@@ -1,0 +1,16 @@
+﻿<Window x:Class="DialogueImplementationTool.UI.QuestSelectionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:DialogueImplementationTool.UI"
+        xmlns:views="clr-namespace:MutagenLibrary.WPF.CustomElements.Views;assembly=MutagenLibrary"
+        mc:Ignorable="d"
+        Title="Select Quest"
+        Height="720" Width="1280"
+        MinHeight="360" MinWidth="640">
+    <Grid>
+        <views:RecordView x:Name="RecordView"
+                          Items="{Binding Quests, RelativeSource={RelativeSource FindAncestor, AncestorType=local:QuestSelectionWindow}}"/>
+    </Grid>
+</Window>
