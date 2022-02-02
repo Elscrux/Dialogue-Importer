@@ -11,7 +11,43 @@
       <PackageReference Include="AODL" Version="1.2.0.1" />
       <PackageReference Include="Mutagen.Bethesda" Version="0.35.0" />
       <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.35.0" />
+      <PackageReference Include="Mutagen.Bethesda.WPF" Version="0.35.0" />
       <PackageReference Include="MutagenLibrary" Version="1.0.24" />
+      <PackageReference Include="Syncfusion.Themes.MaterialDark.WPF" Version="19.4.0.47" />
+      <PackageReference Include="Syncfusion.Themes.MaterialLight.WPF" Version="19.4.0.47" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Dialogue\Dialogue.cs">
+        <DependentUpon>DialogueFactory.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Farewell.cs">
+        <DependentUpon>OneLinerFactory.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\SceneGeneric.cs">
+        <DependentUpon>SceneFactory.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Greeting.cs">
+        <DependentUpon>OneLinerFactory.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Idle.cs">
+        <DependentUpon>OneLinerFactory.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\SceneQuest.cs">
+        <DependentUpon>SceneFactory.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\OneLinerFactory.cs">
+        <DependentUpon>DialogueFactory.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\SceneFactory.cs">
+        <DependentUpon>DialogueFactory.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Parser\OpenDocumentTextParser.cs">
+        <DependentUpon>DocumentParser.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Parser\NullDocumentParser.cs">
+        <DependentUpon>DocumentParser.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

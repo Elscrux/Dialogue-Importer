@@ -1,0 +1,44 @@
+﻿<Window x:Class="DialogueImplementationTool.UI.SceneSpeakerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:DialogueImplementationTool.UI"
+        xmlns:plugins="clr-namespace:Mutagen.Bethesda.WPF.Plugins;assembly=Mutagen.Bethesda.WPF"
+        mc:Ignorable="d"
+        Title="Select scene actors"
+        Height="450" Width="800">
+    <Grid>
+        <DataGrid AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
+                  CanUserReorderColumns="False" CanUserResizeColumns="True" CanUserResizeRows="False" CanUserSortColumns="False"
+                  ItemsSource="{Binding SceneSpeakers}"
+                  Margin="10">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header=" Speaker ">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock HorizontalAlignment="Center" Text="{Binding Name}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock HorizontalAlignment="Center" Text="➞"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header=" FormKey ">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <plugins:FormKeyPicker FormKey="{Binding FormKey, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                   EditorID="{Binding EditorID, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                   LinkCache="{Binding LinkCache, RelativeSource={RelativeSource FindAncestor, AncestorType=local:SceneSpeakerWindow}}"
+                                                   ScopedTypes="{Binding ScopedTypes, RelativeSource={RelativeSource FindAncestor, AncestorType=local:SceneSpeakerWindow}}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>

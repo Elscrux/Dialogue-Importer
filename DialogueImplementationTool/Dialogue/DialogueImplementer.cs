@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Windows;
-using DialogueImplementationTool.UI;
+﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using DialogueImplementationTool.Parser;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
@@ -11,78 +8,47 @@ using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue; 
 
 public class DialogueImplementer {
-    private static readonly IGameEnvironmentState<ISkyrimMod, ISkyrimModGetter> Environment = GameEnvironment.Typical.Skyrim(SkyrimRelease.SkyrimSE);
-    
-    private readonly SkyrimMod _mod = new(new ModKey("DialogueOutput", ModType.Plugin), SkyrimRelease.SkyrimSE);
-    private IQuestGetter _quest = new Quest(FormKey.Null, SkyrimRelease.SkyrimSE);
+    public static readonly IGameEnvironmentState<ISkyrimMod, ISkyrimModGetter> Environment = GameEnvironment.Typical.Skyrim(SkyrimRelease.SkyrimSE);
+    private static readonly Regex WhitespaceRegex = new(@"\s+");
+    public static IQuestGetter Quest = new Quest(FormKey.Null, SkyrimRelease.SkyrimSE);
 
-    public DialogueImplementer() {
-        ForceQuestSelection();
-    }
+    private static readonly Dictionary<DialogueType, DialogueFactory> DialogueFactories = new() {
+        { DialogueType.Greeting, new Greeting() },
+        { DialogueType.Farewell, new Farewell() },
+        { DialogueType.Idle, new Idle() },
+        { DialogueType.Dialogue, new Dialogue() },
+        { DialogueType.GenericScene, new GenericScene() },
+        { DialogueType.QuestScene, new QuestScene() }
+    };
 
-    private void ForceQuestSelection() {
-        var winningOverrides = Environment.LoadOrder.PriorityOrder.Quest().WinningOverrides().ToList();
-        var questSelectionWindow = new QuestSelectionWindow(winningOverrides);
-        questSelectionWindow.OnQuestSelected += QuestSelectionWindowOnOnQuestSelected;
-
-        var success = questSelectionWindow.ShowDialog();
-        while (success is null or false) {
-            MessageBox.Show("Selection not valid!");
-            
-            questSelectionWindow = new QuestSelectionWindow(winningOverrides);
-            questSelectionWindow.OnQuestSelected += QuestSelectionWindowOnOnQuestSelected;
-            
-            success = questSelectionWindow.ShowDialog();
-        }
-    }
-    
-    private void QuestSelectionWindowOnOnQuestSelected(object sender, RoutedEventArgs e) {
-        _quest = (IQuestGetter) sender;
-
-        //Get master references setup
-        var questContext = Environment.LinkCache.ResolveContext<IQuest, IQuestGetter>(_quest.FormKey);
-        questContext.GetOrAddAsOverride(_mod);
+    public DialogueImplementer(FormKey questFormKey) {
+        Quest = questFormKey != FormKey.Null ? Environment.LinkCache.Resolve<IQuestGetter>(questFormKey) : new Quest(FormKey.Null, SkyrimRelease.SkyrimSE);
     }
 
-    public void AddGreeting(List<DialogueTopic> topics) {
-        foreach (var dialogueTopic in topics) {
-            
-        }
-    }
-    
-    public void AddFarewell(List<DialogueTopic> topics) {
-        foreach (var dialogueTopic in topics) {
-            
-        }
-    }
-    
-    public void AddDialogue(List<DialogueTopic> topics) {
-        foreach (var dialogueTopic in topics) {
-            
-        }
-    }
-    
-    public void AddIdle(List<DialogueTopic> topics) {
-        foreach (var dialogueTopic in topics) {
-            
-        }
-    }
-    
-    public void AddScene(List<DialogueTopic> topics) {
-        foreach (var dialogueTopic in topics) {
-            
-        }
-    }
-    
-    public void AddQuestScene(List<DialogueTopic> topics) {
-        foreach (var dialogueTopic in topics) {
-            
-        }
-    }
+    public void ImplementDialogue(List<GeneratedDialogue> dialogue) {
+        DialogueFactory.Mod.Clear();
+        var linkCache = Environment.LinkCache;
 
-    public void Save() {
-        var fileInfo = new FileInfo($"{AppDomain.CurrentDomain.BaseDirectory}\\Output\\{_mod.ModKey.FileName}");
-        if (!fileInfo.Exists) fileInfo.Directory?.Create();
-        _mod.WriteToBinaryParallel(fileInfo.FullName);
+        var npcMappings = new Dictionary<FormKey, INpcGetter>();
+        foreach (var (type, topics, speaker) in dialogue) {
+            if (topics.Count == 0 || !DialogueFactories.ContainsKey(type)) continue;
+
+            var name = string.Empty;
+            if (speaker != FormKey.Null) {
+                //Get npc record
+                INpcGetter npc;
+                if (npcMappings.ContainsKey(speaker)) {
+                    npc = npcMappings[speaker];
+                } else {
+                    npc = linkCache.Resolve<INpcGetter>(speaker);
+                    npcMappings.Add(speaker, npc);
+                }
+            
+                //Remove white spaces from name
+                name = WhitespaceRegex.Replace(npc.Name?.String ?? string.Empty, string.Empty);
+            }
+            
+            DialogueFactories[type].GenerateDialogue(topics, speaker, name);
+        }
     }
 }

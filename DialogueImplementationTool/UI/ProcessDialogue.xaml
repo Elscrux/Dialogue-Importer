@@ -1,0 +1,129 @@
+﻿<Window x:Class="DialogueImplementationTool.UI.ProcessDialogue"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:plugins="clr-namespace:Mutagen.Bethesda.WPF.Plugins;assembly=Mutagen.Bethesda.WPF"
+        xmlns:ui="clr-namespace:DialogueImplementationTool.UI"
+        mc:Ignorable="d"
+        Title="Dialogue Implementation Tool"
+        Height="720" Width="1280"
+        MinHeight="360" MinWidth="640" d:DataContext="{d:DesignInstance ui:DialogueVM}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Grid Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Column="0">
+                <Button Content="Save"
+                        Click="Finish_OnClick"
+                        Margin="10,10,0,0"
+                        HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                
+                <TextBlock x:Name="PreviewText"
+                           FontSize="36"
+                           TextWrapping="WrapWithOverflow" TextAlignment="Center" 
+                           VerticalAlignment="Center"/>
+            </Grid>
+
+            <Grid Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="4*"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+
+                <plugins:FormKeyPicker Grid.Row="0"
+                                       FormKey="{Binding NPCFormKey}"
+                                       LinkCache="{Binding LinkCache, Mode=OneWay}"
+                                       ScopedTypes="{Binding NPCTypes, Mode=OneWay}"/>
+
+                <Grid Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button  Grid.Column="0"
+                             Content="⏪"
+                             IsEnabled="{Binding IsNotFirstIndex}"
+                             Click="BacktrackMany_OnClick"
+                             FontSize="36"
+                             Margin="10"/>
+
+                    <Button  Grid.Column="1"
+                             Content="◀"
+                             IsEnabled="{Binding IsNotFirstIndex}"
+                             Click="Previous_OnClick"
+                             FontSize="36"
+                             Margin="10"/>
+
+                    <Button  Grid.Column="2"
+                             Content="▶"
+                             IsEnabled="{Binding IsNotLastIndex}"
+                             Click="Next_OnClick"
+                             FontSize="36"
+                             Margin="10"/>
+
+                    <Button  Grid.Column="3"
+                             Content="⏩"
+                             IsEnabled="{Binding IsNotLastIndex}"
+                             Click="SkipMany_OnClick"
+                             FontSize="36"
+                             Margin="10"/>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <Grid Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <Grid Row="0" IsEnabled="{Binding ValidNPC}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <CheckBox Grid.Column="0" Margin="5"
+                          IsChecked="{Binding GreetingSelected}"
+                          Content="Greeting" FontSize="36"/>
+                <CheckBox Grid.Column="1" Margin="5"
+                          IsChecked="{Binding FarewellSelected}"
+                          Content="Farewell" FontSize="36"/>
+                <CheckBox Grid.Column="2" Margin="5"
+                          IsChecked="{Binding IdleSelected}"
+                          Content="Idle" FontSize="36"/>
+                <CheckBox Grid.Column="3" Margin="5"
+                          IsChecked="{Binding DialogueSelected}"
+                          Content="Dialogue" FontSize="36"/>
+            </Grid>
+
+            <Grid Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <CheckBox Grid.Column="0" Margin="5"
+                          IsChecked="{Binding GenericSceneSelected}"
+                          Content="Generic Scene" FontSize="36"/>
+                <CheckBox Grid.Column="1" Margin="5"
+                          IsChecked="{Binding QuestSceneSelected}"
+                          Content="Quest Scene" FontSize="36"/>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

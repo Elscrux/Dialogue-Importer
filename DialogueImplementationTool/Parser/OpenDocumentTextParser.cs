@@ -9,18 +9,130 @@ namespace DialogueImplementationTool.Parser;
 
 public sealed class OpenDocumentTextParser : DocumentParser {
     private readonly TextDocument _doc = new();
-    private int _index;
+
+    public override int LastIndex { get; }
+
+    public override void BacktrackMany() {
+        if (Index == 0) return;
+        
+        for (var i = Index - 1; i >= 0; i--) {
+            if (_doc.Content[i] is not List) continue;
+
+            Index = i;
+            return;
+        }
+        
+        Index = 0;
+    }
+    
+    public override void SkipMany() {
+        if (Index >= _doc.Content.Count - 1) return;
+        
+        for (var i = Index + 1; i < _doc.Content.Count; i++) {
+            if (_doc.Content[i] is not List) continue;
+
+            Index = i;
+            return;
+        }
+        
+        Index = LastIndex;
+    }
+
+    public override string Preview(int index) {
+        switch  (_doc.Content[index])  {
+            case List list:
+                while (list.Content.Count > 0) {
+                    if (list.Content[0] is ListItem listItem) {
+                        if (listItem.Content.Count > 0) {
+                            switch (listItem.Content[0]) {
+                                case Paragraph paragraph:
+                                    return GetText(paragraph);
+                                case List newList:
+                                    list = newList;
+                                    break;
+                                default:
+                                    return string.Empty;
+                            }
+                        } else return string.Empty;
+                    } else return string.Empty;
+                }
+                
+                break;
+            case Paragraph paragraph:
+                return GetText(paragraph);
+        }
+
+        return string.Empty;
+    } 
 
     public OpenDocumentTextParser(string path) {
         _doc.Load(path);
+        
+        MergeLists();
+
+        LastIndex = 0;
+        for (var i = _doc.Content.Count - 1; i >= 0; i--) {
+            if (string.IsNullOrWhiteSpace(Preview(i))) continue;
+
+            LastIndex = i;
+            break;
+        }
+
+        for (var i = 0; i < _doc.Content.Count; i++) {
+            App.DialogueVM.DialogueTypeList.Add(new DialogueSelection());
+        }
     }
 
-    public override List<DialogueTopic> ParseNext() {
-        var branches = new List<DialogueTopic>();
-        if (HasFinished()) return branches;
+    private void MergeLists() {
+        var startingIndex = 0;
+        while (startingIndex < _doc.Content.Count) {
+            if (_doc.Content[startingIndex] is not List currentList) {
+                startingIndex++;
+                continue;
+            }
 
-        if (_doc.Content[_index] is not List list) return branches;
-        
+            var listAdded = false;
+            var addNextList = false;
+            var index = startingIndex + 1;
+            while (index < _doc.Content.Count) {
+                switch (_doc.Content[index]) {
+                    case Paragraph paragraph:
+                        if (paragraph.TextContent.Count == 0) {
+                            addNextList = true;
+                            _doc.Content.RemoveAt(index);
+                        } else {
+                            goto EndPoint;
+                        }
+                        break;
+                    case List list:
+                        if (addNextList) {
+                            foreach (IContent content in list.Content) {
+                                currentList.Content.Add(content);
+                            }
+                            _doc.Content.RemoveAt(index);
+                            listAdded = true;
+                            addNextList = false;
+                        } else {
+                            goto EndPoint;
+                        }
+                        break;
+                    default:
+                        goto EndPoint;
+                }
+            }
+            
+            EndPoint: ;
+
+            if (!listAdded) {
+                startingIndex++;
+            }
+        }
+    }
+
+    protected override List<DialogueTopic> ParseDialogue(int index) {
+        var branches = new List<DialogueTopic>();
+        if (_doc.Content[index] is not List list) return branches;
+
         //Evaluate if the player starts dialogue
         var playerDialogue = true;
         if (list.Content.Count > 0) {
@@ -48,57 +160,51 @@ public sealed class OpenDocumentTextParser : DocumentParser {
             AddLinksAndResponses(list, currentBranch);
         }
 
-        _index++;
-
         return branches;
     }
-    
-    public override string PreviewCurrent() {
-        if (HasFinished()) return string.Empty;
+
+    protected override List<DialogueTopic> ParseOneLiner(int index) {
+        var topics = new List<DialogueTopic>();
+        if (_doc.Content[index] is not List list) return topics;
         
-        switch  (_doc.Content[_index])  {
-            case List list:
-                while (list.Content.Count > 0) {
-                    if (list.Content[0] is ListItem listItem) {
-                        if (listItem.Content.Count > 0) {
-                            switch (listItem.Content[0]) {
-                                case Paragraph paragraph:
-                                    return GetText(paragraph);
-                                case List newList:
-                                    list = newList;
-                                    break;
-                                default:
-                                    return string.Empty;
-                            }
-                        } else return string.Empty;
-                    } else return string.Empty;
+        var topic = new DialogueTopic();
+        AddResponses(list, topic);
+        topics.Add(topic);
+
+        return topics;
+    }
+
+    protected override List<DialogueTopic> ParseScene(int index) {
+        var topics = new List<DialogueTopic>();
+        if (_doc.Content[index] is not List list) return topics;
+        
+        var topic = new DialogueTopic();
+        AddResponses(list, topic);
+        topics.Add(topic);
+
+        return topics;
+    }
+
+    private static void AddResponses(IContentContainer list, DialogueTopic topic) {
+        foreach (IContent listContent in list.Content) {
+            if (listContent is not ListItem listItem) continue;
+            
+            foreach (IContent itemContent in listItem.Content) {
+                switch (itemContent) {
+                    case Paragraph paragraph:
+                        //Set player text
+                        topic.Responses.Add(GetText(paragraph));
+
+                        break;
+                    default:
+                        Console.WriteLine($"Warning: Didn't recognize {listContent.GetType()} as response type");
+
+                        break;
                 }
-                
-                break;
-            case Paragraph paragraph:
-                return GetText(paragraph);
-        }
-
-        return string.Empty;
-    }
-
-    public override bool HasFinished() {
-        return _doc.Content.Count <= _index;
-    }
-    
-    public override void SkipOne() {
-        _index++;
-    }
-    
-    public override void SkipMany() {
-        for (var i = _index; i < _doc.Content.Count; i++) {
-            if (_doc.Content[i] is not List) continue;
-
-            _index = i;
-            return;
+            }
         }
     }
-
+    
     private DialogueTopic AddTopic(IContentContainer listItem) {
         var topic = new DialogueTopic();
         
@@ -132,11 +238,7 @@ public sealed class OpenDocumentTextParser : DocumentParser {
                 switch (topicContent) {
                     case Paragraph paragraph:
                         //Add responses
-                        if (topic.Responses.Count == 0) {
-                            topic.Responses.Add(new List<string>());                            
-                        }
-
-                        topic.Responses[0].Add(GetText(paragraph));
+                        topic.Responses.Add(GetText(paragraph));
                         break;
                     case List linkList:
                         //Add links
@@ -155,7 +257,7 @@ public sealed class OpenDocumentTextParser : DocumentParser {
         }
     }
     
-    private string GetText(ITextContainer paragraph) {
+    private static string GetText(ITextContainer paragraph) {
         var sb = new StringBuilder();
         foreach (IText text in paragraph.TextContent) {
             sb.Append(text.Text);
@@ -164,7 +266,7 @@ public sealed class OpenDocumentTextParser : DocumentParser {
         return sb.ToString();
     }
     
-    private bool IsPlayerLine(ITextContainer paragraph) {
+    private static bool IsPlayerLine(ITextContainer paragraph) {
         foreach (IText text in paragraph.TextContent) {
             if (text is not FormatedText formattedText || formattedText.TextStyle.TextProperties.Bold == null) {
                 return false;
