@@ -33,7 +33,8 @@ public partial class ProcessDialogue {
 
     private void RefreshPreview(bool forward) {
         var preview = string.Empty;
-        while (string.IsNullOrWhiteSpace(preview)) {
+        var tries = 0;
+        while (string.IsNullOrWhiteSpace(preview) && tries < 10) {
             preview = App.DialogueVM.DocumentParser.PreviewCurrent();
             if (string.IsNullOrEmpty(preview)) {
                 if (forward) {
@@ -44,6 +45,7 @@ public partial class ProcessDialogue {
             } else {
                 PreviewText.Text = preview;
             }
+            tries++;
         }
     }
 
