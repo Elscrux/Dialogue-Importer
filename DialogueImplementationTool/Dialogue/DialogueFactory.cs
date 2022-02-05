@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace DialogueImplementationTool.Dialogue; 
@@ -17,7 +16,13 @@ public abstract class DialogueFactory {
     public abstract void GenerateDialogue(List<DialogueTopic> topics, FormKey speakerKey, string speakerName);
 
     public static void Save() {
-        var fileInfo = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Output", Mod.ModKey.FileName));
+        var index = 1;
+        var fileInfo = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Output", Mod.ModKey.FileName + index));
+        while (fileInfo.Exists) {
+            index++;
+            fileInfo = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Output", Mod.ModKey.FileName + index));
+        }
+        
         if (!fileInfo.Exists) fileInfo.Directory?.Create();
         Mod.WriteToBinaryParallel(fileInfo.FullName);
     }
