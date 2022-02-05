@@ -35,7 +35,8 @@
 
             <Grid Column="1">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="4*"/>
+                    <RowDefinition Height="2*"/>
+                    <RowDefinition Height="2*"/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
 
@@ -43,8 +44,18 @@
                                        FormKey="{Binding NPCFormKey}"
                                        LinkCache="{Binding LinkCache, Mode=OneWay}"
                                        ScopedTypes="{Binding NPCTypes, Mode=OneWay}"/>
+                
+                <ListBox Grid.Row="1"
+                         ItemsSource="{Binding SpeakerFavourites}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Button Content="{Binding EditorID}"
+                                    Click="SpeakerFavouriteSelect_OnClick" CommandParameter="{Binding}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
 
-                <Grid Row="1">
+                <Grid Row="2">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition/>

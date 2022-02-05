@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Windows.Input;
 using DialogueImplementationTool.Dialogue;
 using DialogueImplementationTool.Parser;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
+using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using Noggog.WPF;
@@ -14,7 +18,7 @@ using ReactiveUI.Fody.Helpers;
 namespace DialogueImplementationTool.UI;
 
 public class DialogueVM : ViewModel {
-    public ILinkCache LinkCache { get; } = GameEnvironment.Typical.Skyrim(SkyrimRelease.SkyrimSE).LinkCache;
+    public ILinkCache LinkCache { get; } = GameEnvironment.Typical.Skyrim(SkyrimRelease.SkyrimSE, LinkCachePreferences.OnlyIdentifiers()).LinkCache;
     public DocumentParser DocumentParser = DocumentParser.Null;
     public DialogueImplementer DialogueImplementer = new(FormKey.Null);
 
@@ -32,6 +36,7 @@ public class DialogueVM : ViewModel {
 		Dialogue List
 	====================================================*/
     public List<DialogueSelection> DialogueTypeList { get; } = new();
+    public ObservableCollection<SpeakerFavourite> SpeakerFavourites { get; } = new();
 
     [Reactive]
     public int Index { get; set; }
@@ -63,8 +68,12 @@ public class DialogueVM : ViewModel {
     public FormKey NPCFormKey { get; set; }
     [Reactive]
     public bool ValidNPC { get; set; }
+    
+    public ICommand SetNPC { get; }
 
     public DialogueVM() {
+        SetNPC = ReactiveCommand.Create((FormKey formKey) => NPCFormKey = formKey);
+        
         this.WhenAnyValue(v => v.Index)
             .Subscribe(_ => {
                 IsNotFirstIndex = Index != 0;
@@ -95,6 +104,10 @@ public class DialogueVM : ViewModel {
             .Subscribe(_ => {
                 ValidNPC = NPCFormKey != FormKey.Null;
                 if (DialogueTypeList.Count > Index) DialogueTypeList[Index].Speaker = NPCFormKey;
+                if (NPCFormKey != FormKey.Null && SpeakerFavourites.All(s => s.FormKey != NPCFormKey)) {
+                    var record = LinkCache.Resolve<IMajorRecordGetter>(NPCFormKey);
+                    SpeakerFavourites.Add(new SpeakerFavourite(NPCFormKey, record.EditorID));
+                }
             });
 
         this.WhenAnyValue(v => v.GreetingSelected)

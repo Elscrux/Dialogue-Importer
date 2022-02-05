@@ -16,3 +16,8 @@ public record DialogueSelection {
     public readonly Dictionary<DialogueType, bool> Selection = Enum.GetValues<DialogueType>().ToDictionary(type => type, _ => false);
     public FormKey Speaker { get; set; } = FormKey.Null;
 }
+
+public record SpeakerFavourite(FormKey FormKey, string? EditorID) {
+    public FormKey FormKey { get; set; } = FormKey;
+    public string? EditorID { get; set; } = EditorID;
+}
