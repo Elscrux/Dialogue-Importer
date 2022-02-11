@@ -36,4 +36,56 @@ public abstract class OneLinerFactory : DialogueFactory {
             Mod.DialogTopics.Add(dialogTopic);
         }
     }
+
+    /*====================================================
+       Post Processing
+    ====================================================*/
+    private static FormKey GetMainSpeaker(IDialogResponses responses) {
+        foreach (var condition in responses.Conditions) {
+            if (condition is not ConditionFloat { Data: FunctionConditionData data }) continue;
+                
+            if (data.Function == Condition.Function.GetIsID) {
+                return data.ParameterOneRecord.FormKey;
+            }
+        }
+
+        return FormKey.Null;
+    }
+
+    private static void ReorderBySpeaker(IDialogTopic topic) {
+        for (var index = 0; index < topic.Responses.Count; index++) {
+            var currentSpeaker = GetMainSpeaker(topic.Responses[index]);
+
+            var rightSpeaker = false;
+            for (var runner = index + 1; runner < topic.Responses.Count; runner++) {
+                var current = topic.Responses[runner];
+                if (GetMainSpeaker(current) == currentSpeaker) {
+                    if (rightSpeaker) break;
+
+                    topic.Remove(current);
+                    topic.Responses.Insert(index + 1, current);
+                } else {
+                    rightSpeaker = false;
+                }
+            }
+        }
+    }
+
+    protected static void PostProcess(IDialogTopic topic) {
+        ReorderBySpeaker(topic);
+        SetRandomFlags(topic, true);
+    }
+    
+    private static void SetRandomFlags(IDialogTopic topic, bool addRandomEndFlag) {
+        for (var index = 0; index < topic.Responses.Count; index++) {
+            var response = topic.Responses[index];
+            response.Flags ??= new DialogResponseFlags();
+
+            if (addRandomEndFlag) {
+                if (index + 1 >= topic.Responses.Count || GetMainSpeaker(topic.Responses[index + 1]) != GetMainSpeaker(response)) {
+                    response.Flags.Flags |= DialogResponses.Flag.RandomEnd;
+                }
+            }
+        }
+    }
 }

@@ -187,4 +187,6 @@ public abstract class SceneFactory : DialogueFactory {
         
         _currentPhaseIndex++;
     }
+    
+    public override void PostProcess() {}
 }

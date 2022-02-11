@@ -53,4 +53,6 @@ public class Dialogue : DialogueFactory {
             char GetIndex(int index, bool type) => type ? (char) (48 + index) : (char) (64 + index);
         }
     }
+    
+    public override void PostProcess() {}
 }

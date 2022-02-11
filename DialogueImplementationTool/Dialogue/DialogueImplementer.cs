@@ -50,5 +50,8 @@ public class DialogueImplementer {
             
             DialogueFactories[type].GenerateDialogue(topics, speaker, name);
         }
+        
+        //Do post processing
+        foreach (var factory in DialogueFactories.Values) factory.PostProcess();
     }
 }

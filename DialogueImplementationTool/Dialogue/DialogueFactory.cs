@@ -14,6 +14,7 @@ public abstract class DialogueFactory {
     protected IQuest? OverrideQuest = null;
 
     public abstract void GenerateDialogue(List<DialogueTopic> topics, FormKey speakerKey, string speakerName);
+    public abstract void PostProcess();
 
     public static void Save() {
         var index = 1;

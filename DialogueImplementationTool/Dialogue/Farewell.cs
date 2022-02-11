@@ -19,4 +19,8 @@ public class Farewell : OneLinerFactory {
 
         GenerateDialogue(topics, speakerKey, _topic);
     }
+
+    public override void PostProcess() {
+        if (_topic != null) PostProcess(_topic);
+    }
 }
