@@ -9,20 +9,27 @@ namespace DialogueImplementationTool.Dialogue;
 
 public abstract class DialogueFactory {
     protected const SkyrimRelease Release = SkyrimRelease.SkyrimSE;
-    public static readonly SkyrimMod Mod = new(new ModKey("DialogueOutput", ModType.Plugin), SkyrimRelease.SkyrimSE);
+    public static readonly SkyrimMod Mod = new(new ModKey(GetNewModName(), ModType.Plugin), SkyrimRelease.SkyrimSE);
+    private const string ModName = "DialogueOutput";
 
     protected IQuest? OverrideQuest = null;
+
+    private static string GetNewModName() {
+        var index = 1;
+        var fileInfo = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Output", ModName + index));
+        while (fileInfo.Exists) {
+            index++;
+            fileInfo = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Output", ModName + index));
+        }
+
+        return ModName + index;
+    }
 
     public abstract void GenerateDialogue(List<DialogueTopic> topics, FormKey speakerKey, string speakerName);
     public abstract void PostProcess();
 
     public static void Save() {
-        var index = 1;
-        var fileInfo = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Output", Mod.ModKey.FileName + index));
-        while (fileInfo.Exists) {
-            index++;
-            fileInfo = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Output", Mod.ModKey.FileName + index));
-        }
+        var fileInfo = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Output", Mod.ModKey.FileName));
         
         if (!fileInfo.Exists) fileInfo.Directory?.Create();
         Mod.WriteToBinaryParallel(fileInfo.FullName);
