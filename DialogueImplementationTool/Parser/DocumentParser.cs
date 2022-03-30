@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Windows.Forms;
 using DialogueImplementationTool.Dialogue;
-using Microsoft.Win32;
+using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 namespace DialogueImplementationTool.Parser; 
 
 public abstract class DocumentParser {
@@ -45,7 +46,7 @@ public abstract class DocumentParser {
     /*====================================================
 		Parsing
 	====================================================*/
-    private static readonly List<string> ValidFilesExtensions = new() {
+    public static readonly List<string> ValidFilesExtensions = new() {
         ".odt",
     };
     
@@ -69,6 +70,19 @@ public abstract class DocumentParser {
             ".odt" => new OpenDocumentTextParser(fileDialog.FileName),
             _ => null
         };
+    }
+    
+    public static IEnumerable<DocumentParser> LoadDocuments() {
+        var folderDialog = new FolderBrowserDialog();
+        if (folderDialog.ShowDialog() != DialogResult.OK) yield break;
+        
+        foreach (var file in Directory.GetFiles(folderDialog.SelectedPath)) {
+            switch (Path.GetExtension(file).ToLower()) {
+                case ".odt":
+                    yield return new OpenDocumentTextParser(file);
+                    break;
+            }
+        }
     }
 
     public List<GeneratedDialogue> GetDialogue() {

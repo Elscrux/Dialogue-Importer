@@ -13,8 +13,8 @@
       <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.35.0" />
       <PackageReference Include="Mutagen.Bethesda.WPF" Version="0.35.0" />
       <PackageReference Include="MutagenLibrary" Version="1.0.24" />
-      <PackageReference Include="Syncfusion.Themes.MaterialDark.WPF" Version="19.4.0.47" />
-      <PackageReference Include="Syncfusion.Themes.MaterialLight.WPF" Version="19.4.0.47" />
+      <PackageReference Include="Syncfusion.Themes.MaterialDark.WPF" Version="19.4.0.56" />
+      <PackageReference Include="Syncfusion.Themes.MaterialLight.WPF" Version="19.4.0.56" />
     </ItemGroup>
 
     <ItemGroup>

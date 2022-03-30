@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using DialogueImplementationTool.Parser;
 
 namespace DialogueImplementationTool.UI;
@@ -17,6 +16,12 @@ public partial class MainWindow {
     }
     
     private void SelectFolder_OnClick(object sender, RoutedEventArgs e) {
-        throw new NotImplementedException();
+        App.DialogueVM.Clear();
+
+        var parsers = DocumentParser.LoadDocuments();
+        foreach (var parser in parsers) {
+            App.DialogueVM.DocumentParser = parser;
+            if (App.DialogueVM.DocumentParser != DocumentParser.Null) new ProcessDialogue().ShowDialog();
+        }
     }
 }
