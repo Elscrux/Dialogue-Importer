@@ -9,10 +9,11 @@
 
     <ItemGroup>
       <PackageReference Include="AODL" Version="1.2.0.1" />
-      <PackageReference Include="Mutagen.Bethesda" Version="0.35.0" />
-      <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.35.0" />
-      <PackageReference Include="Mutagen.Bethesda.WPF" Version="0.35.0" />
-      <PackageReference Include="MutagenLibrary" Version="1.0.24" />
+      <PackageReference Include="DocX" Version="2.1.0" />
+      <PackageReference Include="Mutagen.Bethesda" Version="0.36.1" />
+      <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.36.1" />
+      <PackageReference Include="Mutagen.Bethesda.WPF" Version="0.36.1" />
+      <PackageReference Include="MutagenLibrary" Version="1.0.32" />
       <PackageReference Include="Syncfusion.Themes.MaterialDark.WPF" Version="19.4.0.56" />
       <PackageReference Include="Syncfusion.Themes.MaterialLight.WPF" Version="19.4.0.56" />
     </ItemGroup>
@@ -46,6 +47,9 @@
         <DependentUpon>DocumentParser.cs</DependentUpon>
       </Compile>
       <Compile Update="Parser\NullDocumentParser.cs">
+        <DependentUpon>DocumentParser.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Parser\DocXTextParser.cs">
         <DependentUpon>DocumentParser.cs</DependentUpon>
       </Compile>
     </ItemGroup>

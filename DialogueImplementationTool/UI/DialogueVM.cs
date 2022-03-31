@@ -9,7 +9,6 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
-using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using Noggog.WPF;
@@ -105,7 +104,7 @@ public class DialogueVM : ViewModel {
                 ValidNPC = NPCFormKey != FormKey.Null;
                 if (DialogueTypeList.Count > Index) DialogueTypeList[Index].Speaker = NPCFormKey;
                 if (NPCFormKey != FormKey.Null && SpeakerFavourites.All(s => s.FormKey != NPCFormKey)) {
-                    var record = LinkCache.Resolve<IMajorRecordGetter>(NPCFormKey);
+                    var record = LinkCache.Resolve<INpcGetter>(NPCFormKey);
                     SpeakerFavourites.Add(new SpeakerFavourite(NPCFormKey, record.EditorID));
                 }
             });
@@ -143,6 +142,7 @@ public class DialogueVM : ViewModel {
 
     public void Clear() {
         DocumentParser = DocumentParser.Null;
+        Index = 0;
         DialogueImplementer = new DialogueImplementer(QuestFormKey);
         DialogueTypeList.Clear();
     }

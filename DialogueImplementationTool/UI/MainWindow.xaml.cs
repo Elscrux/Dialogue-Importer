@@ -18,17 +18,24 @@ public partial class MainWindow {
     
     private void SelectFile_OnClick(object sender, RoutedEventArgs e) {
         App.DialogueVM.Clear();
-        App.DialogueVM.DocumentParser = DocumentParser.LoadDocument() ?? DocumentParser.Null;
-        if (App.DialogueVM.DocumentParser != DocumentParser.Null) new ProcessDialogue().ShowDialog();
+        var parser = DocumentParser.LoadDocument();
+        if (parser == null) return;
+
+        LaunchParser(parser);
     }
     
     private void SelectFolder_OnClick(object sender, RoutedEventArgs e) {
         App.DialogueVM.Clear();
 
         var parsers = DocumentParser.LoadDocuments();
-        foreach (var parser in parsers) {
-            App.DialogueVM.DocumentParser = parser;
-            if (App.DialogueVM.DocumentParser != DocumentParser.Null) new ProcessDialogue().ShowDialog();
-        }
+        foreach (var parser in parsers) LaunchParser(parser);
+    }
+
+    private void LaunchParser(DocumentParser parser) {
+        App.DialogueVM.Clear();
+        
+        App.DialogueVM.DocumentParser = parser;
+        for (var i = 0; i <= parser.LastIndex; i++) App.DialogueVM.DialogueTypeList.Add(new DialogueSelection());
+        if (App.DialogueVM.DocumentParser != DocumentParser.Null) new ProcessDialogue().ShowDialog();
     }
 }

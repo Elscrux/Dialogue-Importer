@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using DialogueImplementationTool.Dialogue;
@@ -46,16 +47,25 @@ public abstract class DocumentParser {
     /*====================================================
 		Parsing
 	====================================================*/
-    public static readonly List<string> ValidFilesExtensions = new() {
-        ".odt",
+    private static readonly Dictionary<string, Type> DocumentParsers = new() {
+        { ".odt", typeof(OpenDocumentTextParser) },
+        { ".docx", typeof(DocXTextParser) },
     };
+
+    private static DocumentParser? CreateParser(string file) {
+        var extension = Path.GetExtension(file).ToLower();
+        if (!DocumentParsers.ContainsKey(extension)) return null;
+
+        return (DocumentParser?) Activator.CreateInstance(DocumentParsers[extension], file);
+    }
     
     public static DocumentParser? LoadDocument() {
         var filterBuilder = new StringBuilder();
-        for (var index = 0; index < ValidFilesExtensions.Count; index++) {
+        var fileTypes = DocumentParsers.Keys.ToList();
+        for (var index = 0; index < fileTypes.Count; index++) {
             filterBuilder.Append('*');
-            filterBuilder.Append(ValidFilesExtensions[index]);
-            if (index != ValidFilesExtensions.Count - 1) filterBuilder.Append(';');
+            filterBuilder.Append(fileTypes[index]);
+            if (index != fileTypes.Count - 1) filterBuilder.Append(';');
         }
 
         var filter = filterBuilder.ToString();
@@ -64,12 +74,7 @@ public abstract class DocumentParser {
             Filter = $"Documents({filter})|{filter}"
         };
 
-        if (fileDialog.ShowDialog() is null or false) return null;
-        
-        return Path.GetExtension(fileDialog.FileName).ToLower() switch {
-            ".odt" => new OpenDocumentTextParser(fileDialog.FileName),
-            _ => null
-        };
+        return fileDialog.ShowDialog() is null or false ? null : CreateParser(fileDialog.FileName);
     }
     
     public static IEnumerable<DocumentParser> LoadDocuments() {
@@ -77,11 +82,8 @@ public abstract class DocumentParser {
         if (folderDialog.ShowDialog() != DialogResult.OK) yield break;
         
         foreach (var file in Directory.GetFiles(folderDialog.SelectedPath)) {
-            switch (Path.GetExtension(file).ToLower()) {
-                case ".odt":
-                    yield return new OpenDocumentTextParser(file);
-                    break;
-            }
+            var documentParser = CreateParser(folderDialog.SelectedPath);
+            if (documentParser != null) yield return documentParser;
         }
     }
 

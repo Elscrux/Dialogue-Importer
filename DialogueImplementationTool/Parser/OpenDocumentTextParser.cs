@@ -77,10 +77,6 @@ public sealed class OpenDocumentTextParser : DocumentParser {
             LastIndex = i;
             break;
         }
-
-        for (var i = 0; i < _doc.Content.Count; i++) {
-            App.DialogueVM.DialogueTypeList.Add(new DialogueSelection());
-        }
     }
 
     private void MergeLists() {
@@ -174,16 +170,7 @@ public sealed class OpenDocumentTextParser : DocumentParser {
         return topics;
     }
 
-    protected override List<DialogueTopic> ParseScene(int index) {
-        var topics = new List<DialogueTopic>();
-        if (_doc.Content[index] is not List list) return topics;
-        
-        var topic = new DialogueTopic();
-        AddResponses(list, topic);
-        topics.Add(topic);
-
-        return topics;
-    }
+    protected override List<DialogueTopic> ParseScene(int index) => ParseOneLiner(index);
 
     private static void AddResponses(IContentContainer list, DialogueTopic topic) {
         foreach (IContent listContent in list.Content) {
