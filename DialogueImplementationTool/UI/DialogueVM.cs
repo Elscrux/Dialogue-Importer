@@ -75,8 +75,8 @@ public class DialogueVM : ViewModel {
         
         this.WhenAnyValue(v => v.Index)
             .Subscribe(_ => {
-                IsNotFirstIndex = Index != 0;
-                IsNotLastIndex = Index != DocumentParser.LastIndex;
+                IsNotFirstIndex = Index > 0;
+                IsNotLastIndex = Index < DocumentParser.LastIndex;
                 
                 if (DialogueTypeList.Count > Index) {
                     if (DialogueTypeList[Index].Speaker != FormKey.Null) {
@@ -140,10 +140,19 @@ public class DialogueVM : ViewModel {
             });
     }
 
-    public void Clear() {
-        DocumentParser = DocumentParser.Null;
+    public void Init(DocumentParser parser) {
+        DocumentParser = parser;
+        Index = 1;
         Index = 0;
-        DialogueImplementer = new DialogueImplementer(QuestFormKey);
+        
+        //Use new implementer when quest changed
+        if (DialogueImplementer.Quest.FormKey != QuestFormKey) DialogueImplementer = new DialogueImplementer(QuestFormKey);
+        
+        //Clear dialogue data
         DialogueTypeList.Clear();
+        for (var i = 0; i <= DocumentParser.LastIndex; i++) App.DialogueVM.DialogueTypeList.Add(new DialogueSelection());
+        
+        //Set buttons to unchecked
+        GreetingSelected = FarewellSelected = IdleSelected = DialogueSelected = GenericSceneSelected = QuestSceneSelected = false;
     }
 }

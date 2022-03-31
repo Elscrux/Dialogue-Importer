@@ -82,7 +82,7 @@ public abstract class DocumentParser {
         if (folderDialog.ShowDialog() != DialogResult.OK) yield break;
         
         foreach (var file in Directory.GetFiles(folderDialog.SelectedPath)) {
-            var documentParser = CreateParser(folderDialog.SelectedPath);
+            var documentParser = CreateParser(file);
             if (documentParser != null) yield return documentParser;
         }
     }

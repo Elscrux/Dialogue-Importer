@@ -17,7 +17,6 @@ public partial class MainWindow {
     }
     
     private void SelectFile_OnClick(object sender, RoutedEventArgs e) {
-        App.DialogueVM.Clear();
         var parser = DocumentParser.LoadDocument();
         if (parser == null) return;
 
@@ -25,17 +24,14 @@ public partial class MainWindow {
     }
     
     private void SelectFolder_OnClick(object sender, RoutedEventArgs e) {
-        App.DialogueVM.Clear();
-
         var parsers = DocumentParser.LoadDocuments();
         foreach (var parser in parsers) LaunchParser(parser);
     }
 
     private void LaunchParser(DocumentParser parser) {
-        App.DialogueVM.Clear();
-        
-        App.DialogueVM.DocumentParser = parser;
-        for (var i = 0; i <= parser.LastIndex; i++) App.DialogueVM.DialogueTypeList.Add(new DialogueSelection());
-        if (App.DialogueVM.DocumentParser != DocumentParser.Null) new ProcessDialogue().ShowDialog();
+        if (parser == DocumentParser.Null) return;
+
+        App.DialogueVM.Init(parser);
+        new ProcessDialogue().ShowDialog();
     }
 }
