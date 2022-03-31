@@ -16,10 +16,10 @@ public abstract class DialogueFactory {
 
     private static string GetNewModName() {
         var index = 1;
-        var fileInfo = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Output", ModName + index));
+        var fileInfo = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Output", $"{ModName}{index}.esp"));
         while (fileInfo.Exists) {
             index++;
-            fileInfo = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Output", ModName + index));
+            fileInfo = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Output", $"{ModName}{index}.esp"));
         }
 
         return ModName + index;
@@ -31,7 +31,7 @@ public abstract class DialogueFactory {
     public static void Save() {
         var fileInfo = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Output", Mod.ModKey.FileName));
         
-        if (!fileInfo.Exists) fileInfo.Directory?.Create();
+        if (fileInfo.Directory is { Exists: false }) fileInfo.Directory?.Create();
         Mod.WriteToBinaryParallel(fileInfo.FullName);
     }
 
