@@ -37,6 +37,8 @@ public class DialogueVM : ViewModel {
     public List<DialogueSelection> DialogueTypeList { get; } = new();
     public ObservableCollection<SpeakerFavourite> SpeakerFavourites { get; } = new();
 
+    public bool SavedSession;
+
     [Reactive]
     public int Index { get; set; }
     
@@ -145,6 +147,8 @@ public class DialogueVM : ViewModel {
         Index = 1;
         Index = 0;
         
+        App.DialogueVM.SavedSession = false;
+        
         //Use new implementer when quest changed
         if (DialogueImplementer.Quest.FormKey != QuestFormKey) DialogueImplementer = new DialogueImplementer(QuestFormKey);
         
@@ -154,5 +158,11 @@ public class DialogueVM : ViewModel {
         
         //Set buttons to unchecked
         GreetingSelected = FarewellSelected = IdleSelected = DialogueSelected = GenericSceneSelected = QuestSceneSelected = false;
+    }
+    
+    public void Save() {
+        App.DialogueVM.DialogueImplementer.ImplementDialogue(App.DialogueVM.DocumentParser.GetDialogue());
+        DialogueFactory.Save();
+        App.DialogueVM.SavedSession = true;
     }
 }

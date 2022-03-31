@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using System.Windows;
 using DialogueImplementationTool.Parser;
 using Mutagen.Bethesda;
@@ -33,5 +34,12 @@ public partial class MainWindow {
 
         App.DialogueVM.Init(parser);
         new ProcessDialogue().ShowDialog();
+
+        //Save warning
+        if (!App.DialogueVM.SavedSession && App.DialogueVM.DialogueTypeList.All(selection => selection.Selection.Any(type => type.Value))) {
+            if (MessageBox.Show("You didn't save your changes, do you want to save now?", string.Empty, MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
+                App.DialogueVM.Save();
+            }
+        }
     }
 }
