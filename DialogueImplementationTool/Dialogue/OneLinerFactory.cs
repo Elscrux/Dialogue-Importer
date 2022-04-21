@@ -72,7 +72,7 @@ public abstract class OneLinerFactory : DialogueFactory {
     }
 
     protected static void PostProcess(IDialogTopic topic) {
-        ReorderBySpeaker(topic);
+        // ReorderBySpeaker(topic);
         SetRandomFlags(topic, true);
     }
     
@@ -80,6 +80,7 @@ public abstract class OneLinerFactory : DialogueFactory {
         for (var index = 0; index < topic.Responses.Count; index++) {
             var response = topic.Responses[index];
             response.Flags ??= new DialogResponseFlags();
+            response.Flags.Flags |= DialogResponses.Flag.Random;
 
             if (addRandomEndFlag) {
                 if (index + 1 >= topic.Responses.Count || GetMainSpeaker(topic.Responses[index + 1]) != GetMainSpeaker(response)) {

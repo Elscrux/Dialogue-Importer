@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 using DialogueImplementationTool.Dialogue;
 using Xceed.Document.NET;
 using Xceed.Words.NET;
@@ -12,7 +14,13 @@ public sealed class DocXTextParser : DocumentParser {
     public override int LastIndex { get; }
     
     public DocXTextParser(string path) {
-        _doc = DocX.Load(path);
+        try {
+            _doc = DocX.Load(path);
+        } catch (Exception e) {
+            MessageBox.Show(e.Message);
+            throw;
+        }
+        
         
         LastIndex = _doc.Lists.Count - 1;
     }
@@ -21,7 +29,7 @@ public sealed class DocXTextParser : DocumentParser {
 
     public override void SkipMany() => Next();
 
-    public override string Preview(int index) => _doc.Lists[index].Items.FirstOrDefault()?.Text ?? string.Empty;
+    public override string Preview(int index) =>  index < 0 || index >= _doc.Lists.Count ? string.Empty : _doc.Lists[index].Items.FirstOrDefault()?.Text ?? string.Empty;
 
     protected override List<DialogueTopic> ParseDialogue(int index) {
         var branches = new List<DialogueTopic>();
@@ -79,12 +87,12 @@ public sealed class DocXTextParser : DocumentParser {
         var startingIndentation = paragraph.IndentLevel;
         
         //Add further responses
-        for (; paragraph.IndentLevel == startingIndentation; paragraph = paragraph.NextParagraph) {
+        for (; paragraph != null && paragraph.IndentLevel == startingIndentation; paragraph = paragraph.NextParagraph) {
             topic.Responses.Add(paragraph.Text);
         }
         
         //Add links
-        for (; paragraph.IndentLevel > startingIndentation; paragraph = paragraph.NextParagraph) {
+        for (; paragraph != null && paragraph.IndentLevel > startingIndentation; paragraph = paragraph.NextParagraph) {
             if (paragraph.IndentLevel == startingIndentation + 1) {
                 topic.Links.Add(AddTopic(paragraph));
             }

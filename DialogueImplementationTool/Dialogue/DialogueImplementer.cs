@@ -26,7 +26,6 @@ public class DialogueImplementer {
     }
 
     public void ImplementDialogue(List<GeneratedDialogue> dialogue) {
-        DialogueFactory.Mod.Clear();
         var linkCache = Environment.LinkCache;
 
         var npcMappings = new Dictionary<FormKey, INpcGetter>();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Windows;
 using AODL.Document.Content;
 using AODL.Document.Content.Text;
 using AODL.Document.TextDocuments;
@@ -66,7 +67,14 @@ public sealed class OpenDocumentTextParser : DocumentParser {
     } 
 
     public OpenDocumentTextParser(string path) {
-        _doc.Load(path);
+        try {
+            _doc.Load(path);
+        } catch (Exception e) {
+            MessageBox.Show(e.Message);
+
+            throw;
+        }
+        
         
         MergeLists();
 

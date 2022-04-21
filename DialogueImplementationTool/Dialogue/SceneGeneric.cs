@@ -47,6 +47,7 @@ public class GenericScene : SceneFactory {
 
         //Add scene
         var scene = AddScene($"{questEditorID}Scene", quest.FormKey, new List<int> {2, 3});
+        scene.Flags |= Scene.Flag.BeginOnQuestStart | Scene.Flag.StopOnQuestEnd | Scene.Flag.Interruptable;
         Mod.Scenes.Add(scene);
 
         //Add lines

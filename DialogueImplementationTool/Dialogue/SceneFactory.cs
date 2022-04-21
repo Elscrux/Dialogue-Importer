@@ -56,6 +56,7 @@ public abstract class SceneFactory : DialogueFactory {
         }
         
         //Add lines
+        _currentPhaseIndex = 0;
         foreach (var (speaker, responses) in lines) {
             var (formKey, _, index) = speakers[speaker];
 
@@ -72,7 +73,7 @@ public abstract class SceneFactory : DialogueFactory {
             AddTopic(scene, sceneTopic, index);
         }
         
-        scene.LastActionIndex = 0;
+        scene.LastActionIndex = (uint) lines.Count;
     }
 
     protected static List<(string, List<string>)> ParseLines(List<string> lines) {
@@ -87,15 +88,15 @@ public abstract class SceneFactory : DialogueFactory {
             if (currentSpeaker == speaker) {
                 currentLines.Add(match.Groups[2].Value);
             } else {
-                if (currentLines.Count > 0) {
-                    output.Add((currentSpeaker, new List<string>(currentLines)));
-                }
+                if (currentLines.Any()) output.Add((currentSpeaker, new List<string>(currentLines)));
                 currentLines.Clear();
                 
                 currentSpeaker = speaker;
                 currentLines.Add(match.Groups[2].Value);
             }
         }
+
+        if (currentLines.Any()) output.Add((currentSpeaker, new List<string>(currentLines)));
 
         return output;
     }
@@ -137,8 +138,7 @@ public abstract class SceneFactory : DialogueFactory {
                 Flags = new SceneActor.Flag(),
                 ID = Convert.ToUInt32(id)
             }).ToExtendedList(),
-            Flags = Scene.Flag.BeginOnQuestStart | Scene.Flag.StopOnQuestEnd | Scene.Flag.Interruptable,
-            Quest = new FormLinkNullable<IQuestGetter>(quest)
+            Quest = new FormLinkNullable<IQuestGetter>(quest),
         };
     }
 
