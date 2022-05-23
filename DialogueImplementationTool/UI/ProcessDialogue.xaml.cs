@@ -50,9 +50,10 @@ public partial class ProcessDialogue {
         }
     }
 
-    private void Finish_OnClick(object sender, RoutedEventArgs e) {
-        App.DialogueVM.Save();
-    }
+    private void Save_OnClick(object sender, RoutedEventArgs e) => App.DialogueVM.Save();
+
+    private void OpenFolder_OnClick(object sender, RoutedEventArgs e) => App.DialogueVM.OpenOutput();
+    
     private void SpeakerFavouriteSelect_OnClick(object sender, RoutedEventArgs e) {
         var button = (Button) sender;
         var speaker = (SpeakerFavourite) button.DataContext;

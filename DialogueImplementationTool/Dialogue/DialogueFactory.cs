@@ -11,6 +11,7 @@ public abstract class DialogueFactory {
     protected const SkyrimRelease Release = SkyrimRelease.SkyrimSE;
     public static readonly SkyrimMod Mod = new(new ModKey(GetNewModName(), ModType.Plugin), SkyrimRelease.SkyrimSE);
     private const string ModName = "DialogueOutput";
+    public static readonly string OutputFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Output");
 
     protected IQuest? OverrideQuest = null;
 
@@ -29,7 +30,7 @@ public abstract class DialogueFactory {
     public abstract void PostProcess();
 
     public static void Save() {
-        var fileInfo = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Output", Mod.ModKey.FileName));
+        var fileInfo = new FileInfo(Path.Combine(OutputFolder, Mod.ModKey.FileName));
         
         if (fileInfo.Directory is { Exists: false }) fileInfo.Directory?.Create();
         Mod.WriteToBinaryParallel(fileInfo.FullName);

@@ -23,8 +23,12 @@
 
             <Grid Column="0">
                 <Button Content="Save"
-                        Click="Finish_OnClick"
+                        Click="Save_OnClick"
                         Margin="10,10,0,0"
+                        HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                <Button Content="Open Folder"
+                        Click="OpenFolder_OnClick"
+                        Margin="50,10,0,0"
                         HorizontalAlignment="Left" VerticalAlignment="Top"/>
                 
                 <TextBlock x:Name="PreviewText"

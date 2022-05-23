@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Windows.Input;
 using DialogueImplementationTool.Dialogue;
@@ -164,5 +166,17 @@ public class DialogueVM : ViewModel {
         App.DialogueVM.DialogueImplementer.ImplementDialogue(App.DialogueVM.DocumentParser.GetDialogue());
         DialogueFactory.Save();
         App.DialogueVM.SavedSession = true;
+    }
+    
+    public void OpenOutput() {
+        if (!Directory.Exists(DialogueFactory.OutputFolder)) return;
+
+        using var process = new Process {
+            StartInfo = new ProcessStartInfo {
+                FileName = "explorer",
+                Arguments = $"\"{DialogueFactory.OutputFolder}\""
+            }
+        };
+        process.Start();
     }
 }
