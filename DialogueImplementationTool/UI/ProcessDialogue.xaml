@@ -41,9 +41,9 @@
                 </Grid.RowDefinitions>
 
                 <plugins:FormKeyPicker Grid.Row="0"
-                                       FormKey="{Binding NPCFormKey}"
+                                       FormKey="{Binding SpeakerFormKey}"
                                        LinkCache="{Binding LinkCache, Mode=OneWay}"
-                                       ScopedTypes="{Binding NPCTypes, Mode=OneWay}"/>
+                                       ScopedTypes="{Binding SpeakerTypes, Mode=OneWay}"/>
                 
                 <ListBox Grid.Row="1"
                          ItemsSource="{Binding SpeakerFavourites}">
@@ -100,7 +100,7 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
-            <Grid Row="0" IsEnabled="{Binding ValidNPC}">
+            <Grid Row="0" IsEnabled="{Binding ValidSpeaker}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>

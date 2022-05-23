@@ -35,13 +35,13 @@ public abstract class DialogueFactory {
         Mod.WriteToBinaryParallel(fileInfo.FullName);
     }
 
-    protected static Condition GetIsIDCondition(FormKey npc, bool or = false) {
+    protected static Condition GetFormKeyCondition(Condition.Function function, FormKey formKey, float comparisonValue = 1, bool or = false) {
         var condition = new ConditionFloat {
             CompareOperator = CompareOperator.EqualTo,
-            ComparisonValue = 1,
+            ComparisonValue = comparisonValue,
             Data = new FunctionConditionData {
-                Function = Condition.Function.GetIsID,
-                ParameterOneRecord = new FormLink<ISkyrimMajorRecordGetter>(npc)
+                Function = function,
+                ParameterOneRecord = new FormLink<ISkyrimMajorRecordGetter>(formKey)
             }
         };
 
@@ -50,7 +50,7 @@ public abstract class DialogueFactory {
         return condition;
     }
 
-    protected static ExtendedList<DialogResponses> GetResponses(FormKey npc, IEnumerable<string> lines) {
+    protected static ExtendedList<DialogResponses> GetResponses(FormKey speaker, IEnumerable<string> lines) {
         return new ExtendedList<DialogResponses> { 
             new(Mod.GetNextFormKey(), Release) {
                 Responses = lines.Select((response, i) => new DialogResponse {
@@ -59,11 +59,25 @@ public abstract class DialogueFactory {
                     Flags = DialogResponse.Flag.UseEmotionAnimation,
                     EmotionValue = 50
                 }).ToExtendedList(),
-                Conditions = new ExtendedList<Condition> { GetIsIDCondition(npc) },
+                Conditions = GetSpeakerConditions(speaker),
                 FavorLevel = FavorLevel.None,
                 Flags = new DialogResponseFlags(),
                 PreviousDialog = new FormLinkNullable<IDialogResponsesGetter>(FormKey.Null)
             }
         };
+    }
+
+    protected static ExtendedList<Condition> GetSpeakerConditions(FormKey speaker) {
+        var list = new ExtendedList<Condition>();
+        
+        if (DialogueImplementer.Environment.LinkCache.TryResolve<INpcGetter>(speaker, out var npc)) {
+            list.Add(GetFormKeyCondition(Condition.Function.GetIsID, npc.FormKey));
+        }
+        
+        if(DialogueImplementer.Environment.LinkCache.TryResolve<IFactionGetter>(speaker, out var faction)) {
+            list.Add(GetFormKeyCondition(Condition.Function.GetInFaction, faction.FormKey));
+        }
+
+        return list;
     }
 }

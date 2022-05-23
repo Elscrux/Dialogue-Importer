@@ -109,8 +109,8 @@ public abstract class SceneFactory : DialogueFactory {
                 EventData = new MemorySlice<byte>(new byte[] { 0x52, 0x31, 0x0, 0x0 })
             },
             Conditions = new ExtendedList<Condition> {
-                GetIsIDCondition(npc1, true),
-                GetIsIDCondition(npc2, true)
+                GetFormKeyCondition(Condition.Function.GetIsID, npc1, 1, true),
+                GetFormKeyCondition(Condition.Function.GetIsID, npc2, 1, true)
             },
             Flags = QuestAlias.Flag.AllowReserved,
             VoiceTypes = new FormLinkNullable<IAliasVoiceTypeGetter>(FormKey.Null)

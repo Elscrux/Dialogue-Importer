@@ -15,7 +15,7 @@ public abstract class OneLinerFactory : DialogueFactory {
             var response = topics[0].Responses[i];
 
             var dialogResponses = new DialogResponses(Mod.GetNextFormKey(), Release) {
-                Conditions = new ExtendedList<Condition> { GetIsIDCondition(speakerKey) },
+                Conditions = new ExtendedList<Condition> { GetFormKeyCondition(Condition.Function.GetIsID, speakerKey) },
                 FavorLevel = FavorLevel.None,
                 Responses = new ExtendedList<DialogResponse> {
                     new() {

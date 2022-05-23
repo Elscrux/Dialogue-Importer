@@ -26,25 +26,22 @@ public class DialogueImplementer {
     }
 
     public void ImplementDialogue(List<GeneratedDialogue> dialogue) {
-        var linkCache = Environment.LinkCache;
-
-        var npcMappings = new Dictionary<FormKey, INpcGetter>();
+        var nameMappings = new Dictionary<FormKey, string>();
         foreach (var (type, topics, speaker) in dialogue) {
             if (topics.Count == 0 || !DialogueFactories.ContainsKey(type)) continue;
 
             var name = string.Empty;
             if (speaker != FormKey.Null) {
-                //Get npc record
-                INpcGetter npc;
-                if (npcMappings.ContainsKey(speaker)) {
-                    npc = npcMappings[speaker];
+                if (nameMappings.ContainsKey(speaker)) {
+                    name = nameMappings[speaker];
                 } else {
-                    npc = linkCache.Resolve<INpcGetter>(speaker);
-                    npcMappings.Add(speaker, npc);
+                    if (Environment.LinkCache.TryResolve<INpcGetter>(speaker, out var named)) {
+                        //Remove white spaces from name
+                        name = WhitespaceRegex.Replace(named.Name?.String ?? string.Empty, string.Empty);
+                        
+                        nameMappings.Add(named.FormKey, name);
+                    }
                 }
-            
-                //Remove white spaces from name
-                name = WhitespaceRegex.Replace(npc.Name?.String ?? string.Empty, string.Empty);
             }
             
             DialogueFactories[type].GenerateDialogue(topics, speaker, name);

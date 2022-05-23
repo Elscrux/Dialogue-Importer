@@ -64,16 +64,16 @@ public class DialogueVM : ViewModel {
     /*====================================================
 		NPC
 	====================================================*/
-    public IEnumerable<Type> NPCTypes { get; } = typeof(INpcGetter).AsEnumerable();
+    public IEnumerable<Type> SpeakerTypes { get; } = new List<Type> { typeof(INpcGetter), typeof(IFactionGetter) };
     [Reactive]
-    public FormKey NPCFormKey { get; set; }
+    public FormKey SpeakerFormKey { get; set; }
     [Reactive]
-    public bool ValidNPC { get; set; }
+    public bool ValidSpeaker { get; set; }
     
-    public ICommand SetNPC { get; }
+    public ICommand SetSpeaker { get; }
 
     public DialogueVM() {
-        SetNPC = ReactiveCommand.Create((FormKey formKey) => NPCFormKey = formKey);
+        SetSpeaker = ReactiveCommand.Create((FormKey formKey) => SpeakerFormKey = formKey);
         
         this.WhenAnyValue(v => v.Index)
             .Subscribe(_ => {
@@ -82,9 +82,9 @@ public class DialogueVM : ViewModel {
                 
                 if (DialogueTypeList.Count > Index) {
                     if (DialogueTypeList[Index].Speaker != FormKey.Null) {
-                        NPCFormKey = DialogueTypeList[Index].Speaker;                        
+                        SpeakerFormKey = DialogueTypeList[Index].Speaker;                        
                     } else {
-                        DialogueTypeList[Index].Speaker = NPCFormKey;
+                        DialogueTypeList[Index].Speaker = SpeakerFormKey;
                     }
                     GreetingSelected = DialogueTypeList[Index].Selection[DialogueType.Greeting];
                     FarewellSelected = DialogueTypeList[Index].Selection[DialogueType.Farewell];
@@ -101,13 +101,13 @@ public class DialogueVM : ViewModel {
                 DialogueImplementer = new DialogueImplementer(QuestFormKey);
             });
         
-        this.WhenAnyValue(v => v.NPCFormKey)
+        this.WhenAnyValue(v => v.SpeakerFormKey)
             .Subscribe(_ => {
-                ValidNPC = NPCFormKey != FormKey.Null;
-                if (DialogueTypeList.Count > Index) DialogueTypeList[Index].Speaker = NPCFormKey;
-                if (NPCFormKey != FormKey.Null && SpeakerFavourites.All(s => s.FormKey != NPCFormKey)) {
-                    var record = LinkCache.Resolve<INpcGetter>(NPCFormKey);
-                    SpeakerFavourites.Add(new SpeakerFavourite(NPCFormKey, record.EditorID));
+                ValidSpeaker = SpeakerFormKey != FormKey.Null;
+                if (DialogueTypeList.Count > Index) DialogueTypeList[Index].Speaker = SpeakerFormKey;
+                if (SpeakerFormKey != FormKey.Null && SpeakerFavourites.All(s => s.FormKey != SpeakerFormKey)) {
+                    var record = LinkCache.Resolve<INpcGetter>(SpeakerFormKey);
+                    SpeakerFavourites.Add(new SpeakerFavourite(SpeakerFormKey, record.EditorID));
                 }
             });
 

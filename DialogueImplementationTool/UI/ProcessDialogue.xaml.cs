@@ -56,6 +56,6 @@ public partial class ProcessDialogue {
     private void SpeakerFavouriteSelect_OnClick(object sender, RoutedEventArgs e) {
         var button = (Button) sender;
         var speaker = (SpeakerFavourite) button.DataContext;
-        App.DialogueVM.SetNPC.Execute(speaker.FormKey);
+        App.DialogueVM.SetSpeaker.Execute(speaker.FormKey);
     }
 }
