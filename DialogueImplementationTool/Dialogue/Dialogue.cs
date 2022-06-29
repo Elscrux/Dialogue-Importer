@@ -17,8 +17,7 @@ public class Dialogue : DialogueFactory {
             var branch = new DialogBranch(Mod.GetNextFormKey(), Release) {
                 EditorID = DialogueImplementer.Quest.EditorID + speakerName + _npcIndices[speakerName],
                 Quest = new FormLinkNullable<IQuestGetter>(DialogueImplementer.Quest.FormKey),
-                Flags = DialogBranch.Flag.TopLevel,
-                TNAM = 0
+                Flags = DialogBranch.Flag.TopLevel
             };
             Mod.DialogBranches.Add(branch);
             
