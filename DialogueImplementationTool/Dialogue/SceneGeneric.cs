@@ -40,6 +40,7 @@ public class GenericScene : SceneFactory {
             EditorID = questEditorID,
             Priority = 10,
             Type = Quest.TypeEnum.None,
+            Name = $"{DialogueImplementer.Quest.Name?.String} Scene {SceneCount}",
             Event = "ADIA",
             Aliases = new ExtendedList<QuestAlias> { alias1, alias2, alias3, alias4 }
         };
@@ -52,7 +53,5 @@ public class GenericScene : SceneFactory {
 
         //Add lines
         AddLines(quest, scene, ParseLines(topics[0].Responses), nameMappedSpeakers);
-
-        SceneCount++;
     }
 }
