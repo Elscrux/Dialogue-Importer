@@ -1,19 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>WinExe</OutputType>
+        <OutputType>Exe</OutputType>
         <TargetFramework>net6.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
         <UseWPF>true</UseWPF>
         <ApplicationIcon>DialogueImplementationTool.ico</ApplicationIcon>
+        <LangVersion>default</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="AODL" Version="1.2.0.1" />
-      <PackageReference Include="DocX" Version="2.1.0" />
-      <PackageReference Include="Mutagen.Bethesda" Version="0.36.1" />
-      <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.36.1" />
-      <PackageReference Include="Mutagen.Bethesda.WPF" Version="0.36.1" />
+      <PackageReference Include="DocX" Version="2.2.0" />
+      <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.37.0" />
+      <PackageReference Include="Mutagen.Bethesda.WPF" Version="0.37.0" />
     </ItemGroup>
 
     <ItemGroup>

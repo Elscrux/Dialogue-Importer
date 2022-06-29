@@ -8,7 +8,7 @@ using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue; 
 
 public class DialogueImplementer {
-    public static readonly IGameEnvironmentState<ISkyrimMod, ISkyrimModGetter> Environment = GameEnvironment.Typical.Skyrim(SkyrimRelease.SkyrimSE);
+    public static readonly IGameEnvironment<ISkyrimMod, ISkyrimModGetter> Environment = GameEnvironment.Typical.Skyrim(SkyrimRelease.SkyrimSE);
     private static readonly Regex WhitespaceRegex = new(@"\s+");
     public static IQuestGetter Quest = new Quest(FormKey.Null, SkyrimRelease.SkyrimSE);
 
