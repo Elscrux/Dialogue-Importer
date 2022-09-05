@@ -58,8 +58,8 @@ public abstract class DocumentParser {
 
         return (DocumentParser?) Activator.CreateInstance(DocumentParsers[extension], file);
     }
-    
-    public static DocumentParser? LoadDocument() {
+
+    public static string GetFilter() {
         var filterBuilder = new StringBuilder();
         var fileTypes = DocumentParsers.Keys.ToList();
         for (var index = 0; index < fileTypes.Count; index++) {
@@ -68,7 +68,11 @@ public abstract class DocumentParser {
             if (index != fileTypes.Count - 1) filterBuilder.Append(';');
         }
 
-        var filter = filterBuilder.ToString();
+        return filterBuilder.ToString();
+    }
+    
+    public static DocumentParser? LoadDocument() {
+        var filter = GetFilter();
         var fileDialog = new OpenFileDialog {
             Multiselect = false,
             Filter = $"Documents({filter})|{filter}"
@@ -80,8 +84,10 @@ public abstract class DocumentParser {
     public static IEnumerable<DocumentParser> LoadDocuments() {
         var folderDialog = new FolderBrowserDialog();
         if (folderDialog.ShowDialog() != DialogResult.OK) yield break;
-        
-        foreach (var file in Directory.GetFiles(folderDialog.SelectedPath)) {
+
+        var extensions = DocumentParsers.Keys.ToList();
+        foreach (var file in Directory.EnumerateFiles(folderDialog.SelectedPath, "*.*", SearchOption.AllDirectories)
+            .Where(file => extensions.Any(file.EndsWith))) {
             var documentParser = CreateParser(file);
             if (documentParser != null) yield return documentParser;
         }
