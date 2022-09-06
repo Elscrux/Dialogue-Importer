@@ -71,15 +71,27 @@ public sealed class OpenDocumentTextParser : DocumentParser {
     } 
 
     public OpenDocumentTextParser(string path) {
-        try {
-            _doc.Load(path);
-        } catch (Exception e) {
-            MessageBox.Show(e.Message);
-
-            throw;
+        var tryLoading = true;
+        while (tryLoading) {
+            try {
+                _doc.Load(path);
+                tryLoading = false;
+            } catch (Exception e) {
+                switch (MessageBox.Show(e.Message)) {
+                    case MessageBoxResult.None:
+                    case MessageBoxResult.Cancel:
+                    case MessageBoxResult.No:
+                        tryLoading = false;
+                        break;
+                    case MessageBoxResult.OK:
+                    case MessageBoxResult.Yes:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
         }
-        
-        
+
         MergeLists();
 
         LastIndex = 0;

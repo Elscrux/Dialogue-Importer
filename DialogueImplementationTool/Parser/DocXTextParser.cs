@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using DialogueImplementationTool.Dialogue;
@@ -17,14 +18,28 @@ public sealed class DocXTextParser : DocumentParser {
     public override int LastIndex { get; }
     
     public DocXTextParser(string path) {
-        try {
-            _doc = DocX.Load(path);
-        } catch (Exception e) {
-            MessageBox.Show(e.Message);
-            throw;
+        var tryLoading = true;
+        while (tryLoading) {
+            try {
+                _doc = DocX.Load(path);
+                tryLoading = false;
+            } catch (Exception e) {
+                switch (MessageBox.Show(e.Message)) {
+                    case MessageBoxResult.None:
+                    case MessageBoxResult.Cancel:
+                    case MessageBoxResult.No:
+                        tryLoading = false;
+                        break;
+                    case MessageBoxResult.OK:
+                    case MessageBoxResult.Yes:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
         }
         
-        
+        _doc ??= DocX.Create(Stream.Null);
         LastIndex = _doc.Lists.Count - 1;
     }
 
