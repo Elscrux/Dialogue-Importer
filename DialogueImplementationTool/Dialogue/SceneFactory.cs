@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.RegularExpressions;
+using DialogueImplementationTool.Dialogue.Responses;
 using DialogueImplementationTool.UI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
@@ -20,7 +21,7 @@ public abstract class SceneFactory : DialogueFactory {
     protected static List<Speaker> GetSpeakers(IEnumerable<DialogueTopic> topics) {
         //Get speaker strings
         var speakerNames = topics
-            .SelectMany(topic => topic.Responses, (_, response) => SceneLineRegex.Match(response))
+            .SelectMany(topic => topic.Responses, (_, response) => SceneLineRegex.Match(response.Response))
             .Where(match => match.Success)
             .Select(match => match.Groups[1].Value)
             .ToHashSet();
@@ -39,7 +40,7 @@ public abstract class SceneFactory : DialogueFactory {
         );
     }
 
-    protected void AddLines(IQuestGetter quest, Scene scene, List<(string Speaker, List<string> Responses)> lines, Dictionary<string,(FormKey FormKey, string? EditorID, int AliasIndex)> speakers) {
+    protected void AddLines(IQuestGetter quest, Scene scene, List<(string Speaker, List<DialogueResponse> Responses)> lines, Dictionary<string,(FormKey FormKey, string? EditorID, int AliasIndex)> speakers) {
         //Merge lines
         var i = 0;
         var currentIndex = 0;
@@ -76,27 +77,26 @@ public abstract class SceneFactory : DialogueFactory {
         scene.LastActionIndex = (uint) lines.Count;
     }
 
-    protected static List<(string, List<string>)> ParseLines(List<string> lines) {
-        var output = new List<(string, List<string>)>();
+    protected static List<(string, List<DialogueResponse>)> ParseLines(List<DialogueResponse> lines) {
+        var output = new List<(string, List<DialogueResponse>)>();
         var currentSpeaker = string.Empty;
-        var currentLines = new List<string>();
+        var currentLines = new List<DialogueResponse>();
         foreach (var response in lines) {
-            var match = SceneLineRegex.Match(response);
+            var match = SceneLineRegex.Match(response.Response);
             if (!match.Success) continue;
             
             var speaker = match.Groups[1].Value;
-            if (currentSpeaker == speaker) {
-                currentLines.Add(match.Groups[2].Value);
-            } else {
-                if (currentLines.Any()) output.Add((currentSpeaker, new List<string>(currentLines)));
+            if (currentSpeaker != speaker) {
+                if (currentLines.Any()) output.Add((currentSpeaker, new List<DialogueResponse>(currentLines)));
                 currentLines.Clear();
                 
                 currentSpeaker = speaker;
-                currentLines.Add(match.Groups[2].Value);
             }
+            
+            currentLines.Add(response with { Response = match.Groups[2].Value });
         }
 
-        if (currentLines.Any()) output.Add((currentSpeaker, new List<string>(currentLines)));
+        if (currentLines.Any()) output.Add((currentSpeaker, new List<DialogueResponse>(currentLines)));
 
         return output;
     }

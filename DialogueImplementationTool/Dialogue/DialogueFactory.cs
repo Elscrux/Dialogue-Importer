@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using DialogueImplementationTool.Dialogue.Responses;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
@@ -51,11 +52,12 @@ public abstract class DialogueFactory {
         return condition;
     }
 
-    protected static ExtendedList<DialogResponses> GetResponses(FormKey speaker, IEnumerable<string> lines) {
+    protected static ExtendedList<DialogResponses> GetResponses(FormKey speaker, IEnumerable<DialogueResponse> lines) {
         return new ExtendedList<DialogResponses> { 
             new(Mod.GetNextFormKey(), Release) {
-                Responses = lines.Select((response, i) => new DialogResponse {
-                    Text = response,
+                Responses = lines.Select((line, i) => new DialogResponse {
+                    Text = line.Response,
+                    ScriptNotes = line.ScriptNote,
                     ResponseNumber = (byte) i,
                     Flags = DialogResponse.Flag.UseEmotionAnimation,
                     EmotionValue = 50

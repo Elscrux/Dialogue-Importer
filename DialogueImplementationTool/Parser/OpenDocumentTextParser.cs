@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Windows;
 using AODL.Document.Content;
 using AODL.Document.Content.Text;
+using AODL.Document.Content.Text.TextControl;
 using AODL.Document.TextDocuments;
 using DialogueImplementationTool.Dialogue;
+using DialogueImplementationTool.Dialogue.Responses;
 namespace DialogueImplementationTool.Parser;
 
 public sealed class OpenDocumentTextParser : DocumentParser {
@@ -180,7 +184,7 @@ public sealed class OpenDocumentTextParser : DocumentParser {
 
     protected override List<DialogueTopic> ParseScene(int index) => ParseOneLiner(index);
 
-    private static void AddResponses(IContentContainer list, DialogueTopic topic) {
+    private void AddResponses(IContentContainer list, DialogueTopic topic) {
         foreach (IContent listContent in list.Content) {
             if (listContent is not ListItem listItem) continue;
             
@@ -188,7 +192,7 @@ public sealed class OpenDocumentTextParser : DocumentParser {
                 switch (itemContent) {
                     case Paragraph paragraph:
                         //Set player text
-                        topic.Responses.Add(GetText(paragraph));
+                        topic.Responses.Add(DialogueResponse.Build(GetFormattedText(paragraph)));
 
                         break;
                     default:
@@ -233,7 +237,7 @@ public sealed class OpenDocumentTextParser : DocumentParser {
                 switch (topicContent) {
                     case Paragraph paragraph:
                         //Add responses
-                        topic.Responses.Add(GetText(paragraph));
+                        topic.Responses.Add(DialogueResponse.Build(GetFormattedText(paragraph)));
                         break;
                     case List linkList:
                         //Add links
@@ -252,7 +256,7 @@ public sealed class OpenDocumentTextParser : DocumentParser {
         }
     }
     
-    private static string GetText(ITextContainer paragraph) {
+    private string GetText(ITextContainer paragraph) {
         var sb = new StringBuilder();
         foreach (IText text in paragraph.TextContent) {
             sb.Append(text.Text);
@@ -261,7 +265,7 @@ public sealed class OpenDocumentTextParser : DocumentParser {
         return sb.ToString();
     }
     
-    private static bool IsPlayerLine(ITextContainer paragraph) {
+    private bool IsPlayerLine(ITextContainer paragraph) {
         foreach (IText text in paragraph.TextContent) {
             if (text is not FormatedText formattedText || formattedText.TextStyle.TextProperties.Bold == null) {
                 return false;
@@ -269,5 +273,31 @@ public sealed class OpenDocumentTextParser : DocumentParser {
         }
 
         return true;
+    }
+    
+    private List<FormattedText> GetFormattedText(ITextContainer paragraph) {
+        return (from IText text in paragraph.TextContent select GetFormattedText(text)).ToList();
+    }
+    
+    private FormattedText GetFormattedText(IText text) {
+        switch (text) {
+            case FormatedText formattedText:
+                if (string.IsNullOrWhiteSpace(formattedText.TextStyle.TextProperties.FontColor)) {
+                    return new FormattedText(text.Text, formattedText.TextStyle.TextProperties.Bold != null, Color.Black);
+                }
+                
+                //Format "#112233"
+                var r = Convert.ToInt32(formattedText.TextStyle.TextProperties.FontColor.Substring(1, 2), 16);
+                var g = Convert.ToInt32(formattedText.TextStyle.TextProperties.FontColor.Substring(3, 2), 16);
+                var b = Convert.ToInt32(formattedText.TextStyle.TextProperties.FontColor.Substring(5, 2), 16);
+
+                return new FormattedText(formattedText.Text, formattedText.TextStyle.TextProperties.Bold != null, Color.FromArgb(r, g, b));
+            case WhiteSpace:
+            case SimpleText:
+                return new FormattedText(text.Text, false, Color.Black);
+            default:
+                throw new ArgumentOutOfRangeException(nameof(text));
+
+        }
     }
 }

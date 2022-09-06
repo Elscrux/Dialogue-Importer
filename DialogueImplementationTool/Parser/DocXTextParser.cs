@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Windows;
 using DialogueImplementationTool.Dialogue;
-using Xceed.Document.NET;
+using DialogueImplementationTool.Dialogue.Responses;
 using Xceed.Words.NET;
+using List = Xceed.Document.NET.List;
+using Paragraph = Xceed.Document.NET.Paragraph;
 namespace DialogueImplementationTool.Parser;
 
 public sealed class DocXTextParser : DocumentParser {
@@ -63,10 +66,12 @@ public sealed class DocXTextParser : DocumentParser {
 
     protected override List<DialogueTopic> ParseScene(int index) => ParseOneLiner(index);
 
-    private static void AddResponses(List list, DialogueTopic topic) {
+    private void AddResponses(List list, DialogueTopic topic) {
         if (!list.Items.Any()) return;
 
-        foreach (var item in list.Items) topic.Responses.Add(item.Text);
+        foreach (var item in list.Items) {
+            topic.Responses.Add( DialogueResponse.Build(GetFormattedText(item)));
+        }
     }
     
     private DialogueTopic AddTopic(Paragraph paragraph) {
@@ -88,7 +93,7 @@ public sealed class DocXTextParser : DocumentParser {
         
         //Add further responses
         for (; paragraph != null && paragraph.IndentLevel == startingIndentation; paragraph = paragraph.NextParagraph) {
-            topic.Responses.Add(paragraph.Text);
+            topic.Responses.Add(DialogueResponse.Build(GetFormattedText(paragraph)));
         }
         
         //Add links
@@ -99,5 +104,15 @@ public sealed class DocXTextParser : DocumentParser {
         }
     }
     
-    private static bool IsPlayerLine(Paragraph paragraph) => paragraph.MagicText.All(magicText => magicText.formatting.Bold is not (null or false));
+    private bool IsPlayerLine(Paragraph paragraph) => paragraph.MagicText.All(magicText => magicText.formatting.Bold is not (null or false));
+
+    private IEnumerable<FormattedText> GetFormattedText(Paragraph paragraph) {
+        return paragraph.MagicText
+            .Select(text => new FormattedText(text.text, text.formatting.Bold ?? false, text.formatting.FontColor ?? Color.Black))
+            .ToList();
+    }
+    
+    private FormattedText GetFormattedText(Xceed.Document.NET.FormattedText text) {
+        return new FormattedText(text.text, text.formatting.Bold ?? false, text.formatting.FontColor ?? Color.Black);
+    }
 }

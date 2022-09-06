@@ -10,13 +10,6 @@ namespace DialogueImplementationTool.Parser;
 
 public abstract class DocumentParser {
     public static readonly DocumentParser Null = new NullDocumentParser();
-    private static readonly Dictionary<string, string> InvalidStrings = new() {
-        {"\r", ""},
-        {"’", "'"},
-        {"`", "'"},
-        {"”", "\""},
-        {"…", "..."},
-    };
 
     /*====================================================
 		Iterator
@@ -101,17 +94,6 @@ public abstract class DocumentParser {
                 if (selected) dialogue.Add(new GeneratedDialogue(dialogueType, ParseDialogue(dialogueType, i), speakerFormKey));
             }
         }
-        
-        foreach (var (_, dialogueTopics, _) in dialogue) {
-            foreach (var dialogueTopic in dialogueTopics) {
-                for (var index = 0; index < dialogueTopic.Responses.Count; index++) {
-                    foreach (var (invalid, fix) in InvalidStrings) {
-                        dialogueTopic.Responses[index] = dialogueTopic.Responses[index].Replace(invalid, fix);
-                    }
-                }
-            }
-        }
-
         return dialogue;
     }
 

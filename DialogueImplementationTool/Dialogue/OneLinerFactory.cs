@@ -19,7 +19,8 @@ public abstract class OneLinerFactory : DialogueFactory {
                 FavorLevel = FavorLevel.None,
                 Responses = new ExtendedList<DialogResponse> {
                     new() {
-                        Text = response,
+                        Text = response.Response,
+                        ScriptNotes = response.ScriptNote,
                         ResponseNumber = (byte) i,
                         EmotionValue = 50
                     }
