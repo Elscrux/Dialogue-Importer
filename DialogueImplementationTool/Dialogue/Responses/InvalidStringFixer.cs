@@ -1,19 +1,10 @@
-﻿using System.Collections.Generic;
-using DialogueImplementationTool.Parser;
+﻿using DialogueImplementationTool.Parser;
 namespace DialogueImplementationTool.Dialogue.Responses;
 
-public class InvalidStringFixer : IDialoguePreProcessor {
-    private static readonly Dictionary<string, string> InvalidStrings = new() {
-        {"\r", ""},
-        {"’", "'"},
-        {"`", "'"},
-        {"”", "\""},
-        {"…", "..."},
-    };
-    
+public class InvalidStringFixer : IDialogueResponsePreProcessor {
     public DialogueResponse Process(DialogueResponse response, FormattedText text) {
         var fixedResponse = text.Text;
-        foreach (var (invalid, fix) in InvalidStrings) {
+        foreach (var (invalid, fix) in InvalidString.InvalidStrings) {
             fixedResponse = fixedResponse.Replace(invalid, fix);
         }
         

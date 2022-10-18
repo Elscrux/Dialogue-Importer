@@ -3,15 +3,18 @@ using DialogueImplementationTool.Parser;
 namespace DialogueImplementationTool.Dialogue.Responses;
 
 public record DialogueResponse {
-    private static readonly IEnumerable<IDialoguePreProcessor> PreProcessors = new List<IDialoguePreProcessor> {
+    private static readonly IEnumerable<IDialogueResponsePreProcessor> PreProcessors = new List<IDialogueResponsePreProcessor> {
         new InvalidStringFixer(),
         new ScriptNotesParser(),
     };
     
-    private static readonly IEnumerable<IDialoguePostProcessor> PostProcessors = new List<IDialoguePostProcessor> {
+    private static readonly IEnumerable<IDialogueResponsePostProcessor> PostProcessors = new List<IDialogueResponsePostProcessor> {
         new BracesRemover(),
         new Trimmer(),
     };
+    
+    public string Response { get; set; } = string.Empty;
+    public string ScriptNote { get; set; } = string.Empty;
 
     public static DialogueResponse Build(IEnumerable<FormattedText> textSnippets) {
         //Apply pre processors
@@ -39,7 +42,4 @@ public record DialogueResponse {
 
         return finalResponse;
     }
-    
-    public string Response { get; set; } = string.Empty;
-    public string ScriptNote { get; set; } = string.Empty;
 }

@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using DialogueImplementationTool.Parser;
 namespace DialogueImplementationTool.Dialogue.Responses;
 
-public class ScriptNotesParser : IDialoguePreProcessor {
+public class ScriptNotesParser : IDialogueResponsePreProcessor {
     private static readonly Regex InvalidBracesRegex = new(@"\[([^\[\]]*)\]");
 
     private static readonly Color OrangeColor = Color.Orange; 

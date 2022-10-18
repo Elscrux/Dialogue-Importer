@@ -10,6 +10,7 @@ using AODL.Document.Content.Text.TextControl;
 using AODL.Document.TextDocuments;
 using DialogueImplementationTool.Dialogue;
 using DialogueImplementationTool.Dialogue.Responses;
+using DialogueImplementationTool.Dialogue.Topics;
 namespace DialogueImplementationTool.Parser;
 
 public sealed class OpenDocumentTextParser : DocumentParser {

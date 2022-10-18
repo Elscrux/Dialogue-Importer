@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using DialogueImplementationTool.Dialogue.Topics;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;

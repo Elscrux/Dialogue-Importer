@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 namespace DialogueImplementationTool.Dialogue.Responses; 
 
-public class BracesRemover : IDialoguePostProcessor {
+public class BracesRemover : IDialogueResponsePostProcessor {
     private static readonly Regex InvalidBracesRegex = new(@"(\(\s*\)|\[\s*\])");
     
     public void Process(DialogueResponse response) {

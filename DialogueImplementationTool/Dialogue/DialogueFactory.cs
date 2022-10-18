@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DialogueImplementationTool.Dialogue.Responses;
+using DialogueImplementationTool.Dialogue.Topics;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;

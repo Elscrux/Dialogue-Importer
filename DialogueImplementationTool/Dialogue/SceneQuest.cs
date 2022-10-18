@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DialogueImplementationTool.Dialogue.Topics;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue; 

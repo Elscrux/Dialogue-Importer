@@ -52,13 +52,16 @@
         <DependentUpon>DocumentParser.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Responses\InvalidStringFixer.cs">
-        <DependentUpon>IDialoguePreProcessor.cs</DependentUpon>
+        <DependentUpon>IDialogueResponsePreProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Responses\ScriptNotesParser.cs">
-        <DependentUpon>IDialoguePreProcessor.cs</DependentUpon>
+        <DependentUpon>IDialogueResponsePreProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Responses\BracesRemover.cs">
-        <DependentUpon>IDialoguePostProcessor.cs</DependentUpon>
+        <DependentUpon>IDialogueResponsePostProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Responses\Trimmer.cs">
+        <DependentUpon>IDialogueResponsePostProcessor.cs</DependentUpon>
       </Compile>
     </ItemGroup>
 

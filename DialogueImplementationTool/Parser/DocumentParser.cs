@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using DialogueImplementationTool.Dialogue;
+using DialogueImplementationTool.Dialogue.Topics;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 namespace DialogueImplementationTool.Parser; 
 

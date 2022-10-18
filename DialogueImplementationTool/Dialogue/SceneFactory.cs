@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using DialogueImplementationTool.Dialogue.Responses;
+using DialogueImplementationTool.Dialogue.Topics;
 using DialogueImplementationTool.UI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;

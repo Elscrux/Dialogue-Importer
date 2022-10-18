@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using DialogueImplementationTool.Dialogue;
+using DialogueImplementationTool.Dialogue.Topics;
 namespace DialogueImplementationTool.Parser;
 
 public class NullDocumentParser : DocumentParser {

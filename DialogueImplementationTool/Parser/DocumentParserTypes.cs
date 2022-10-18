@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using DialogueImplementationTool.Dialogue;
+using DialogueImplementationTool.Dialogue.Topics;
 using Mutagen.Bethesda.Plugins;
 namespace DialogueImplementationTool.Parser; 
 
