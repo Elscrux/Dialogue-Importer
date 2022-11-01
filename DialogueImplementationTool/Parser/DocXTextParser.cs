@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows;
 using DialogueImplementationTool.Dialogue.Responses;
 using DialogueImplementationTool.Dialogue.Topics;
+using Noggog;
 using Xceed.Words.NET;
 using List = Xceed.Document.NET.List;
 using Paragraph = Xceed.Document.NET.Paragraph;
@@ -123,7 +124,8 @@ public sealed class DocXTextParser : DocumentParser {
 
     private IEnumerable<FormattedText> GetFormattedText(Paragraph paragraph) {
         return paragraph.MagicText
-            .Select(text => new FormattedText(text.text, text.formatting.Bold ?? false, text.formatting.FontColor ?? Color.Black))
+            .NotNull()
+            .Select(text => new FormattedText(text.text, text.formatting?.Bold ?? false, text.formatting?.FontColor ?? Color.Black))
             .ToList();
     }
     
