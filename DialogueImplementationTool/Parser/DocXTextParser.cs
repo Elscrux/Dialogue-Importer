@@ -58,13 +58,19 @@ public sealed class DocXTextParser : DocumentParser {
 
         //Evaluate if the player starts dialogue
         if (IsPlayerLine(list.Items[0])) {
-            branches.AddRange(list.Items.Where(p => p.IndentLevel == FirstIndentationLevel).Select(AddTopic));
+            branches.AddRange(list.Items.Where(p => p.IndentLevel == FirstIndentationLevel)
+                .Select(x => {
+                    var currentBranch = AddTopic(x);
+                    currentBranch.Build();
+                    return currentBranch;
+                }));
         } else {
             //One new branch, NPC starts to talk
             var currentBranch = new DialogueTopic();
             branches.Add(currentBranch);
         
             AddLinksAndResponses(list.Items[0], currentBranch);
+            currentBranch.Build();
         }
 
         return branches;
@@ -115,7 +121,9 @@ public sealed class DocXTextParser : DocumentParser {
         //Add links
         for (; paragraph != null && paragraph.IndentLevel > startingIndentation; paragraph = paragraph.NextParagraph) {
             if (paragraph.IndentLevel == startingIndentation + 1) {
-                topic.Links.Add(AddTopic(paragraph));
+                var nextTopic = AddTopic(paragraph);
+                nextTopic.IncomingLink = topic;
+                topic.Links.Add(nextTopic);
             }
         }
     }

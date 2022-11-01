@@ -69,6 +69,9 @@
       <Compile Update="Dialogue\Topics\Trimmer.cs">
         <DependentUpon>IDialogueTopicPostProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\Topics\SayOnceChecker.cs">
+        <DependentUpon>IDialogueTopicPostProcessor.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

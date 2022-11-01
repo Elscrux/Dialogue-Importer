@@ -4,21 +4,21 @@ namespace DialogueImplementationTool.Dialogue.Topics;
 
 public record DialogueTopic {
     private static readonly IEnumerable<IDialogueTopicPostProcessor> PostProcessors = new List<IDialogueTopicPostProcessor> {
+        new SayOnceChecker(),
+        new BackToOptionsLinker(),
         new Trimmer(),
         new InvalidStringFixer(),
     };
     
-    public string Text {
-        get => _text;
-        set {
-            _text = value;
-            foreach (var preProcessor in PostProcessors) {
-                preProcessor.Process(this);
-            }
-        }
-    }
-    
+    public string Text { get; set; } = string.Empty;
     public readonly List<DialogueResponse> Responses = new();
     public readonly List<DialogueTopic> Links = new();
-    private string _text = string.Empty;
+    public DialogueTopic? IncomingLink { get; set; }
+    public bool SayOnce { get; set; }
+
+    public void Build() {
+        foreach (var preProcessor in PostProcessors) {
+            preProcessor.Process(this);
+        }
+    }
 }

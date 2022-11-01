@@ -8,7 +8,6 @@ using AODL.Document.Content;
 using AODL.Document.Content.Text;
 using AODL.Document.Content.Text.TextControl;
 using AODL.Document.TextDocuments;
-using DialogueImplementationTool.Dialogue;
 using DialogueImplementationTool.Dialogue.Responses;
 using DialogueImplementationTool.Dialogue.Topics;
 namespace DialogueImplementationTool.Parser;
@@ -171,7 +170,9 @@ public sealed class OpenDocumentTextParser : DocumentParser {
                 if (branch is not ListItem branchItem) continue;
                     
                 //Player dialogue - every entry is a new branch
-                branches.Add(AddTopic(branchItem));
+                var currentBranch = AddTopic(branchItem);
+                currentBranch.Build();
+                branches.Add(currentBranch);
             }
         } else {
             //One new branch, NPC starts to talk
@@ -179,6 +180,7 @@ public sealed class OpenDocumentTextParser : DocumentParser {
             branches.Add(currentBranch);
 
             AddLinksAndResponses(list, currentBranch);
+            currentBranch.Build();
         }
 
         return branches;
@@ -256,8 +258,10 @@ public sealed class OpenDocumentTextParser : DocumentParser {
                         //Add links
                         foreach (IContent linkContent in linkList.Content) {
                             if (linkContent is not ListItem linkItem) continue;
-                            
-                            topic.Links.Add(AddTopic(linkItem));
+
+                            var nextTopic = AddTopic(linkItem);
+                            nextTopic.IncomingLink = topic;
+                            topic.Links.Add(nextTopic);
                         }
                         
                         break;
