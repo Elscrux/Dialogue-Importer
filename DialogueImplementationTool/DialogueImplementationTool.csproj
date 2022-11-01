@@ -63,6 +63,12 @@
       <Compile Update="Dialogue\Responses\Trimmer.cs">
         <DependentUpon>IDialogueResponsePostProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\Topics\InvalidStringFixer.cs">
+        <DependentUpon>IDialogueTopicPostProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Topics\Trimmer.cs">
+        <DependentUpon>IDialogueTopicPostProcessor.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>
