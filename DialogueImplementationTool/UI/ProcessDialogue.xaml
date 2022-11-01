@@ -123,7 +123,7 @@
                           Content="Idle" FontSize="36"/>
                 <CheckBox Grid.Column="3" Margin="5"
                           IsChecked="{Binding DialogueSelected}"
-                          Content="Dialogue" FontSize="36"/>
+                          Content="Branching Dialogue" FontSize="36"/>
             </Grid>
 
             <Grid Row="1">

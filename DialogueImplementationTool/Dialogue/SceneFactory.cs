@@ -13,7 +13,7 @@ using Condition = Mutagen.Bethesda.Skyrim.Condition;
 namespace DialogueImplementationTool.Dialogue; 
 
 public abstract class SceneFactory : DialogueFactory {
-    private static readonly Regex SceneLineRegex = new(@"([\S\w]*):? *([\S\s]+)");
+    private static readonly Regex SceneLineRegex = new(@"([^\s:]*):? *([\S\s]+)");
     protected int SceneCount = 1; 
     
     private uint _currentPhaseIndex;
