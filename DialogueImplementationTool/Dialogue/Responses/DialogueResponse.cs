@@ -9,6 +9,7 @@ public record DialogueResponse {
     };
     
     private static readonly IEnumerable<IDialogueResponsePostProcessor> PostProcessors = new List<IDialogueResponsePostProcessor> {
+        new BackToDialogueRemover(),
         new BracesRemover(),
         new Trimmer(),
     };
