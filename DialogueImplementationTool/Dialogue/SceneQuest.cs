@@ -11,8 +11,13 @@ public class QuestScene : SceneFactory {
         //Get speaker structures
         var uniqueSpeakers = GetSpeakers(topics);
         
+        if (OverrideQuest == null) {
+            var questContext = DialogueImplementer.Environment.LinkCache.ResolveContext<IQuest, IQuestGetter>(DialogueImplementer.Quest.FormKey);
+            OverrideQuest = questContext.GetOrAddAsOverride(Mod);
+        }
+        
         //Add existing aliases
-        foreach (var alias in DialogueImplementer.Quest.Aliases) {
+        foreach (var alias in OverrideQuest.Aliases) {
             if (alias.UniqueActor.IsNull) continue;
 
             foreach (var speaker in uniqueSpeakers.Where(speaker => speaker.FormKey == alias.UniqueActor.FormKey)) {
@@ -23,11 +28,6 @@ public class QuestScene : SceneFactory {
         
         //Add new aliases
         foreach (var speaker in uniqueSpeakers.Where(speaker => speaker.AliasIndex == -1)) {
-            if (OverrideQuest == null) {
-                var questContext = DialogueImplementer.Environment.LinkCache.ResolveContext<IQuest, IQuestGetter>(DialogueImplementer.Quest.FormKey);
-                OverrideQuest = questContext.GetOrAddAsOverride(Mod);
-            }
-            
             var newAlias = GetAlias(speaker);
             newAlias.ID = Convert.ToUInt32(OverrideQuest.Aliases.Count);
             speaker.AliasIndex = OverrideQuest.Aliases.Count;
