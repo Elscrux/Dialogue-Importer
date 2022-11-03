@@ -5,10 +5,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:local="clr-namespace:DialogueImplementationTool.UI"
         xmlns:plugins="clr-namespace:Mutagen.Bethesda.WPF.Plugins;assembly=Mutagen.Bethesda.WPF"
-        mc:Ignorable="d"
+        xmlns:dd="urn:gong-wpf-dragdrop"
+        mc:Ignorable="d" d:DataContext="{d:DesignInstance local:SceneSpeakerWindow}"
         Title="Select scene actors"
         Height="450" Width="800">
-    <Grid>
+    <StackPanel Orientation="Horizontal">
         <DataGrid AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
                   CanUserReorderColumns="False" CanUserResizeColumns="True" CanUserResizeRows="False" CanUserSortColumns="False"
                   ItemsSource="{Binding SceneSpeakers}"
@@ -31,14 +32,33 @@
                 <DataGridTemplateColumn Header=" FormKey ">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <plugins:FormKeyPicker FormKey="{Binding FormKey, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                   EditorID="{Binding EditorID, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                   LinkCache="{Binding LinkCache, RelativeSource={RelativeSource FindAncestor, AncestorType=local:SceneSpeakerWindow}}"
-                                                   ScopedTypes="{Binding ScopedTypes, RelativeSource={RelativeSource FindAncestor, AncestorType=local:SceneSpeakerWindow}}" />
+                            <plugins:FormKeyPicker
+                                dd:DragDrop.IsDropTarget="True"
+                                dd:DragDrop.DropHandler="{StaticResource FormKeyPickerDropTarget}"
+                                dd:DragDrop.ShowAlwaysDropTargetAdorner="True"
+                                dd:DragDrop.UseDefaultEffectDataTemplate="True"
+                                FormKey="{Binding FormKey, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                EditorID="{Binding EditorID, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                LinkCache="{Binding LinkCache, RelativeSource={RelativeSource FindAncestor, AncestorType=local:SceneSpeakerWindow}}"
+                                ScopedTypes="{Binding ScopedTypes, RelativeSource={RelativeSource FindAncestor, AncestorType=local:SceneSpeakerWindow}}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
-    </Grid>
+        
+        <GroupBox Header="Favorites, drag and drop to assign">
+            <ListBox ItemsSource="{Binding SpeakerFavourites}"
+                     dd:DragDrop.IsDragSource="True"
+                     dd:DragDrop.DragHandler="{Binding  DragSource}"
+                     dd:DragDrop.ShowAlwaysDropTargetAdorner="True"
+                     dd:DragDrop.UseDefaultEffectDataTemplate="True">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding EditorID}"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </GroupBox>
+    </StackPanel>
 </Window>

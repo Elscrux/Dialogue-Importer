@@ -12,6 +12,7 @@
     <ItemGroup>
       <PackageReference Include="AODL" Version="1.2.0.1" />
       <PackageReference Include="DocX" Version="2.2.0" />
+      <PackageReference Include="gong-wpf-dragdrop" Version="3.2.0" />
       <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.37.0" />
       <PackageReference Include="Mutagen.Bethesda.WPF" Version="0.37.0" />
       <PackageReference Include="xunit" Version="2.4.2" />
