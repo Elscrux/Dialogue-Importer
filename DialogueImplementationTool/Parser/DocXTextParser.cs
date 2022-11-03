@@ -128,7 +128,7 @@ public sealed class DocXTextParser : DocumentParser {
         }
     }
     
-    private bool IsPlayerLine(Paragraph paragraph) => paragraph.MagicText.All(magicText => magicText.formatting.Bold is not (null or false));
+    private bool IsPlayerLine(Paragraph paragraph) => paragraph.MagicText.NotNull().All(magicText => magicText.formatting?.Bold is not (null or false));
 
     private IEnumerable<FormattedText> GetFormattedText(Paragraph paragraph) {
         return paragraph.MagicText
