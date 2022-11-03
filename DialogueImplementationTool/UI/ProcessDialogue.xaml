@@ -9,136 +9,113 @@
         Title="Dialogue Implementation Tool"
         Height="720" Width="1280"
         MinHeight="360" MinWidth="640" d:DataContext="{d:DesignInstance ui:DialogueVM}">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
-
-        <Grid Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-
-            <Grid Column="0">
-                <Button Content="Save"
-                        Click="Save_OnClick"
-                        Margin="10,10,0,0"
-                        HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                <Button Content="Open Folder"
-                        Click="OpenFolder_OnClick"
-                        Margin="50,10,0,0"
-                        HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                
-                <TextBlock x:Name="PreviewText"
-                           FontSize="36"
-                           TextWrapping="WrapWithOverflow" TextAlignment="Center" 
-                           VerticalAlignment="Center"/>
-            </Grid>
-
-            <Grid Column="1">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="2*"/>
-                    <RowDefinition Height="2*"/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-
-                <plugins:FormKeyPicker Grid.Row="0"
-                                       FormKey="{Binding SpeakerFormKey}"
-                                       LinkCache="{Binding LinkCache, Mode=OneWay}"
-                                       ScopedTypes="{Binding SpeakerTypes, Mode=OneWay}"/>
-                
-                <ListBox Grid.Row="1"
-                         ItemsSource="{Binding SpeakerFavourites}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Button Content="{Binding EditorID}"
-                                    Click="SpeakerFavouriteSelect_OnClick" CommandParameter="{Binding}"/>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-
-                <Grid Row="2">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-
-                    <Button  Grid.Column="0"
-                             Content="⏪"
-                             IsEnabled="{Binding IsNotFirstIndex}"
-                             Click="BacktrackMany_OnClick"
-                             FontSize="36"
-                             Margin="10"/>
-
-                    <Button  Grid.Column="1"
-                             Content="◀"
-                             IsEnabled="{Binding IsNotFirstIndex}"
-                             Click="Previous_OnClick"
-                             FontSize="36"
-                             Margin="10"/>
-
-                    <Button  Grid.Column="2"
-                             Content="▶"
-                             IsEnabled="{Binding IsNotLastIndex}"
-                             Click="Next_OnClick"
-                             FontSize="36"
-                             Margin="10"/>
-
-                    <Button  Grid.Column="3"
-                             Content="⏩"
-                             IsEnabled="{Binding IsNotLastIndex}"
-                             Click="SkipMany_OnClick"
-                             FontSize="36"
-                             Margin="10"/>
-                </Grid>
-            </Grid>
-        </Grid>
-
-        <Grid Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-
-            <Grid Row="0" IsEnabled="{Binding ValidSpeaker}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-
-                <CheckBox Grid.Column="0" Margin="5"
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="Save"
+                      Click="Save_OnClick"
+                      Margin="10,10,0,0"
+                      HorizontalAlignment="Left" VerticalAlignment="Top" />
+            <MenuItem Header="Open Output Folder"
+                      Click="OpenFolder_OnClick"
+                      Margin="50,10,0,0"
+                      HorizontalAlignment="Left" VerticalAlignment="Top" />
+            <MenuItem />
+        </Menu>
+          
+        <GroupBox DockPanel.Dock="Bottom" 
+                  Header="2) Dialogue Type" >
+            <UniformGrid>
+                <CheckBox Margin="5"
                           IsChecked="{Binding GreetingSelected}"
+                          IsEnabled="{Binding ValidSpeaker}"
                           Content="Greeting" FontSize="36"/>
-                <CheckBox Grid.Column="1" Margin="5"
+                <CheckBox Margin="5"
                           IsChecked="{Binding FarewellSelected}"
+                          IsEnabled="{Binding ValidSpeaker}"
                           Content="Farewell" FontSize="36"/>
-                <CheckBox Grid.Column="2" Margin="5"
+                <CheckBox Margin="5"
                           IsChecked="{Binding IdleSelected}"
+                          IsEnabled="{Binding ValidSpeaker}"
                           Content="Idle" FontSize="36"/>
-                <CheckBox Grid.Column="3" Margin="5"
-                          IsChecked="{Binding DialogueSelected}"
-                          Content="Branching Dialogue" FontSize="36"/>
-            </Grid>
-
-            <Grid Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-
-                <CheckBox Grid.Column="0" Margin="5"
+                <CheckBox  Margin="5"
+                           IsChecked="{Binding DialogueSelected}"
+                           IsEnabled="{Binding ValidSpeaker}"
+                           Content="Branching Dialogue" FontSize="36"/>
+                <CheckBox Margin="5"
                           IsChecked="{Binding GenericSceneSelected}"
                           Content="Generic Scene" FontSize="36"/>
-                <CheckBox Grid.Column="1" Margin="5"
+                <CheckBox Margin="5"
                           IsChecked="{Binding QuestSceneSelected}"
                           Content="Quest Scene" FontSize="36"/>
+            </UniformGrid>
+        </GroupBox>
+
+        <GroupBox Header="1) Speaker" Width="300">
+            <StackPanel>
+                <plugins:FormKeyPicker MinHeight="200"
+                                       FormKey="{Binding SpeakerFormKey}"
+                                       LinkCache="{Binding LinkCache, Mode=OneWay}"
+                                       ScopedTypes="{Binding SpeakerTypes, Mode=OneWay}" />
+                
+                <GroupBox Header="Favorites" MinHeight="100">
+                    <ListBox ItemsSource="{Binding SpeakerFavourites}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Button Content="{Binding EditorID}"
+                                        Click="SpeakerFavouriteSelect_OnClick"
+                                        CommandParameter="{Binding}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </GroupBox>
+            </StackPanel>
+        </GroupBox>
+
+        <GroupBox Header="Dialogue">
+            <Grid>
+                <TextBlock x:Name="PreviewText"
+                           FontSize="36"
+                           TextWrapping="WrapWithOverflow" TextAlignment="Center"
+                           VerticalAlignment="Center" />
+                
+                <Grid Height="70" Width="275"
+                      HorizontalAlignment="Right" VerticalAlignment="Top">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0"
+                            Content="⏪"
+                            IsEnabled="{Binding IsNotFirstIndex}"
+                            Click="BacktrackMany_OnClick"
+                            FontSize="36"
+                            Margin="10" />
+
+                    <Button Grid.Column="1"
+                            Content="◀"
+                            IsEnabled="{Binding IsNotFirstIndex}"
+                            Click="Previous_OnClick"
+                            FontSize="36"
+                            Margin="10" />
+
+                    <Button Grid.Column="2"
+                            Content="▶"
+                            IsEnabled="{Binding IsNotLastIndex}"
+                            Click="Next_OnClick"
+                            FontSize="36"
+                            Margin="10" />
+
+                    <Button Grid.Column="3"
+                            Content="⏩"
+                            IsEnabled="{Binding IsNotLastIndex}"
+                            Click="SkipMany_OnClick"
+                            FontSize="36"
+                            Margin="10" />
+                </Grid>
             </Grid>
-        </Grid>
-    </Grid>
+        </GroupBox>
+    </DockPanel>
 </Window>
