@@ -124,6 +124,7 @@ public sealed class DocXTextParser : DocumentParser {
                 var nextTopic = AddTopic(paragraph);
                 nextTopic.IncomingLink = topic;
                 topic.Links.Add(nextTopic);
+                nextTopic.Build();
             }
         }
     }

@@ -262,6 +262,7 @@ public sealed class OpenDocumentTextParser : DocumentParser {
                             var nextTopic = AddTopic(linkItem);
                             nextTopic.IncomingLink = topic;
                             topic.Links.Add(nextTopic);
+                            nextTopic.Build();
                         }
                         
                         break;
