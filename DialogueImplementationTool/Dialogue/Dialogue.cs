@@ -27,7 +27,7 @@ public class Dialogue : DialogueFactory {
             DialogTopic CreateTopic(DialogueTopic rawTopic, string indexString, bool indexType) {
                 indexType = !indexType;
 
-                var responses = GetResponses(speakerKey, rawTopic.Responses);
+                var responses = GetResponsesList(speakerKey, rawTopic);
                 var dialogTopic = new DialogTopic(Mod.GetNextFormKey(), Release) {
                     EditorID = $"{DialogueImplementer.Quest.EditorID}{speakerName}{_npcIndices[speakerName]}Topic{indexString}",
                     Priority = 2500,
@@ -37,7 +37,7 @@ public class Dialogue : DialogueFactory {
                     Subtype = DialogTopic.SubtypeEnum.Custom,
                     Category = DialogTopic.CategoryEnum.Topic,
                     SubtypeName = "CUST",
-                    Responses = responses
+                    Responses = responses,
                 };
                 Mod.DialogTopics.Add(dialogTopic);
 

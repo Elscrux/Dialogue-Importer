@@ -68,7 +68,7 @@ public abstract class SceneFactory : DialogueFactory {
                 Category = DialogTopic.CategoryEnum.Scene,
                 Subtype = DialogTopic.SubtypeEnum.Scene,
                 SubtypeName = "SCEN",
-                Responses = GetResponses(formKey, responses)
+                Responses = GetResponsesList(formKey, new DialogueTopic { Responses = responses }),
             };
             Mod.DialogTopics.Add(sceneTopic);
 

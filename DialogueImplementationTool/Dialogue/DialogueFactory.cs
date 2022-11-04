@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using DialogueImplementationTool.Dialogue.Responses;
 using DialogueImplementationTool.Dialogue.Topics;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
@@ -10,7 +9,7 @@ using Noggog;
 namespace DialogueImplementationTool.Dialogue; 
 
 public abstract class DialogueFactory {
-    protected const SkyrimRelease Release = SkyrimRelease.SkyrimSE;
+    public const SkyrimRelease Release = SkyrimRelease.SkyrimSE;
     public static readonly SkyrimMod Mod = new(new ModKey(GetNewModName(), ModType.Plugin), SkyrimRelease.SkyrimSE);
     private const string ModName = "DialogueOutput";
     public static readonly string OutputFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Output");
@@ -38,7 +37,7 @@ public abstract class DialogueFactory {
         Mod.WriteToBinaryParallel(fileInfo.FullName);
     }
 
-    protected static Condition GetFormKeyCondition(Condition.Function function, FormKey formKey, float comparisonValue = 1, bool or = false) {
+    public static Condition GetFormKeyCondition(Condition.Function function, FormKey formKey, float comparisonValue = 1, bool or = false) {
         var condition = new ConditionFloat {
             CompareOperator = CompareOperator.EqualTo,
             ComparisonValue = comparisonValue,
@@ -53,25 +52,36 @@ public abstract class DialogueFactory {
         return condition;
     }
 
-    protected static ExtendedList<DialogResponses> GetResponses(FormKey speaker, IEnumerable<DialogueResponse> lines) {
-        return new ExtendedList<DialogResponses> { 
-            new(Mod.GetNextFormKey(), Release) {
-                Responses = lines.Select((line, i) => new DialogResponse {
-                    Text = line.Response,
-                    ScriptNotes = line.ScriptNote,
-                    ResponseNumber = (byte) i,
-                    Flags = DialogResponse.Flag.UseEmotionAnimation,
-                    EmotionValue = 50
-                }).ToExtendedList(),
-                Conditions = GetSpeakerConditions(speaker),
-                FavorLevel = FavorLevel.None,
-                Flags = new DialogResponseFlags(),
-                PreviousDialog = new FormLinkNullable<IDialogResponsesGetter>(FormKey.Null)
-            }
+    public static ExtendedList<DialogResponses> GetResponsesList(FormKey speaker, DialogueTopic topic) {
+        return new ExtendedList<DialogResponses> { GetResponses(speaker, topic) };
+    }
+
+    public static DialogResponses GetResponses(FormKey speaker, DialogueTopic topic, FormKey? previousDialogue = null) {
+        var previousDialog = new FormLinkNullable<IDialogResponsesGetter>(previousDialogue ?? FormKey.Null);
+        
+        if (topic.SharedInfo != null) {
+            var dialogResponses = topic.SharedInfo.GetResponseData();
+            dialogResponses.PreviousDialog = previousDialog;
+            
+            return dialogResponses;
+        }
+
+        return new DialogResponses(Mod.GetNextFormKey(), Release) {
+            Responses = topic.Responses.Select((line, i) => new DialogResponse {
+                Text = line.Response,
+                ScriptNotes = line.ScriptNote,
+                ResponseNumber = (byte) i,
+                Flags = DialogResponse.Flag.UseEmotionAnimation,
+                EmotionValue = 50
+            }).ToExtendedList(),
+            Conditions = GetSpeakerConditions(speaker),
+            FavorLevel = FavorLevel.None,
+            Flags = new DialogResponseFlags(),
+            PreviousDialog = previousDialog
         };
     }
 
-    protected static ExtendedList<Condition> GetSpeakerConditions(FormKey speaker) {
+    public static ExtendedList<Condition> GetSpeakerConditions(FormKey speaker) {
         var list = new ExtendedList<Condition>();
         
         if (DialogueImplementer.Environment.LinkCache.TryResolve<INpcGetter>(speaker, out var npc)) {

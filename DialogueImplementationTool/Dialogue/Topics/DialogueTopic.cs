@@ -10,8 +10,10 @@ public record DialogueTopic {
         new InvalidStringFixer(),
     };
     
+    public SharedInfo? SharedInfo { get; set; }
+    
     public string Text { get; set; } = string.Empty;
-    public readonly List<DialogueResponse> Responses = new();
+    public List<DialogueResponse> Responses = new();
     public readonly List<DialogueTopic> Links = new();
     public DialogueTopic? IncomingLink { get; set; }
     public bool SayOnce { get; set; }

@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
+using DialogueImplementationTool.Dialogue.Responses;
 using DialogueImplementationTool.Dialogue.Topics;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
-using Noggog;
-namespace DialogueImplementationTool.Dialogue; 
+namespace DialogueImplementationTool.Dialogue;
 
 public abstract class OneLinerFactory : DialogueFactory {
     protected static void GenerateDialogue(List<DialogueTopic> topics, FormKey speakerKey, DialogTopic dialogTopic) {
@@ -15,23 +15,14 @@ public abstract class OneLinerFactory : DialogueFactory {
         for (var i = 0; i < topics[0].Responses.Count; i++) {
             var response = topics[0].Responses[i];
 
-            var dialogResponses = new DialogResponses(Mod.GetNextFormKey(), Release) {
-                Conditions = GetSpeakerConditions(speakerKey),
-                FavorLevel = FavorLevel.None,
-                Responses = new ExtendedList<DialogResponse> {
-                    new() {
-                        Text = response.Response,
-                        ScriptNotes = response.ScriptNote,
-                        ResponseNumber = (byte) i,
-                        EmotionValue = 50
-                    }
-                },
-                Flags = new DialogResponseFlags(),
-                PreviousDialog = new FormLinkNullable<IDialogResponsesGetter>(lastFormKey)
-            };
-            lastFormKey = dialogResponses.FormKey;
+            var responses = GetResponses(
+                speakerKey,
+                new DialogueTopic { Responses = new List<DialogueResponse> { response } },
+                lastFormKey);
+            
+            lastFormKey = responses.FormKey;
 
-            dialogTopic.Responses.Add(dialogResponses);
+            dialogTopic.Responses.Add(responses);
         }
 
         if (!Mod.DialogTopics.ContainsKey(dialogTopic.FormKey)) {
@@ -45,7 +36,7 @@ public abstract class OneLinerFactory : DialogueFactory {
     private static FormKey GetMainSpeaker(IDialogResponses responses) {
         foreach (var condition in responses.Conditions) {
             if (condition is not ConditionFloat { Data: FunctionConditionData data }) continue;
-                
+
             if (data.Function == Condition.Function.GetIsID) {
                 return data.ParameterOneRecord.FormKey;
             }
@@ -77,7 +68,7 @@ public abstract class OneLinerFactory : DialogueFactory {
         // ReorderBySpeaker(topic);
         SetRandomFlags(topic, true);
     }
-    
+
     private static void SetRandomFlags(IDialogTopic topic, bool addRandomEndFlag) {
         for (var index = 0; index < topic.Responses.Count; index++) {
             var response = topic.Responses[index];

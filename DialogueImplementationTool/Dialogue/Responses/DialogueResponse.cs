@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using DialogueImplementationTool.Parser;
 namespace DialogueImplementationTool.Dialogue.Responses;
 
@@ -42,5 +43,16 @@ public record DialogueResponse {
         }
 
         return finalResponse;
+    }
+    
+    public virtual bool Equals(DialogueResponse? other) {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+
+        return Response == other.Response && ScriptNote == other.ScriptNote;
+    }
+    
+    public override int GetHashCode() {
+        return HashCode.Combine(Response, ScriptNote);
     }
 }
