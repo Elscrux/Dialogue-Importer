@@ -192,6 +192,7 @@ public sealed class OpenDocumentTextParser : DocumentParser {
         
         var topic = new DialogueTopic();
         AddResponses(list, topic);
+        topic.Build();
         topics.Add(topic);
 
         return topics;

@@ -81,6 +81,7 @@ public sealed class DocXTextParser : DocumentParser {
         
         var topic = new DialogueTopic();
         AddResponses(_doc.Lists[index], topic);
+        topic.Build();
         topics.Add(topic);
 
         return topics;
