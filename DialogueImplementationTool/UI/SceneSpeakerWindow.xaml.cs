@@ -23,13 +23,15 @@ public partial class SceneSpeakerWindow {
     public ILinkCache LinkCache { get; }
     public IEnumerable<Type> ScopedTypes { get; set; }
 
-    public SpeakerFavouriteFormKeyDragSource DragSource { get; set; } = new();
-    public GridFormKeyPickerDropTarget PickerDropTarget { get; set; } = new();
-
     public SceneSpeakerWindow(ObservableCollection<Speaker> speakers) {
         InitializeComponent();
         
         SceneSpeakers = speakers;
+        
+        foreach (var speaker in SceneSpeakers) {
+            var matchingSpeaker = SpeakerFavourites.FirstOrDefault(s => s.EditorID != null && s.EditorID.ToLower().Contains(speaker.Name.ToLower()));
+            if (matchingSpeaker != null) speaker.FormKey = matchingSpeaker.FormKey;
+        }
         
         LinkCache = GameEnvironment.Typical.Skyrim(SkyrimRelease.SkyrimSE, LinkCachePreferences.OnlyIdentifiers()).LinkCache;
         ScopedTypes = typeof(INpcGetter).AsEnumerable();
@@ -44,7 +46,7 @@ public class FormKeyWrapper {
 
 public class GridFormKeyPickerDropTarget : IDropTarget {
     public void DragOver(IDropInfo dropInfo) {
-        if (dropInfo.Data is FormKeyWrapper wrapper) {
+        if (dropInfo.Data is FormKeyWrapper) {
             dropInfo.Effects = DragDropEffects.Copy;
             dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
         }

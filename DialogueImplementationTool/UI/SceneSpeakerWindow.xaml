@@ -50,7 +50,7 @@
         <GroupBox Header="Favorites, drag and drop to assign">
             <ListBox ItemsSource="{Binding SpeakerFavourites}"
                      dd:DragDrop.IsDragSource="True"
-                     dd:DragDrop.DragHandler="{Binding  DragSource}"
+                     dd:DragDrop.DragHandler="{StaticResource SpeakerFavouriteFormKeyDragSource}"
                      dd:DragDrop.ShowAlwaysDropTargetAdorner="True"
                      dd:DragDrop.UseDefaultEffectDataTemplate="True">
                 <ListBox.ItemTemplate>
