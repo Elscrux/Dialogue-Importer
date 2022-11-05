@@ -37,7 +37,7 @@ public class DialogueVM : ViewModel {
 		Dialogue List
 	====================================================*/
     public List<DialogueSelection> DialogueTypeList { get; } = new();
-    public ObservableCollection<SpeakerFavourite> SpeakerFavourites { get; } = new();
+    public ObservableCollection<Speaker> SpeakerFavourites { get; } = new();
 
     public bool SavedSession;
 
@@ -108,8 +108,7 @@ public class DialogueVM : ViewModel {
                 ValidSpeaker = SpeakerFormKey != FormKey.Null;
                 if (DialogueTypeList.Count > Index) DialogueTypeList[Index].Speaker = SpeakerFormKey;
                 if (SpeakerFormKey != FormKey.Null && SpeakerFavourites.All(s => s.FormKey != SpeakerFormKey)) {
-                    var record = LinkCache.Resolve<INpcGetter>(SpeakerFormKey);
-                    SpeakerFavourites.Add(new SpeakerFavourite(SpeakerFormKey, record.EditorID));
+                    SpeakerFavourites.Add(new Speaker(SpeakerFormKey));
                 }
             });
 

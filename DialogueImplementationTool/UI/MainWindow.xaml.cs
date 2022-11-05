@@ -5,7 +5,6 @@ using DialogueImplementationTool.Parser;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins.Order.DI;
-
 namespace DialogueImplementationTool.UI;
 
 public partial class MainWindow {

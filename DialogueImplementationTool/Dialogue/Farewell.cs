@@ -7,7 +7,7 @@ namespace DialogueImplementationTool.Dialogue;
 public class Farewell : OneLinerFactory {
     private static DialogTopic? _topic;
     
-    public override void GenerateDialogue(List<DialogueTopic> topics, FormKey speakerKey, string speakerName) {
+    public override void GenerateDialogue(List<DialogueTopic> topics) {
         _topic ??= new DialogTopic(Mod.GetNextFormKey(), Release) {
             EditorID = $"{DialogueImplementer.Quest.EditorID}Goodbyes",
             Name = $"{DialogueImplementer.Quest.EditorID}Goodbyes",
@@ -18,7 +18,7 @@ public class Farewell : OneLinerFactory {
             SubtypeName = "GBYE"
         };
 
-        GenerateDialogue(topics, speakerKey, _topic);
+        GenerateDialogue(topics, _topic);
     }
 
     public override void PostProcess() {

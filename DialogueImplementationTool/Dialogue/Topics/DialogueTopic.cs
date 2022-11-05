@@ -12,8 +12,10 @@ public record DialogueTopic {
     
     public SharedInfo? SharedInfo { get; set; }
     
+    public ISpeaker Speaker { get; set; }
+    
     public string Text { get; set; } = string.Empty;
-    public List<DialogueResponse> Responses = new();
+    public readonly List<DialogueResponse> Responses = new();
     public readonly List<DialogueTopic> Links = new();
     public DialogueTopic? IncomingLink { get; set; }
     public bool SayOnce { get; set; }

@@ -7,7 +7,7 @@ namespace DialogueImplementationTool.Dialogue;
 public class Idle : OneLinerFactory {
     private static DialogTopic? _topic;
     
-    public override void GenerateDialogue(List<DialogueTopic> topics, FormKey speakerKey, string speakerName) {
+    public override void GenerateDialogue(List<DialogueTopic> topics) {
         _topic ??= new DialogTopic(Mod.GetNextFormKey(), Release) {
             EditorID = $"{DialogueImplementer.Quest.EditorID}Idles",
             Name = $"{DialogueImplementer.Quest.EditorID}Idles",
@@ -18,7 +18,7 @@ public class Idle : OneLinerFactory {
             SubtypeName = "IDLE"
         };
 
-        GenerateDialogue(topics, speakerKey, _topic);
+        GenerateDialogue(topics, _topic);
     }
 
     public override void PostProcess() {

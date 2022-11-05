@@ -73,6 +73,12 @@
       <Compile Update="Dialogue\Topics\SayOnceChecker.cs">
         <DependentUpon>IDialogueTopicPostProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\Topics\BackToOptionsLinker.cs">
+        <DependentUpon>IDialogueTopicPostProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Responses\BackToDialogueRemover.cs">
+        <DependentUpon>IDialogueResponsePostProcessor.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
-using DialogueImplementationTool.Parser;
+using DialogueImplementationTool.Dialogue;
 using GongSolutions.Wpf.DragDrop;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
@@ -12,18 +12,16 @@ using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.WPF.Plugins;
 using Noggog;
-using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 namespace DialogueImplementationTool.UI; 
 
 public partial class SceneSpeakerWindow {
-    public ObservableCollection<Speaker> SceneSpeakers { get; }
-    public ObservableCollection<SpeakerFavourite> SpeakerFavourites => App.DialogueVM.SpeakerFavourites;
+    public ObservableCollection<AliasSpeaker> SceneSpeakers { get; }
+    public ObservableCollection<Speaker> SpeakerFavourites => App.DialogueVM.SpeakerFavourites;
 
     public ILinkCache LinkCache { get; }
     public IEnumerable<Type> ScopedTypes { get; set; }
 
-    public SceneSpeakerWindow(ObservableCollection<Speaker> speakers) {
+    public SceneSpeakerWindow(ObservableCollection<AliasSpeaker> speakers) {
         InitializeComponent();
         
         SceneSpeakers = speakers;
@@ -61,7 +59,7 @@ public class GridFormKeyPickerDropTarget : IDropTarget {
 
 public class SpeakerFavouriteFormKeyDragSource : IDragSource {
     public void StartDrag(IDragInfo dragInfo) {
-        if (dragInfo.SourceItem is SpeakerFavourite speakerFavourite) {
+        if (dragInfo.SourceItem is Speaker speakerFavourite) {
             dragInfo.Data = new FormKeyWrapper { FormKey = speakerFavourite.FormKey };
             dragInfo.Effects = DragDropEffects.Copy;
         }
@@ -72,22 +70,3 @@ public class SpeakerFavouriteFormKeyDragSource : IDragSource {
     public void DragCancelled() {}
     public bool TryCatchOccurredException(Exception exception) { return true; }
 } 
-
-public class Speaker : ReactiveObject {
-    public Speaker(string name) {
-        Name = name;
-
-        this.WhenAnyValue(x => x.FormKey)
-            .Subscribe(_ => { 
-                if (FormKey != FormKey.Null && App.DialogueVM.SpeakerFavourites.All(s => s.FormKey != FormKey)) {
-                    var record = App.DialogueVM.LinkCache.Resolve<INpcGetter>(FormKey);
-                    App.DialogueVM.SpeakerFavourites.Add(new SpeakerFavourite(FormKey, record.EditorID));
-                }
-            });
-    }
-
-    public string Name { get; }
-    [Reactive] public FormKey FormKey { get; set; }
-    public string? EditorID { get; set; }
-    public int AliasIndex { get; set; } = -1;
-}

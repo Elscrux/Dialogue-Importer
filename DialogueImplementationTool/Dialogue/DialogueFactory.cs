@@ -27,7 +27,8 @@ public abstract class DialogueFactory {
         return ModName + index;
     }
 
-    public abstract void GenerateDialogue(List<DialogueTopic> topics, FormKey speakerKey, string speakerName);
+    public abstract void PreProcess(List<DialogueTopic> topics);
+    public abstract void GenerateDialogue(List<DialogueTopic> topics);
     public abstract void PostProcess();
 
     public static void Save() {
@@ -37,7 +38,7 @@ public abstract class DialogueFactory {
         Mod.WriteToBinaryParallel(fileInfo.FullName);
     }
 
-    public static Condition GetFormKeyCondition(Condition.Function function, FormKey formKey, float comparisonValue = 1, bool or = false) {
+    protected static Condition GetFormKeyCondition(Condition.Function function, FormKey formKey, float comparisonValue = 1, bool or = false) {
         var condition = new ConditionFloat {
             CompareOperator = CompareOperator.EqualTo,
             ComparisonValue = comparisonValue,
@@ -52,11 +53,11 @@ public abstract class DialogueFactory {
         return condition;
     }
 
-    public static ExtendedList<DialogResponses> GetResponsesList(FormKey speaker, DialogueTopic topic) {
-        return new ExtendedList<DialogResponses> { GetResponses(speaker, topic) };
+    protected static ExtendedList<DialogResponses> GetResponsesList(DialogueTopic topic) {
+        return new ExtendedList<DialogResponses> { GetResponses(topic) };
     }
 
-    public static DialogResponses GetResponses(FormKey speaker, DialogueTopic topic, FormKey? previousDialogue = null) {
+    public static DialogResponses GetResponses(DialogueTopic topic, FormKey? previousDialogue = null) {
         var previousDialog = new FormLinkNullable<IDialogResponsesGetter>(previousDialogue ?? FormKey.Null);
         
         if (topic.SharedInfo != null) {
@@ -74,24 +75,46 @@ public abstract class DialogueFactory {
                 Flags = DialogResponse.Flag.UseEmotionAnimation,
                 EmotionValue = 50
             }).ToExtendedList(),
-            Conditions = GetSpeakerConditions(speaker),
+            Conditions = GetSpeakerConditions(topic.Speaker),
             FavorLevel = FavorLevel.None,
             Flags = new DialogResponseFlags(),
             PreviousDialog = previousDialog
         };
     }
 
-    public static ExtendedList<Condition> GetSpeakerConditions(FormKey speaker) {
+    public static ExtendedList<Condition> GetSpeakerConditions(ISpeaker speaker) {
         var list = new ExtendedList<Condition>();
         
-        if (DialogueImplementer.Environment.LinkCache.TryResolve<INpcGetter>(speaker, out var npc)) {
+        if (DialogueImplementer.Environment.LinkCache.TryResolve<INpcGetter>(speaker.FormKey, out var npc)) {
             list.Add(GetFormKeyCondition(Condition.Function.GetIsID, npc.FormKey));
         }
         
-        if(DialogueImplementer.Environment.LinkCache.TryResolve<IFactionGetter>(speaker, out var faction)) {
+        if(DialogueImplementer.Environment.LinkCache.TryResolve<IFactionGetter>(speaker.FormKey, out var faction)) {
             list.Add(GetFormKeyCondition(Condition.Function.GetInFaction, faction.FormKey));
         }
 
         return list;
+    }
+    
+    protected static List<DialogueTopic> GetAllTopics(List<DialogueTopic> topics) {
+        //Through shared dialogue detection, a topic that was previously only one topic might be split into multiple topics
+        //This is basically flattening the dialogue tree
+        var allTopics = new List<DialogueTopic>(topics);
+
+        foreach (var currentTopic in topics) {
+            var linkedTopics = new Queue<DialogueTopic>();
+            linkedTopics.Enqueue(currentTopic);
+
+            while (linkedTopics.Any()) {
+                var topic = linkedTopics.Dequeue();
+                linkedTopics.Enqueue(topic.Links);
+
+                var indexOf = allTopics.IndexOf(currentTopic);
+                for (var i = topic.Links.Count - 1; i >= 0; i--) {
+                    allTopics.Insert(indexOf + 1, topic.Links[i]);
+                }
+            }
+        }
+        return allTopics;
     }
 }

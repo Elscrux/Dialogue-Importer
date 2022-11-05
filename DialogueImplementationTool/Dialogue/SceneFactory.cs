@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Windows;
 using DialogueImplementationTool.Dialogue.Responses;
 using DialogueImplementationTool.Dialogue.Topics;
 using DialogueImplementationTool.UI;
@@ -13,54 +14,21 @@ using Condition = Mutagen.Bethesda.Skyrim.Condition;
 namespace DialogueImplementationTool.Dialogue; 
 
 public abstract class SceneFactory : DialogueFactory {
-    private static readonly Regex SceneLineRegex = new(@"([^\s:]*):? *([\S\s]+)");
-    protected int SceneCount = 1; 
+    private static readonly Regex SceneLineRegex = new(@"([^:]*):? *([\S\s]+)");
+
+    protected List<AliasSpeaker> AliasSpeakers = new();
+    protected Dictionary<string, AliasSpeaker> NameMappedSpeakers = new();
     
-    private uint _currentPhaseIndex;
     private List<int> _aliasIndices = new();
 
-    protected static List<Speaker> GetSpeakers(IEnumerable<DialogueTopic> topics) {
-        //Get speaker strings
-        var speakerNames = topics
-            .SelectMany(topic => topic.Responses, (_, response) => SceneLineRegex.Match(response.Response))
-            .Where(match => match.Success)
-            .Select(match => match.Groups[1].Value)
-            .ToHashSet();
-
-        //Map speaker form keys
-        var speakers = new ObservableCollection<Speaker>(speakerNames.Select(s => new Speaker(s)).ToList());
-        new SceneSpeakerWindow(speakers).ShowDialog();
-
-        return speakers.ToList();
-    }
-    
-    protected static Dictionary<string,(FormKey FormKey, string? EditorID, int AliasIndex)> GetNameMappedSpeakers(IEnumerable<Speaker> speakers) {
-        return speakers.ToDictionary(
-            speaker => speaker.Name,
-            speaker => (speaker.FormKey, speaker.EditorID, speaker.AliasIndex)
-        );
-    }
-
-    protected void AddLines(IQuestGetter quest, Scene scene, List<(string Speaker, List<DialogueResponse> Responses)> lines, Dictionary<string,(FormKey FormKey, string? EditorID, int AliasIndex)> speakers) {
-        //Merge lines
-        var i = 0;
-        var currentIndex = 0;
-        var currentSpeaker = FormKey.Null;
-        while (i < lines.Count) {
-            if (speakers[lines[i].Speaker].FormKey == currentSpeaker) {
-                lines[currentIndex].Responses.AddRange(lines[i].Responses);
-                lines.RemoveAt(i);
-            } else {
-                currentIndex = i;
-                currentSpeaker = speakers[lines[i].Speaker].FormKey;
-                i++;
-            }
-        }
+    protected void AddLines(
+        IQuestGetter quest,
+        Scene scene,
+        List<DialogueTopic> topics) {
+        uint currentPhaseIndex = 0;
         
-        //Add lines
-        _currentPhaseIndex = 0;
-        foreach (var (speaker, responses) in lines) {
-            var (formKey, _, index) = speakers[speaker];
+        foreach (var topic in topics) {
+            var aliasSpeaker = NameMappedSpeakers[topic.Speaker.Name];
 
             var sceneTopic = new DialogTopic(Mod.GetNextFormKey(), Release) {
                 Priority = 2500,
@@ -68,38 +36,57 @@ public abstract class SceneFactory : DialogueFactory {
                 Category = DialogTopic.CategoryEnum.Scene,
                 Subtype = DialogTopic.SubtypeEnum.Scene,
                 SubtypeName = "SCEN",
-                Responses = GetResponsesList(formKey, new DialogueTopic { Responses = responses }),
+                Responses = GetResponsesList(topic),
             };
             Mod.DialogTopics.Add(sceneTopic);
 
-            AddTopic(scene, sceneTopic, index);
+            AddTopic(sceneTopic, aliasSpeaker.AliasIndex);
         }
         
-        scene.LastActionIndex = (uint) lines.Count;
-    }
+        scene.LastActionIndex = (uint) topics.Count;
+        
+        void AddTopic(DialogTopic topic, int speakerAliasID) {
+            scene.Phases.Add(new ScenePhase { Name = string.Empty, EditorWidth = 200 });
 
-    protected static List<(string, List<DialogueResponse>)> ParseLines(List<DialogueResponse> lines) {
-        var output = new List<(string, List<DialogueResponse>)>();
-        var currentSpeaker = string.Empty;
-        var currentLines = new List<DialogueResponse>();
-        foreach (var response in lines) {
-            var match = SceneLineRegex.Match(response.Response);
-            if (!match.Success) continue;
-            
-            var speaker = match.Groups[1].Value;
-            if (currentSpeaker != speaker) {
-                if (currentLines.Any()) output.Add((currentSpeaker, new List<DialogueResponse>(currentLines)));
-                currentLines.Clear();
-                
-                currentSpeaker = speaker;
+            //Speaker action
+            scene.Actions.Add(new SceneAction {
+                Type = SceneAction.TypeEnum.Dialog,
+                ActorID = speakerAliasID,
+                Emotion = Emotion.Neutral,
+                EmotionValue = 0,
+                Flags = new SceneAction.Flag(),
+                StartPhase = currentPhaseIndex,
+                EndPhase = currentPhaseIndex,
+                Topic = new FormLinkNullable<IDialogTopicGetter>(topic.FormKey),
+                LoopingMin = 1,
+                LoopingMax = 10,
+                Index = scene.LastActionIndex,
+                Name = string.Empty
+            });
+            scene.LastActionIndex += 1;
+
+            //Head track actions
+            foreach (var aliasIndex in _aliasIndices.Where(aliasIndex => aliasIndex != speakerAliasID)) {
+                scene.Actions.Add(new SceneAction {
+                    Type = SceneAction.TypeEnum.Dialog,
+                    ActorID = aliasIndex,
+                    Emotion = Emotion.Neutral,
+                    EmotionValue = 0,
+                    Flags = SceneAction.Flag.FaceTarget,
+                    StartPhase = currentPhaseIndex,
+                    EndPhase = currentPhaseIndex,
+                    Topic = new FormLinkNullable<IDialogTopicGetter>(FormKey.Null),
+                    LoopingMin = 1,
+                    LoopingMax = 10,
+                    HeadtrackActorID = speakerAliasID,
+                    Index = scene.LastActionIndex,
+                    Name = string.Empty
+                });
+                scene.LastActionIndex += 1;
             }
-            
-            currentLines.Add(response with { Response = match.Groups[2].Value });
+        
+            currentPhaseIndex++;
         }
-
-        if (currentLines.Any()) output.Add((currentSpeaker, new List<DialogueResponse>(currentLines)));
-
-        return output;
     }
     
     protected static QuestAlias GetEventAlias(string name, FormKey npc1, FormKey npc2) {
@@ -118,23 +105,22 @@ public abstract class SceneFactory : DialogueFactory {
         };
     }
     
-    protected static QuestAlias GetAlias(Speaker speaker) {
+    protected static QuestAlias GetAlias(AliasSpeaker aliasSpeaker) {
         return new QuestAlias {
-            Name = speaker.Name,
-            UniqueActor = new FormLinkNullable<INpcGetter>(speaker.FormKey),
+            Name = aliasSpeaker.Name,
+            UniqueActor = new FormLinkNullable<INpcGetter>(aliasSpeaker.FormKey),
             Flags = QuestAlias.Flag.AllowReserved | QuestAlias.Flag.AllowReuseInQuest,
             VoiceTypes = new FormLinkNullable<IAliasVoiceTypeGetter>(FormKey.Null)
         };
     }
 
-    protected Scene AddScene(string editorID, FormKey quest, List<int> aliasesIDs) {
-        SceneCount++;
-        _aliasIndices = aliasesIDs;
+    protected Scene AddScene(string editorID, FormKey quest) {
+        _aliasIndices = NameMappedSpeakers.Select(s => s.Value.AliasIndex).ToList();
         
         return new Scene(Mod.GetNextFormKey(), Release) {
             EditorID = editorID,
             Actions = new ExtendedList<SceneAction>(),
-            Actors = aliasesIDs.Select(id => new SceneActor {
+            Actors = _aliasIndices.Select(id => new SceneActor {
                 BehaviorFlags = SceneActor.BehaviorFlag.DeathEnd | SceneActor.BehaviorFlag.CombatEnd | SceneActor.BehaviorFlag.DialoguePause,
                 Flags = new SceneActor.Flag(),
                 ID = Convert.ToUInt32(id)
@@ -142,51 +128,78 @@ public abstract class SceneFactory : DialogueFactory {
             Quest = new FormLinkNullable<IQuestGetter>(quest),
         };
     }
+    
+    public override void PreProcess(List<DialogueTopic> topics) {
+        AliasSpeakers = GetSpeakers(topics);
 
-    private void AddTopic(IScene scene, DialogTopic topic, int speakerAliasID) {
-        scene.Phases.Add(new ScenePhase {
-            Name = string.Empty,
-            EditorWidth = 200
-        });
+        NameMappedSpeakers = AliasSpeakers.ToDictionary(speaker => speaker.Name, speaker => speaker);
 
-        //Speaker action
-        scene.Actions.Add(new SceneAction {
-            Type = SceneAction.TypeEnum.Dialog,
-            ActorID = speakerAliasID,
-            Emotion = Emotion.Neutral,
-            EmotionValue = 0,
-            Flags = new SceneAction.Flag(),
-            StartPhase = _currentPhaseIndex,
-            EndPhase = _currentPhaseIndex,
-            Topic = new FormLinkNullable<IDialogTopicGetter>(topic.FormKey),
-            LoopingMin = 1,
-            LoopingMax = 10,
-            Index = scene.LastActionIndex,
-            Name = string.Empty
-        });
-        scene.LastActionIndex += 1;
+        //break up topics for every new speaker
+        var separatedTopics = ParseLines(topics);
 
-        //Head track actions
-        foreach (var aliasIndex in _aliasIndices.Where(aliasIndex => aliasIndex != speakerAliasID)) {
-            scene.Actions.Add(new SceneAction {
-                Type = SceneAction.TypeEnum.Dialog,
-                ActorID = aliasIndex,
-                Emotion = Emotion.Neutral,
-                EmotionValue = 0,
-                Flags = SceneAction.Flag.FaceTarget,
-                StartPhase = _currentPhaseIndex,
-                EndPhase = _currentPhaseIndex,
-                Topic = new FormLinkNullable<IDialogTopicGetter>(FormKey.Null),
-                LoopingMin = 1,
-                LoopingMax = 10,
-                HeadtrackActorID = speakerAliasID,
-                Index = scene.LastActionIndex,
-                Name = string.Empty
-            });
-            scene.LastActionIndex += 1;
-        }
+        topics.Clear();
+        topics.AddRange(separatedTopics);
+
+        PreProcessSpeakers();
+    }
+    
+    public abstract void PreProcessSpeakers();
+
+    private static List<AliasSpeaker> GetSpeakers(IEnumerable<DialogueTopic> topics) {
+        //Get speaker strings
+        var speakerNames = topics
+            .SelectMany(topic => topic.Responses, (_, response) => SceneLineRegex.Match(response.Response))
+            .Where(match => match.Success)
+            .Select(match => match.Groups[1].Value)
+            .ToHashSet();
+
+        //Map speaker form keys
+        var speakers = new ObservableCollection<AliasSpeaker>(speakerNames.Select(s => new AliasSpeaker(s)).ToList());
+        new SceneSpeakerWindow(speakers).ShowDialog();
         
-        _currentPhaseIndex++;
+        while (speakers.Any(s => s.FormKey == FormKey.Null)) {
+            MessageBox.Show("You must assign every speaker of the scene to an npc");
+            new SceneSpeakerWindow(speakers).ShowDialog();
+        }
+
+        return speakers
+            .Distinct(x => x.FormKey)
+            .ToList();
+    }
+    
+    private List<DialogueTopic> ParseLines(List<DialogueTopic> topics) {
+        var separatedTopics = new List<DialogueTopic>();
+        var currentSpeaker = string.Empty;
+        var currentLines = new List<DialogueResponse>();
+
+        void AddCurrentTopic() {
+            if (currentLines.Any()) {
+                var dialogueTopic = new DialogueTopic();
+                dialogueTopic.Responses.AddRange(currentLines);
+                dialogueTopic.Speaker = NameMappedSpeakers[currentSpeaker];
+
+                separatedTopics.Add(dialogueTopic);
+            }
+            currentLines.Clear();
+        }
+
+        foreach (var topic in topics) {
+            foreach (var response in topic.Responses) {
+                var match = SceneLineRegex.Match(response.Response);
+                if (!match.Success) continue;
+
+                var speaker = match.Groups[1].Value;
+                if (currentSpeaker != speaker) {
+                    AddCurrentTopic();
+                    currentSpeaker = speaker;
+                }
+
+                currentLines.Add(response with { Response = match.Groups[2].Value });
+            }
+        }
+
+        if (currentLines.Any()) AddCurrentTopic();
+        return separatedTopics;
     }
     
     public override void PostProcess() {}

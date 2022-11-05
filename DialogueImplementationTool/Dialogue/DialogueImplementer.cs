@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using DialogueImplementationTool.Dialogue.Responses;
 using DialogueImplementationTool.Dialogue.Topics;
 using DialogueImplementationTool.Parser;
@@ -15,33 +14,36 @@ namespace DialogueImplementationTool.Dialogue;
 
 public class DialogueImplementer {
     public static readonly IGameEnvironment<ISkyrimMod, ISkyrimModGetter> Environment = GameEnvironment.Typical.Skyrim(SkyrimRelease.SkyrimSE);
-    private static readonly Regex WhitespaceRegex = new(@"\s+");
     public static IQuestGetter Quest = new Quest(FormKey.Null, SkyrimRelease.SkyrimSE);
 
-    public static readonly Dictionary<FormKey, string> NameMappings = new();
-
-    private static readonly Dictionary<DialogueType, DialogueFactory> DialogueFactories = new() {
-        { DialogueType.Greeting, new Greeting() },
-        { DialogueType.Farewell, new Farewell() },
-        { DialogueType.Idle, new Idle() },
-        { DialogueType.Dialogue, new Dialogue() },
-        { DialogueType.GenericScene, new GenericScene() },
-        { DialogueType.QuestScene, new QuestScene() }
-    };
+    public static DialogueFactory GetDialogueFactory(DialogueType type) {
+        return type switch {
+            DialogueType.Dialogue => new Dialogue(),
+            DialogueType.Greeting => new Greeting(),
+            DialogueType.Farewell => new Farewell(),
+            DialogueType.Idle => new Idle(),
+            DialogueType.GenericScene => new GenericScene(),
+            DialogueType.QuestScene => new QuestScene(),
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+    }
 
     public DialogueImplementer(FormKey questFormKey) {
         Quest = questFormKey != FormKey.Null ? Environment.LinkCache.Resolve<IQuestGetter>(questFormKey) : new Quest(FormKey.Null, SkyrimRelease.SkyrimSE);
     }
 
     public void ImplementDialogue(List<GeneratedDialogue> dialogue) {
+        dialogue.Where(d => d.Topics.Count > 0)
+            .ForEach(d => d.Factory.PreProcess(d.Topics));
+        
         ConvertToSharedLines(dialogue);
         
-        dialogue
-            .Where(x => x.Topics.Count > 0 && DialogueFactories.ContainsKey(x.Type))
-            .ForEach(x => DialogueFactories[x.Type].GenerateDialogue(x.Topics, x.SpeakerFormKey, GetSpeakerName(x.SpeakerFormKey)));
+        dialogue.Where(d => d.Topics.Count > 0)
+            .ForEach(d => d.Factory.GenerateDialogue(d.Topics));
         
         //Do post processing
-        foreach (var factory in DialogueFactories.Values) factory.PostProcess();
+        dialogue.Select(d => d.Factory)
+            .ForEach(d => d.PostProcess());
     }
     
     private record SharedLineLink(DialogueTopic TopicUsingLine, SharedLine? Last, SharedLine? Next) {
@@ -78,17 +80,14 @@ public class DialogueImplementer {
         
         public SharedLine? CommonLast { get; set; }
         public SharedLine? CommonNext { get; set; }
-
-        // public List<CommonSharedLine> BackLinks { get; set; } = new();
-        // public List<CommonSharedLine> ForwardLinks { get; set; } = new();
     }
 
     private static void ConvertToSharedLines(List<GeneratedDialogue> dialogue) { 
         var sharedLines = new HashSet<SharedLine>();
 
         //Convert dialogue to shared lines, where objects can be shared on a line/response level
-        foreach (var (_, topics, speaker) in dialogue) {
-            var linkedTopics = new Queue<DialogueTopic>(topics);
+        foreach (var generated in dialogue) {
+            var linkedTopics = new Queue<DialogueTopic>(generated.Topics);
             
             while (linkedTopics.Any()) {
                 var topic = linkedTopics.Dequeue();
@@ -99,7 +98,7 @@ public class DialogueImplementer {
                 SharedLine? next = null;
                 foreach (var response in topic.Responses) {
                     //Get unique shared line
-                    var sharedLine = new SharedLine(response, speaker);
+                    var sharedLine = new SharedLine(response, topic.Speaker.FormKey);
                     if (sharedLines.TryGetValue(sharedLine, out var existingSharedLine)) {
                         sharedLine = existingSharedLine;
                     }
@@ -115,7 +114,7 @@ public class DialogueImplementer {
             }
         }
         
-        //Rove lines that aren't shared
+        //Remove lines that aren't shared
         sharedLines.RemoveWhere(l => l.Users.Count < 2);
         
         //Build a dictionary of all shared lines and potentially their common last or next line
@@ -144,7 +143,6 @@ public class DialogueImplementer {
         
         //Merge shared lines that are always in the same order
         //Filter out lines that are linked to or from multiple shared lines, they can't be merged
-        // foreach (var current in commonSharedLines.Where(l => l.BackLinks.Count < 2 && l.ForwardLinks.Count < 2)) {
         foreach (var current in commonSharedLines) {
             if (current.SharedLines.Count == 0) continue;
 
@@ -172,23 +170,24 @@ public class DialogueImplementer {
         //Remove empty common shared lines
         commonSharedLines.RemoveWhere(l => l.SharedLines.Count == 0);
         
-        const string invisCont = "(invis cont)";
+        const string invisibleCont = "(invis cont)";
         foreach (var commonSharedLine in commonSharedLines) {
             var firstShared = commonSharedLine.SharedLines[0];  
             
             //Convert common shared lines to shared infos
             var sharedTopic = new DialogueTopic();
             sharedTopic.Responses.AddRange(commonSharedLine.SharedLines);
+            sharedTopic.Speaker = new Speaker(firstShared.Speaker);
             
-            var sharedInfo = new SharedInfo(firstShared.Speaker, sharedTopic);
+            var sharedInfo = new SharedInfo(sharedTopic);
             
             //Integrate into dialogue structure and setup all the linking correctly
-            foreach (var (topicUsingLine, last, next) in firstShared.Users) {
+            foreach (var (topicUsingLine, _, _) in firstShared.Users) {
                 var currentTopic = topicUsingLine;
                 
                 //Search for topics that were nested behind invis conts through shared dialogue
                 var indexOf = currentTopic.SharedInfo == null ? currentTopic.Responses.IndexOf(firstShared) : -1;
-                while (indexOf == -1 && currentTopic.Links.Count == 1 && currentTopic.Links[0].Text == invisCont) {
+                while (indexOf == -1 && currentTopic.Links.Count == 1 && currentTopic.Links[0].Text == invisibleCont) {
                     currentTopic = currentTopic.Links[0];
                     if (currentTopic.SharedInfo == null) {
                         indexOf = currentTopic.Responses.IndexOf(firstShared);
@@ -203,8 +202,9 @@ public class DialogueImplementer {
                     var nextRange = currentTopic.Responses.GetRange(sharedTopic.Responses.Count, currentTopic.Responses.Count - sharedTopic.Responses.Count - indexOf);
                     if (nextRange.Count > 0) {
                         var nextTopic = new DialogueTopic {
-                            Text = invisCont,
+                            Text = invisibleCont,
                             IncomingLink = currentTopic,
+                            Speaker = currentTopic.Speaker,
                         };
                         nextTopic.Responses.AddRange(nextRange);
 
@@ -220,17 +220,19 @@ public class DialogueImplementer {
                     currentTopic.Responses.RemoveRange(indexOf + sharedTopic.Responses.Count, currentTopic.Responses.Count - sharedTopic.Responses.Count);
                 } else {
                     var invisibleContTopic = new DialogueTopic {
-                        Text = invisCont,
+                        Text = invisibleCont,
                         IncomingLink = currentTopic,
                         SharedInfo = sharedInfo,
+                        Speaker = currentTopic.Speaker,
                     };
                     invisibleContTopic.Responses.AddRange(sharedTopic.Responses);
 
                     var nextRange = currentTopic.Responses.GetRange(indexOf + sharedTopic.Responses.Count, currentTopic.Responses.Count - sharedTopic.Responses.Count - indexOf);
                     if (nextRange.Count > 0) {
                         var nextTopic = new DialogueTopic {
-                            Text = invisCont,
+                            Text = invisibleCont,
                             IncomingLink = invisibleContTopic,
+                            Speaker = currentTopic.Speaker,
                         };
                         nextTopic.Responses.AddRange(nextRange);
                         
@@ -253,24 +255,5 @@ public class DialogueImplementer {
                 }
             }
         }
-    }
-
-    private static string GetSpeakerName(FormKey speaker) {
-        var name = string.Empty;
-        
-        if (speaker != FormKey.Null) {
-            if (NameMappings.TryGetValue(speaker, out var speakerName)) {
-                name = speakerName;
-            } else {
-                if (Environment.LinkCache.TryResolve<INpcGetter>(speaker, out var named)) {
-                    //Remove white spaces from name
-                    name = WhitespaceRegex.Replace(named.Name?.String ?? string.Empty, string.Empty);
-
-                    NameMappings.Add(named.FormKey, name);
-                }
-            }
-        }
-        
-        return name;
     }
 }

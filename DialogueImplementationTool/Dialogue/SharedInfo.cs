@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using DialogueImplementationTool.Dialogue.Topics;
 using Mutagen.Bethesda.Plugins;
@@ -9,13 +10,12 @@ public class SharedInfo {
     private static DialogTopic? _topic;
     private static readonly Dictionary<FormKey, int> SharedLineCount = new();
 
-    public FormKey Speaker { get; }
     public DialogResponses? ResponseData { get; set; }
     public DialogueTopic ResponseDataTopic { get; }
-    
 
-    public SharedInfo(FormKey speaker, DialogueTopic responseDataTopic) {
-        Speaker = speaker;
+    public SharedInfo(DialogueTopic responseDataTopic) {
+        if (responseDataTopic.Speaker == null) throw new ArgumentException($"{nameof(responseDataTopic)} can't have an empty speaker");
+
         ResponseDataTopic = responseDataTopic;
     }
     
@@ -37,7 +37,7 @@ public class SharedInfo {
             }
         
             var lastFormKey = _topic.Responses.Count > 0 ? _topic.Responses[^1].FormKey : FormKey.Null;
-            var dialogResponses = DialogueFactory.GetResponses(Speaker, ResponseDataTopic, lastFormKey);
+            var dialogResponses = DialogueFactory.GetResponses(ResponseDataTopic, lastFormKey);
             dialogResponses.EditorID = GetNextSharedEditorID();
 
             _topic.Responses.Add(dialogResponses);
@@ -47,7 +47,7 @@ public class SharedInfo {
         
         return new DialogResponses(DialogueFactory.Mod.GetNextFormKey(), DialogueFactory.Release) {
             ResponseData = new FormLinkNullable<IDialogResponsesGetter>(ResponseData.FormKey),
-            Conditions = DialogueFactory.GetSpeakerConditions(Speaker),
+            Conditions = DialogueFactory.GetSpeakerConditions(ResponseDataTopic.Speaker),
             FavorLevel = FavorLevel.None,
             Flags = new DialogResponseFlags(),
         };
@@ -55,15 +55,15 @@ public class SharedInfo {
     
     private string GetNextSharedEditorID() {
         var newCount = 1;
-        if (!SharedLineCount.TryGetValue(Speaker, out var count)) {
-            SharedLineCount.Add(Speaker, newCount);
+        if (!SharedLineCount.TryGetValue(ResponseDataTopic.Speaker.FormKey, out var count)) {
+            SharedLineCount.Add(ResponseDataTopic.Speaker.FormKey, newCount);
         } else {
             newCount = count + 1;
-            SharedLineCount[Speaker] = newCount;
+            SharedLineCount[ResponseDataTopic.Speaker.FormKey] = newCount;
         }
 
         return DialogueImplementer.Quest.EditorID
-          + DialogueImplementer.NameMappings[Speaker]
+          + ResponseDataTopic.Speaker.Name
           + "Shared"
           + newCount;
     }

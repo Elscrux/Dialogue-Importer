@@ -1,7 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using DialogueImplementationTool.Parser;
-
+using DialogueImplementationTool.Dialogue;
 namespace DialogueImplementationTool.UI;
 
 public partial class ProcessDialogue {
@@ -56,7 +55,7 @@ public partial class ProcessDialogue {
     
     private void SpeakerFavouriteSelect_OnClick(object sender, RoutedEventArgs e) {
         var button = (Button) sender;
-        var speaker = (SpeakerFavourite) button.DataContext;
+        var speaker = (Speaker) button.DataContext;
         App.DialogueVM.SetSpeaker.Execute(speaker.FormKey);
     }
 }

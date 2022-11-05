@@ -6,17 +6,21 @@ namespace DialogueImplementationTool.Dialogue;
 
 public class Dialogue : DialogueFactory {
     private readonly Dictionary<string, int> _npcIndices = new();
-
-    public override void GenerateDialogue(List<DialogueTopic> topics, FormKey speakerKey, string speakerName) {
+    
+    public override void PreProcess(List<DialogueTopic> topics) {
+        
+    }
+    
+    public override void GenerateDialogue(List<DialogueTopic> topics) {
         foreach (var dialogueTopic in topics) {
-            if (_npcIndices.ContainsKey(speakerName)) {
-                _npcIndices[speakerName] += 1;
+            if (_npcIndices.ContainsKey(dialogueTopic.Speaker.Name)) {
+                _npcIndices[dialogueTopic.Speaker.Name] += 1;
             } else {
-                _npcIndices.Add(speakerName, 1);
+                _npcIndices.Add(dialogueTopic.Speaker.Name, 1);
             }
             
             var branch = new DialogBranch(Mod.GetNextFormKey(), Release) {
-                EditorID = DialogueImplementer.Quest.EditorID + speakerName + _npcIndices[speakerName],
+                EditorID = DialogueImplementer.Quest.EditorID + dialogueTopic.Speaker.Name + _npcIndices[dialogueTopic.Speaker.Name],
                 Quest = new FormLinkNullable<IQuestGetter>(DialogueImplementer.Quest.FormKey),
                 Flags = DialogBranch.Flag.TopLevel
             };
@@ -27,9 +31,9 @@ public class Dialogue : DialogueFactory {
             DialogTopic CreateTopic(DialogueTopic rawTopic, string indexString, bool indexType) {
                 indexType = !indexType;
 
-                var responses = GetResponsesList(speakerKey, rawTopic);
+                var responses = GetResponsesList(rawTopic);
                 var dialogTopic = new DialogTopic(Mod.GetNextFormKey(), Release) {
-                    EditorID = $"{DialogueImplementer.Quest.EditorID}{speakerName}{_npcIndices[speakerName]}Topic{indexString}",
+                    EditorID = $"{DialogueImplementer.Quest.EditorID}{dialogueTopic.Speaker.Name}{_npcIndices[dialogueTopic.Speaker.Name]}Topic{indexString}",
                     Priority = 2500,
                     Name = rawTopic.Text,
                     Branch = new FormLinkNullable<IDialogBranchGetter>(branch),

@@ -1,25 +1,22 @@
 ﻿using System.Collections.Generic;
-using DialogueImplementationTool.Dialogue.Responses;
 using DialogueImplementationTool.Dialogue.Topics;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue;
 
 public abstract class OneLinerFactory : DialogueFactory {
-    protected static void GenerateDialogue(List<DialogueTopic> topics, FormKey speakerKey, DialogTopic dialogTopic) {
+    private static bool _needPostProcessing;
+    
+    protected static void GenerateDialogue(List<DialogueTopic> topics, DialogTopic dialogTopic) {
+        var allTopics = GetAllTopics(topics);
+        
         var lastFormKey = FormKey.Null;
         if (dialogTopic.Responses.Count > 0) {
             lastFormKey = dialogTopic.Responses[^1].FormKey;
         }
 
-        for (var i = 0; i < topics[0].Responses.Count; i++) {
-            var response = topics[0].Responses[i];
-
-            var responses = GetResponses(
-                speakerKey,
-                new DialogueTopic { Responses = new List<DialogueResponse> { response } },
-                lastFormKey);
-            
+        foreach (var topic in allTopics) {
+            var responses = GetResponses(topic, lastFormKey);
             lastFormKey = responses.FormKey;
 
             dialogTopic.Responses.Add(responses);
@@ -28,6 +25,8 @@ public abstract class OneLinerFactory : DialogueFactory {
         if (!Mod.DialogTopics.ContainsKey(dialogTopic.FormKey)) {
             Mod.DialogTopics.Add(dialogTopic);
         }
+        
+        _needPostProcessing = true;
     }
 
     /*====================================================
@@ -64,9 +63,15 @@ public abstract class OneLinerFactory : DialogueFactory {
         }
     }
 
+    public override void PreProcess(List<DialogueTopic> topics) {}
+
     protected static void PostProcess(IDialogTopic topic) {
+        if (!_needPostProcessing) return;
+        
         // ReorderBySpeaker(topic);
         SetRandomFlags(topic, true);
+        
+        _needPostProcessing = false;
     }
 
     private static void SetRandomFlags(IDialogTopic topic, bool addRandomEndFlag) {
