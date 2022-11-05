@@ -7,9 +7,8 @@ using System.Windows;
 using DialogueImplementationTool.Dialogue.Responses;
 using DialogueImplementationTool.Dialogue.Topics;
 using Noggog;
+using Xceed.Document.NET;
 using Xceed.Words.NET;
-using List = Xceed.Document.NET.List;
-using Paragraph = Xceed.Document.NET.Paragraph;
 namespace DialogueImplementationTool.Parser;
 
 public sealed class DocXTextParser : DocumentParser {
@@ -77,25 +76,17 @@ public sealed class DocXTextParser : DocumentParser {
     }
 
     protected override List<DialogueTopic> ParseOneLiner(int index) {
-        var topics = new List<DialogueTopic>();
-        
-        var topic = new DialogueTopic();
-        AddResponses(_doc.Lists[index], topic);
-        topic.Build();
-        topics.Add(topic);
-
-        return topics;
+        return _doc.Lists[index].Items
+            .Where(p => p.IndentLevel == FirstIndentationLevel)
+            .Select(p => {
+                var topic = new DialogueTopic { Responses = { DialogueResponse.Build(GetFormattedText(p)) } };
+                topic.Build();
+                return topic;
+            })
+            .ToList();
     }
 
     protected override List<DialogueTopic> ParseScene(int index) => ParseOneLiner(index);
-
-    private void AddResponses(List list, DialogueTopic topic) {
-        if (!list.Items.Any()) return;
-
-        foreach (var item in list.Items) {
-            topic.Responses.Add( DialogueResponse.Build(GetFormattedText(item)));
-        }
-    }
     
     private DialogueTopic AddTopic(Paragraph paragraph) {
         var topic = new DialogueTopic();

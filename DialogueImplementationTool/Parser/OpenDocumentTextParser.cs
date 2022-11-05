@@ -6,10 +6,10 @@ using System.Text;
 using System.Windows;
 using AODL.Document.Content;
 using AODL.Document.Content.Text;
-using AODL.Document.Content.Text.TextControl;
 using AODL.Document.TextDocuments;
 using DialogueImplementationTool.Dialogue.Responses;
 using DialogueImplementationTool.Dialogue.Topics;
+using Noggog;
 namespace DialogueImplementationTool.Parser;
 
 public sealed class OpenDocumentTextParser : DocumentParser {
@@ -190,17 +190,6 @@ public sealed class OpenDocumentTextParser : DocumentParser {
         var topics = new List<DialogueTopic>();
         if (_doc.Content[index] is not List list) return topics;
         
-        var topic = new DialogueTopic();
-        AddResponses(list, topic);
-        topic.Build();
-        topics.Add(topic);
-
-        return topics;
-    }
-
-    protected override List<DialogueTopic> ParseScene(int index) => ParseOneLiner(index);
-
-    private void AddResponses(IContentContainer list, DialogueTopic topic) {
         foreach (IContent listContent in list.Content) {
             if (listContent is not ListItem listItem) continue;
             
@@ -208,18 +197,22 @@ public sealed class OpenDocumentTextParser : DocumentParser {
                 switch (itemContent) {
                     case Paragraph paragraph:
                         //Set player text
-                        topic.Responses.Add(DialogueResponse.Build(GetFormattedText(paragraph)));
-
+                        var topic = new DialogueTopic {Responses = { DialogueResponse.Build(GetFormattedText(paragraph)) }};
+                        topic.Build();
+                        topics.Add(topic);
                         break;
                     default:
                         Console.WriteLine($"Warning: Didn't recognize {listContent.GetType()} as response type");
-
                         break;
                 }
             }
         }
+
+        return topics;
     }
-    
+
+    protected override List<DialogueTopic> ParseScene(int index) => ParseOneLiner(index);
+
     private DialogueTopic AddTopic(IContentContainer listItem) {
         var topic = new DialogueTopic();
         
