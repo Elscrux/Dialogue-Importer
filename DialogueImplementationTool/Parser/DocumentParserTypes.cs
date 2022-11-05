@@ -35,8 +35,6 @@ public record DialogueSelection {
     public void Deconstruct(out Dictionary<DialogueType, bool> selection, out FormKey speakerFormKey) {
         selection = Selection;
         speakerFormKey = Speaker;
-
-        Selection[DialogueType.GenericScene] = true;
     }
     
     public readonly Dictionary<DialogueType, bool> Selection = Enum.GetValues<DialogueType>().ToDictionary(type => type, _ => false);
