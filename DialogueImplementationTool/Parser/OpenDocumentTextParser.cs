@@ -295,10 +295,14 @@ public sealed class OpenDocumentTextParser : DocumentParser {
     }
     
     private List<FormattedText> GetFormattedText(ITextContainer paragraph) {
-        return (from IText text in paragraph.TextContent select GetFormattedText(text)).ToList();
+        return (from IText text in paragraph.TextContent select GetFormattedText(text))
+            .NotNull()
+            .ToList();
     }
     
-    private FormattedText GetFormattedText(IText text) {
+    private FormattedText? GetFormattedText(IText text) {
+        if (text.Text == null) return null;
+
         switch (text) {
             case FormatedText formattedText:
                 if (string.IsNullOrWhiteSpace(formattedText.TextStyle.TextProperties.FontColor)) {
@@ -311,12 +315,8 @@ public sealed class OpenDocumentTextParser : DocumentParser {
                 var b = Convert.ToInt32(formattedText.TextStyle.TextProperties.FontColor.Substring(5, 2), 16);
 
                 return new FormattedText(formattedText.Text, formattedText.TextStyle.TextProperties.Bold != null, Color.FromArgb(r, g, b));
-            case WhiteSpace:
-            case SimpleText:
-                return new FormattedText(text.Text, false, Color.Black);
             default:
-                throw new ArgumentOutOfRangeException(nameof(text));
-
+                return new FormattedText(text.Text, false, Color.Black);
         }
     }
 }
