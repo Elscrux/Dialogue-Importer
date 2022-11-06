@@ -5,22 +5,20 @@ using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue; 
 
 public class Dialogue : DialogueFactory {
-    private readonly Dictionary<string, int> _npcIndices = new();
+    private static readonly Dictionary<string, int> NPCIndices = new();
     
-    public override void PreProcess(List<DialogueTopic> topics) {
-        
-    }
+    public override void PreProcess(List<DialogueTopic> topics) {}
     
     public override void GenerateDialogue(List<DialogueTopic> topics) {
         foreach (var dialogueTopic in topics) {
-            if (_npcIndices.ContainsKey(dialogueTopic.Speaker.Name)) {
-                _npcIndices[dialogueTopic.Speaker.Name] += 1;
+            if (NPCIndices.ContainsKey(dialogueTopic.Speaker.Name)) {
+                NPCIndices[dialogueTopic.Speaker.Name] += 1;
             } else {
-                _npcIndices.Add(dialogueTopic.Speaker.Name, 1);
+                NPCIndices.Add(dialogueTopic.Speaker.Name, 1);
             }
             
             var branch = new DialogBranch(Mod.GetNextFormKey(), Release) {
-                EditorID = DialogueImplementer.Quest.EditorID + dialogueTopic.Speaker.Name + _npcIndices[dialogueTopic.Speaker.Name],
+                EditorID = DialogueImplementer.Quest.EditorID + dialogueTopic.Speaker.Name + NPCIndices[dialogueTopic.Speaker.Name],
                 Quest = new FormLinkNullable<IQuestGetter>(DialogueImplementer.Quest.FormKey),
                 Flags = DialogBranch.Flag.TopLevel
             };
@@ -33,7 +31,7 @@ public class Dialogue : DialogueFactory {
 
                 var responses = GetResponsesList(rawTopic);
                 var dialogTopic = new DialogTopic(Mod.GetNextFormKey(), Release) {
-                    EditorID = $"{DialogueImplementer.Quest.EditorID}{dialogueTopic.Speaker.Name}{_npcIndices[dialogueTopic.Speaker.Name]}Topic{indexString}",
+                    EditorID = $"{DialogueImplementer.Quest.EditorID}{dialogueTopic.Speaker.Name}{NPCIndices[dialogueTopic.Speaker.Name]}Topic{indexString}",
                     Priority = 2500,
                     Name = rawTopic.Text,
                     Branch = new FormLinkNullable<IDialogBranchGetter>(branch),
