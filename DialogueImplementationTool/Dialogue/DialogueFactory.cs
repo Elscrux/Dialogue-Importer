@@ -71,7 +71,7 @@ public abstract class DialogueFactory {
             Responses = topic.Responses.Select((line, i) => new DialogResponse {
                 Text = line.Response,
                 ScriptNotes = line.ScriptNote,
-                ResponseNumber = (byte) i,
+                ResponseNumber = (byte) (i + 1), //Starts with 1
                 Flags = DialogResponse.Flag.UseEmotionAnimation,
                 EmotionValue = 50
             }).ToExtendedList(),
