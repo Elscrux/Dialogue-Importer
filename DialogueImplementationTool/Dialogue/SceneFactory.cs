@@ -26,6 +26,8 @@ public abstract class SceneFactory : DialogueFactory {
         Scene scene,
         List<DialogueTopic> topics) {
         uint currentPhaseIndex = 0;
+
+        scene.LastActionIndex ??= 1;
         
         foreach (var topic in topics) {
             var aliasSpeaker = NameMappedSpeakers[topic.Speaker.Name];
@@ -43,9 +45,9 @@ public abstract class SceneFactory : DialogueFactory {
             AddTopic(sceneTopic, aliasSpeaker.AliasIndex);
         }
         
-        scene.LastActionIndex = (uint) topics.Count;
+        scene.LastActionIndex = Convert.ToUInt32(topics.Count * _aliasIndices.Count);
         
-        void AddTopic(DialogTopic topic, int speakerAliasID) {
+        void AddTopic(IDialogTopicGetter topic, int speakerAliasID) {
             scene.Phases.Add(new ScenePhase { Name = string.Empty, EditorWidth = 200 });
 
             //Speaker action
