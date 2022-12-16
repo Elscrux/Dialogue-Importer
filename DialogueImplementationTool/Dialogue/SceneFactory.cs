@@ -51,7 +51,7 @@ public abstract class SceneFactory : DialogueFactory {
             scene.Phases.Add(new ScenePhase { Name = string.Empty, EditorWidth = 200 });
 
             //Speaker action
-            scene.Actions.Add(new SceneAction {
+            var speakerAction = new SceneAction {
                 Type = SceneAction.TypeEnum.Dialog,
                 ActorID = speakerAliasID,
                 Emotion = Emotion.Neutral,
@@ -64,7 +64,14 @@ public abstract class SceneFactory : DialogueFactory {
                 LoopingMax = 10,
                 Index = scene.LastActionIndex,
                 Name = string.Empty
-            });
+            };
+            
+            // We can only be sure who the speaker should look at when there are only two NPCs involved.
+            if (AliasSpeakers.Count == 2) {
+                speakerAction.HeadtrackActorID = _aliasIndices.FirstOrDefault(aliasIndex => aliasIndex != speakerAliasID);
+            }
+            
+            scene.Actions.Add(speakerAction);
             scene.LastActionIndex += 1;
 
             //Head track actions
