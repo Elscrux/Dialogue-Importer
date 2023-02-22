@@ -4,7 +4,6 @@ using System.Linq;
 using DialogueImplementationTool.Dialogue;
 using DialogueImplementationTool.Dialogue.Topics;
 using Mutagen.Bethesda.Plugins;
-using Noggog;
 namespace DialogueImplementationTool.Parser; 
 
 public class GeneratedDialogue {
@@ -15,11 +14,10 @@ public class GeneratedDialogue {
         var speaker = new Speaker(speakerFormKey);
         
         //Set speaker for all linked topics
-        var linkedTopics = new Queue<DialogueTopic>(topics);
-        while (linkedTopics.Any()) {
-            var topic = linkedTopics.Dequeue();
-            linkedTopics.Enqueue(topic.Links);
-            topic.Speaker = speaker;
+        foreach (var rootTopic in topics) {
+            foreach (var topic in rootTopic.EnumerateLinks()) {
+                topic.Speaker = speaker;
+            }
         }
 
         Factory = DialogueImplementer.GetDialogueFactory(Type);

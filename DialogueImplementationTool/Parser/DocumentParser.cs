@@ -92,7 +92,16 @@ public abstract class DocumentParser {
         for (var i = 0; i < App.DialogueVM.DialogueTypeList.Count; i++) {
             var (selection, speakerFormKey) = App.DialogueVM.DialogueTypeList[i];
             foreach (var (dialogueType, selected) in selection) {
-                if (selected) dialogue.Add(new GeneratedDialogue(dialogueType, ParseDialogue(dialogueType, i), speakerFormKey));
+                if (selected) {
+                    var dialogueTopics = ParseDialogue(dialogueType, i);
+                    foreach (var rootTopic in dialogueTopics) {
+                        foreach (var topic in rootTopic.EnumerateLinks()) {
+                            topic.PostProcess();
+                        }
+                    }
+                    
+                    dialogue.Add(new GeneratedDialogue(dialogueType, dialogueTopics, speakerFormKey));
+                }
             }
         }
         return dialogue;

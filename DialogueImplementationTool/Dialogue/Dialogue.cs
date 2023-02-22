@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using DialogueImplementationTool.Dialogue.Topics;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
@@ -8,6 +9,8 @@ public class Dialogue : DialogueFactory {
     private static readonly Dictionary<string, int> NPCIndices = new();
     
     public override void PreProcess(List<DialogueTopic> topics) {}
+
+    private record LinkedTopic(FormKey FormKey, DialogueTopic Topic, string IndexString, bool IndexType);
     
     public override void GenerateDialogue(List<DialogueTopic> topics) {
         foreach (var dialogueTopic in topics) {
@@ -23,17 +26,23 @@ public class Dialogue : DialogueFactory {
                 Flags = DialogBranch.Flag.TopLevel
             };
             Mod.DialogBranches.Add(branch);
+
             
-            branch.StartingTopic = new FormLinkNullable<IDialogTopicGetter>(CreateTopic(dialogueTopic, string.Empty, true));
+            var startingFormKey = Mod.GetNextFormKey();
+            branch.StartingTopic = new FormLinkNullable<IDialogTopicGetter>(startingFormKey);
 
-            DialogTopic CreateTopic(DialogueTopic rawTopic, string indexString, bool indexType) {
-                indexType = !indexType;
-
-                var responses = GetResponsesList(rawTopic);
-                var dialogTopic = new DialogTopic(Mod.GetNextFormKey(), Release) {
-                    EditorID = $"{DialogueImplementer.Quest.EditorID}{dialogueTopic.Speaker.Name}{NPCIndices[dialogueTopic.Speaker.Name]}Topic{indexString}",
+            var createdTopics = new HashSet<LinkedTopic>();
+            var topicQueue = new Queue<LinkedTopic>();
+            topicQueue.Enqueue(new LinkedTopic(startingFormKey, dialogueTopic, string.Empty, true));
+            
+            while (topicQueue.Any()) {
+                var rawTopic = topicQueue.Dequeue();
+            
+                var responses = GetResponsesList(rawTopic.Topic);
+                var dialogTopic = new DialogTopic(rawTopic.FormKey, Release) {
+                    EditorID = $"{DialogueImplementer.Quest.EditorID}{dialogueTopic.Speaker.Name}{NPCIndices[dialogueTopic.Speaker.Name]}Topic{rawTopic.IndexString}",
                     Priority = 2500,
-                    Name = rawTopic.Text,
+                    Name = rawTopic.Topic.Text,
                     Branch = new FormLinkNullable<IDialogBranchGetter>(branch),
                     Quest = new FormLinkNullable<IQuestGetter>(DialogueImplementer.Quest.FormKey),
                     Subtype = DialogTopic.SubtypeEnum.Custom,
@@ -43,13 +52,20 @@ public class Dialogue : DialogueFactory {
                 };
                 Mod.DialogTopics.Add(dialogTopic);
 
-                for (var i = 0; i < rawTopic.Links.Count; i++) {
-                    responses[0].LinkTo.Add(new FormLink<IDialogGetter>(
-                        CreateTopic(rawTopic.Links[i], indexString + GetIndex(i + 1, indexType), indexType)
-                    ));
-                }
+                for (var i = 0; i < rawTopic.Topic.Links.Count; i++) {
+                    var linkedTopic = createdTopics.FirstOrDefault(t => t.Topic == rawTopic.Topic.Links[i]);
+                    if (linkedTopic == null) {
+                        var linkFormKey = Mod.GetNextFormKey();
+                        var newLink = new LinkedTopic(linkFormKey, rawTopic.Topic.Links[i], rawTopic.IndexString + GetIndex(i + 1, !rawTopic.IndexType), !rawTopic.IndexType);
 
-                return dialogTopic;
+                        createdTopics.Add(newLink);
+                        topicQueue.Enqueue(newLink);
+
+                        responses[0].LinkTo.Add(new FormLink<IDialogGetter>(linkFormKey));
+                    } else {
+                        responses[0].LinkTo.Add(new FormLink<IDialogGetter>(linkedTopic.FormKey));
+                    }
+                }
             }
 
             char GetIndex(int index, bool type) => type ? (char) (48 + index) : (char) (64 + index);

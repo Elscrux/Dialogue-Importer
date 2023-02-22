@@ -101,20 +101,15 @@ public abstract class DialogueFactory {
         //This is basically flattening the dialogue tree
         var allTopics = new List<DialogueTopic>(topics);
 
-        foreach (var currentTopic in topics) {
-            var linkedTopics = new Queue<DialogueTopic>();
-            linkedTopics.Enqueue(currentTopic);
-
-            while (linkedTopics.Any()) {
-                var topic = linkedTopics.Dequeue();
-                linkedTopics.Enqueue(topic.Links);
-
-                var indexOf = allTopics.IndexOf(currentTopic);
+        foreach (var rootTopic in topics) {
+            foreach (var topic in rootTopic.EnumerateLinks()) {
+                var indexOf = allTopics.IndexOf(topic);
                 for (var i = topic.Links.Count - 1; i >= 0; i--) {
                     allTopics.Insert(indexOf + 1, topic.Links[i]);
                 }
             }
         }
+
         return allTopics;
     }
 }

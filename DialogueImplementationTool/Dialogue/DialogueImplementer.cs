@@ -87,29 +87,26 @@ public class DialogueImplementer {
 
         //Convert dialogue to shared lines, where objects can be shared on a line/response level
         foreach (var generated in dialogue) {
-            var linkedTopics = new Queue<DialogueTopic>(generated.Topics);
-            
-            while (linkedTopics.Any()) {
-                var topic = linkedTopics.Dequeue();
-                linkedTopics.Enqueue(topic.Links);
-                
-                SharedLine? last = null;
-                SharedLineLink? lastLink = null;
-                SharedLine? next = null;
-                foreach (var response in topic.Responses) {
-                    //Get unique shared line
-                    var sharedLine = new SharedLine(response, topic.Speaker.FormKey);
-                    if (sharedLines.TryGetValue(sharedLine, out var existingSharedLine)) {
-                        sharedLine = existingSharedLine;
-                    }
+            foreach (var rootTopic in generated.Topics) {
+                foreach (var topic in rootTopic.EnumerateLinks()) {
+                    SharedLine? last = null;
+                    SharedLineLink? lastLink = null;
+                    SharedLine? next = null;
+                    foreach (var response in topic.Responses) {
+                        //Get unique shared line
+                        var sharedLine = new SharedLine(response, topic.Speaker.FormKey);
+                        if (sharedLines.TryGetValue(sharedLine, out var existingSharedLine)) {
+                            sharedLine = existingSharedLine;
+                        }
                     
-                    //Setup links
-                    if (lastLink != null) lastLink.Next = sharedLine;
-                    lastLink = new SharedLineLink(topic, last, next);
-                    sharedLine.Users.Add(lastLink);
-                    last = sharedLine;
+                        //Setup links
+                        if (lastLink != null) lastLink.Next = sharedLine;
+                        lastLink = new SharedLineLink(topic, last, next);
+                        sharedLine.Users.Add(lastLink);
+                        last = sharedLine;
 
-                    sharedLines.Add(sharedLine);
+                        sharedLines.Add(sharedLine);
+                    }
                 }
             }
         }
