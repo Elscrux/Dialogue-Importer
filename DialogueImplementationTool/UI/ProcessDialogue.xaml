@@ -9,6 +9,26 @@
         Title="Dialogue Implementation Tool"
         Height="720" Width="1280"
         MinHeight="360" MinWidth="640" d:DataContext="{d:DesignInstance ui:DialogueVM}">
+    <Window.InputBindings>
+        <KeyBinding Key="D1" Command="{Binding SelectIndex}" CommandParameter="1"/>
+        <KeyBinding Key="NumPad1" Command="{Binding SelectIndex}" CommandParameter="1"/>
+        <KeyBinding Key="D2" Command="{Binding SelectIndex}" CommandParameter="2"/>
+        <KeyBinding Key="NumPad2" Command="{Binding SelectIndex}" CommandParameter="2"/>
+        <KeyBinding Key="D3" Command="{Binding SelectIndex}" CommandParameter="3"/>
+        <KeyBinding Key="NumPad3" Command="{Binding SelectIndex}" CommandParameter="3"/>
+        <KeyBinding Key="D4" Command="{Binding SelectIndex}" CommandParameter="4"/>
+        <KeyBinding Key="NumPad4" Command="{Binding SelectIndex}" CommandParameter="4"/>
+        <KeyBinding Key="D5" Command="{Binding SelectIndex}" CommandParameter="5"/>
+        <KeyBinding Key="NumPad5" Command="{Binding SelectIndex}" CommandParameter="5"/>
+        <KeyBinding Key="D6" Command="{Binding SelectIndex}" CommandParameter="6"/>
+        <KeyBinding Key="NumPad6" Command="{Binding SelectIndex}" CommandParameter="6"/>
+        
+        <KeyBinding Key="Left" Command="{Binding BacktrackMany}"/>
+        <KeyBinding Key="Right" Command="{Binding SkipMany}"/>
+        
+        <KeyBinding Modifiers="Control" Key="S" Command="{Binding Save}"/>
+    </Window.InputBindings>
+    
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="Save"
@@ -73,7 +93,7 @@
 
         <GroupBox Header="Dialogue">
             <Grid>
-                <TextBlock x:Name="PreviewText"
+                <TextBlock Text="{Binding PreviewText}"
                            FontSize="36"
                            TextWrapping="WrapWithOverflow" TextAlignment="Center"
                            VerticalAlignment="Center" />
@@ -90,28 +110,28 @@
                     <Button Grid.Column="0"
                             Content="⏪"
                             IsEnabled="{Binding IsNotFirstIndex}"
-                            Click="BacktrackMany_OnClick"
+                            Command="{Binding BacktrackMany}"
                             FontSize="36"
                             Margin="10" />
 
                     <Button Grid.Column="1"
                             Content="◀"
                             IsEnabled="{Binding IsNotFirstIndex}"
-                            Click="Previous_OnClick"
+                            Command="{Binding Previous}"
                             FontSize="36"
                             Margin="10" />
 
                     <Button Grid.Column="2"
                             Content="▶"
                             IsEnabled="{Binding IsNotLastIndex}"
-                            Click="Next_OnClick"
+                            Command="{Binding Next}"
                             FontSize="36"
                             Margin="10" />
 
                     <Button Grid.Column="3"
                             Content="⏩"
                             IsEnabled="{Binding IsNotLastIndex}"
-                            Click="SkipMany_OnClick"
+                            Command="{Binding SkipMany}"
                             FontSize="36"
                             Margin="10" />
                 </Grid>

@@ -37,7 +37,7 @@ public partial class MainWindow {
         //Save warning
         if (!App.DialogueVM.SavedSession && App.DialogueVM.DialogueTypeList.All(selection => selection.Selection.Any(type => type.Value))) {
             if (MessageBox.Show("You didn't save your changes, do you want to save now?", string.Empty, MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
-                App.DialogueVM.Save();
+                App.DialogueVM.Save.Execute(null);
             }
         }
     }

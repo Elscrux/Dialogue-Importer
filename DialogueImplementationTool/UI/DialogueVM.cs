@@ -42,6 +42,9 @@ public class DialogueVM : ViewModel {
     public bool SavedSession;
 
     [Reactive]
+    public string PreviewText { get; set; } = string.Empty;
+
+    [Reactive]
     public int Index { get; set; }
     
     [Reactive]
@@ -73,9 +76,63 @@ public class DialogueVM : ViewModel {
     public bool ValidSpeaker { get; set; }
     
     public ICommand SetSpeaker { get; }
+    public ICommand SelectIndex { get; }
+    public ICommand Save { get; }
+    
+    public ICommand BacktrackMany { get; }
+    public ICommand Previous { get; }
+    public ICommand Next { get; }
+    public ICommand SkipMany { get; }
 
     public DialogueVM() {
         SetSpeaker = ReactiveCommand.Create((FormKey formKey) => SpeakerFormKey = formKey);
+        SelectIndex = ReactiveCommand.Create<string>(indexStr => {
+            switch (int.Parse(indexStr)) {
+                case 1:
+                    if (ValidSpeaker) GreetingSelected = !GreetingSelected;
+                    break;
+                case 2:
+                    if (ValidSpeaker) FarewellSelected = !FarewellSelected;
+                    break;
+                case 3:
+                    if (ValidSpeaker) IdleSelected = !IdleSelected;
+                    break;
+                case 4:
+                    if (ValidSpeaker) DialogueSelected = !DialogueSelected;
+                    break;
+                case 5:
+                    GenericSceneSelected = !GenericSceneSelected;
+                    break;
+                case 6:
+                    QuestSceneSelected = !QuestSceneSelected;
+                    break;
+            }
+        });
+        Save = ReactiveCommand.Create(() => {
+            App.DialogueVM.DialogueImplementer.ImplementDialogue(App.DialogueVM.DocumentParser.GetDialogue());
+            DialogueFactory.Save();
+            App.DialogueVM.SavedSession = true;
+        });
+
+        BacktrackMany = ReactiveCommand.Create(() => {
+            DocumentParser.BacktrackMany();
+            RefreshPreview(false);
+        });
+
+        Previous = ReactiveCommand.Create(() => {
+            DocumentParser.Previous();
+            RefreshPreview(false);
+        });
+
+        Next = ReactiveCommand.Create(() => {
+            DocumentParser.Next();
+            RefreshPreview(true);
+        });
+
+        SkipMany = ReactiveCommand.Create(() => {
+            DocumentParser.SkipMany();
+            RefreshPreview(true);
+        });
         
         this.WhenAnyValue(v => v.Index)
             .Subscribe(_ => {
@@ -160,11 +217,23 @@ public class DialogueVM : ViewModel {
         //Set buttons to unchecked
         GreetingSelected = FarewellSelected = IdleSelected = DialogueSelected = GenericSceneSelected = QuestSceneSelected = false;
     }
-    
-    public void Save() {
-        App.DialogueVM.DialogueImplementer.ImplementDialogue(App.DialogueVM.DocumentParser.GetDialogue());
-        DialogueFactory.Save();
-        App.DialogueVM.SavedSession = true;
+
+    public void RefreshPreview(bool forward) {
+        var preview = string.Empty;
+        var tries = 0;
+        while (string.IsNullOrWhiteSpace(preview) && tries < 10) {
+            preview = App.DialogueVM.DocumentParser.PreviewCurrent();
+            if (string.IsNullOrEmpty(preview)) {
+                if (forward) {
+                    App.DialogueVM.DocumentParser.Next();   
+                } else {
+                    App.DialogueVM.DocumentParser.Previous();
+                }
+            } else {
+                PreviewText = preview;
+            }
+            tries++;
+        }
     }
     
     public void OpenOutput() {
