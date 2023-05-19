@@ -84,18 +84,26 @@ public abstract class DialogueFactory {
 
     public static ExtendedList<Condition> GetSpeakerConditions(ISpeaker speaker) {
         var list = new ExtendedList<Condition>();
-        
+
         if (DialogueImplementer.Environment.LinkCache.TryResolve<INpcGetter>(speaker.FormKey, out var npc)) {
             list.Add(GetFormKeyCondition(Condition.Function.GetIsID, npc.FormKey));
         }
-        
-        if(DialogueImplementer.Environment.LinkCache.TryResolve<IFactionGetter>(speaker.FormKey, out var faction)) {
+
+        if (DialogueImplementer.Environment.LinkCache.TryResolve<IFactionGetter>(speaker.FormKey, out var faction)) {
             list.Add(GetFormKeyCondition(Condition.Function.GetInFaction, faction.FormKey));
+        }
+
+        if (DialogueImplementer.Environment.LinkCache.TryResolve<IVoiceTypeGetter>(speaker.FormKey, out var voiceType)) {
+            list.Add(GetFormKeyCondition(Condition.Function.GetIsVoiceType, voiceType.FormKey));
+        }
+
+        if (DialogueImplementer.Environment.LinkCache.TryResolve<IFormListGetter>(speaker.FormKey, out var formList)) {
+            list.Add(GetFormKeyCondition(Condition.Function.GetIsVoiceType, formList.FormKey));
         }
 
         return list;
     }
-    
+
     protected static List<DialogueTopic> GetAllTopics(List<DialogueTopic> topics) {
         //Through shared dialogue detection, a topic that was previously only one topic might be split into multiple topics
         //This is basically flattening the dialogue tree

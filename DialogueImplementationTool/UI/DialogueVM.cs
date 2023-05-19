@@ -69,7 +69,7 @@ public class DialogueVM : ViewModel {
     /*====================================================
 		NPC
 	====================================================*/
-    public IEnumerable<Type> SpeakerTypes { get; } = new List<Type> { typeof(INpcGetter), typeof(IFactionGetter) };
+    public IEnumerable<Type> SpeakerTypes { get; } = new List<Type> { typeof(INpcGetter), typeof(IFactionGetter), typeof(IVoiceTypeGetter), typeof(IFormListGetter) };
     [Reactive]
     public FormKey SpeakerFormKey { get; set; }
     [Reactive]
