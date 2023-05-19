@@ -54,6 +54,6 @@ public class GenericScene : SceneFactory {
     
     public override void PreProcessSpeakers() {
         //Make sure there are only two speakers
-        if (AliasSpeakers.Count != 2) MessageBox.Show("Error, there can only be 2 NPCs");
+        if (NameMappedSpeakers.Count != 2) MessageBox.Show("Error, there can only be 2 NPCs");
     }
 }

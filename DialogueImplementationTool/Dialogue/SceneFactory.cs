@@ -17,7 +17,7 @@ public abstract class SceneFactory : DialogueFactory {
     private static readonly Regex SceneLineRegex = new(@"([^:]*):? *([\S\s]+)");
 
     protected List<AliasSpeaker> AliasSpeakers = new();
-    protected Dictionary<string, AliasSpeaker> NameMappedSpeakers = new();
+    protected List<(FormKey FormKey, List<AliasSpeaker> Speakers)> NameMappedSpeakers = new();
     
     private List<int> _aliasIndices = new();
 
@@ -30,7 +30,7 @@ public abstract class SceneFactory : DialogueFactory {
         scene.LastActionIndex ??= 1;
         
         foreach (var topic in topics) {
-            var aliasSpeaker = NameMappedSpeakers[topic.Speaker.Name];
+            var aliasSpeaker = GetSpeaker(topic.Speaker.Name);
 
             var sceneTopic = new DialogTopic(Mod.GetNextFormKey(), Release) {
                 Priority = 2500,
@@ -124,7 +124,7 @@ public abstract class SceneFactory : DialogueFactory {
     }
 
     protected Scene AddScene(string editorID, FormKey quest) {
-        _aliasIndices = NameMappedSpeakers.Select(s => s.Value.AliasIndex).ToList();
+        _aliasIndices = NameMappedSpeakers.SelectMany(x => x.Speakers.Select(speaker => speaker.AliasIndex)).ToList();
         
         return new Scene(Mod.GetNextFormKey(), Release) {
             EditorID = editorID,
@@ -141,7 +141,10 @@ public abstract class SceneFactory : DialogueFactory {
     public override void PreProcess(List<DialogueTopic> topics) {
         AliasSpeakers = GetSpeakers(topics);
 
-        NameMappedSpeakers = AliasSpeakers.ToDictionary(speaker => speaker.Name, speaker => speaker);
+        NameMappedSpeakers = AliasSpeakers
+            .GroupBy(x => x.FormKey)
+            .Select(x => (x.Key, x.ToList()))
+            .ToList();
 
         //break up topics for every new speaker
         var separatedTopics = ParseLines(topics);
@@ -172,7 +175,6 @@ public abstract class SceneFactory : DialogueFactory {
         }
 
         return speakers
-            .Distinct(x => x.FormKey)
             .ToList();
     }
     
@@ -185,7 +187,7 @@ public abstract class SceneFactory : DialogueFactory {
             if (currentLines.Any()) {
                 var dialogueTopic = new DialogueTopic();
                 dialogueTopic.Responses.AddRange(currentLines);
-                dialogueTopic.Speaker = NameMappedSpeakers[currentSpeaker];
+                dialogueTopic.Speaker = GetSpeaker(currentSpeaker);
 
                 separatedTopics.Add(dialogueTopic);
             }
@@ -212,4 +214,16 @@ public abstract class SceneFactory : DialogueFactory {
     }
     
     public override void PostProcess() {}
+
+    public AliasSpeaker GetSpeaker(string name) {
+        foreach (var (formKey, speakers) in NameMappedSpeakers) {
+            foreach (var speaker in speakers) {
+                if (speaker.Name == name) {
+                    return speaker;
+                }
+            }
+        }
+
+        throw new Exception("Didn't find speaker");
+    }
 }
