@@ -67,6 +67,12 @@ public abstract class DialogueFactory {
             return dialogResponses;
         }
 
+        var flags = new DialogResponseFlags();
+
+        if (topic.SayOnce) {
+            flags.Flags |= DialogResponses.Flag.SayOnce;
+        }
+
         return new DialogResponses(Mod.GetNextFormKey(), Release) {
             Responses = topic.Responses.Select((line, i) => new DialogResponse {
                 Text = line.Response,
@@ -77,7 +83,7 @@ public abstract class DialogueFactory {
             }).ToExtendedList(),
             Conditions = GetSpeakerConditions(topic.Speaker),
             FavorLevel = FavorLevel.None,
-            Flags = new DialogResponseFlags(),
+            Flags = flags,
             PreviousDialog = previousDialog
         };
     }
