@@ -4,7 +4,8 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue; 
 
-public class Idle : OneLinerFactory {
+public sealed class Idle : OneLinerFactory {
+    private static readonly PostProcessOptions PostProcessOptions = new(true);
     private static DialogTopic? _topic;
     
     public override void GenerateDialogue(List<DialogueTopic> topics) {
@@ -22,6 +23,6 @@ public class Idle : OneLinerFactory {
     }
 
     public override void PostProcess() {
-        if (_topic != null) PostProcess(_topic);
+        if (_topic != null) PostProcess(_topic, PostProcessOptions);
     }
 }

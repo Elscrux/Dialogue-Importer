@@ -5,6 +5,8 @@ using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue;
 
 public abstract class OneLinerFactory : DialogueFactory {
+    public record PostProcessOptions(bool RandomFlags = false, float ResetHours = 0);
+
     private static bool _needPostProcessing;
     
     protected static void GenerateDialogue(List<DialogueTopic> topics, DialogTopic dialogTopic) {
@@ -65,13 +67,21 @@ public abstract class OneLinerFactory : DialogueFactory {
 
     public override void PreProcess(List<DialogueTopic> topics) {}
 
-    protected static void PostProcess(IDialogTopic topic) {
+    protected static void PostProcess(IDialogTopic topic, PostProcessOptions options) {
         if (!_needPostProcessing) return;
-        
+
         // ReorderBySpeaker(topic);
-        SetRandomFlags(topic, true);
-        
+        if (options.RandomFlags) SetRandomFlags(topic, true);
+        if (options.ResetHours > 0) SetResetHours(topic, options.ResetHours);
+
         _needPostProcessing = false;
+    }
+
+    private static void SetResetHours(IDialogTopic topic, float resetHours) {
+        foreach (var response in topic.Responses) {
+            response.Flags ??= new DialogResponseFlags();
+            response.Flags.ResetHours = resetHours;
+        }
     }
 
     private static void SetRandomFlags(IDialogTopic topic, bool addRandomEndFlag) {
