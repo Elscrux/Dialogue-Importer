@@ -9,7 +9,7 @@ public class SayOnceChecker : IDialogueTopicPostProcessor {
         var previousResponse = response.Response;
             
         response.Response = response.Response
-            .Replace("[initial]", string.Empty, StringComparison.InvariantCulture);
+            .Replace("[initial]", string.Empty, StringComparison.OrdinalIgnoreCase);
 
         if (response.Response != previousResponse) {
             topic.SayOnce = true;
