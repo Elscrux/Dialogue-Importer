@@ -6,6 +6,7 @@ namespace DialogueImplementationTool.Dialogue.Topics;
 public record DialogueTopic {
     private static readonly IEnumerable<IDialogueTopicPostProcessor> PreProcessors = new List<IDialogueTopicPostProcessor> {
         new SayOnceChecker(),
+        new GoodbyeChecker(),
         new Trimmer(),
         new InvalidStringFixer(),
     };

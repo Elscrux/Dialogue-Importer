@@ -79,6 +79,9 @@
       <Compile Update="Dialogue\Responses\BackToDialogueRemover.cs">
         <DependentUpon>IDialogueResponsePostProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\Topics\GoodbyeChecker.cs">
+        <DependentUpon>IDialogueTopicPostProcessor.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>
