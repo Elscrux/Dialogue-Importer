@@ -27,7 +27,10 @@ public partial class SceneSpeakerWindow {
         SceneSpeakers = speakers;
         
         foreach (var speaker in SceneSpeakers) {
-            var matchingSpeaker = SpeakerFavourites.FirstOrDefault(s => s.EditorID != null && s.EditorID.ToLower().Contains(speaker.Name.ToLower()));
+            var matchingSpeaker = SpeakerFavourites.MinBy(s => {
+                var index = s.EditorID?.IndexOf(speaker.Name, StringComparison.OrdinalIgnoreCase);
+                return index is null or -1 ? int.MaxValue : index;
+            });
             if (matchingSpeaker != null) speaker.FormKey = matchingSpeaker.FormKey;
         }
         
