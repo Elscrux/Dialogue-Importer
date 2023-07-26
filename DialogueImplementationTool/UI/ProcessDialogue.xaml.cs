@@ -7,7 +7,7 @@ public partial class ProcessDialogue {
     public ProcessDialogue() {
         InitializeComponent();
         DataContext = App.DialogueVM;
-        
+
         App.DialogueVM.RefreshPreview(true);
     }
 

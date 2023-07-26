@@ -70,11 +70,11 @@ public sealed class OpenDocumentTextParser : DocumentParser {
         return string.Empty;
     } 
 
-    public OpenDocumentTextParser(string path) {
+    public OpenDocumentTextParser(string filePath) : base(filePath) {
         var tryLoading = true;
         while (tryLoading) {
             try {
-                _doc.Load(path);
+                _doc.Load(filePath);
                 tryLoading = false;
             } catch (Exception e) {
                 switch (MessageBox.Show(e.Message)) {

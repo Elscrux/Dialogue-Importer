@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using DialogueImplementationTool.Dialogue.Topics;
 namespace DialogueImplementationTool.Parser;
 
-public class NullDocumentParser : DocumentParser {
+public sealed class NullDocumentParser : DocumentParser {
+    public NullDocumentParser(string filePath) : base(filePath) {}
+
     public override int LastIndex => int.MaxValue;
     public override void SkipMany() {
         throw new NotImplementedException();

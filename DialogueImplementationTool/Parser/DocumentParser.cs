@@ -10,7 +10,13 @@ using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 namespace DialogueImplementationTool.Parser; 
 
 public abstract class DocumentParser {
-    public static readonly DocumentParser Null = new NullDocumentParser();
+    public static readonly DocumentParser Null = new NullDocumentParser(string.Empty);
+
+    public string FilePath { get; set; }
+
+    protected DocumentParser(string filePath) {
+        FilePath = filePath;
+    }
 
     /*====================================================
 		Iterator

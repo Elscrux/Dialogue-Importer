@@ -17,7 +17,7 @@ public sealed class DocXTextParser : DocumentParser {
     private readonly DocX _doc;
     public override int LastIndex { get; }
     
-    public DocXTextParser(string path) {
+    public DocXTextParser(string path) : base(path) {
         var tryLoading = true;
         while (tryLoading) {
             try {

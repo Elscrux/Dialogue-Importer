@@ -6,7 +6,7 @@
         xmlns:plugins="clr-namespace:Mutagen.Bethesda.WPF.Plugins;assembly=Mutagen.Bethesda.WPF"
         xmlns:ui="clr-namespace:DialogueImplementationTool.UI"
         mc:Ignorable="d"
-        Title="Dialogue Implementation Tool"
+        Title="{Binding Title, StringFormat='Dialogue Implementation Tool - {0}'}"
         Height="720" Width="1280"
         MinHeight="360" MinWidth="640" d:DataContext="{d:DesignInstance ui:DialogueVM}">
     <Window.InputBindings>

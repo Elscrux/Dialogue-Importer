@@ -83,6 +83,7 @@ public class DialogueVM : ViewModel {
     public ICommand Previous { get; }
     public ICommand Next { get; }
     public ICommand SkipMany { get; }
+    [Reactive] public string Title { get; set; }
 
     public DialogueVM() {
         SetSpeaker = ReactiveCommand.Create((FormKey formKey) => SpeakerFormKey = formKey);
@@ -109,9 +110,9 @@ public class DialogueVM : ViewModel {
             }
         });
         Save = ReactiveCommand.Create(() => {
-            App.DialogueVM.DialogueImplementer.ImplementDialogue(App.DialogueVM.DocumentParser.GetDialogue());
+            DialogueImplementer.ImplementDialogue(DocumentParser.GetDialogue());
             DialogueFactory.Save();
-            App.DialogueVM.SavedSession = true;
+            SavedSession = true;
         });
 
         BacktrackMany = ReactiveCommand.Create(() => {
@@ -205,14 +206,15 @@ public class DialogueVM : ViewModel {
         Index = 1;
         Index = 0;
         
-        App.DialogueVM.SavedSession = false;
+        Title = Path.GetFileName(parser.FilePath);
+        SavedSession = false;
         
         //Use new implementer when quest changed
         if (DialogueImplementer.Quest.FormKey != QuestFormKey) DialogueImplementer = new DialogueImplementer(QuestFormKey);
         
         //Clear dialogue data
         DialogueTypeList.Clear();
-        for (var i = 0; i <= DocumentParser.LastIndex; i++) App.DialogueVM.DialogueTypeList.Add(new DialogueSelection());
+        for (var i = 0; i <= DocumentParser.LastIndex; i++) DialogueTypeList.Add(new DialogueSelection());
         
         //Set buttons to unchecked
         GreetingSelected = FarewellSelected = IdleSelected = DialogueSelected = GenericSceneSelected = QuestSceneSelected = false;
@@ -222,12 +224,12 @@ public class DialogueVM : ViewModel {
         var preview = string.Empty;
         var tries = 0;
         while (string.IsNullOrWhiteSpace(preview) && tries < 10) {
-            preview = App.DialogueVM.DocumentParser.PreviewCurrent();
+            preview = DocumentParser.PreviewCurrent();
             if (string.IsNullOrEmpty(preview)) {
                 if (forward) {
-                    App.DialogueVM.DocumentParser.Next();   
+                    DocumentParser.Next();   
                 } else {
-                    App.DialogueVM.DocumentParser.Previous();
+                    DocumentParser.Previous();
                 }
             } else {
                 PreviewText = preview;
