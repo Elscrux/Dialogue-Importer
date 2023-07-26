@@ -5,12 +5,12 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue; 
 
-public class Dialogue : DialogueFactory {
+public sealed class Dialogue : DialogueFactory {
     private static readonly Dictionary<string, int> NPCIndices = new();
     
     public override void PreProcess(List<DialogueTopic> topics) {}
 
-    private record LinkedTopic(FormKey FormKey, DialogueTopic Topic, string IndexString, bool IndexType);
+    private sealed record LinkedTopic(FormKey FormKey, DialogueTopic Topic, string IndexString, bool IndexType);
     
     public override void GenerateDialogue(List<DialogueTopic> topics) {
         foreach (var dialogueTopic in topics) {
@@ -31,7 +31,7 @@ public class Dialogue : DialogueFactory {
             var startingFormKey = Mod.GetNextFormKey();
             branch.StartingTopic = new FormLinkNullable<IDialogTopicGetter>(startingFormKey);
 
-            var createdTopics = new HashSet<LinkedTopic>();
+            var createdTopics = new List<LinkedTopic>();
             var topicQueue = new Queue<LinkedTopic>();
             topicQueue.Enqueue(new LinkedTopic(startingFormKey, dialogueTopic, string.Empty, true));
             
