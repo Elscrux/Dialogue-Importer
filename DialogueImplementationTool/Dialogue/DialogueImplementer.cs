@@ -4,7 +4,6 @@ using System.Linq;
 using DialogueImplementationTool.Dialogue.Responses;
 using DialogueImplementationTool.Dialogue.Topics;
 using DialogueImplementationTool.Parser;
-using DynamicData;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
@@ -12,7 +11,7 @@ using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace DialogueImplementationTool.Dialogue; 
 
-public class DialogueImplementer {
+public sealed class DialogueImplementer {
     public static readonly IGameEnvironment<ISkyrimMod, ISkyrimModGetter> Environment = GameEnvironment.Typical.Skyrim(SkyrimRelease.SkyrimSE);
     public static IQuestGetter Quest = new Quest(FormKey.Null, SkyrimRelease.SkyrimSE);
 
@@ -46,11 +45,11 @@ public class DialogueImplementer {
             .ForEach(d => d.PostProcess());
     }
     
-    private record SharedLineLink(DialogueTopic TopicUsingLine, SharedLine? Last, SharedLine? Next) {
+    private sealed record SharedLineLink(DialogueTopic TopicUsingLine, SharedLine? Last, SharedLine? Next) {
         public SharedLine? Next { get; set; } = Next;
     }
     
-    private record SharedLine : DialogueResponse {
+    private sealed record SharedLine : DialogueResponse {
         public SharedLine(DialogueResponse dialogueResponse, FormKey speaker) {
             Response = dialogueResponse.Response;
             ScriptNote = dialogueResponse.ScriptNote;
@@ -60,7 +59,7 @@ public class DialogueImplementer {
         public FormKey Speaker { get; init; }
         public List<SharedLineLink> Users { get; } = new();
 
-        public virtual bool Equals(SharedLine? other) {
+        public bool Equals(SharedLine? other) {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
 
@@ -71,7 +70,7 @@ public class DialogueImplementer {
         }
     }
     
-    private class CommonSharedLine {
+    private sealed class CommonSharedLine {
         public CommonSharedLine(SharedLine sharedLine) {
             SharedLines.Add(sharedLine);
         }
@@ -194,29 +193,27 @@ public class DialogueImplementer {
                 if (indexOf == -1) {
                     Console.Write($"ERROR: Response {firstShared.Response} is not part of {string.Join(" ", currentTopic.Responses)}");
                 } else if (indexOf == 0) {
+                    // Shared info starts the topic, make the current topic the shared info
                     currentTopic.SharedInfo = sharedInfo;
-                    currentTopic.InvisibleContinue = true;
 
                     var nextRange = currentTopic.Responses.GetRange(sharedTopic.Responses.Count, currentTopic.Responses.Count - sharedTopic.Responses.Count - indexOf);
                     if (nextRange.Count > 0) {
+                        // If something comes after the shared info, create a new topic for it
+                        // currentTopic => nextTopic
                         var nextTopic = new DialogueTopic {
                             Text = invisibleCont,
                             IncomingLink = currentTopic,
                             Speaker = currentTopic.Speaker,
                         };
                         nextTopic.Responses.AddRange(nextRange);
-
-                        nextTopic.Links.Add(currentTopic.Links);
-                        foreach (var dialogueTopic in currentTopic.Links) {
-                            dialogueTopic.IncomingLink = nextTopic;
-                        }
                         
-                        currentTopic.Links.Clear();
-                        currentTopic.Links.Add(nextTopic);
+                        currentTopic.Append(nextTopic);
                     }
-                    
+
+                    // Get rid of all lines that aren't part of the invisible continue
                     currentTopic.Responses.RemoveRange(indexOf + sharedTopic.Responses.Count, currentTopic.Responses.Count - sharedTopic.Responses.Count);
                 } else {
+                    // Shared info is in the middle of the topic, either at the end or the middle
                     var invisibleContTopic = new DialogueTopic {
                         Text = invisibleCont,
                         IncomingLink = currentTopic,
@@ -224,9 +221,14 @@ public class DialogueImplementer {
                         Speaker = currentTopic.Speaker,
                     };
                     invisibleContTopic.Responses.AddRange(sharedTopic.Responses);
+                    currentTopic.Append(invisibleContTopic);
 
                     var nextRange = currentTopic.Responses.GetRange(indexOf + sharedTopic.Responses.Count, currentTopic.Responses.Count - sharedTopic.Responses.Count - indexOf);
                     if (nextRange.Count > 0) {
+                        // Inserting the shared info in the middle of other responses
+                        // currentTopic => invisibleContTopic => nextTopic
+                        
+                        // Build next topic from the remaining responses
                         var nextTopic = new DialogueTopic {
                             Text = invisibleCont,
                             IncomingLink = invisibleContTopic,
@@ -234,22 +236,12 @@ public class DialogueImplementer {
                         };
                         nextTopic.Responses.AddRange(nextRange);
                         
-                        invisibleContTopic.Links.Add(nextTopic);
-                        
-                        nextTopic.Links.Add(currentTopic.Links);
-                        foreach (var dialogueTopic in currentTopic.Links) {
-                            dialogueTopic.IncomingLink = nextTopic;
-                        }
-                    } else {
-                        invisibleContTopic.Links.Add(currentTopic.Links);
-                        foreach (var dialogueTopic in currentTopic.Links) {
-                            dialogueTopic.IncomingLink = invisibleContTopic;
-                        }
+                        // Handle all the linking, flags etc.
+                        invisibleContTopic.Append(nextTopic);
                     }
-                    
+
+                    // Get rid of all lines that aren't part of the base topic and are now part of the invisible continue or the next topic after that
                     currentTopic.Responses.RemoveRange(indexOf, currentTopic.Responses.Count - indexOf);
-                    currentTopic.Links.Clear();
-                    currentTopic.Links.Add(invisibleContTopic);
                 }
             }
         }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using DialogueImplementationTool.Dialogue.Responses;
+using DynamicData;
 namespace DialogueImplementationTool.Dialogue.Topics; 
 
 public record DialogueTopic {
@@ -55,5 +56,29 @@ public record DialogueTopic {
             }
             yield return dialogueTopic;
         }
+    }
+
+    /// <summary>
+    /// Links to be played after this topic, linked with an invisible continue
+    /// This handles all relinking of topics, flags, etc.
+    /// </summary>
+    /// <param name="nextTopic"></param>
+    public void Append(DialogueTopic nextTopic) {
+        // Handle invisible continue
+        InvisibleContinue = true;
+
+        // Handle Goodbye
+        if (Goodbye) {
+            nextTopic.Goodbye = true;
+            Goodbye = false;
+        }
+
+        // Handle Links
+        nextTopic.Links.Add(Links);
+        foreach (var linkingTopic in Links) {
+            linkingTopic.IncomingLink = nextTopic;
+        }
+        Links.Clear();
+        Links.Add(nextTopic);
     }
 }
