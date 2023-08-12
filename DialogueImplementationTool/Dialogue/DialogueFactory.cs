@@ -60,18 +60,19 @@ public abstract class DialogueFactory {
     public static DialogResponses GetResponses(DialogueTopic topic, FormKey? previousDialogue = null) {
         var previousDialog = new FormLinkNullable<IDialogResponsesGetter>(previousDialogue ?? FormKey.Null);
         
-        if (topic.SharedInfo != null) {
-            var dialogResponses = topic.SharedInfo.GetResponseData();
-            dialogResponses.PreviousDialog = previousDialog;
-            
-            return dialogResponses;
-        }
-
         var flags = new DialogResponseFlags();
 
         if (topic.SayOnce) flags.Flags |= DialogResponses.Flag.SayOnce;
         if (topic.Goodbye) flags.Flags |= DialogResponses.Flag.Goodbye;
         if (topic.InvisibleContinue) flags.Flags |= DialogResponses.Flag.InvisibleContinue;
+
+        if (topic.SharedInfo != null) {
+            var dialogResponses = topic.SharedInfo.GetResponseData();
+            dialogResponses.PreviousDialog = previousDialog;
+            dialogResponses.Flags = flags;
+
+            return dialogResponses;
+        }
 
         return new DialogResponses(Mod.GetNextFormKey(), Release) {
             Responses = topic.Responses.Select((line, i) => new DialogResponse {
