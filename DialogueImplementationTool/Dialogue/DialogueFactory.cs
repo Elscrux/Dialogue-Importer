@@ -70,6 +70,7 @@ public abstract class DialogueFactory {
         var flags = new DialogResponseFlags();
 
         if (topic.SayOnce) flags.Flags |= DialogResponses.Flag.SayOnce;
+        if (topic.Goodbye) flags.Flags |= DialogResponses.Flag.Goodbye;
         if (topic.InvisibleContinue) flags.Flags |= DialogResponses.Flag.InvisibleContinue;
 
         return new DialogResponses(Mod.GetNextFormKey(), Release) {

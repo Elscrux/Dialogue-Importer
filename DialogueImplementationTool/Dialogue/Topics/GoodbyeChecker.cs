@@ -13,7 +13,7 @@ public class GoodbyeChecker : IDialogueTopicPostProcessor {
 		response.Response = GoodbyeRegex.Replace(response.Response, string.Empty);
 
 		if (response.Response != previousResponse) {
-			topic.SayOnce = true;
+			topic.Goodbye = true;
 		}
 	}
 }
