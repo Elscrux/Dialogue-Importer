@@ -7,7 +7,7 @@ public class GoodbyeChecker : IDialogueTopicPostProcessor {
 	public void Process(DialogueTopic topic) {
 		if (topic.Responses.Count == 0) return;
 
-		var response = topic.Responses[0];
+		var response = topic.Responses[^1];
 		var previousResponse = response.Response;
 
 		response.Response = GoodbyeRegex.Replace(response.Response, string.Empty);
