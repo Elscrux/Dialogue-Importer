@@ -69,9 +69,8 @@ public abstract class DialogueFactory {
 
         var flags = new DialogResponseFlags();
 
-        if (topic.SayOnce) {
-            flags.Flags |= DialogResponses.Flag.SayOnce;
-        }
+        if (topic.SayOnce) flags.Flags |= DialogResponses.Flag.SayOnce;
+        if (topic.InvisibleContinue) flags.Flags |= DialogResponses.Flag.InvisibleContinue;
 
         return new DialogResponses(Mod.GetNextFormKey(), Release) {
             Responses = topic.Responses.Select((line, i) => new DialogResponse {
@@ -91,19 +90,22 @@ public abstract class DialogueFactory {
     public static ExtendedList<Condition> GetSpeakerConditions(ISpeaker speaker) {
         var list = new ExtendedList<Condition>();
 
-        if (DialogueImplementer.Environment.LinkCache.TryResolve<INpcGetter>(speaker.FormKey, out var npc)) {
+        if (speaker is AliasSpeaker aliasSpeaker) {
+            list.Add(new ConditionFloat {
+                CompareOperator = CompareOperator.EqualTo,
+                ComparisonValue = 1,
+                Data = new FunctionConditionData {
+                    Function = Condition.Function.GetIsAliasRef,
+                    ParameterOneNumber = aliasSpeaker.AliasIndex
+                }
+            });
+        } else if (DialogueImplementer.Environment.LinkCache.TryResolve<INpcGetter>(speaker.FormKey, out var npc)) {
             list.Add(GetFormKeyCondition(Condition.Function.GetIsID, npc.FormKey));
-        }
-
-        if (DialogueImplementer.Environment.LinkCache.TryResolve<IFactionGetter>(speaker.FormKey, out var faction)) {
+        } else if (DialogueImplementer.Environment.LinkCache.TryResolve<IFactionGetter>(speaker.FormKey, out var faction)) {
             list.Add(GetFormKeyCondition(Condition.Function.GetInFaction, faction.FormKey));
-        }
-
-        if (DialogueImplementer.Environment.LinkCache.TryResolve<IVoiceTypeGetter>(speaker.FormKey, out var voiceType)) {
+        } else if (DialogueImplementer.Environment.LinkCache.TryResolve<IVoiceTypeGetter>(speaker.FormKey, out var voiceType)) {
             list.Add(GetFormKeyCondition(Condition.Function.GetIsVoiceType, voiceType.FormKey));
-        }
-
-        if (DialogueImplementer.Environment.LinkCache.TryResolve<IFormListGetter>(speaker.FormKey, out var formList)) {
+        } else if (DialogueImplementer.Environment.LinkCache.TryResolve<IFormListGetter>(speaker.FormKey, out var formList)) {
             list.Add(GetFormKeyCondition(Condition.Function.GetIsVoiceType, formList.FormKey));
         }
 

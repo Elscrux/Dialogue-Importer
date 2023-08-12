@@ -82,10 +82,10 @@ public class DialogueImplementer {
         public SharedLine? CommonNext { get; set; }
     }
 
-    private static void ConvertToSharedLines(List<GeneratedDialogue> dialogue) { 
+    private static void ConvertToSharedLines(List<GeneratedDialogue> dialogue) {
+        // Convert to shared line objects that store the speaker and text per line/response
+        // and links to the shared line to be able to check which lines are reused multiple times
         var sharedLines = new HashSet<SharedLine>();
-
-        //Convert dialogue to shared lines, where objects can be shared on a line/response level
         foreach (var generated in dialogue) {
             foreach (var rootTopic in generated.Topics) {
                 foreach (var topic in rootTopic.EnumerateLinks()) {
@@ -110,12 +110,12 @@ public class DialogueImplementer {
                 }
             }
         }
-        
-        //Remove lines that aren't shared
+
+        // Remove lines that aren't shared, meaning they are only used once 
         sharedLines.RemoveWhere(l => l.Users.Count < 2);
-        
-        //Build a dictionary of all shared lines and potentially their common last or next line
-        //depending on where the shared line is used and if they also have a common speaker
+
+        // Build a dictionary of all shared lines and potentially their common last or next line
+        // depending on where the shared line is used and if they also have a common speaker
         var commonSharedLines = new List<CommonSharedLine>();
         foreach (var currentSharedLine in sharedLines) {
             var sharingLast = currentSharedLine.Users
@@ -155,7 +155,7 @@ public class DialogueImplementer {
             
             if (current.CommonNext != null) {
                 var nextLine = commonSharedLines.FirstOrDefault(l => l.SharedLines.Contains(current.CommonNext));
-                if (nextLine is { CommonLast: {} } && nextLine.CommonLast.Equals(current.SharedLines[^1])) {
+                if (nextLine is { CommonLast: not null } && nextLine.CommonLast.Equals(current.SharedLines[^1])) {
                     //Add last line to current
                     current.SharedLines.AddRange(nextLine.SharedLines);
                     current.CommonNext = nextLine.CommonNext;
@@ -195,6 +195,7 @@ public class DialogueImplementer {
                     Console.Write($"ERROR: Response {firstShared.Response} is not part of {string.Join(" ", currentTopic.Responses)}");
                 } else if (indexOf == 0) {
                     currentTopic.SharedInfo = sharedInfo;
+                    currentTopic.InvisibleContinue = true;
 
                     var nextRange = currentTopic.Responses.GetRange(sharedTopic.Responses.Count, currentTopic.Responses.Count - sharedTopic.Responses.Count - indexOf);
                     if (nextRange.Count > 0) {

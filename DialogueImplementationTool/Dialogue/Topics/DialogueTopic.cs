@@ -24,6 +24,8 @@ public record DialogueTopic {
     public readonly List<DialogueTopic> Links = new();
     public DialogueTopic? IncomingLink { get; set; }
     public bool SayOnce { get; set; }
+    public bool Goodbye { get; set; }
+    public bool InvisibleContinue { get; set; }
 
     public void Build() {
         foreach (var preProcessor in PreProcessors) {
