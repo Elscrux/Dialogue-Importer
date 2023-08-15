@@ -14,8 +14,6 @@ public abstract class DialogueFactory {
     private const string ModName = "DialogueOutput";
     public static readonly string OutputFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Output");
 
-    protected IQuest? OverrideQuest = null;
-
     private static string GetNewModName() {
         var index = 1;
         var fileInfo = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Output", $"{ModName}{index}.esp"));

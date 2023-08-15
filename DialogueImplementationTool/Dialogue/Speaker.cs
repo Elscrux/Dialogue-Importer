@@ -13,7 +13,7 @@ public interface ISpeaker {
     public string Name { get; set; }
 }
 
-public record Speaker : ISpeaker {
+public class Speaker : ISpeaker {
     private static readonly Regex WhitespaceRegex = new(@"\s+");
     
     public FormKey FormKey { get; set; }

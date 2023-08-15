@@ -83,7 +83,8 @@ public class DialogueVM : ViewModel {
     public ICommand Previous { get; }
     public ICommand Next { get; }
     public ICommand SkipMany { get; }
-    [Reactive] public string Title { get; set; }
+    [Reactive] public string Title { get; set; } = string.Empty;
+    [Reactive] public bool UseGetIsAliasRef { get; set; }
 
     public DialogueVM() {
         SetSpeaker = ReactiveCommand.Create((FormKey formKey) => SpeakerFormKey = formKey);
@@ -141,10 +142,14 @@ public class DialogueVM : ViewModel {
                 IsNotLastIndex = Index < DocumentParser.LastIndex;
                 
                 if (DialogueTypeList.Count > Index) {
-                    if (DialogueTypeList[Index].Speaker != FormKey.Null) {
-                        SpeakerFormKey = DialogueTypeList[Index].Speaker;                        
-                    } else {
+                    if (DialogueTypeList[Index].Speaker == FormKey.Null) {
+                        // Keep current speaker for fresh dialogue and set in list
                         DialogueTypeList[Index].Speaker = SpeakerFormKey;
+                        DialogueTypeList[Index].UseGetIsAliasRef = UseGetIsAliasRef;
+                    } else {
+                        // Load speaker from list
+                        SpeakerFormKey = DialogueTypeList[Index].Speaker;
+                        UseGetIsAliasRef = DialogueTypeList[Index].UseGetIsAliasRef;
                     }
                     GreetingSelected = DialogueTypeList[Index].Selection[DialogueType.Greeting];
                     FarewellSelected = DialogueTypeList[Index].Selection[DialogueType.Farewell];
@@ -198,6 +203,11 @@ public class DialogueVM : ViewModel {
         this.WhenAnyValue(v => v.QuestSceneSelected)
             .Subscribe(_ => {
                 if (DialogueTypeList.Count > Index) DialogueTypeList[Index].Selection[DialogueType.QuestScene] = QuestSceneSelected;
+            });
+        
+        this.WhenAnyValue(v => v.UseGetIsAliasRef)
+            .Subscribe(x => {
+                if (DialogueTypeList.Count > Index) DialogueTypeList[Index].UseGetIsAliasRef = x;
             });
     }
 

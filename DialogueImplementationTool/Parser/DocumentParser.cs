@@ -96,8 +96,8 @@ public abstract class DocumentParser {
     public List<GeneratedDialogue> GetDialogue() {
         var dialogue = new List<GeneratedDialogue>();
         for (var i = 0; i < App.DialogueVM.DialogueTypeList.Count; i++) {
-            var (selection, speakerFormKey) = App.DialogueVM.DialogueTypeList[i];
-            foreach (var (dialogueType, selected) in selection) {
+            var selection = App.DialogueVM.DialogueTypeList[i];
+            foreach (var (dialogueType, selected) in selection.Selection) {
                 if (selected) {
                     var dialogueTopics = ParseDialogue(dialogueType, i);
                     foreach (var rootTopic in dialogueTopics) {
@@ -106,7 +106,7 @@ public abstract class DocumentParser {
                         }
                     }
                     
-                    dialogue.Add(new GeneratedDialogue(dialogueType, dialogueTopics, speakerFormKey));
+                    dialogue.Add(new GeneratedDialogue(dialogueType, dialogueTopics, selection.Speaker, selection.UseGetIsAliasRef));
                 }
             }
         }

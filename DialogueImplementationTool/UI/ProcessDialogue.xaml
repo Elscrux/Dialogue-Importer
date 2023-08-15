@@ -78,16 +78,21 @@
                                        ScopedTypes="{Binding SpeakerTypes, Mode=OneWay}" />
                 
                 <GroupBox Header="Favorites" MinHeight="100">
-                    <ListBox ItemsSource="{Binding SpeakerFavourites}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Button Content="{Binding EditorID}"
-                                        Click="SpeakerFavouriteSelect_OnClick"
-                                        CommandParameter="{Binding}" />
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                    <ScrollViewer>
+                        <ListBox ItemsSource="{Binding SpeakerFavourites}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Content="{Binding EditorID}"
+                                            Click="SpeakerFavouriteSelect_OnClick"
+                                            CommandParameter="{Binding}" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </ScrollViewer>
                 </GroupBox>
+                
+                <CheckBox Content="Use GetIsAliasRef"
+                          IsChecked="{Binding UseGetIsAliasRef}"/>
             </StackPanel>
         </GroupBox>
 

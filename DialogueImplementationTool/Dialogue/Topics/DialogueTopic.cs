@@ -4,7 +4,7 @@ using DialogueImplementationTool.Dialogue.Responses;
 using DynamicData;
 namespace DialogueImplementationTool.Dialogue.Topics; 
 
-public record DialogueTopic {
+public sealed class DialogueTopic {
     private static readonly IEnumerable<IDialogueTopicPostProcessor> PreProcessors = new List<IDialogueTopicPostProcessor> {
         new SayOnceChecker(),
         new GoodbyeChecker(),

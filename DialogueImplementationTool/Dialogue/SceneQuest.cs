@@ -5,20 +5,15 @@ using DialogueImplementationTool.Dialogue.Topics;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue; 
 
-public class QuestScene : SceneFactory {
+public sealed class QuestScene : SceneFactory {
     private static int _questSceneCount = 1; 
     
     public override void GenerateDialogue(List<DialogueTopic> topics) {
         //Get all topics in order
         var allTopics = GetAllTopics(topics);
-        
-        if (OverrideQuest == null) {
-            var questContext = DialogueImplementer.Environment.LinkCache.ResolveContext<IQuest, IQuestGetter>(DialogueImplementer.Quest.FormKey);
-            OverrideQuest = questContext.GetOrAddAsOverride(Mod);
-        }
-        
+
         //Detect existing aliases
-        foreach (var alias in OverrideQuest.Aliases) {
+        foreach (var alias in DialogueImplementer.OverrideQuest.Aliases) {
             if (alias.UniqueActor.IsNull) continue;
 
             foreach (var speaker in AliasSpeakers.Where(speaker => speaker.FormKey == alias.UniqueActor.FormKey)) {
@@ -26,13 +21,13 @@ public class QuestScene : SceneFactory {
                 break;
             }
         }
-        
+
         //Add missing aliases
         foreach (var speaker in AliasSpeakers.Where(speaker => speaker.AliasIndex == -1)) {
             var newAlias = GetAlias(speaker);
-            newAlias.ID = Convert.ToUInt32(OverrideQuest.Aliases.Count);
-            speaker.AliasIndex = OverrideQuest.Aliases.Count;
-            OverrideQuest.Aliases.Add(newAlias);
+            newAlias.ID = Convert.ToUInt32(DialogueImplementer.OverrideQuest.Aliases.Count);
+            speaker.AliasIndex = DialogueImplementer.OverrideQuest.Aliases.Count;
+            DialogueImplementer.OverrideQuest.Aliases.Add(newAlias);
         }
 
         //Add scene

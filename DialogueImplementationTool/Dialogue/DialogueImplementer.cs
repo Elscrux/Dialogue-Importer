@@ -14,6 +14,7 @@ namespace DialogueImplementationTool.Dialogue;
 public sealed class DialogueImplementer {
     public static readonly IGameEnvironment<ISkyrimMod, ISkyrimModGetter> Environment = GameEnvironment.Typical.Skyrim(SkyrimRelease.SkyrimSE);
     public static IQuestGetter Quest = new Quest(FormKey.Null, SkyrimRelease.SkyrimSE);
+    public static IQuest OverrideQuest = null!;
 
     public static DialogueFactory GetDialogueFactory(DialogueType type) {
         return type switch {
@@ -29,6 +30,10 @@ public sealed class DialogueImplementer {
 
     public DialogueImplementer(FormKey questFormKey) {
         Quest = questFormKey != FormKey.Null ? Environment.LinkCache.Resolve<IQuestGetter>(questFormKey) : new Quest(FormKey.Null, SkyrimRelease.SkyrimSE);
+        if (Quest.FormKey.IsNull) return;
+
+        var questContext = Environment.LinkCache.ResolveContext<IQuest, IQuestGetter>(Quest.FormKey);
+        OverrideQuest = questContext.GetOrAddAsOverride(DialogueFactory.Mod);
     }
 
     public void ImplementDialogue(List<GeneratedDialogue> dialogue) {
@@ -50,23 +55,23 @@ public sealed class DialogueImplementer {
     }
     
     private sealed record SharedLine : DialogueResponse {
-        public SharedLine(DialogueResponse dialogueResponse, FormKey speaker) {
+        public SharedLine(DialogueResponse dialogueResponse, ISpeaker speaker) {
             Response = dialogueResponse.Response;
             ScriptNote = dialogueResponse.ScriptNote;
             Speaker = speaker;
         }
         
-        public FormKey Speaker { get; init; }
+        public ISpeaker Speaker { get; }
         public List<SharedLineLink> Users { get; } = new();
 
         public bool Equals(SharedLine? other) {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
 
-            return base.Equals(other) && Speaker.Equals(other.Speaker);
+            return base.Equals(other) && Speaker.FormKey.Equals(other.Speaker.FormKey);
         }
         public override int GetHashCode() {
-            return HashCode.Combine(base.GetHashCode(), Speaker);
+            return HashCode.Combine(base.GetHashCode(), Speaker.FormKey);
         }
     }
     
@@ -93,7 +98,7 @@ public sealed class DialogueImplementer {
                     SharedLine? next = null;
                     foreach (var response in topic.Responses) {
                         //Get unique shared line
-                        var sharedLine = new SharedLine(response, topic.Speaker.FormKey);
+                        var sharedLine = new SharedLine(response, topic.Speaker);
                         if (sharedLines.TryGetValue(sharedLine, out var existingSharedLine)) {
                             sharedLine = existingSharedLine;
                         }
@@ -173,7 +178,7 @@ public sealed class DialogueImplementer {
             //Convert common shared lines to shared infos
             var sharedTopic = new DialogueTopic();
             sharedTopic.Responses.AddRange(commonSharedLine.SharedLines);
-            sharedTopic.Speaker = new Speaker(firstShared.Speaker);
+            sharedTopic.Speaker = firstShared.Speaker;
             
             var sharedInfo = new SharedInfo(sharedTopic);
             
