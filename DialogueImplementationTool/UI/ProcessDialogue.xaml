@@ -31,7 +31,7 @@
     
     <DockPanel>
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="Save"
+            <MenuItem Header="Save and Close"
                       Click="Save_OnClick"
                       Margin="10,10,0,0"
                       HorizontalAlignment="Left" VerticalAlignment="Top" />

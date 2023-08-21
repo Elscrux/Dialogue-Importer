@@ -39,6 +39,10 @@ public partial class SceneSpeakerWindow {
 
         DataContext = this;
     }
+
+    private void Save_OnClick(object sender, RoutedEventArgs e) {
+        Close();
+    }
 }
 
 public class FormKeyWrapper {

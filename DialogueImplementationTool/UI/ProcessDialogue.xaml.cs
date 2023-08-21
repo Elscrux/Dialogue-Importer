@@ -11,7 +11,10 @@ public partial class ProcessDialogue {
         App.DialogueVM.RefreshPreview(true);
     }
 
-    private void Save_OnClick(object sender, RoutedEventArgs e) => App.DialogueVM.Save.Execute(null);
+    private void Save_OnClick(object sender, RoutedEventArgs e) {
+        App.DialogueVM.Save.Execute(null);
+        Close();
+    }
 
     private void OpenFolder_OnClick(object sender, RoutedEventArgs e) => App.DialogueVM.OpenOutput();
     
