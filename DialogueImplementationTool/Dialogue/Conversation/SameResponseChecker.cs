@@ -11,18 +11,28 @@ public sealed class SameResponseChecker : IConversationProcessor {
     }
 
     private void CheckTopics(IList<DialogueTopic> topics) {
-        for (var i = 0; i < topics.Count; i++) {
-            var currentTopic = topics[i];
-            CheckTopics(currentTopic.Links);
-            if (currentTopic.Responses.Count != 0) continue;
+        var processedTopics = new HashSet<DialogueTopic>();
+        var queueBacklog = new Queue<IList<DialogueTopic>>();
+        queueBacklog.Enqueue(topics);
 
-            // We found an empty topic
-            // Search for the next topic with any responses and use those
-            for (var j = i + 1; j < topics.Count; j++) {
-                if (topics[j].Responses.Count == 0) continue;
+        while (queueBacklog.Count > 0) {
+            var dialogueTopics = queueBacklog.Dequeue();
+            for (var i = 0; i < dialogueTopics.Count; i++) {
+                var currentTopic = dialogueTopics[i];
+                if (processedTopics.Contains(currentTopic)) continue;
 
-                currentTopic.Responses.AddRange(topics[j].Responses);
-                break;
+                processedTopics.Add(currentTopic);
+                queueBacklog.Enqueue(currentTopic.Links);
+                if (currentTopic.Responses.Count != 0) continue;
+
+                // We found an empty topic
+                // Search for the next topic with any responses and use those
+                for (var j = i + 1; j < dialogueTopics.Count; j++) {
+                    if (dialogueTopics[j].Responses.Count == 0) continue;
+
+                    currentTopic.Responses.AddRange(dialogueTopics[j].Responses);
+                    break;
+                }
             }
         }
     }
