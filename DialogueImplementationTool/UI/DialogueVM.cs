@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using DialogueImplementationTool.Dialogue;
 using DialogueImplementationTool.Parser;
@@ -18,7 +19,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace DialogueImplementationTool.UI;
 
-public class DialogueVM : ViewModel {
+public sealed class DialogueVM : ViewModel {
     public ILinkCache LinkCache { get; } = GameEnvironment.Typical.Skyrim(SkyrimRelease.SkyrimSE, LinkCachePreferences.OnlyIdentifiers()).LinkCache;
     public DocumentParser DocumentParser = DocumentParser.Null;
     public DialogueImplementer DialogueImplementer = new(FormKey.Null);
@@ -87,6 +88,12 @@ public class DialogueVM : ViewModel {
     [Reactive] public bool UseGetIsAliasRef { get; set; }
 
     public DialogueVM() {
+        Task.Run(() => {
+            foreach (var speakerType in SpeakerTypes) {
+                LinkCache.Warmup(speakerType);
+            }
+        });
+
         SetSpeaker = ReactiveCommand.Create((FormKey formKey) => SpeakerFormKey = formKey);
         SelectIndex = ReactiveCommand.Create<string>(indexStr => {
             switch (int.Parse(indexStr)) {
@@ -251,11 +258,10 @@ public class DialogueVM : ViewModel {
     public void OpenOutput() {
         if (!Directory.Exists(DialogueFactory.OutputFolder)) return;
 
-        using var process = new Process {
-            StartInfo = new ProcessStartInfo {
-                FileName = "explorer",
-                Arguments = $"\"{DialogueFactory.OutputFolder}\""
-            }
+        using var process = new Process();
+        process.StartInfo = new ProcessStartInfo {
+            FileName = "explorer",
+            Arguments = $"\"{DialogueFactory.OutputFolder}\""
         };
         process.Start();
     }

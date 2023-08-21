@@ -1,7 +1,7 @@
 ﻿using System;
 namespace DialogueImplementationTool.Dialogue.Topics; 
 
-public class SayOnceChecker : IDialogueTopicPostProcessor {
+public sealed class SayOnceChecker : IDialogueTopicPostProcessor {
     public void Process(DialogueTopic topic) {
         if (topic.Responses.Count == 0) return;
 

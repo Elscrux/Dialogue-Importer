@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 namespace DialogueImplementationTool.Dialogue.Topics;
 
-public class GoodbyeChecker : IDialogueTopicPostProcessor {
+public sealed class GoodbyeChecker : IDialogueTopicPostProcessor {
 	private static readonly Regex GoodbyeRegex = new(@"\[(exit|end) (dialog|dialogue|conversation|convo)\]");
 
 	public void Process(DialogueTopic topic) {

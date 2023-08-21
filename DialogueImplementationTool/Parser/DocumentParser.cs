@@ -7,7 +7,7 @@ using System.Windows.Forms;
 using DialogueImplementationTool.Dialogue;
 using DialogueImplementationTool.Dialogue.Topics;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
-namespace DialogueImplementationTool.Parser; 
+namespace DialogueImplementationTool.Parser;
 
 public abstract class DocumentParser {
     public static readonly DocumentParser Null = new NullDocumentParser(string.Empty);
@@ -19,24 +19,29 @@ public abstract class DocumentParser {
     }
 
     /*====================================================
-		Iterator
-	====================================================*/
+        Iterator
+    ====================================================*/
     private int _index;
+
     public int Index {
         get => _index;
-        protected set {
+        protected set
+        {
             _index = value;
             App.DialogueVM.Index = value;
         }
     }
+
     public abstract int LastIndex { get; }
-    
+
     public void Previous() {
         if (Index > 0) Index--;
     }
+
     public void Next() {
         if (Index < LastIndex) Index++;
     }
+
     public abstract void SkipMany();
     public abstract void BacktrackMany();
 
@@ -45,8 +50,8 @@ public abstract class DocumentParser {
 
 
     /*====================================================
-		Parsing
-	====================================================*/
+        Parsing
+    ====================================================*/
     private static readonly Dictionary<string, Type> DocumentParsers = new() {
         { ".odt", typeof(OpenDocumentTextParser) },
         { ".docx", typeof(DocXTextParser) },
@@ -80,14 +85,14 @@ public abstract class DocumentParser {
 
         return fileDialog.ShowDialog() is null or false ? null : CreateParser(fileDialog.FileName);
     }
-    
+
     public static IEnumerable<DocumentParser> LoadDocuments() {
         var folderDialog = new FolderBrowserDialog();
         if (folderDialog.ShowDialog() != DialogResult.OK) yield break;
 
         var extensions = DocumentParsers.Keys.ToList();
         foreach (var file in Directory.EnumerateFiles(folderDialog.SelectedPath, "*.*", SearchOption.AllDirectories)
-            .Where(file => extensions.Any(file.EndsWith))) {
+                     .Where(file => extensions.Any(file.EndsWith))) {
             var documentParser = CreateParser(file);
             if (documentParser != null) yield return documentParser;
         }
@@ -105,11 +110,12 @@ public abstract class DocumentParser {
                             topic.PostProcess();
                         }
                     }
-                    
+
                     dialogue.Add(new GeneratedDialogue(dialogueType, dialogueTopics, selection.Speaker, selection.UseGetIsAliasRef));
                 }
             }
         }
+
         return dialogue;
     }
 
@@ -128,6 +134,7 @@ public abstract class DocumentParser {
                 throw new ArgumentOutOfRangeException(nameof(dialogueType), dialogueType, null);
         }
     }
+
     protected abstract List<DialogueTopic> ParseDialogue(int index);
     protected abstract List<DialogueTopic> ParseOneLiner(int index);
     protected abstract List<DialogueTopic> ParseScene(int index);

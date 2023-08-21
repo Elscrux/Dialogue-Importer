@@ -1,7 +1,7 @@
 ﻿using System;
 namespace DialogueImplementationTool.Dialogue.Topics; 
 
-public class BackToOptionsLinker : IDialogueTopicPostProcessor {
+public sealed class BackToOptionsLinker : IDialogueTopicPostProcessor {
     public void Process(DialogueTopic topic) {
         if (topic.Responses.Count == 0) return;
 
