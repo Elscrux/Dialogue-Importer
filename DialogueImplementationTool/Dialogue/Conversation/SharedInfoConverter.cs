@@ -82,17 +82,11 @@ public sealed class SharedInfoConverter : IConversationProcessor {
         foreach (var currentSharedLine in sharedLines) {
             var sharingLast = currentSharedLine.Users
                 .Select(l => l.Last)
-                .NotNull()
-                .Where(l => l.Speaker == currentSharedLine.Speaker)
-                .Distinct()
-                .Count() == 1;
+                .All(l => l is not null && l.Speaker == currentSharedLine.Speaker);
 
             var sharingNext = currentSharedLine.Users
                 .Select(l => l.Next)
-                .NotNull()
-                .Where(l => l.Speaker == currentSharedLine.Speaker)
-                .Distinct()
-                .Count() == 1;
+                .All(l => l is not null && l.Speaker == currentSharedLine.Speaker);
 
             commonSharedLines.Add(new CommonSharedLine(currentSharedLine) {
                 CommonLast = sharingLast ? currentSharedLine.Users[0].Last : null,
@@ -100,25 +94,27 @@ public sealed class SharedInfoConverter : IConversationProcessor {
             });
         }
         
-        //Merge shared lines that are always in the same order
-        //Filter out lines that are linked to or from multiple shared lines, they can't be merged
+        // Merge shared lines that are always in the same order
+        // Filter out lines that are linked to or from multiple shared lines, they can't be merged
         foreach (var current in commonSharedLines) {
             if (current.SharedLines.Count == 0) continue;
 
+            // Try to merge the last line into the current one
             if (current.CommonLast != null) {
                 var lastLine = commonSharedLines.FirstOrDefault(l => l.SharedLines.Contains(current.CommonLast));
-                if (lastLine is { CommonNext: {} } && lastLine.CommonNext.Equals(current.SharedLines[0])) {
-                    //Add last line to current
+                if (lastLine is { CommonNext: not null } && lastLine.CommonNext.Equals(current.SharedLines[0])) {
+                    // Add last line to current
                     current.SharedLines.InsertRange(0, lastLine.SharedLines);
                     current.CommonLast = lastLine.CommonLast;
                     lastLine.SharedLines.Clear();
                 }
             }
             
+            // Try to merge the next line into the current one
             if (current.CommonNext != null) {
                 var nextLine = commonSharedLines.FirstOrDefault(l => l.SharedLines.Contains(current.CommonNext));
                 if (nextLine is { CommonLast: not null } && nextLine.CommonLast.Equals(current.SharedLines[^1])) {
-                    //Add last line to current
+                    // Add next line to current
                     current.SharedLines.AddRange(nextLine.SharedLines);
                     current.CommonNext = nextLine.CommonNext;
                     nextLine.SharedLines.Clear();
