@@ -16,6 +16,7 @@ public sealed class DialogueImplementer {
     public static IQuest OverrideQuest = null!;
 
     private static readonly IConversationProcessor[] ConversationProcessors = {
+        new SameResponseChecker(),
         new SharedInfoConverter(),
     };
 
