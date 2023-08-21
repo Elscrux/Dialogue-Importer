@@ -19,7 +19,8 @@
                                LinkCache="{Binding LinkCache, Mode=OneWay}"
                                ScopedTypes="{Binding QuestTypes, Mode=OneWay}"/>
 
-        <Grid Grid.Row="1" IsEnabled="{Binding ValidQuest}">
+        <Grid Grid.Row="1"
+              Visibility="{Binding ValidQuest, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid.RowDefinitions>
                 <RowDefinition/>
                 <RowDefinition/>
