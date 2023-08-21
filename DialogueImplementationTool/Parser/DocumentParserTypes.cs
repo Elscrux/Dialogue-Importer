@@ -12,13 +12,16 @@ public class GeneratedDialogue {
         Type = type;
         Topics = topics;
 
-        var alias = DialogueImplementer.OverrideQuest.GetOrAddAlias(DialogueImplementer.Environment.LinkCache, speakerFormKey);
-        ISpeaker speaker = useGetIsAliasRef
-            ? new AliasSpeaker(alias.Name) {
+        ISpeaker speaker;
+        if (useGetIsAliasRef) {
+            var alias = DialogueImplementer.OverrideQuest.GetOrAddAlias(DialogueImplementer.Environment.LinkCache, speakerFormKey);
+            speaker = new AliasSpeaker(alias.Name) {
                 FormKey = speakerFormKey,
                 AliasIndex = (int) alias.ID
-            }
-            : new Speaker(speakerFormKey);
+            };
+        } else {
+            speaker = new Speaker(speakerFormKey);
+        }
 
         //Set speaker for all linked topics
         foreach (var rootTopic in topics) {
