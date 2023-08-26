@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Linq;
 using System.Text.RegularExpressions;
 using DialogueImplementationTool.Parser;
 namespace DialogueImplementationTool.Dialogue.Responses;
@@ -12,8 +13,8 @@ public class ScriptNotesParser : IDialogueResponsePreProcessor {
 
     public DialogueResponse Process(DialogueResponse response, FormattedText text) {
         if (AreColorsSimilar(text.Color, OrangeColor, SimilarThreshold)) {
-            var match = InvalidBracesRegex.Match(text.Text);
-            return new DialogueResponse { ScriptNote = match.Success ? match.Groups[1].Value : text.Text };
+            var newScriptNotePart = string.Join(' ', InvalidBracesRegex.Matches(text.Text).Select(m => m.Groups[1].Value));
+            return new DialogueResponse { ScriptNote = response.ScriptNote + newScriptNotePart };
         }
         
         return response;
