@@ -27,6 +27,7 @@ public sealed class DialogueTopic {
     public bool SayOnce { get; set; }
     public bool Goodbye { get; set; }
     public bool InvisibleContinue { get; set; }
+    public bool Blocking { get; set; }
 
     public void Build() {
         foreach (var preProcessor in PreProcessors) {

@@ -18,6 +18,7 @@ public sealed class DialogueImplementer {
     private static readonly IConversationProcessor[] ConversationProcessors = {
         new SameResponseChecker(),
         new SharedInfoConverter(),
+        new BlockingChecker(),
     };
 
     public static DialogueFactory GetDialogueFactory(DialogueType type) {
