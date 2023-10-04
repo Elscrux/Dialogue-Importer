@@ -45,28 +45,28 @@
         <GroupBox DockPanel.Dock="Bottom" 
                   Header="2) Dialogue Type" >
             <UniformGrid>
-                <CheckBox Margin="5"
+                <ToggleButton Margin="5"
                           IsChecked="{Binding GreetingSelected}"
                           IsEnabled="{Binding ValidSpeaker}"
                           Content="Greeting" FontSize="36"/>
-                <CheckBox Margin="5"
-                          IsChecked="{Binding FarewellSelected}"
-                          IsEnabled="{Binding ValidSpeaker}"
-                          Content="Farewell" FontSize="36"/>
-                <CheckBox Margin="5"
-                          IsChecked="{Binding IdleSelected}"
-                          IsEnabled="{Binding ValidSpeaker}"
-                          Content="Idle" FontSize="36"/>
-                <CheckBox  Margin="5"
-                           IsChecked="{Binding DialogueSelected}"
-                           IsEnabled="{Binding ValidSpeaker}"
-                           Content="Branching Dialogue" FontSize="36"/>
-                <CheckBox Margin="5"
-                          IsChecked="{Binding GenericSceneSelected}"
-                          Content="Generic Scene" FontSize="36"/>
-                <CheckBox Margin="5"
-                          IsChecked="{Binding QuestSceneSelected}"
-                          Content="Quest Scene" FontSize="36"/>
+                <ToggleButton Margin="5"
+                              IsChecked="{Binding FarewellSelected}"
+                              IsEnabled="{Binding ValidSpeaker}"
+                              Content="Farewell" FontSize="36"/>
+                <ToggleButton Margin="5"
+                              IsChecked="{Binding IdleSelected}"
+                              IsEnabled="{Binding ValidSpeaker}"
+                              Content="Idle" FontSize="36"/>
+                <ToggleButton  Margin="5"
+                               IsChecked="{Binding DialogueSelected}"
+                               IsEnabled="{Binding ValidSpeaker}"
+                               Content="Branching Dialogue" FontSize="36"/>
+                <ToggleButton Margin="5"
+                              IsChecked="{Binding GenericSceneSelected}"
+                              Content="Generic Scene" FontSize="36"/>
+                <ToggleButton Margin="5"
+                              IsChecked="{Binding QuestSceneSelected}"
+                              Content="Quest Scene" FontSize="36"/>
             </UniformGrid>
         </GroupBox>
 
