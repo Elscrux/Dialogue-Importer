@@ -101,26 +101,32 @@ public sealed class DocXTextParser : DocumentParser {
     
         return topic;
     }
-    
+
     private void AddLinksAndResponses(Paragraph paragraph, DialogueTopic topic) {
         var startingIndentation = paragraph.IndentLevel;
-        
+
         //Add further responses
-        for (; paragraph != null && paragraph.IndentLevel == startingIndentation; paragraph = paragraph.NextParagraph) {
+        while (paragraph != null && paragraph.IndentLevel == startingIndentation) {
             topic.Responses.Add(DialogueResponse.Build(GetFormattedText(paragraph)));
+
+            paragraph = paragraph.NextParagraph;
+            while (paragraph is { IndentLevel: null } && paragraph.Xml != paragraph.NextParagraph.Xml) {
+                paragraph = paragraph.NextParagraph;
+            }
         }
-        
+
         //Add links
-        for (; paragraph != null && paragraph.IndentLevel > startingIndentation; paragraph = paragraph.NextParagraph) {
+        while (paragraph != null && paragraph.IndentLevel > startingIndentation) {
             if (paragraph.IndentLevel == startingIndentation + 1) {
                 var nextTopic = AddTopic(paragraph);
                 nextTopic.IncomingLink = topic;
                 topic.Links.Add(nextTopic);
                 nextTopic.Build();
             }
+            paragraph = paragraph.NextParagraph;
         }
     }
-    
+
     private bool IsPlayerLine(Paragraph paragraph) => paragraph.MagicText.NotNull().All(magicText => magicText.formatting?.Bold is not (null or false));
 
     private IEnumerable<FormattedText> GetFormattedText(Paragraph paragraph) {
