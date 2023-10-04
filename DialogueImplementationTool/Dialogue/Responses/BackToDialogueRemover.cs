@@ -1,15 +1,9 @@
-﻿using System;
+﻿using System.Text.RegularExpressions;
 namespace DialogueImplementationTool.Dialogue.Responses; 
 
 public class BackToDialogueRemover : IDialogueResponsePostProcessor {
+	private readonly Regex _regex = new(@"(?i)\[back to (root|top|main)( level( (dialogue|options))?)?\]");
     public void Process(DialogueResponse response) {
-        response.Response = response.Response
-            .Replace("[back to root]", string.Empty, StringComparison.OrdinalIgnoreCase)
-            .Replace("[back to top dialogue]", string.Empty, StringComparison.OrdinalIgnoreCase)
-            .Replace("[back to top level dialogue]", string.Empty, StringComparison.OrdinalIgnoreCase)
-            .Replace("[back to dialogue options]", string.Empty, StringComparison.OrdinalIgnoreCase)
-            .Replace("[back to dialogue]", string.Empty, StringComparison.OrdinalIgnoreCase)
-            .Replace("[back to root dialogue]", string.Empty, StringComparison.OrdinalIgnoreCase)
-            .Replace("[back to main dialogue]", string.Empty, StringComparison.OrdinalIgnoreCase);
+	    response.Response = _regex.Replace(response.Response, string.Empty);
     }
 }
