@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using DialogueImplementationTool.Dialogue.Topics;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 namespace DialogueImplementationTool.Dialogue; 
 
 public sealed class QuestScene : SceneFactory {
@@ -23,8 +25,9 @@ public sealed class QuestScene : SceneFactory {
         }
 
         //Add missing aliases
+        var addedAliases = new Dictionary<FormKey, QuestAlias>();
         foreach (var speaker in AliasSpeakers.Where(speaker => speaker.AliasIndex == -1)) {
-            var newAlias = GetAlias(speaker);
+            var newAlias = addedAliases.GetOrAdd(speaker.FormKey, () => GetAlias(speaker));
             newAlias.ID = Convert.ToUInt32(DialogueImplementer.OverrideQuest.Aliases.Count);
             speaker.AliasIndex = DialogueImplementer.OverrideQuest.Aliases.Count;
             DialogueImplementer.OverrideQuest.Aliases.Add(newAlias);
