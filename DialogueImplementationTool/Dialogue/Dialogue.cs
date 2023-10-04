@@ -25,10 +25,12 @@ public sealed class Dialogue : DialogueFactory {
                 Quest = new FormLinkNullable<IQuestGetter>(DialogueImplementer.Quest.FormKey),
                 Flags = DialogBranch.Flag.TopLevel
             };
-            if (dialogueTopic.Blocking) branch.Flags |= DialogBranch.Flag.Blocking;
+
+            branch.Flags |= dialogueTopic.Blocking
+                ? DialogBranch.Flag.Blocking
+                : DialogBranch.Flag.TopLevel;
             Mod.DialogBranches.Add(branch);
 
-            
             var startingFormKey = Mod.GetNextFormKey();
             branch.StartingTopic = new FormLinkNullable<IDialogTopicGetter>(startingFormKey);
 
