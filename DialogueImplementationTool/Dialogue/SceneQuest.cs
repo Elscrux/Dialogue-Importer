@@ -20,7 +20,6 @@ public sealed class QuestScene : SceneFactory {
 
             foreach (var speaker in AliasSpeakers.Where(speaker => speaker.FormKey == alias.UniqueActor.FormKey)) {
                 speaker.AliasIndex = Convert.ToInt32(alias.ID);
-                break;
             }
         }
 
