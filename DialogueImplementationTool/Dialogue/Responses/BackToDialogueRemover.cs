@@ -8,6 +8,8 @@ public class BackToDialogueRemover : IDialogueResponsePostProcessor {
             .Replace("[back to top dialogue]", string.Empty, StringComparison.OrdinalIgnoreCase)
             .Replace("[back to top level dialogue]", string.Empty, StringComparison.OrdinalIgnoreCase)
             .Replace("[back to dialogue options]", string.Empty, StringComparison.OrdinalIgnoreCase)
-            .Replace("[back to dialogue]", string.Empty, StringComparison.OrdinalIgnoreCase);
+            .Replace("[back to dialogue]", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("[back to root dialogue]", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("[back to main dialogue]", string.Empty, StringComparison.OrdinalIgnoreCase);
     }
 }
