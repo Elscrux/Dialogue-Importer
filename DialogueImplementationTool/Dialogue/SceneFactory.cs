@@ -118,7 +118,6 @@ public abstract class SceneFactory : DialogueFactory {
         return new QuestAlias {
             Name = aliasSpeaker.Name,
             UniqueActor = new FormLinkNullable<INpcGetter>(aliasSpeaker.FormKey),
-            Flags = QuestAlias.Flag.AllowReserved | QuestAlias.Flag.AllowReuseInQuest,
             VoiceTypes = new FormLinkNullable<IAliasVoiceTypeGetter>(FormKey.Null)
         };
     }

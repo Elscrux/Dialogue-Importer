@@ -26,10 +26,13 @@ public class GenericScene : SceneFactory {
         alias1.ID = 0;
         var alias2 = GetEventAlias("Actor 2", AliasSpeakers[0].FormKey, AliasSpeakers[1].FormKey);
         alias2.ID = 1;
+        const QuestAlias.Flag genericSceneAliasFlags = QuestAlias.Flag.AllowReserved | QuestAlias.Flag.AllowReserved;
         var alias3 = GetAlias(AliasSpeakers[0]);
         alias3.ID = 2;
+        alias3.Flags |= genericSceneAliasFlags;
         var alias4 = GetAlias(AliasSpeakers[1]);
         alias4.ID = 3;
+        alias4.Flags |= genericSceneAliasFlags;
         
         var quest = new Quest(Mod.GetNextFormKey(), Release) {
             EditorID = questEditorID,
