@@ -9,6 +9,7 @@ using DialogueImplementationTool.Dialogue.Topics;
 using DialogueImplementationTool.UI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
+using Mutagen.Bethesda.Skyrim.Internals;
 using Noggog;
 using Condition = Mutagen.Bethesda.Skyrim.Condition;
 namespace DialogueImplementationTool.Dialogue; 
@@ -98,12 +99,12 @@ public abstract class SceneFactory : DialogueFactory {
         }
     }
     
-    protected static QuestAlias GetEventAlias(string name, FormKey npc1, FormKey npc2) {
+    protected static QuestAlias GetEventAlias(string name, byte[] eventData, FormKey npc1, FormKey npc2) {
         return new QuestAlias {
             Name = name,
             FindMatchingRefFromEvent = new FindMatchingRefFromEvent {
-                FromEvent = "ADIA",
-                EventData = new MemorySlice<byte>(new byte[] { 0x52, 0x31, 0x0, 0x0 })
+                FromEvent = RecordTypes.ADIA,
+                EventData = eventData
             },
             Conditions = new ExtendedList<Condition> {
                 GetFormKeyCondition(Condition.Function.GetIsID, npc1, 1, true),

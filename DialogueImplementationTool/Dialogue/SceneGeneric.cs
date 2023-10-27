@@ -22,9 +22,9 @@ public class GenericScene : SceneFactory {
 
         //Add quest
         var questEditorID = $"{DialogueImplementer.Quest.EditorID}Scene{_genericSceneCount}";
-        var alias1 = GetEventAlias("Actor 1", AliasSpeakers[0].FormKey, AliasSpeakers[1].FormKey);
+        var alias1 = GetEventAlias("Actor 1", new byte[] { 0x52, 0x31, 0x0, 0x0 }, AliasSpeakers[0].FormKey, AliasSpeakers[1].FormKey);
         alias1.ID = 0;
-        var alias2 = GetEventAlias("Actor 2", AliasSpeakers[0].FormKey, AliasSpeakers[1].FormKey);
+        var alias2 = GetEventAlias("Actor 2", new byte[] { 0x52, 0x32, 0x0, 0x0 }, AliasSpeakers[0].FormKey, AliasSpeakers[1].FormKey);
         alias2.ID = 1;
         const QuestAlias.Flag genericSceneAliasFlags = QuestAlias.Flag.AllowReserved | QuestAlias.Flag.AllowReserved;
         var alias3 = GetAlias(AliasSpeakers[0]);
