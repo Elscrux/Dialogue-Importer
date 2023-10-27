@@ -2,6 +2,7 @@
 using System.Windows;
 using DialogueImplementationTool.Dialogue.Topics;
 using Mutagen.Bethesda.Skyrim;
+using Mutagen.Bethesda.Skyrim.Internals;
 using Noggog;
 namespace DialogueImplementationTool.Dialogue; 
 
@@ -39,7 +40,7 @@ public class GenericScene : SceneFactory {
             Priority = 10,
             Type = Quest.TypeEnum.None,
             Name = $"{DialogueImplementer.Quest.Name?.String} Scene {_genericSceneCount}",
-            Event = "ADIA",
+            Event = RecordTypes.ADIA,
             Aliases = new ExtendedList<QuestAlias> { alias1, alias2, alias3, alias4 }
         };
         Mod.Quests.Add(quest);
