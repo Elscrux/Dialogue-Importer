@@ -22,7 +22,6 @@ public static class QuestExtension {
 		var alias = new QuestAlias {
 			Name = aliasName,
 			UniqueActor = new FormLinkNullable<INpcGetter>(npcFormKey),
-			Flags = QuestAlias.Flag.AllowReserved | QuestAlias.Flag.AllowReuseInQuest,
 			VoiceTypes = new FormLinkNullable<IAliasVoiceTypeGetter>(FormKey.Null),
 			ID = Convert.ToUInt32(quest.Aliases.Count)
 		};
