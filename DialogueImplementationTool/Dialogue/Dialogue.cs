@@ -23,7 +23,6 @@ public sealed class Dialogue : DialogueFactory {
             var branch = new DialogBranch(Mod.GetNextFormKey(), Release) {
                 EditorID = DialogueImplementer.Quest.EditorID + dialogueTopic.Speaker.Name + NPCIndices[dialogueTopic.Speaker.Name],
                 Quest = new FormLinkNullable<IQuestGetter>(DialogueImplementer.Quest.FormKey),
-                Flags = DialogBranch.Flag.TopLevel
             };
 
             branch.Flags |= dialogueTopic.Blocking
