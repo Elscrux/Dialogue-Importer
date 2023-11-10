@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 namespace DialogueImplementationTool; 
 
-public class InvalidString {
-    public static readonly Dictionary<string, string> InvalidStrings = new() {
+public static class InvalidString {
+    public static Dictionary<string, string> InvalidStrings { get; } = new() {
         {"\r", ""},
         {"\n", ""},
         {"’", "'"},

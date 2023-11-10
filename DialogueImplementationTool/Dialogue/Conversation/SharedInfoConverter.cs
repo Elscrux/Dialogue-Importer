@@ -44,11 +44,11 @@ public sealed class SharedInfoConverter : IConversationProcessor {
         public SharedLine? CommonNext { get; set; }
     }
 
-    public void Process(IList<GeneratedDialogue> dialogue) {
+    public void Process(IList<GeneratedDialogue> dialogues) {
         // Convert to shared line objects that store the speaker and text per line/response
         // and links to the shared line to be able to check which lines are reused multiple times
         var sharedLines = new HashSet<SharedLine>();
-        foreach (var generated in dialogue) {
+        foreach (var generated in dialogues) {
             foreach (var rootTopic in generated.Topics) {
                 foreach (var topic in rootTopic.EnumerateLinks()) {
                     SharedLine? last = null;
@@ -101,7 +101,7 @@ public sealed class SharedInfoConverter : IConversationProcessor {
 
             // Try to merge the last line into the current one
             if (current.CommonLast != null) {
-                var lastLine = commonSharedLines.FirstOrDefault(l => l.SharedLines.Contains(current.CommonLast));
+                var lastLine = commonSharedLines.Find(l => l.SharedLines.Contains(current.CommonLast));
                 if (lastLine is { CommonNext: not null } && lastLine.CommonNext.Equals(current.SharedLines[0])) {
                     // Add last line to current
                     current.SharedLines.InsertRange(0, lastLine.SharedLines);
@@ -112,7 +112,7 @@ public sealed class SharedInfoConverter : IConversationProcessor {
             
             // Try to merge the next line into the current one
             if (current.CommonNext != null) {
-                var nextLine = commonSharedLines.FirstOrDefault(l => l.SharedLines.Contains(current.CommonNext));
+                var nextLine = commonSharedLines.Find(l => l.SharedLines.Contains(current.CommonNext));
                 if (nextLine is { CommonLast: not null } && nextLine.CommonLast.Equals(current.SharedLines[^1])) {
                     // Add next line to current
                     current.SharedLines.AddRange(nextLine.SharedLines);

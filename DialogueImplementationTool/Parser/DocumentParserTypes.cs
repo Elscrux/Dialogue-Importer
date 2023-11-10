@@ -40,7 +40,7 @@ public class GeneratedDialogue {
 }
 
 public sealed class DialogueSelection {
-    public readonly Dictionary<DialogueType, bool> Selection = Enum.GetValues<DialogueType>().ToDictionary(type => type, _ => false);
+    public Dictionary<DialogueType, bool> Selection { get; } = Enum.GetValues<DialogueType>().ToDictionary(type => type, _ => false);
     public FormKey Speaker { get; set; } = FormKey.Null;
     public bool UseGetIsAliasRef { get; set; }
 }

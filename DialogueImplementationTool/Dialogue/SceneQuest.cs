@@ -12,7 +12,7 @@ public sealed class QuestScene : SceneFactory {
     
     public override void GenerateDialogue(List<DialogueTopic> topics) {
         //Get all topics in order
-        var allTopics = GetAllTopics(topics);
+        var allTopics = TopicsTreeToList(topics);
 
         //Detect existing aliases
         foreach (var alias in DialogueImplementer.OverrideQuest.Aliases) {

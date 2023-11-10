@@ -92,7 +92,7 @@ public abstract class DocumentParser {
 
         var extensions = DocumentParsers.Keys.ToList();
         foreach (var file in Directory.EnumerateFiles(folderDialog.SelectedPath, "*.*", SearchOption.AllDirectories)
-                     .Where(file => extensions.Any(file.EndsWith))) {
+                     .Where(file => extensions.Exists(file.EndsWith))) {
             var documentParser = CreateParser(file);
             if (documentParser != null) yield return documentParser;
         }

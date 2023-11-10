@@ -13,7 +13,7 @@ public class GenericScene : SceneFactory {
         if (AliasSpeakers.Count != 2) return;
         
         //Get all topics in order
-        var allTopics = GetAllTopics(topics);
+        var allTopics = TopicsTreeToList(topics);
         
         //Assign alias indices
         var first = AliasSpeakers[0].FormKey;

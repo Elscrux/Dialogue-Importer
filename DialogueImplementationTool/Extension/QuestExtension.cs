@@ -12,7 +12,7 @@ public static class QuestExtension {
 
 	public static IQuestAliasGetter GetOrAddAlias(this IQuest quest, ILinkCache linkCache, FormKey npcFormKey) {
 		// Detect existing alias
-		var existingAlias = quest.Aliases.FirstOrDefault(alias => alias.UniqueActor.FormKey == npcFormKey);
+		var existingAlias = quest.Aliases.Find(alias => alias.UniqueActor.FormKey == npcFormKey);
 		if (existingAlias is not null) return existingAlias;
 
 		//Add missing alias

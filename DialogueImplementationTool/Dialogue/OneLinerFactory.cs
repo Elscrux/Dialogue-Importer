@@ -10,14 +10,14 @@ public abstract class OneLinerFactory : DialogueFactory {
     private static bool _needPostProcessing;
     
     protected static void GenerateDialogue(List<DialogueTopic> topics, DialogTopic dialogTopic) {
-        var allTopics = GetAllTopics(topics);
+        var topicsList = TopicsTreeToList(topics);
         
         var lastFormKey = FormKey.Null;
         if (dialogTopic.Responses.Count > 0) {
             lastFormKey = dialogTopic.Responses[^1].FormKey;
         }
 
-        foreach (var topic in allTopics) {
+        foreach (var topic in topicsList) {
             var responses = GetResponses(topic, lastFormKey);
             lastFormKey = responses.FormKey;
 
@@ -90,10 +90,8 @@ public abstract class OneLinerFactory : DialogueFactory {
             response.Flags ??= new DialogResponseFlags();
             response.Flags.Flags |= DialogResponses.Flag.Random;
 
-            if (addRandomEndFlag) {
-                if (index + 1 >= topic.Responses.Count || GetMainSpeaker(topic.Responses[index + 1]) != GetMainSpeaker(response)) {
-                    response.Flags.Flags |= DialogResponses.Flag.RandomEnd;
-                }
+            if (addRandomEndFlag && (index + 1 >= topic.Responses.Count || GetMainSpeaker(topic.Responses[index + 1]) != GetMainSpeaker(response))) {
+                response.Flags.Flags |= DialogResponses.Flag.RandomEnd;
             }
         }
     }

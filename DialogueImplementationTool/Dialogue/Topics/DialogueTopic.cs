@@ -2,7 +2,7 @@
 using System.Linq;
 using DialogueImplementationTool.Dialogue.Responses;
 using DynamicData;
-namespace DialogueImplementationTool.Dialogue.Topics; 
+namespace DialogueImplementationTool.Dialogue.Topics;
 
 public sealed class DialogueTopic {
     private static readonly IEnumerable<IDialogueTopicPostProcessor> PreProcessors = new List<IDialogueTopicPostProcessor> {
@@ -21,8 +21,8 @@ public sealed class DialogueTopic {
     public ISpeaker Speaker { get; set; }
     
     public string Text { get; set; } = string.Empty;
-    public readonly List<DialogueResponse> Responses = new();
-    public readonly List<DialogueTopic> Links = new();
+    public List<DialogueResponse> Responses { get; } = new();
+    public List<DialogueTopic> Links { get; } = new();
     public DialogueTopic? IncomingLink { get; set; }
     public bool SayOnce { get; set; }
     public bool Goodbye { get; set; }

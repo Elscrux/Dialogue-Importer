@@ -56,7 +56,7 @@ public sealed class Dialogue : DialogueFactory {
                 Mod.DialogTopics.Add(dialogTopic);
 
                 for (var i = 0; i < rawTopic.Topic.Links.Count; i++) {
-                    var linkedTopic = createdTopics.FirstOrDefault(t => t.Topic == rawTopic.Topic.Links[i]);
+                    var linkedTopic = createdTopics.Find(t => t.Topic == rawTopic.Topic.Links[i]);
                     if (linkedTopic == null) {
                         var linkFormKey = Mod.GetNextFormKey();
                         var newLink = new LinkedTopic(linkFormKey, rawTopic.Topic.Links[i], rawTopic.IndexString + GetIndex(i + 1, !rawTopic.IndexType), !rawTopic.IndexType);

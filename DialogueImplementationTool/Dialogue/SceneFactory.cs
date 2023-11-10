@@ -69,7 +69,7 @@ public abstract class SceneFactory : DialogueFactory {
             
             // We can only be sure who the speaker should look at when there are only two NPCs involved.
             if (AliasSpeakers.Count == 2) {
-                speakerAction.HeadtrackActorID = _aliasIndices.FirstOrDefault(aliasIndex => aliasIndex != speakerAliasID);
+                speakerAction.HeadtrackActorID = _aliasIndices.Find(aliasIndex => aliasIndex != speakerAliasID);
             }
             
             scene.Actions.Add(speakerAction);

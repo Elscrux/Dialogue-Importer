@@ -111,40 +111,44 @@ public sealed class OpenDocumentTextParser : DocumentParser {
                 continue;
             }
 
-            var listAdded = false;
             var addNextList = false;
             var index = startingIndex + 1;
-            while (index < _doc.Content.Count) {
-                switch (_doc.Content[index]) {
-                    case Paragraph paragraph:
-                        if (paragraph.TextContent.Count == 0) {
-                            addNextList = true;
-                            _doc.Content.RemoveAt(index);
-                        } else {
-                            goto EndPoint;
-                        }
-                        break;
-                    case List list:
-                        if (addNextList) {
-                            foreach (IContent content in list.Content) {
-                                currentList.Content.Add(content);
-                            }
-                            _doc.Content.RemoveAt(index);
-                            listAdded = true;
-                            addNextList = false;
-                        } else {
-                            goto EndPoint;
-                        }
-                        break;
-                    default:
-                        goto EndPoint;
-                }
-            }
-            
-            EndPoint: ;
+            var listAdded = ListAdded();
 
             if (!listAdded) {
                 startingIndex++;
+            }
+            continue;
+
+            bool ListAdded() {
+                var added = false;
+                while (index < _doc.Content.Count) {
+                    switch (_doc.Content[index]) {
+                        case Paragraph paragraph:
+                            if (paragraph.TextContent.Count == 0) {
+                                addNextList = true;
+                                _doc.Content.RemoveAt(index);
+                            } else {
+                                return added;
+                            }
+                            break;
+                        case List list:
+                            if (addNextList) {
+                                foreach (IContent content in list.Content) {
+                                    currentList.Content.Add(content);
+                                }
+                                _doc.Content.RemoveAt(index);
+                                added = true;
+                                addNextList = false;
+                            } else {
+                                return added;
+                            }
+                            break;
+                        default:
+                            return added;
+                    }
+                }
+                return added;
             }
         }
     }

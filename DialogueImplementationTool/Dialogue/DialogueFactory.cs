@@ -112,9 +112,14 @@ public abstract class DialogueFactory {
         return list;
     }
 
-    protected static List<DialogueTopic> GetAllTopics(List<DialogueTopic> topics) {
-        //Through shared dialogue detection, a topic that was previously only one topic might be split into multiple topics
-        //This is basically flattening the dialogue tree
+    /// <summary>
+    /// Through shared dialogue detection, a topic that was previously only
+    /// one topic might be split into multiple topics.
+    /// This is basically flattening the dialogue tree.
+    /// </summary>
+    /// <param name="topics">Topics tree</param>
+    /// <returns>Flattened topics list</returns>
+    protected static List<DialogueTopic> TopicsTreeToList(List<DialogueTopic> topics) {
         var allTopics = new List<DialogueTopic>(topics);
 
         foreach (var rootTopic in topics) {
