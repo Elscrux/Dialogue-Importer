@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Windows;
 using DialogueImplementationTool.Parser;
+using Microsoft.Win32;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins.Order.DI;
@@ -39,6 +40,19 @@ public partial class MainWindow {
 
         if (MessageBox.Show("You didn't save your changes, do you want to save now?", string.Empty, MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
             App.DialogueVM.Save.Execute(null);
+        }
+    }
+
+    private void SelectionPythonPath_OnClick(object sender, RoutedEventArgs e) {
+        const string filter = "*.dll";
+        var fileDialog = new OpenFileDialog {
+            Multiselect = false,
+            Filter = $"Library({filter})|{filter}"
+        };
+
+        if (fileDialog.ShowDialog() is true) {
+            App.DialogueVM.PythonDllPath = fileDialog.FileName;
+            App.DialogueVM.RefreshPython();
         }
     }
 }

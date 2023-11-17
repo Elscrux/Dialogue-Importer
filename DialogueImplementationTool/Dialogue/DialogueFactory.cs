@@ -78,7 +78,8 @@ public abstract class DialogueFactory {
                 ScriptNotes = line.ScriptNote,
                 ResponseNumber = (byte) (i + 1), //Starts with 1
                 Flags = DialogResponse.Flag.UseEmotionAnimation,
-                EmotionValue = 50
+                Emotion = line.Emotion,
+                EmotionValue = line.EmotionValue
             }).ToExtendedList(),
             Conditions = GetSpeakerConditions(topic.Speaker),
             FavorLevel = FavorLevel.None,

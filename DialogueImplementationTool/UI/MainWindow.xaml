@@ -10,16 +10,39 @@
         MinHeight="400" MinWidth="400" d:DataContext="{d:DesignInstance ui:DialogueVM}">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition MaxHeight="30"/>
             <RowDefinition/>
             <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <plugins:FormKeyPicker Grid.Row="0"
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Column="0"
+                   Target="PythonDllPathTextBox"
+                   Content="Path to Python Dll"/>
+
+            <TextBox x:Name="PythonDllPathTextBox"
+                     Grid.Column="1"
+                     IsReadOnly="True"
+                     Margin="2"
+                     Text="{Binding PythonDllPath}"/>
+
+            <Button Grid.Column="2"
+                    Content="Select"
+                    Click="SelectionPythonPath_OnClick"/>
+        </Grid>
+        
+        <plugins:FormKeyPicker Grid.Row="1"
                                FormKey="{Binding QuestFormKey}"
                                LinkCache="{Binding LinkCache, Mode=OneWay}"
                                ScopedTypes="{Binding QuestTypes, Mode=OneWay}"/>
 
-        <Grid Grid.Row="1"
+        <Grid Grid.Row="2"
               Visibility="{Binding ValidQuest, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid.RowDefinitions>
                 <RowDefinition/>

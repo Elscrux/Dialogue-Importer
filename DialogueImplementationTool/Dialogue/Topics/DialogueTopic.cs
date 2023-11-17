@@ -14,6 +14,7 @@ public sealed class DialogueTopic {
     
     private static readonly IEnumerable<IDialogueTopicPostProcessor> PostProcessors = new List<IDialogueTopicPostProcessor> {
         new BackToOptionsLinker(),
+        new EmotionClassifier(),
     };
     
     public SharedInfo? SharedInfo { get; set; }

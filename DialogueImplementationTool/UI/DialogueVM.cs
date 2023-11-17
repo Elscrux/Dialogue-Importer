@@ -40,6 +40,9 @@ public sealed class DialogueVM : ViewModel {
     public List<DialogueSelection> DialogueTypeList { get; } = new();
     public ObservableCollection<Speaker> SpeakerFavourites { get; } = new();
 
+    [Reactive] public string PythonDllPath { get; set; }
+    public EmotionClassifier? EmotionClassifier { get; private set; }
+    
     public bool SavedSession;
 
     [Reactive]
@@ -93,6 +96,8 @@ public sealed class DialogueVM : ViewModel {
                 LinkCache.Warmup(speakerType);
             }
         });
+
+        TrySetPythonPath();
 
         SetSpeaker = ReactiveCommand.Create((FormKey formKey) => SpeakerFormKey = formKey);
         SelectIndex = ReactiveCommand.Create<string>(indexStr => {
@@ -218,7 +223,40 @@ public sealed class DialogueVM : ViewModel {
             });
     }
 
+    private void TrySetPythonPath() {
+        var paths = Environment.GetEnvironmentVariable("PATH");
+        if (paths is null) return;
+
+        foreach (var path in paths.Split(';')) {
+            if (!path.Contains("python", StringComparison.OrdinalIgnoreCase)) continue;
+            if (!Directory.Exists(path)) continue;
+
+            var filePath = Directory
+                .EnumerateFiles(path, "python3*.dll", SearchOption.TopDirectoryOnly)
+                // Don't use python3.dll
+                .Where(x => !x.Contains("python3.dll"))
+                .FirstOrDefault(File.Exists);
+            if (filePath is null) continue;
+
+            PythonDllPath = filePath;
+            break;
+        }
+    }
+
+    public void RefreshPython() {
+        if (EmotionClassifier?.PythonDllPath == PythonDllPath) return;
+
+        try {
+            EmotionClassifier?.Dispose();
+            EmotionClassifier = null;
+            EmotionClassifier = new EmotionClassifier(PythonDllPath);
+        } catch (Exception e) {
+            Console.WriteLine($"Failed to load emotion classifier: {e.Message}");
+        }
+    }
+
     public void Init(DocumentParser parser) {
+        RefreshPython();
         DocumentParser = parser;
         Index = 1;
         Index = 0;
@@ -264,5 +302,16 @@ public sealed class DialogueVM : ViewModel {
             Arguments = $"\"{DialogueFactory.OutputFolder}\""
         };
         process.Start();
+    }
+
+    public override void Dispose() {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    private void Dispose(bool disposing) {
+        if (disposing) {
+            EmotionClassifier?.Dispose();
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using DialogueImplementationTool.Parser;
+using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Responses;
 
 public record DialogueResponse {
@@ -17,6 +18,8 @@ public record DialogueResponse {
     
     public string Response { get; set; } = string.Empty;
     public string ScriptNote { get; set; } = string.Empty;
+    public Emotion Emotion { get; set; } = Emotion.Neutral;
+    public uint EmotionValue { get; set; } = 50;
 
     public static DialogueResponse Build(IEnumerable<FormattedText> textSnippets) {
         //Apply pre processors
