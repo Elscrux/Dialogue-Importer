@@ -8,14 +8,15 @@ using ReactiveUI.Fody.Helpers;
 namespace DialogueImplementationTool.Dialogue;
 
 public interface ISpeaker {
-    protected static readonly Regex ReplaceRegex = new(@"\s+|-");
+    private static readonly Regex ReplaceRegex = new(@"\s+|-");
     public FormKey FormKey { get; set; }
     public string? EditorID { get; set; }
     public string Name { get; set; }
+    
+    public static string GetSpeakerName(string name) => ReplaceRegex.Replace(name, string.Empty);
 }
 
 public class Speaker : ISpeaker {
-    
     public FormKey FormKey { get; set; }
     public string? EditorID { get; set; }
     public string Name { get; set; }
@@ -25,7 +26,7 @@ public class Speaker : ISpeaker {
         
         if (App.DialogueVM.LinkCache.TryResolve<INpcGetter>(FormKey, out var npc)) {
             EditorID = npc.EditorID;
-            Name = ISpeaker.ReplaceRegex.Replace(npc.Name?.String ?? string.Empty, string.Empty);
+            Name = ISpeaker.GetSpeakerName(npc.Name?.String ?? string.Empty);
         } else {
             Name = EditorID = string.Empty;
         }
@@ -34,7 +35,7 @@ public class Speaker : ISpeaker {
 
 public class AliasSpeaker : ReactiveObject, ISpeaker {
     public AliasSpeaker(string name) {
-        Name = ISpeaker.ReplaceRegex.Replace(name ?? string.Empty, string.Empty);
+        Name = ISpeaker.GetSpeakerName(name ?? string.Empty);
 
         this.WhenAnyValue(x => x.FormKey)
             .Subscribe(_ => { 
