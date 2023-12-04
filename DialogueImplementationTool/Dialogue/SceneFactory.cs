@@ -216,6 +216,7 @@ public abstract class SceneFactory : DialogueFactory {
     public override void PostProcess() {}
 
     public AliasSpeaker GetSpeaker(string name) {
+        name = ISpeaker.GetSpeakerName(name);
         foreach (var (formKey, speakers) in NameMappedSpeakers) {
             foreach (var speaker in speakers) {
                 if (speaker.Name == name) {
