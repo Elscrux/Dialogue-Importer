@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using DialogueImplementationTool.Parser;
 namespace DialogueImplementationTool.Dialogue.Responses;
 
+// todo this doesn't work when the script note is split across multiple formatted text parts (like "[" "script note" "]") - implement this in another step to work with this properly
 public class ScriptNotesParser : IDialogueResponsePreProcessor {
     private static readonly Regex InvalidBracesRegex = new(@"\[([^\[\]]*)\]");
 
