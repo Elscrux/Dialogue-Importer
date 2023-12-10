@@ -2,7 +2,7 @@
 namespace DialogueImplementationTool.Dialogue.Topics;
 
 public sealed class GoodbyeChecker : IDialogueTopicPostProcessor {
-	private static readonly Regex GoodbyeRegex = new(@"\[(exit|end) (dialog|dialogue|conversation|convo)\]");
+	private static readonly Regex GoodbyeRegex = new(@"\[(exit|end) (dialog|dialogue|conversation|convo)\]", RegexOptions.IgnoreCase);
 
 	public void Process(DialogueTopic topic) {
 		if (topic.Responses.Count == 0) return;
