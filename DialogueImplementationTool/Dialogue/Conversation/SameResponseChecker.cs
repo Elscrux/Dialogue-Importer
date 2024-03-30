@@ -3,6 +3,18 @@ using DialogueImplementationTool.Dialogue.Topics;
 using DialogueImplementationTool.Parser;
 namespace DialogueImplementationTool.Dialogue.Conversation;
 
+/// <summary>
+/// Allows two player topics in a row to share the same line.
+/// <example>
+/// <para>Here we implicitly add "That's good!" to 1.1 as well.</para>
+/// <code>
+/// <para>1. Hi, Player. How are you?</para>
+/// <para>	1.1. I'm good.</para>
+/// <para>	1.2. I'm fine.</para>
+/// <para>		1.2.1. That's good!</para>
+/// </code>
+/// </example>
+/// </summary>
 public sealed class SameResponseChecker : IConversationProcessor {
 	public void Process(IList<GeneratedDialogue> dialogues) {
 		foreach (var dialogue in dialogues) {
