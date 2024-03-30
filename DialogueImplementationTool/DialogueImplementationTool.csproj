@@ -83,6 +83,18 @@
       <Compile Update="Dialogue\Topics\GoodbyeChecker.cs">
         <DependentUpon>IDialogueTopicPostProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\Conversation\BlockingChecker.cs">
+        <DependentUpon>IConversationProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Conversation\SameResponseChecker.cs">
+        <DependentUpon>IConversationProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Conversation\SharedInfoConverter.cs">
+        <DependentUpon>IConversationProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Topics\EmotionClassifier.cs">
+        <DependentUpon>IDialogueTopicPostProcessor.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

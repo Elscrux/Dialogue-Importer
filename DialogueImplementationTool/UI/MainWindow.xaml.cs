@@ -9,50 +9,50 @@ using Mutagen.Bethesda.Plugins.Order.DI;
 namespace DialogueImplementationTool.UI;
 
 public partial class MainWindow {
-    public MainWindow() {
-        var pathProvider = new PluginListingsPathProvider(new GameReleaseInjection(GameRelease.SkyrimSE));
-        if (!File.Exists(pathProvider.Path)) MessageBox.Show($"Make sure {pathProvider.Path} exists.");
+	public MainWindow() {
+		var pathProvider = new PluginListingsPathProvider(new GameReleaseInjection(GameRelease.SkyrimSE));
+		if (!File.Exists(pathProvider.Path)) MessageBox.Show($"Make sure {pathProvider.Path} exists.");
 
-        InitializeComponent();
-        DataContext = App.DialogueVM;
-    }
-    
-    private void SelectFile_OnClick(object sender, RoutedEventArgs e) {
-        var parser = DocumentParser.LoadDocument();
-        if (parser == null) return;
+		InitializeComponent();
+		DataContext = App.DialogueVM;
+	}
 
-        LaunchParser(parser);
-    }
-    
-    private void SelectFolder_OnClick(object sender, RoutedEventArgs e) {
-        var parsers = DocumentParser.LoadDocuments();
-        foreach (var parser in parsers) LaunchParser(parser);
-    }
+	private void SelectFile_OnClick(object sender, RoutedEventArgs e) {
+		var parser = DocumentParser.LoadDocument();
+		if (parser == null) return;
 
-    private void LaunchParser(DocumentParser parser) {
-        if (parser == DocumentParser.Null) return;
+		LaunchParser(parser);
+	}
 
-        App.DialogueVM.Init(parser);
-        new ProcessDialogue().ShowDialog();
+	private void SelectFolder_OnClick(object sender, RoutedEventArgs e) {
+		var parsers = DocumentParser.LoadDocuments();
+		foreach (var parser in parsers) LaunchParser(parser);
+	}
 
-        //Save warning
-        if (App.DialogueVM.SavedSession || !App.DialogueVM.DialogueTypeList.Exists(selection => selection.Selection.Any(type => type.Value))) return;
+	private void LaunchParser(DocumentParser parser) {
+		if (parser == DocumentParser.Null) return;
 
-        if (MessageBox.Show("You didn't save your changes, do you want to save now?", string.Empty, MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
-            App.DialogueVM.Save.Execute(null);
-        }
-    }
+		App.DialogueVM.Init(parser);
+		new ProcessDialogue().ShowDialog();
 
-    private void SelectionPythonPath_OnClick(object sender, RoutedEventArgs e) {
-        const string filter = "*.dll";
-        var fileDialog = new OpenFileDialog {
-            Multiselect = false,
-            Filter = $"Library({filter})|{filter}"
-        };
+		//Save warning
+		if (App.DialogueVM.SavedSession || !App.DialogueVM.DialogueTypeList.Exists(selection => selection.Selection.Any(type => type.Value))) return;
 
-        if (fileDialog.ShowDialog() is true) {
-            App.DialogueVM.PythonDllPath = fileDialog.FileName;
-            App.DialogueVM.RefreshPython();
-        }
-    }
+		if (MessageBox.Show("You didn't save your changes, do you want to save now?", string.Empty, MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
+			App.DialogueVM.Save.Execute(null);
+		}
+	}
+
+	private void SelectionPythonPath_OnClick(object sender, RoutedEventArgs e) {
+		const string filter = "*.dll";
+		var fileDialog = new OpenFileDialog {
+			Multiselect = false,
+			Filter = $"Library({filter})|{filter}"
+		};
+
+		if (fileDialog.ShowDialog() is true) {
+			App.DialogueVM.PythonDllPath = fileDialog.FileName;
+			App.DialogueVM.RefreshPython();
+		}
+	}
 }

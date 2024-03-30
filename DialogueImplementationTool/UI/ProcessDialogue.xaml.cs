@@ -4,23 +4,23 @@ using DialogueImplementationTool.Dialogue;
 namespace DialogueImplementationTool.UI;
 
 public partial class ProcessDialogue {
-    public ProcessDialogue() {
-        InitializeComponent();
-        DataContext = App.DialogueVM;
+	public ProcessDialogue() {
+		InitializeComponent();
+		DataContext = App.DialogueVM;
 
-        App.DialogueVM.RefreshPreview(true);
-    }
+		App.DialogueVM.RefreshPreview(true);
+	}
 
-    private void Save_OnClick(object sender, RoutedEventArgs e) {
-        App.DialogueVM.Save.Execute(null);
-        Close();
-    }
+	private void Save_OnClick(object sender, RoutedEventArgs e) {
+		App.DialogueVM.Save.Execute(null);
+		Close();
+	}
 
-    private void OpenFolder_OnClick(object sender, RoutedEventArgs e) => App.DialogueVM.OpenOutput();
-    
-    private void SpeakerFavouriteSelect_OnClick(object sender, RoutedEventArgs e) {
-        var button = (Button) sender;
-        var speaker = (Speaker) button.DataContext;
-        App.DialogueVM.SetSpeaker.Execute(speaker.FormKey);
-    }
+	private void OpenFolder_OnClick(object sender, RoutedEventArgs e) => App.DialogueVM.OpenOutput();
+
+	private void SpeakerFavouriteSelect_OnClick(object sender, RoutedEventArgs e) {
+		var button = (Button) sender;
+		var speaker = (Speaker) button.DataContext;
+		App.DialogueVM.SetSpeaker.Execute(speaker.FormKey);
+	}
 }

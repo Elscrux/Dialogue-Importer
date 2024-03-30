@@ -36,7 +36,7 @@
                     Content="Select"
                     Click="SelectionPythonPath_OnClick"/>
         </Grid>
-        
+
         <plugins:FormKeyPicker Grid.Row="1"
                                FormKey="{Binding QuestFormKey}"
                                LinkCache="{Binding LinkCache, Mode=OneWay}"

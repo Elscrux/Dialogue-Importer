@@ -22,33 +22,33 @@
         <KeyBinding Key="NumPad5" Command="{Binding SelectIndex}" CommandParameter="5"/>
         <KeyBinding Key="D6" Command="{Binding SelectIndex}" CommandParameter="6"/>
         <KeyBinding Key="NumPad6" Command="{Binding SelectIndex}" CommandParameter="6"/>
-        
+
         <KeyBinding Key="Left" Command="{Binding BacktrackMany}"/>
         <KeyBinding Key="Right" Command="{Binding SkipMany}"/>
-        
+
         <KeyBinding Modifiers="Control" Key="S" Command="{Binding Save}"/>
     </Window.InputBindings>
-    
+
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="Save and Close"
                       Click="Save_OnClick"
                       Margin="10,10,0,0"
-                      HorizontalAlignment="Left" VerticalAlignment="Top" />
+                      HorizontalAlignment="Left" VerticalAlignment="Top"/>
             <MenuItem Header="Open Output Folder"
                       Click="OpenFolder_OnClick"
                       Margin="50,10,0,0"
-                      HorizontalAlignment="Left" VerticalAlignment="Top" />
-            <MenuItem />
+                      HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <MenuItem/>
         </Menu>
-          
-        <GroupBox DockPanel.Dock="Bottom" 
-                  Header="2) Dialogue Type" >
+
+        <GroupBox DockPanel.Dock="Bottom"
+                  Header="2) Dialogue Type">
             <UniformGrid>
                 <ToggleButton Margin="5"
-                          IsChecked="{Binding GreetingSelected}"
-                          IsEnabled="{Binding ValidSpeaker}"
-                          Content="Greeting" FontSize="36"/>
+                              IsChecked="{Binding GreetingSelected}"
+                              IsEnabled="{Binding ValidSpeaker}"
+                              Content="Greeting" FontSize="36"/>
                 <ToggleButton Margin="5"
                               IsChecked="{Binding FarewellSelected}"
                               IsEnabled="{Binding ValidSpeaker}"
@@ -57,10 +57,10 @@
                               IsChecked="{Binding IdleSelected}"
                               IsEnabled="{Binding ValidSpeaker}"
                               Content="Idle" FontSize="36"/>
-                <ToggleButton  Margin="5"
-                               IsChecked="{Binding DialogueSelected}"
-                               IsEnabled="{Binding ValidSpeaker}"
-                               Content="Branching Dialogue" FontSize="36"/>
+                <ToggleButton Margin="5"
+                              IsChecked="{Binding DialogueSelected}"
+                              IsEnabled="{Binding ValidSpeaker}"
+                              Content="Branching Dialogue" FontSize="36"/>
                 <ToggleButton Margin="5"
                               IsChecked="{Binding GenericSceneSelected}"
                               Content="Generic Scene" FontSize="36"/>
@@ -75,8 +75,8 @@
                 <plugins:FormKeyPicker MinHeight="200"
                                        FormKey="{Binding SpeakerFormKey}"
                                        LinkCache="{Binding LinkCache, Mode=OneWay}"
-                                       ScopedTypes="{Binding SpeakerTypes, Mode=OneWay}" />
-                
+                                       ScopedTypes="{Binding SpeakerTypes, Mode=OneWay}"/>
+
                 <GroupBox Header="Favorites" MinHeight="100">
                     <ScrollViewer>
                         <ListBox ItemsSource="{Binding SpeakerFavourites}">
@@ -84,13 +84,13 @@
                                 <DataTemplate>
                                     <Button Content="{Binding EditorID}"
                                             Click="SpeakerFavouriteSelect_OnClick"
-                                            CommandParameter="{Binding}" />
+                                            CommandParameter="{Binding}"/>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
                     </ScrollViewer>
                 </GroupBox>
-                
+
                 <CheckBox Content="Use GetIsAliasRef"
                           IsChecked="{Binding UseGetIsAliasRef}"/>
             </StackPanel>
@@ -101,15 +101,15 @@
                 <TextBlock Text="{Binding PreviewText}"
                            FontSize="36"
                            TextWrapping="WrapWithOverflow" TextAlignment="Center"
-                           VerticalAlignment="Center" />
-                
+                           VerticalAlignment="Center"/>
+
                 <Grid Height="70" Width="275"
                       HorizontalAlignment="Right" VerticalAlignment="Top">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
 
                     <Button Grid.Column="0"
@@ -117,28 +117,28 @@
                             IsEnabled="{Binding IsNotFirstIndex}"
                             Command="{Binding BacktrackMany}"
                             FontSize="36"
-                            Margin="10" />
+                            Margin="10"/>
 
                     <Button Grid.Column="1"
                             Content="◀"
                             IsEnabled="{Binding IsNotFirstIndex}"
                             Command="{Binding Previous}"
                             FontSize="36"
-                            Margin="10" />
+                            Margin="10"/>
 
                     <Button Grid.Column="2"
                             Content="▶"
                             IsEnabled="{Binding IsNotLastIndex}"
                             Command="{Binding Next}"
                             FontSize="36"
-                            Margin="10" />
+                            Margin="10"/>
 
                     <Button Grid.Column="3"
                             Content="⏩"
                             IsEnabled="{Binding IsNotLastIndex}"
                             Command="{Binding SkipMany}"
                             FontSize="36"
-                            Margin="10" />
+                            Margin="10"/>
                 </Grid>
             </Grid>
         </GroupBox>

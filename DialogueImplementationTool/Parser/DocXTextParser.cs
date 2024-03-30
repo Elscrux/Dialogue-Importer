@@ -12,131 +12,131 @@ using Xceed.Words.NET;
 namespace DialogueImplementationTool.Parser;
 
 public sealed class DocXTextParser : DocumentParser {
-    private const int FirstIndentationLevel = 0;
-    
-    private readonly DocX _doc;
-    public override int LastIndex { get; }
-    
-    public DocXTextParser(string path) : base(path) {
-        var tryLoading = true;
-        while (tryLoading) {
-            try {
-                _doc = DocX.Load(path);
-                tryLoading = false;
-            } catch (Exception e) {
-                switch (MessageBox.Show(e.Message)) {
-                    case MessageBoxResult.None:
-                    case MessageBoxResult.Cancel:
-                    case MessageBoxResult.No:
-                        tryLoading = false;
-                        break;
-                    case MessageBoxResult.OK:
-                    case MessageBoxResult.Yes:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-        }
-        
-        _doc ??= DocX.Create(Stream.Null);
-        LastIndex = _doc.Lists.Count - 1;
-    }
+	private const int FirstIndentationLevel = 0;
 
-    public override void BacktrackMany() => Previous();
+	private readonly DocX _doc;
+	public override int LastIndex { get; }
 
-    public override void SkipMany() => Next();
+	public DocXTextParser(string path) : base(path) {
+		var tryLoading = true;
+		while (tryLoading) {
+			try {
+				_doc = DocX.Load(path);
+				tryLoading = false;
+			} catch (Exception e) {
+				switch (MessageBox.Show(e.Message)) {
+					case MessageBoxResult.None:
+					case MessageBoxResult.Cancel:
+					case MessageBoxResult.No:
+						tryLoading = false;
+						break;
+					case MessageBoxResult.OK:
+					case MessageBoxResult.Yes:
+						break;
+					default:
+						throw new ArgumentOutOfRangeException();
+				}
+			}
+		}
 
-    public override string Preview(int index) =>  index < 0 || index >= _doc.Lists.Count ? string.Empty : _doc.Lists[index].Items.FirstOrDefault()?.Text ?? string.Empty;
+		_doc ??= DocX.Create(Stream.Null);
+		LastIndex = _doc.Lists.Count - 1;
+	}
 
-    protected override List<DialogueTopic> ParseDialogue(int index) {
-        var branches = new List<DialogueTopic>();
-        var list = _doc.Lists[index];
-        
-        if (!list.Items.Any()) return branches;
+	public override void BacktrackMany() => Previous();
 
-        //Evaluate if the player starts dialogue
-        if (IsPlayerLine(list.Items[0])) {
-            branches.AddRange(list.Items.Where(p => p.IndentLevel == FirstIndentationLevel)
-                .Select(x => {
-                    var currentBranch = AddTopic(x);
-                    currentBranch.Build();
-                    return currentBranch;
-                }));
-        } else {
-            //One new branch, NPC starts to talk
-            var currentBranch = new DialogueTopic();
-            branches.Add(currentBranch);
-        
-            AddLinksAndResponses(list.Items[0], currentBranch);
-            currentBranch.Build();
-        }
+	public override void SkipMany() => Next();
 
-        return branches;
-    }
+	public override string Preview(int index) => index < 0 || index >= _doc.Lists.Count ? string.Empty : _doc.Lists[index].Items.FirstOrDefault()?.Text ?? string.Empty;
 
-    protected override List<DialogueTopic> ParseOneLiner(int index) {
-        return _doc.Lists[index].Items
-            .Where(p => p.IndentLevel == FirstIndentationLevel)
-            .Select(p => {
-                var topic = new DialogueTopic { Responses = { DialogueResponse.Build(GetFormattedText(p)) } };
-                topic.Build();
-                return topic;
-            })
-            .ToList();
-    }
+	protected override List<DialogueTopic> ParseDialogue(int index) {
+		var branches = new List<DialogueTopic>();
+		var list = _doc.Lists[index];
 
-    protected override List<DialogueTopic> ParseScene(int index) => ParseOneLiner(index);
-    
-    private DialogueTopic AddTopic(Paragraph paragraph) {
-        var topic = new DialogueTopic();
-        var startingIndentation = paragraph.IndentLevel;
+		if (!list.Items.Any()) return branches;
 
-        topic.Text = paragraph.Text;
+		//Evaluate if the player starts dialogue
+		if (IsPlayerLine(list.Items[0])) {
+			branches.AddRange(list.Items.Where(p => p.IndentLevel == FirstIndentationLevel)
+				.Select(x => {
+					var currentBranch = AddTopic(x);
+					currentBranch.Build();
+					return currentBranch;
+				}));
+		} else {
+			//One new branch, NPC starts to talk
+			var currentBranch = new DialogueTopic();
+			branches.Add(currentBranch);
 
-        paragraph = paragraph.NextParagraph;
-        if (paragraph.IndentLevel == startingIndentation + 1) {
-            AddLinksAndResponses(paragraph, topic);
-        }
-    
-        return topic;
-    }
+			AddLinksAndResponses(list.Items[0], currentBranch);
+			currentBranch.Build();
+		}
 
-    private void AddLinksAndResponses(Paragraph paragraph, DialogueTopic topic) {
-        var startingIndentation = paragraph.IndentLevel;
+		return branches;
+	}
 
-        //Add further responses
-        while (paragraph != null && paragraph.IndentLevel == startingIndentation) {
-            topic.Responses.Add(DialogueResponse.Build(GetFormattedText(paragraph)));
+	protected override List<DialogueTopic> ParseOneLiner(int index) {
+		return _doc.Lists[index].Items
+			.Where(p => p.IndentLevel == FirstIndentationLevel)
+			.Select(p => {
+				var topic = new DialogueTopic { Responses = { DialogueResponse.Build(GetFormattedText(p)) } };
+				topic.Build();
+				return topic;
+			})
+			.ToList();
+	}
 
-            paragraph = paragraph.NextParagraph;
-            while (paragraph is { IndentLevel: null } && paragraph.Xml != paragraph.NextParagraph.Xml) {
-                paragraph = paragraph.NextParagraph;
-            }
-        }
+	protected override List<DialogueTopic> ParseScene(int index) => ParseOneLiner(index);
 
-        //Add links
-        while (paragraph != null && paragraph.IndentLevel > startingIndentation) {
-            if (paragraph.IndentLevel == startingIndentation + 1) {
-                var nextTopic = AddTopic(paragraph);
-                nextTopic.IncomingLink = topic;
-                topic.Links.Add(nextTopic);
-                nextTopic.Build();
-            }
-            paragraph = paragraph.NextParagraph;
-        }
-    }
+	private DialogueTopic AddTopic(Paragraph paragraph) {
+		var topic = new DialogueTopic();
+		var startingIndentation = paragraph.IndentLevel;
 
-    private bool IsPlayerLine(Paragraph paragraph) => paragraph.MagicText.NotNull().All(magicText => magicText.formatting?.Bold is not (null or false));
+		topic.Text = paragraph.Text;
 
-    private IEnumerable<FormattedText> GetFormattedText(Paragraph paragraph) {
-        return paragraph.MagicText
-            .NotNull()
-            .Select(text => new FormattedText(text.text, text.formatting?.Bold ?? false, text.formatting?.FontColor ?? Color.Black))
-            .ToList();
-    }
-    
-    private FormattedText GetFormattedText(Xceed.Document.NET.FormattedText text) {
-        return new FormattedText(text.text, text.formatting.Bold ?? false, text.formatting.FontColor ?? Color.Black);
-    }
+		paragraph = paragraph.NextParagraph;
+		if (paragraph.IndentLevel == startingIndentation + 1) {
+			AddLinksAndResponses(paragraph, topic);
+		}
+
+		return topic;
+	}
+
+	private void AddLinksAndResponses(Paragraph paragraph, DialogueTopic topic) {
+		var startingIndentation = paragraph.IndentLevel;
+
+		//Add further responses
+		while (paragraph != null && paragraph.IndentLevel == startingIndentation) {
+			topic.Responses.Add(DialogueResponse.Build(GetFormattedText(paragraph)));
+
+			paragraph = paragraph.NextParagraph;
+			while (paragraph is { IndentLevel: null } && paragraph.Xml != paragraph.NextParagraph.Xml) {
+				paragraph = paragraph.NextParagraph;
+			}
+		}
+
+		//Add links
+		while (paragraph != null && paragraph.IndentLevel > startingIndentation) {
+			if (paragraph.IndentLevel == startingIndentation + 1) {
+				var nextTopic = AddTopic(paragraph);
+				nextTopic.IncomingLink = topic;
+				topic.Links.Add(nextTopic);
+				nextTopic.Build();
+			}
+			paragraph = paragraph.NextParagraph;
+		}
+	}
+
+	private bool IsPlayerLine(Paragraph paragraph) => paragraph.MagicText.NotNull().All(magicText => magicText.formatting?.Bold is not (null or false));
+
+	private IEnumerable<FormattedText> GetFormattedText(Paragraph paragraph) {
+		return paragraph.MagicText
+			.NotNull()
+			.Select(text => new FormattedText(text.text, text.formatting?.Bold ?? false, text.formatting?.FontColor ?? Color.Black))
+			.ToList();
+	}
+
+	private FormattedText GetFormattedText(Xceed.Document.NET.FormattedText text) {
+		return new FormattedText(text.text, text.formatting.Bold ?? false, text.formatting.FontColor ?? Color.Black);
+	}
 }

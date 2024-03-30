@@ -10,132 +10,131 @@ using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 namespace DialogueImplementationTool.Parser;
 
 public abstract class DocumentParser {
-    public static readonly DocumentParser Null = new NullDocumentParser(string.Empty);
+	public static readonly DocumentParser Null = new NullDocumentParser(string.Empty);
 
-    public string FilePath { get; set; }
+	public string FilePath { get; set; }
 
-    protected DocumentParser(string filePath) {
-        FilePath = filePath;
-    }
+	protected DocumentParser(string filePath) {
+		FilePath = filePath;
+	}
 
-    /*====================================================
-        Iterator
-    ====================================================*/
-    private int _index;
+	/*====================================================
+	    Iterator
+	====================================================*/
+	private int _index;
 
-    public int Index {
-        get => _index;
-        protected set
-        {
-            _index = value;
-            App.DialogueVM.Index = value;
-        }
-    }
+	public int Index {
+		get => _index;
+		protected set {
+			_index = value;
+			App.DialogueVM.Index = value;
+		}
+	}
 
-    public abstract int LastIndex { get; }
+	public abstract int LastIndex { get; }
 
-    public void Previous() {
-        if (Index > 0) Index--;
-    }
+	public void Previous() {
+		if (Index > 0) Index--;
+	}
 
-    public void Next() {
-        if (Index < LastIndex) Index++;
-    }
+	public void Next() {
+		if (Index < LastIndex) Index++;
+	}
 
-    public abstract void SkipMany();
-    public abstract void BacktrackMany();
+	public abstract void SkipMany();
+	public abstract void BacktrackMany();
 
-    public string PreviewCurrent() => Preview(Index);
-    public abstract string Preview(int index);
+	public string PreviewCurrent() => Preview(Index);
+	public abstract string Preview(int index);
 
 
-    /*====================================================
-        Parsing
-    ====================================================*/
-    private static readonly Dictionary<string, Type> DocumentParsers = new() {
-        { ".odt", typeof(OpenDocumentTextParser) },
-        { ".docx", typeof(DocXTextParser) },
-    };
+	/*====================================================
+	    Parsing
+	====================================================*/
+	private static readonly Dictionary<string, Type> DocumentParsers = new() {
+		{ ".odt", typeof(OpenDocumentTextParser) },
+		{ ".docx", typeof(DocXTextParser) },
+	};
 
-    private static DocumentParser? CreateParser(string file) {
-        var extension = Path.GetExtension(file).ToLower();
-        if (!DocumentParsers.ContainsKey(extension)) return null;
+	private static DocumentParser? CreateParser(string file) {
+		var extension = Path.GetExtension(file).ToLower();
+		if (!DocumentParsers.ContainsKey(extension)) return null;
 
-        return (DocumentParser?) Activator.CreateInstance(DocumentParsers[extension], file);
-    }
+		return (DocumentParser?) Activator.CreateInstance(DocumentParsers[extension], file);
+	}
 
-    public static string GetFilter() {
-        var filterBuilder = new StringBuilder();
-        var fileTypes = DocumentParsers.Keys.ToList();
-        for (var index = 0; index < fileTypes.Count; index++) {
-            filterBuilder.Append('*');
-            filterBuilder.Append(fileTypes[index]);
-            if (index != fileTypes.Count - 1) filterBuilder.Append(';');
-        }
+	public static string GetFilter() {
+		var filterBuilder = new StringBuilder();
+		var fileTypes = DocumentParsers.Keys.ToList();
+		for (var index = 0; index < fileTypes.Count; index++) {
+			filterBuilder.Append('*');
+			filterBuilder.Append(fileTypes[index]);
+			if (index != fileTypes.Count - 1) filterBuilder.Append(';');
+		}
 
-        return filterBuilder.ToString();
-    }
-    
-    public static DocumentParser? LoadDocument() {
-        var filter = GetFilter();
-        var fileDialog = new OpenFileDialog {
-            Multiselect = false,
-            Filter = $"Documents({filter})|{filter}"
-        };
+		return filterBuilder.ToString();
+	}
 
-        return fileDialog.ShowDialog() is null or false ? null : CreateParser(fileDialog.FileName);
-    }
+	public static DocumentParser? LoadDocument() {
+		var filter = GetFilter();
+		var fileDialog = new OpenFileDialog {
+			Multiselect = false,
+			Filter = $"Documents({filter})|{filter}"
+		};
 
-    public static IEnumerable<DocumentParser> LoadDocuments() {
-        var folderDialog = new FolderBrowserDialog();
-        if (folderDialog.ShowDialog() != DialogResult.OK) yield break;
+		return fileDialog.ShowDialog() is null or false ? null : CreateParser(fileDialog.FileName);
+	}
 
-        var extensions = DocumentParsers.Keys.ToList();
-        foreach (var file in Directory.EnumerateFiles(folderDialog.SelectedPath, "*.*", SearchOption.AllDirectories)
-                     .Where(file => extensions.Exists(file.EndsWith))) {
-            var documentParser = CreateParser(file);
-            if (documentParser != null) yield return documentParser;
-        }
-    }
+	public static IEnumerable<DocumentParser> LoadDocuments() {
+		var folderDialog = new FolderBrowserDialog();
+		if (folderDialog.ShowDialog() != DialogResult.OK) yield break;
 
-    public List<GeneratedDialogue> GetDialogue() {
-        var dialogue = new List<GeneratedDialogue>();
-        for (var i = 0; i < App.DialogueVM.DialogueTypeList.Count; i++) {
-            var selection = App.DialogueVM.DialogueTypeList[i];
-            foreach (var (dialogueType, selected) in selection.Selection) {
-                if (selected) {
-                    var dialogueTopics = ParseDialogue(dialogueType, i);
-                    foreach (var rootTopic in dialogueTopics) {
-                        foreach (var topic in rootTopic.EnumerateLinks()) {
-                            topic.PostProcess();
-                        }
-                    }
+		var extensions = DocumentParsers.Keys.ToList();
+		foreach (var file in Directory.EnumerateFiles(folderDialog.SelectedPath, "*.*", SearchOption.AllDirectories)
+			.Where(file => extensions.Exists(file.EndsWith))) {
+			var documentParser = CreateParser(file);
+			if (documentParser != null) yield return documentParser;
+		}
+	}
 
-                    dialogue.Add(new GeneratedDialogue(dialogueType, dialogueTopics, selection.Speaker, selection.UseGetIsAliasRef));
-                }
-            }
-        }
+	public List<GeneratedDialogue> GetDialogue() {
+		var dialogue = new List<GeneratedDialogue>();
+		for (var i = 0; i < App.DialogueVM.DialogueTypeList.Count; i++) {
+			var selection = App.DialogueVM.DialogueTypeList[i];
+			foreach (var (dialogueType, selected) in selection.Selection) {
+				if (selected) {
+					var dialogueTopics = ParseDialogue(dialogueType, i);
+					foreach (var rootTopic in dialogueTopics) {
+						foreach (var topic in rootTopic.EnumerateLinks()) {
+							topic.PostProcess();
+						}
+					}
 
-        return dialogue;
-    }
+					dialogue.Add(new GeneratedDialogue(dialogueType, dialogueTopics, selection.Speaker, selection.UseGetIsAliasRef));
+				}
+			}
+		}
 
-    private List<DialogueTopic> ParseDialogue(DialogueType dialogueType, int index) {
-        switch (dialogueType) {
-            case DialogueType.Dialogue:
-                return ParseDialogue(index);
-            case DialogueType.Greeting:
-            case DialogueType.Farewell:
-            case DialogueType.Idle:
-                return ParseOneLiner(index);
-            case DialogueType.GenericScene:
-            case DialogueType.QuestScene:
-                return ParseScene(index);
-            default:
-                throw new ArgumentOutOfRangeException(nameof(dialogueType), dialogueType, null);
-        }
-    }
+		return dialogue;
+	}
 
-    protected abstract List<DialogueTopic> ParseDialogue(int index);
-    protected abstract List<DialogueTopic> ParseOneLiner(int index);
-    protected abstract List<DialogueTopic> ParseScene(int index);
+	private List<DialogueTopic> ParseDialogue(DialogueType dialogueType, int index) {
+		switch (dialogueType) {
+			case DialogueType.Dialogue:
+				return ParseDialogue(index);
+			case DialogueType.Greeting:
+			case DialogueType.Farewell:
+			case DialogueType.Idle:
+				return ParseOneLiner(index);
+			case DialogueType.GenericScene:
+			case DialogueType.QuestScene:
+				return ParseScene(index);
+			default:
+				throw new ArgumentOutOfRangeException(nameof(dialogueType), dialogueType, null);
+		}
+	}
+
+	protected abstract List<DialogueTopic> ParseDialogue(int index);
+	protected abstract List<DialogueTopic> ParseOneLiner(int index);
+	protected abstract List<DialogueTopic> ParseScene(int index);
 }

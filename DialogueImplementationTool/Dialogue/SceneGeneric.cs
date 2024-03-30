@@ -4,60 +4,60 @@ using DialogueImplementationTool.Dialogue.Topics;
 using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Skyrim.Internals;
 using Noggog;
-namespace DialogueImplementationTool.Dialogue; 
+namespace DialogueImplementationTool.Dialogue;
 
-public class GenericScene : SceneFactory {
-    private static int _genericSceneCount = 1; 
-    
-    public override void GenerateDialogue(List<DialogueTopic> topics) {
-        if (AliasSpeakers.Count != 2) return;
-        
-        //Get all topics in order
-        var allTopics = TopicsTreeToList(topics);
-        
-        //Assign alias indices
-        var first = AliasSpeakers[0].FormKey;
-        foreach (var speaker in AliasSpeakers) {
-            speaker.AliasIndex = speaker.FormKey == first ? 2 : 3;
-        }
+public sealed class GenericScene : SceneFactory {
+	private static int _genericSceneCount = 1;
 
-        //Add quest
-        var questEditorID = $"{DialogueImplementer.Quest.EditorID}Scene{_genericSceneCount}";
-        var alias1 = GetEventAlias("Actor 1", new byte[] { 0x52, 0x31, 0x0, 0x0 }, AliasSpeakers[0].FormKey, AliasSpeakers[1].FormKey);
-        alias1.ID = 0;
-        var alias2 = GetEventAlias("Actor 2", new byte[] { 0x52, 0x32, 0x0, 0x0 }, AliasSpeakers[0].FormKey, AliasSpeakers[1].FormKey);
-        alias2.ID = 1;
-        const QuestAlias.Flag genericSceneAliasFlags = QuestAlias.Flag.AllowReserved | QuestAlias.Flag.AllowReserved;
-        var alias3 = GetAlias(AliasSpeakers[0]);
-        alias3.ID = 2;
-        alias3.Flags |= genericSceneAliasFlags;
-        var alias4 = GetAlias(AliasSpeakers[1]);
-        alias4.ID = 3;
-        alias4.Flags |= genericSceneAliasFlags;
-        
-        var quest = new Quest(Mod.GetNextFormKey(), Release) {
-            EditorID = questEditorID,
-            Priority = 10,
-            Type = Quest.TypeEnum.None,
-            Name = $"{DialogueImplementer.Quest.Name?.String} Scene {_genericSceneCount}",
-            Event = RecordTypes.ADIA,
-            Aliases = new ExtendedList<QuestAlias> { alias1, alias2, alias3, alias4 }
-        };
-        Mod.Quests.Add(quest);
+	public override void GenerateDialogue(List<DialogueTopic> topics) {
+		if (AliasSpeakers.Count != 2) return;
 
-        //Add scene
-        var scene = AddScene($"{questEditorID}Scene", quest.FormKey);
-        scene.Flags = new Scene.Flag();
-        scene.Flags |= Scene.Flag.BeginOnQuestStart | Scene.Flag.StopOnQuestEnd | Scene.Flag.Interruptable;
-        Mod.Scenes.Add(scene);
-        _genericSceneCount++;
+		//Get all topics in order
+		var allTopics = TopicsTreeToList(topics);
 
-        //Add lines
-        AddLines(quest, scene, allTopics);
-    }
-    
-    public override void PreProcessSpeakers() {
-        //Make sure there are only two speakers
-        if (NameMappedSpeakers.Count != 2) MessageBox.Show("Error, there can only be 2 NPCs");
-    }
+		//Assign alias indices
+		var first = AliasSpeakers[0].FormKey;
+		foreach (var speaker in AliasSpeakers) {
+			speaker.AliasIndex = speaker.FormKey == first ? 2 : 3;
+		}
+
+		//Add quest
+		var questEditorID = $"{DialogueImplementer.Quest.EditorID}Scene{_genericSceneCount}";
+		var alias1 = GetEventAlias("Actor 1", new byte[] { 0x52, 0x31, 0x0, 0x0 }, AliasSpeakers[0].FormKey, AliasSpeakers[1].FormKey);
+		alias1.ID = 0;
+		var alias2 = GetEventAlias("Actor 2", new byte[] { 0x52, 0x32, 0x0, 0x0 }, AliasSpeakers[0].FormKey, AliasSpeakers[1].FormKey);
+		alias2.ID = 1;
+		const QuestAlias.Flag genericSceneAliasFlags = QuestAlias.Flag.AllowReserved | QuestAlias.Flag.AllowReserved;
+		var alias3 = GetAlias(AliasSpeakers[0]);
+		alias3.ID = 2;
+		alias3.Flags |= genericSceneAliasFlags;
+		var alias4 = GetAlias(AliasSpeakers[1]);
+		alias4.ID = 3;
+		alias4.Flags |= genericSceneAliasFlags;
+
+		var quest = new Quest(Mod.GetNextFormKey(), Release) {
+			EditorID = questEditorID,
+			Priority = 10,
+			Type = Quest.TypeEnum.None,
+			Name = $"{DialogueImplementer.Quest.Name?.String} Scene {_genericSceneCount}",
+			Event = RecordTypes.ADIA,
+			Aliases = new ExtendedList<QuestAlias> { alias1, alias2, alias3, alias4 }
+		};
+		Mod.Quests.Add(quest);
+
+		//Add scene
+		var scene = AddScene($"{questEditorID}Scene", quest.FormKey);
+		scene.Flags = new Scene.Flag();
+		scene.Flags |= Scene.Flag.BeginOnQuestStart | Scene.Flag.StopOnQuestEnd | Scene.Flag.Interruptable;
+		Mod.Scenes.Add(scene);
+		_genericSceneCount++;
+
+		//Add lines
+		AddLines(quest, scene, allTopics);
+	}
+
+	public override void PreProcessSpeakers() {
+		//Make sure there are only two speakers
+		if (NameMappedSpeakers.Count != 2) MessageBox.Show("Error, there can only be 2 NPCs");
+	}
 }

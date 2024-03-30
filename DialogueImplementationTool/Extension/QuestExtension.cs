@@ -7,7 +7,7 @@ namespace DialogueImplementationTool.Extension;
 
 public static class QuestExtension {
 	public static IQuestAliasGetter? GetAlias(this IQuestGetter quest, FormKey npcFormKey) {
-		return  quest.Aliases.FirstOrDefault(alias => alias.UniqueActor.FormKey == npcFormKey);
+		return quest.Aliases.FirstOrDefault(alias => alias.UniqueActor.FormKey == npcFormKey);
 	}
 
 	public static IQuestAliasGetter GetOrAddAlias(this IQuest quest, ILinkCache linkCache, FormKey npcFormKey) {
