@@ -4,97 +4,82 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue;
 
-public abstract class OneLinerFactory : DialogueFactory {
-	public sealed record PostProcessOptions(bool RandomFlags = false, float ResetHours = 0);
+public abstract class OneLinerFactory(IDialogueContext context) : DialogueFactory(context) {
+    protected void GenerateDialogue(IQuest quest, List<DialogueTopic> topics, DialogTopic dialogTopic) {
+        var topicsInfoList = topics.ToTopicInfoList();
 
-	private static bool _needPostProcessing;
+        var lastFormKey = FormKey.Null;
+        if (dialogTopic.Responses.Count > 0) lastFormKey = dialogTopic.Responses[^1].FormKey;
 
-	protected static void GenerateDialogue(List<DialogueTopic> topics, DialogTopic dialogTopic) {
-		var topicsList = TopicsTreeToList(topics);
+        foreach (var topicInfo in topicsInfoList) {
+            var responses = GetResponses(quest, topicInfo, lastFormKey);
+            lastFormKey = responses.FormKey;
+            dialogTopic.Responses.Add(responses);
+        }
 
-		var lastFormKey = FormKey.Null;
-		if (dialogTopic.Responses.Count > 0) {
-			lastFormKey = dialogTopic.Responses[^1].FormKey;
-		}
+        Context.AddDialogTopic(dialogTopic);
+    }
 
-		foreach (var topic in topicsList) {
-			var responses = GetResponses(topic, lastFormKey);
-			lastFormKey = responses.FormKey;
+    /*====================================================
+       Post Processing
+    ====================================================*/
+    private static FormKey GetMainSpeaker(IDialogResponses responses) {
+        foreach (var condition in responses.Conditions) {
+            if (condition is not ConditionFloat { Data: FunctionConditionData data }) continue;
 
-			dialogTopic.Responses.Add(responses);
-		}
+            if (data.Function == Condition.Function.GetIsID) return data.ParameterOneRecord.FormKey;
+        }
 
-		if (!Mod.DialogTopics.ContainsKey(dialogTopic.FormKey)) {
-			Mod.DialogTopics.Add(dialogTopic);
-		}
+        return FormKey.Null;
+    }
 
-		_needPostProcessing = true;
-	}
+    private static void ReorderBySpeaker(IDialogTopic topic) {
+        for (var index = 0; index < topic.Responses.Count; index++) {
+            var currentSpeaker = GetMainSpeaker(topic.Responses[index]);
 
-	/*====================================================
-	   Post Processing
-	====================================================*/
-	private static FormKey GetMainSpeaker(IDialogResponses responses) {
-		foreach (var condition in responses.Conditions) {
-			if (condition is not ConditionFloat { Data: FunctionConditionData data }) continue;
+            var rightSpeaker = false;
+            for (var runner = index + 1; runner < topic.Responses.Count; runner++) {
+                var current = topic.Responses[runner];
+                if (GetMainSpeaker(current) == currentSpeaker) {
+                    if (rightSpeaker) break;
 
-			if (data.Function == Condition.Function.GetIsID) {
-				return data.ParameterOneRecord.FormKey;
-			}
-		}
+                    topic.Remove(current);
+                    topic.Responses.Insert(index + 1, current);
+                } else {
+                    rightSpeaker = false;
+                }
+            }
+        }
+    }
 
-		return FormKey.Null;
-	}
+    public override void PreProcess(List<DialogueTopic> topics) { }
 
-	private static void ReorderBySpeaker(IDialogTopic topic) {
-		for (var index = 0; index < topic.Responses.Count; index++) {
-			var currentSpeaker = GetMainSpeaker(topic.Responses[index]);
+    protected static void PostProcess(IDialogTopic topic, PostProcessOptions options) {
+        // ReorderBySpeaker(topic);
+        if (options.RandomFlags) SetRandomFlags(topic, true);
+        if (options.ResetHours > 0) SetResetHours(topic, options.ResetHours);
+    }
 
-			var rightSpeaker = false;
-			for (var runner = index + 1; runner < topic.Responses.Count; runner++) {
-				var current = topic.Responses[runner];
-				if (GetMainSpeaker(current) == currentSpeaker) {
-					if (rightSpeaker) break;
+    private static void SetResetHours(IDialogTopic topic, float resetHours) {
+        foreach (var response in topic.Responses) {
+            response.Flags ??= new DialogResponseFlags();
+            response.Flags.ResetHours = resetHours;
+        }
+    }
 
-					topic.Remove(current);
-					topic.Responses.Insert(index + 1, current);
-				} else {
-					rightSpeaker = false;
-				}
-			}
-		}
-	}
+    private static void SetRandomFlags(IDialogTopic topic, bool addRandomEndFlag) {
+        for (var index = 0; index < topic.Responses.Count; index++) {
+            var response = topic.Responses[index];
+            response.Flags ??= new DialogResponseFlags();
+            if ((response.Flags.Flags & DialogResponses.Flag.SayOnce) != 0) continue;
 
-	public override void PreProcess(List<DialogueTopic> topics) {}
+            response.Flags.Flags |= DialogResponses.Flag.Random;
 
-	protected static void PostProcess(IDialogTopic topic, PostProcessOptions options) {
-		if (!_needPostProcessing) return;
+            if (addRandomEndFlag && (index + 1 >= topic.Responses.Count
+                                     || GetMainSpeaker(topic.Responses[index + 1]) != GetMainSpeaker(response)))
+                response.Flags.Flags |= DialogResponses.Flag.RandomEnd;
+        }
+    }
 
-		// ReorderBySpeaker(topic);
-		if (options.RandomFlags) SetRandomFlags(topic, true);
-		if (options.ResetHours > 0) SetResetHours(topic, options.ResetHours);
-
-		_needPostProcessing = false;
-	}
-
-	private static void SetResetHours(IDialogTopic topic, float resetHours) {
-		foreach (var response in topic.Responses) {
-			response.Flags ??= new DialogResponseFlags();
-			response.Flags.ResetHours = resetHours;
-		}
-	}
-
-	private static void SetRandomFlags(IDialogTopic topic, bool addRandomEndFlag) {
-		for (var index = 0; index < topic.Responses.Count; index++) {
-			var response = topic.Responses[index];
-			response.Flags ??= new DialogResponseFlags();
-			if ((response.Flags.Flags & DialogResponses.Flag.SayOnce) != 0) continue;
-
-			response.Flags.Flags |= DialogResponses.Flag.Random;
-
-			if (addRandomEndFlag && (index + 1 >= topic.Responses.Count || GetMainSpeaker(topic.Responses[index + 1]) != GetMainSpeaker(response))) {
-				response.Flags.Flags |= DialogResponses.Flag.RandomEnd;
-			}
-		}
-	}
+    protected sealed record PostProcessOptions(bool RandomFlags = false, float ResetHours = 0);
 }

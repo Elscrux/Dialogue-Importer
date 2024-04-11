@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using DialogueImplementationTool.Dialogue.Topics;
 using DialogueImplementationTool.Parser;
 namespace DialogueImplementationTool.Dialogue.Conversation;
@@ -16,35 +17,41 @@ namespace DialogueImplementationTool.Dialogue.Conversation;
 /// </example>
 /// </summary>
 public sealed class SameResponseChecker : IConversationProcessor {
-	public void Process(IList<GeneratedDialogue> dialogues) {
-		foreach (var dialogue in dialogues) {
-			CheckTopics(dialogue.Topics);
-		}
-	}
+    public void Process(IList<GeneratedDialogue> dialogues) {
+        foreach (var dialogue in dialogues) {
+            CheckTopics(dialogue.Topics);
+        }
+    }
 
-	private void CheckTopics(IList<DialogueTopic> topics) {
-		var processedTopics = new HashSet<DialogueTopic>();
-		var queueBacklog = new Queue<IList<DialogueTopic>>();
-		queueBacklog.Enqueue(topics);
+    private void CheckTopics(IList<DialogueTopic> topics) {
+        var processedTopics = new HashSet<DialogueTopic>();
+        var queueBacklog = new Queue<IList<DialogueTopic>>();
+        queueBacklog.Enqueue(topics);
 
-		while (queueBacklog.Count > 0) {
-			var dialogueTopics = queueBacklog.Dequeue();
-			for (var i = 0; i < dialogueTopics.Count; i++) {
-				var currentTopic = dialogueTopics[i];
-				if (!processedTopics.Add(currentTopic)) continue;
+        // Iterate through all option lists to find ones with empty responses
+        while (queueBacklog.Count > 0) {
+            var currentTopicOptions = queueBacklog.Dequeue();
+            for (var i = 0; i < currentTopicOptions.Count; i++) {
+                var currentTopic = currentTopicOptions[i];
+                if (!processedTopics.Add(currentTopic)) continue;
 
-				queueBacklog.Enqueue(currentTopic.Links);
-				if (currentTopic.Responses.Count != 0) continue;
+                foreach (var info in currentTopic.TopicInfos) {
+                    queueBacklog.Enqueue(info.Links);
+                }
 
-				// We found an empty topic
-				// Search for the next topic with any responses and use those
-				for (var j = i + 1; j < dialogueTopics.Count; j++) {
-					if (dialogueTopics[j].Responses.Count == 0) continue;
+                if (currentTopic.TopicInfos.TrueForAll(t => t.Responses.Count != 0)) continue;
 
-					currentTopic.Responses.AddRange(dialogueTopics[j].Responses);
-					break;
-				}
-			}
-		}
-	}
+                // We found a topic with no infos that have any responses
+                // Search for the next topic with any responses and use its infos
+                var nextTopic = currentTopicOptions
+                    .Skip(i + 1)
+                    .FirstOrDefault(t => t.TopicInfos.Exists(info => info.Responses.Count > 0));
+
+                if (nextTopic is null) continue;
+
+                currentTopic.TopicInfos.Clear();
+                currentTopic.TopicInfos.AddRange(nextTopic.TopicInfos);
+            }
+        }
+    }
 }

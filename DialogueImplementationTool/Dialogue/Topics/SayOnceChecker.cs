@@ -1,19 +1,18 @@
 ﻿using System.Text.RegularExpressions;
 namespace DialogueImplementationTool.Dialogue.Topics;
 
-public sealed class SayOnceChecker : IDialogueTopicPostProcessor {
-	private static readonly Regex InitialRegex = new(@"\[(initial)( (greeting))?\]", RegexOptions.IgnoreCase);
+public sealed partial class SayOnceChecker : IDialogueTopicInfoProcessor {
+    public void Process(DialogueTopicInfo topicInfo) {
+        if (topicInfo.Responses.Count == 0) return;
 
-	public void Process(DialogueTopic topic) {
-		if (topic.Responses.Count == 0) return;
+        var response = topicInfo.Responses[0];
+        var previousResponse = response.Response;
 
-		var response = topic.Responses[0];
-		var previousResponse = response.Response;
+        response.Response = InitialRegex().Replace(response.Response, string.Empty);
 
-		response.Response = InitialRegex.Replace(response.Response, string.Empty);
+        if (response.Response != previousResponse) topicInfo.SayOnce = true;
+    }
 
-		if (response.Response != previousResponse) {
-			topic.SayOnce = true;
-		}
-	}
+    [GeneratedRegex(@"\[(initial)( (greeting))?\]", RegexOptions.IgnoreCase, "en-DE")]
+    private static partial Regex InitialRegex();
 }

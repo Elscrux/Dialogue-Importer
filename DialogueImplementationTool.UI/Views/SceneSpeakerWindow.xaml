@@ -1,12 +1,12 @@
-﻿<Window x:Class="DialogueImplementationTool.UI.SceneSpeakerWindow"
+﻿<Window x:Class="DialogueImplementationTool.UI.Views.SceneSpeakerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:local="clr-namespace:DialogueImplementationTool.UI"
         xmlns:plugins="clr-namespace:Mutagen.Bethesda.WPF.Plugins;assembly=Mutagen.Bethesda.WPF"
         xmlns:dd="urn:gong-wpf-dragdrop"
-        mc:Ignorable="d" d:DataContext="{d:DesignInstance local:SceneSpeakerWindow}"
+        xmlns:views="clr-namespace:DialogueImplementationTool.UI.Views"
+        mc:Ignorable="d" d:DataContext="{d:DesignInstance views:SceneSpeakerWindow}"
         Title="Select scene actors"
         Height="450" Width="800">
     <DockPanel>
@@ -46,8 +46,8 @@
                                     dd:DragDrop.UseDefaultEffectDataTemplate="True"
                                     FormKey="{Binding FormKey, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                     EditorID="{Binding EditorID, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                    LinkCache="{Binding LinkCache, RelativeSource={RelativeSource FindAncestor, AncestorType=local:SceneSpeakerWindow}}"
-                                    ScopedTypes="{Binding ScopedTypes, RelativeSource={RelativeSource FindAncestor, AncestorType=local:SceneSpeakerWindow}}" />
+                                    LinkCache="{Binding LinkCache, RelativeSource={RelativeSource FindAncestor, AncestorType=views:SceneSpeakerWindow}}"
+                                    ScopedTypes="{Binding ScopedTypes, RelativeSource={RelativeSource FindAncestor, AncestorType=views:SceneSpeakerWindow}}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -55,7 +55,7 @@
             </DataGrid>
 
             <GroupBox Header="Favorites, drag and drop to assign">
-                <ListBox ItemsSource="{Binding SpeakerFavourites}"
+                <ListBox ItemsSource="{Binding SpeakerFavoritesSelection.Speakers}"
                          dd:DragDrop.IsDragSource="True"
                          dd:DragDrop.DragHandler="{StaticResource SpeakerFavouriteFormKeyDragSource}"
                          dd:DragDrop.ShowAlwaysDropTargetAdorner="True"

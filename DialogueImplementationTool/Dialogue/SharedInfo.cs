@@ -7,64 +7,69 @@ using Noggog;
 namespace DialogueImplementationTool.Dialogue;
 
 public sealed class SharedInfo {
-	private static DialogTopic? _topic;
-	private static readonly Dictionary<FormKey, int> SharedLineCount = new();
+    // todo remove static member
+    private static readonly Dictionary<FormKey, int> SharedLineCount = new();
+    private DialogTopic? _topic;
 
-	public DialogResponses? ResponseData { get; set; }
-	public DialogueTopic ResponseDataTopic { get; }
+    public SharedInfo(DialogueTopicInfo responseDataTopicInfo) {
+        if (responseDataTopicInfo.Speaker is null)
+            throw new ArgumentException($"{nameof(responseDataTopicInfo)} can't have an empty speaker");
 
-	public SharedInfo(DialogueTopic responseDataTopic) {
-		if (responseDataTopic.Speaker == null) throw new ArgumentException($"{nameof(responseDataTopic)} can't have an empty speaker");
+        ResponseDataTopicInfo = responseDataTopicInfo;
+    }
 
-		ResponseDataTopic = responseDataTopic;
-	}
+    public DialogResponses? ResponseData { get; set; }
+    public DialogueTopicInfo ResponseDataTopicInfo { get; }
 
-	public DialogResponses GetResponseData() {
-		if (ResponseData == null) {
-			_topic ??= new DialogTopic(DialogueFactory.Mod.GetNextFormKey(), DialogueFactory.Release) {
-				EditorID = $"{DialogueImplementer.Quest.EditorID}SharedInfos",
-				Name = $"{DialogueImplementer.Quest.EditorID}SharedInfos",
-				Priority = 2500,
-				Quest = new FormLinkNullable<IQuestGetter>(DialogueImplementer.Quest.FormKey),
-				Category = DialogTopic.CategoryEnum.Misc,
-				Subtype = DialogTopic.SubtypeEnum.SharedInfo,
-				SubtypeName = "IDAT",
-				Responses = new ExtendedList<DialogResponses>(),
-			};
+    public DialogResponses GetResponseData(
+        IQuest quest,
+        IDialogueContext modContext,
+        Func<IQuest, DialogueTopicInfo, FormKey?, DialogResponses> getResponses,
+        Func<ISpeaker, ExtendedList<Condition>> getSpeakerConditions) {
+        if (ResponseData is null) {
+            _topic ??= new DialogTopic(modContext.GetNextFormKey(), modContext.Release) {
+                EditorID = $"{quest.EditorID}SharedInfos",
+                Name = $"{quest.EditorID}SharedInfos",
+                Priority = 2500,
+                Quest = new FormLinkNullable<IQuestGetter>(quest.FormKey),
+                Category = DialogTopic.CategoryEnum.Misc,
+                Subtype = DialogTopic.SubtypeEnum.SharedInfo,
+                SubtypeName = "IDAT",
+                Responses = [],
+            };
 
-			if (!DialogueFactory.Mod.DialogTopics.ContainsKey(_topic.FormKey)) {
-				DialogueFactory.Mod.DialogTopics.Add(_topic);
-			}
+            modContext.AddDialogTopic(_topic);
 
-			var lastFormKey = _topic.Responses.Count > 0 ? _topic.Responses[^1].FormKey : FormKey.Null;
-			var dialogResponses = DialogueFactory.GetResponses(ResponseDataTopic, lastFormKey);
-			dialogResponses.EditorID = GetNextSharedEditorID();
+            var lastFormKey = _topic.Responses.Count > 0 ? _topic.Responses[^1].FormKey : FormKey.Null;
+            var dialogResponses = getResponses(quest, ResponseDataTopicInfo, lastFormKey);
+            // Todo refactor with Naming.GetFirstFreeIndex
+            dialogResponses.EditorID = GetNextSharedEditorID(quest.EditorID);
 
-			_topic.Responses.Add(dialogResponses);
+            _topic.Responses.Add(dialogResponses);
 
-			ResponseData = dialogResponses;
-		}
+            ResponseData = dialogResponses;
+        }
 
-		return new DialogResponses(DialogueFactory.Mod.GetNextFormKey(), DialogueFactory.Release) {
-			ResponseData = new FormLinkNullable<IDialogResponsesGetter>(ResponseData.FormKey),
-			Conditions = DialogueFactory.GetSpeakerConditions(ResponseDataTopic.Speaker),
-			FavorLevel = FavorLevel.None,
-			Flags = new DialogResponseFlags(),
-		};
-	}
+        return new DialogResponses(modContext.GetNextFormKey(), modContext.Release) {
+            ResponseData = new FormLinkNullable<IDialogResponsesGetter>(ResponseData.FormKey),
+            Conditions = getSpeakerConditions(ResponseDataTopicInfo.Speaker),
+            FavorLevel = FavorLevel.None,
+            Flags = new DialogResponseFlags(),
+        };
+    }
 
-	private string GetNextSharedEditorID() {
-		var newCount = 1;
-		if (!SharedLineCount.TryGetValue(ResponseDataTopic.Speaker.FormKey, out var count)) {
-			SharedLineCount.Add(ResponseDataTopic.Speaker.FormKey, newCount);
-		} else {
-			newCount = count + 1;
-			SharedLineCount[ResponseDataTopic.Speaker.FormKey] = newCount;
-		}
+    private string GetNextSharedEditorID(string? questEditorId) {
+        var newCount = 1;
+        if (!SharedLineCount.TryGetValue(ResponseDataTopicInfo.Speaker.FormKey, out var count)) {
+            SharedLineCount.Add(ResponseDataTopicInfo.Speaker.FormKey, newCount);
+        } else {
+            newCount = count + 1;
+            SharedLineCount[ResponseDataTopicInfo.Speaker.FormKey] = newCount;
+        }
 
-		return DialogueImplementer.Quest.EditorID
-		  + ResponseDataTopic.Speaker.Name
-		  + "Shared"
-		  + newCount;
-	}
+        return questEditorId
+               + ResponseDataTopicInfo.Speaker.Name
+               + "Shared"
+               + newCount;
+    }
 }

@@ -1,9 +1,13 @@
 ﻿using System.Text.RegularExpressions;
 namespace DialogueImplementationTool.Dialogue.Responses;
 
-public sealed class BackToDialogueRemover : IDialogueResponsePostProcessor {
-	private readonly Regex _regex = new(@"(?i)\[back to (root|top|main)( level)?( dialogue)?( options)?\]", RegexOptions.IgnoreCase);
-	public void Process(DialogueResponse response) {
-		response.Response = _regex.Replace(response.Response, string.Empty);
-	}
+public sealed partial class BackToDialogueRemover : IDialogueResponsePostProcessor {
+    public void Process(DialogueResponse response) {
+        response.Response = Regex().Replace(response.Response, string.Empty);
+    }
+
+    [GeneratedRegex(@"(?i)\[back to (root|top|main)( level)?( dialogue)?( options)?\]",
+        RegexOptions.IgnoreCase,
+        "en-DE")]
+    private static partial Regex Regex();
 }

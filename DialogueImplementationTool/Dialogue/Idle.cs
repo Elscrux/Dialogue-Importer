@@ -4,25 +4,27 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue;
 
-public sealed class Idle : OneLinerFactory {
-	private static readonly PostProcessOptions PostProcessOptions = new(true);
-	private static DialogTopic? _topic;
+public sealed class Idle(IDialogueContext context) : OneLinerFactory(context) {
+    private static readonly PostProcessOptions PostProcessOptions = new(true);
+    private DialogTopic? _topic;
 
-	public override void GenerateDialogue(List<DialogueTopic> topics) {
-		_topic ??= new DialogTopic(Mod.GetNextFormKey(), Release) {
-			EditorID = $"{DialogueImplementer.Quest.EditorID}Idles",
-			Name = $"{DialogueImplementer.Quest.EditorID}Idles",
-			Priority = 2500,
-			Quest = new FormLinkNullable<IQuestGetter>(DialogueImplementer.Quest.FormKey),
-			Category = DialogTopic.CategoryEnum.Misc,
-			Subtype = DialogTopic.SubtypeEnum.Idle,
-			SubtypeName = "IDLE"
-		};
+    public override void GenerateDialogue(IQuest quest, List<DialogueTopic> topics) {
+        var editorId = $"{quest.EditorID}Idles";
 
-		GenerateDialogue(topics, _topic);
-	}
+        _topic = Context.GetTopic(editorId) ?? new DialogTopic(Context.GetNextFormKey(), Context.Release) {
+            EditorID = editorId,
+            Name = editorId,
+            Priority = 2500,
+            Quest = new FormLinkNullable<IQuestGetter>(quest.FormKey),
+            Category = DialogTopic.CategoryEnum.Misc,
+            Subtype = DialogTopic.SubtypeEnum.Idle,
+            SubtypeName = "IDLE",
+        };
 
-	public override void PostProcess() {
-		if (_topic != null) PostProcess(_topic, PostProcessOptions);
-	}
+        GenerateDialogue(quest, topics, _topic);
+    }
+
+    public override void PostProcess() {
+        if (_topic is not null) PostProcess(_topic, PostProcessOptions);
+    }
 }

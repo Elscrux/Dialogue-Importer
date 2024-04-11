@@ -10,310 +10,325 @@ using AODL.Document.TextDocuments;
 using DialogueImplementationTool.Dialogue.Responses;
 using DialogueImplementationTool.Dialogue.Topics;
 using Noggog;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 namespace DialogueImplementationTool.Parser;
 
-public sealed class OpenDocumentTextParser : DocumentParser {
-	private readonly TextDocument _doc = new();
+public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
+    private readonly TextDocument _doc = new();
 
-	public override int LastIndex { get; }
+    public OpenDocumentTextParser(string filePath, DialogueProcessor dialogueProcessor) {
+        FilePath = filePath;
+        DialogueProcessor = dialogueProcessor;
+        var tryLoading = true;
+        while (tryLoading)
+            try {
+                _doc.Load(filePath);
+                tryLoading = false;
+            } catch (Exception e) {
+                switch (MessageBox.Show(e.Message)) {
+                    case MessageBoxResult.None:
+                    case MessageBoxResult.Cancel:
+                    case MessageBoxResult.No:
+                        tryLoading = false;
+                        break;
+                    case MessageBoxResult.OK:
+                    case MessageBoxResult.Yes:
+                        break;
+                    default: throw new ArgumentOutOfRangeException();
+                }
+            }
 
-	public override void BacktrackMany() {
-		if (Index == 0) return;
+        MergeLists();
 
-		for (var i = Index - 1; i >= 0; i--) {
-			if (_doc.Content[i] is not List) continue;
+        LastIndex = 0;
+        for (var i = _doc.Content.Count - 1; i >= 0; i--) {
+            if (string.IsNullOrWhiteSpace(Preview(i))) continue;
 
-			Index = i;
-			return;
-		}
+            LastIndex = i;
+            break;
+        }
+    }
 
-		Index = 0;
-	}
+    public string FilePath { get; }
+    public DialogueProcessor DialogueProcessor { get; }
+    [Reactive] public int Index { get; set; }
+    public int LastIndex { get; }
 
-	public override void SkipMany() {
-		if (Index >= _doc.Content.Count - 1) return;
+    public void BacktrackMany() {
+        if (Index == 0) return;
 
-		for (var i = Index + 1; i < _doc.Content.Count; i++) {
-			if (_doc.Content[i] is not List) continue;
+        for (var i = Index - 1; i >= 0; i--) {
+            if (_doc.Content[i] is not List) continue;
 
-			Index = i;
-			return;
-		}
+            Index = i;
+            return;
+        }
 
-		Index = LastIndex;
-	}
+        Index = 0;
+    }
 
-	public override string Preview(int index) {
-		switch (_doc.Content[index]) {
-			case List list:
-				while (list.Content.Count > 0) {
-					if (list.Content[0] is ListItem listItem) {
-						if (listItem.Content.Count > 0) {
-							switch (listItem.Content[0]) {
-								case Paragraph paragraph:
-									return GetText(paragraph);
-								case List newList:
-									list = newList;
-									break;
-								default:
-									return string.Empty;
-							}
-						} else return string.Empty;
-					} else return string.Empty;
-				}
+    public void SkipMany() {
+        if (Index >= _doc.Content.Count - 1) return;
 
-				break;
-			case Paragraph paragraph:
-				return GetText(paragraph);
-		}
+        for (var i = Index + 1; i < _doc.Content.Count; i++) {
+            if (_doc.Content[i] is not List) continue;
 
-		return string.Empty;
-	}
+            Index = i;
+            return;
+        }
 
-	public OpenDocumentTextParser(string filePath) : base(filePath) {
-		var tryLoading = true;
-		while (tryLoading) {
-			try {
-				_doc.Load(filePath);
-				tryLoading = false;
-			} catch (Exception e) {
-				switch (MessageBox.Show(e.Message)) {
-					case MessageBoxResult.None:
-					case MessageBoxResult.Cancel:
-					case MessageBoxResult.No:
-						tryLoading = false;
-						break;
-					case MessageBoxResult.OK:
-					case MessageBoxResult.Yes:
-						break;
-					default:
-						throw new ArgumentOutOfRangeException();
-				}
-			}
-		}
+        Index = LastIndex;
+    }
 
-		MergeLists();
+    public string Preview(int index) {
+        switch (_doc.Content[index]) {
+            case List list:
+                while (list.Content.Count > 0)
+                    if (list.Content[0] is ListItem listItem) {
+                        if (listItem.Content.Count > 0)
+                            switch (listItem.Content[0]) {
+                                case Paragraph paragraph: return GetText(paragraph);
+                                case List newList:
+                                    list = newList;
+                                    break;
+                                default: return string.Empty;
+                            }
+                        else
+                            return string.Empty;
+                    } else {
+                        return string.Empty;
+                    }
 
-		LastIndex = 0;
-		for (var i = _doc.Content.Count - 1; i >= 0; i--) {
-			if (string.IsNullOrWhiteSpace(Preview(i))) continue;
+                break;
+            case Paragraph paragraph: return GetText(paragraph);
+        }
 
-			LastIndex = i;
-			break;
-		}
-	}
+        return string.Empty;
+    }
 
-	private void MergeLists() {
-		var startingIndex = 0;
-		while (startingIndex < _doc.Content.Count) {
-			if (_doc.Content[startingIndex] is not List currentList) {
-				startingIndex++;
-				continue;
-			}
+    public List<DialogueTopic> ParseDialogue(int index) {
+        if (_doc.Content[index] is not List list) return [];
 
-			var addNextList = false;
-			var index = startingIndex + 1;
-			var listAdded = ListAdded();
+        var branches = new List<DialogueTopic>();
+        //Evaluate if the player starts dialogue
+        var playerDialogue = true;
+        if (list.Content.Count > 0) {
+            if (list.Content[0] is ListItem listItem) {
+                if (listItem.Content.Count > 0) {
+                    if (listItem.Content[0] is Paragraph paragraph)
+                        playerDialogue = IsPlayerLine(paragraph);
+                    else
+                        Console.WriteLine(
+                            $"Warning: Didn't recognize {listItem.Content[0].GetType()} as paragraph type");
+                }
+            } else {
+                Console.WriteLine($"Warning: Didn't recognize {list.Content[0].GetType()} as list item type");
+            }
+        }
 
-			if (!listAdded) {
-				startingIndex++;
-			}
-			continue;
+        if (playerDialogue) {
+            foreach (IContent branch in list.Content) {
+                if (branch is not ListItem branchItem) continue;
 
-			bool ListAdded() {
-				var added = false;
-				while (index < _doc.Content.Count) {
-					switch (_doc.Content[index]) {
-						case Paragraph paragraph:
-							if (paragraph.TextContent.Count == 0) {
-								addNextList = true;
-								_doc.Content.RemoveAt(index);
-							} else {
-								return added;
-							}
-							break;
-						case List list:
-							if (addNextList) {
-								foreach (IContent content in list.Content) {
-									currentList.Content.Add(content);
-								}
-								_doc.Content.RemoveAt(index);
-								added = true;
-								addNextList = false;
-							} else {
-								return added;
-							}
-							break;
-						default:
-							return added;
-					}
-				}
-				return added;
-			}
-		}
-	}
+                //Player dialogue - every entry is a new branch
+                var currentBranch = AddTopicInfo(branchItem);
+                DialogueProcessor.PreProcess(currentBranch);
+                branches.Add(new DialogueTopic { TopicInfos = [currentBranch] });
+            }
+        } else {
+            //One new branch, NPC starts to talk
+            var currentBranch = new DialogueTopicInfo();
+            branches.Add(new DialogueTopic { TopicInfos = [currentBranch] });
 
-	protected override List<DialogueTopic> ParseDialogue(int index) {
-		var branches = new List<DialogueTopic>();
-		if (_doc.Content[index] is not List list) return branches;
+            AddLinksAndResponses(list, currentBranch);
+            DialogueProcessor.PreProcess(currentBranch);
+        }
 
-		//Evaluate if the player starts dialogue
-		var playerDialogue = true;
-		if (list.Content.Count > 0) {
-			if (list.Content[0] is ListItem listItem) {
-				if (listItem.Content.Count > 0) {
-					if (listItem.Content[0] is Paragraph paragraph) {
-						playerDialogue = IsPlayerLine(paragraph);
-					} else Console.WriteLine($"Warning: Didn't recognize {listItem.Content[0].GetType()} as paragraph type");
-				}
-			} else Console.WriteLine($"Warning: Didn't recognize {list.Content[0].GetType()} as list item type");
-		}
+        return branches;
+    }
 
-		if (playerDialogue) {
-			foreach (IContent branch in list.Content) {
-				if (branch is not ListItem branchItem) continue;
+    public List<DialogueTopic> ParseOneLiner(int index) {
+        if (_doc.Content[index] is not List list) return [];
 
-				//Player dialogue - every entry is a new branch
-				var currentBranch = AddTopic(branchItem);
-				currentBranch.Build();
-				branches.Add(currentBranch);
-			}
-		} else {
-			//One new branch, NPC starts to talk
-			var currentBranch = new DialogueTopic();
-			branches.Add(currentBranch);
+        var topics = new List<DialogueTopicInfo>();
+        foreach (IContent listContent in list.Content) {
+            if (listContent is not ListItem listItem) continue;
 
-			AddLinksAndResponses(list, currentBranch);
-			currentBranch.Build();
-		}
+            foreach (IContent itemContent in listItem.Content) {
+                switch (itemContent) {
+                    case Paragraph paragraph:
+                        //Set player text
+                        var topic = new DialogueTopicInfo
+                            { Responses = { DialogueResponse.Build(GetFormattedText(paragraph)) } };
+                        DialogueProcessor.PreProcess(topic);
+                        topics.Add(topic);
+                        break;
+                    default:
+                        Console.WriteLine($"Warning: Didn't recognize {listContent.GetType()} as response type");
+                        break;
+                }
+            }
+        }
 
-		return branches;
-	}
+        return [new DialogueTopic { TopicInfos = topics }];
+    }
 
-	protected override List<DialogueTopic> ParseOneLiner(int index) {
-		var topics = new List<DialogueTopic>();
-		if (_doc.Content[index] is not List list) return topics;
+    public List<DialogueTopic> ParseScene(int index) {
+        return ParseOneLiner(index);
+    }
 
-		foreach (IContent listContent in list.Content) {
-			if (listContent is not ListItem listItem) continue;
+    private void MergeLists() {
+        var startingIndex = 0;
+        while (startingIndex < _doc.Content.Count) {
+            if (_doc.Content[startingIndex] is not List currentList) {
+                startingIndex++;
+                continue;
+            }
 
-			foreach (IContent itemContent in listItem.Content) {
-				switch (itemContent) {
-					case Paragraph paragraph:
-						//Set player text
-						var topic = new DialogueTopic { Responses = { DialogueResponse.Build(GetFormattedText(paragraph)) } };
-						topic.Build();
-						topics.Add(topic);
-						break;
-					default:
-						Console.WriteLine($"Warning: Didn't recognize {listContent.GetType()} as response type");
-						break;
-				}
-			}
-		}
+            var addNextList = false;
+            var index = startingIndex + 1;
+            var listAdded = ListAdded();
 
-		return topics;
-	}
+            if (!listAdded) startingIndex++;
 
-	protected override List<DialogueTopic> ParseScene(int index) => ParseOneLiner(index);
+            continue;
 
-	private DialogueTopic AddTopic(IContentContainer listItem) {
-		var topic = new DialogueTopic();
+            bool ListAdded() {
+                var added = false;
+                while (index < _doc.Content.Count)
+                    switch (_doc.Content[index]) {
+                        case Paragraph paragraph:
+                            if (paragraph.TextContent.Count == 0) {
+                                addNextList = true;
+                                _doc.Content.RemoveAt(index);
+                            } else {
+                                return added;
+                            }
 
-		foreach (IContent itemContent in listItem.Content) {
-			switch (itemContent) {
-				case Paragraph paragraph:
-					//Set player text
-					topic.Text = GetText(paragraph);
+                            break;
+                        case List list:
+                            if (addNextList) {
+                                foreach (IContent content in list.Content) {
+                                    currentList.Content.Add(content);
+                                }
 
-					break;
-				case List linksAndResponsesList:
-					//Add links and responses
-					AddLinksAndResponses(linksAndResponsesList, topic);
+                                _doc.Content.RemoveAt(index);
+                                added = true;
+                                addNextList = false;
+                            } else {
+                                return added;
+                            }
 
-					break;
-				default:
-					Console.WriteLine($"Warning: Didn't recognize {itemContent.GetType()} as topic type");
+                            break;
+                        default: return added;
+                    }
 
-					break;
-			}
-		}
+                return added;
+            }
+        }
+    }
 
-		return topic;
-	}
+    private DialogueTopicInfo AddTopicInfo(IContentContainer listItem) {
+        var topic = new DialogueTopicInfo();
 
-	private void AddLinksAndResponses(IContentContainer list, DialogueTopic topic) {
-		foreach (IContent listContent in list.Content) {
-			if (listContent is not ListItem listItem) continue;
+        foreach (IContent itemContent in listItem.Content) {
+            switch (itemContent) {
+                case Paragraph paragraph:
+                    //Set player text
+                    topic.Prompt = GetText(paragraph);
 
-			foreach (IContent topicContent in listItem.Content) {
-				switch (topicContent) {
-					case Paragraph paragraph:
-						//Add responses
-						topic.Responses.Add(DialogueResponse.Build(GetFormattedText(paragraph)));
-						break;
-					case List linkList:
-						//Add links
-						foreach (IContent linkContent in linkList.Content) {
-							if (linkContent is not ListItem linkItem) continue;
+                    break;
+                case List linksAndResponsesList:
+                    //Add links and responses
+                    AddLinksAndResponses(linksAndResponsesList, topic);
 
-							var nextTopic = AddTopic(linkItem);
-							nextTopic.IncomingLink = topic;
-							topic.Links.Add(nextTopic);
-							nextTopic.Build();
-						}
+                    break;
+                default:
+                    Console.WriteLine($"Warning: Didn't recognize {itemContent.GetType()} as topic type");
 
-						break;
-					default:
-						Console.WriteLine($"Warning: Didn't recognize {topicContent.GetType()} as branch Type");
-						break;
-				}
-			}
-		}
-	}
+                    break;
+            }
+        }
 
-	private string GetText(ITextContainer paragraph) {
-		var sb = new StringBuilder();
-		foreach (IText text in paragraph.TextContent) {
-			sb.Append(text.Text);
-		}
+        return topic;
+    }
 
-		return sb.ToString();
-	}
+    private void AddLinksAndResponses(IContentContainer list, DialogueTopicInfo topicInfo) {
+        foreach (IContent listContent in list.Content) {
+            if (listContent is not ListItem listItem) continue;
 
-	private bool IsPlayerLine(ITextContainer paragraph) {
-		foreach (IText text in paragraph.TextContent) {
-			if (text is not FormatedText formattedText || formattedText.TextStyle.TextProperties.Bold == null) {
-				return false;
-			}
-		}
+            foreach (IContent topicContent in listItem.Content) {
+                switch (topicContent) {
+                    case Paragraph paragraph:
+                        //Add responses
+                        topicInfo.Responses.Add(DialogueResponse.Build(GetFormattedText(paragraph)));
+                        break;
+                    case List linkList:
+                        //Add links
+                        foreach (IContent linkContent in linkList.Content) {
+                            if (linkContent is not ListItem linkItem) continue;
 
-		return true;
-	}
+                            var nextTopicInfo = AddTopicInfo(linkItem);
+                            var nextTopic = new DialogueTopic { TopicInfos = [nextTopicInfo] };
+                            topicInfo.Links.Add(nextTopic);
+                            DialogueProcessor.PreProcess(nextTopicInfo);
+                        }
 
-	private List<FormattedText> GetFormattedText(ITextContainer paragraph) {
-		return (from IText text in paragraph.TextContent select GetFormattedText(text))
-			.NotNull()
-			.ToList();
-	}
+                        break;
+                    default:
+                        Console.WriteLine($"Warning: Didn't recognize {topicContent.GetType()} as branch Type");
+                        break;
+                }
+            }
+        }
+    }
 
-	private FormattedText? GetFormattedText(IText text) {
-		if (text.Text == null) return null;
+    private string GetText(ITextContainer paragraph) {
+        var sb = new StringBuilder();
+        foreach (IText text in paragraph.TextContent) {
+            sb.Append(text.Text);
+        }
 
-		switch (text) {
-			case FormatedText formattedText:
-				if (string.IsNullOrWhiteSpace(formattedText.TextStyle.TextProperties.FontColor)) {
-					return new FormattedText(text.Text, formattedText.TextStyle.TextProperties.Bold != null, Color.Black);
-				}
+        return sb.ToString();
+    }
 
-				//Format "#112233"
-				var r = Convert.ToInt32(formattedText.TextStyle.TextProperties.FontColor.Substring(1, 2), 16);
-				var g = Convert.ToInt32(formattedText.TextStyle.TextProperties.FontColor.Substring(3, 2), 16);
-				var b = Convert.ToInt32(formattedText.TextStyle.TextProperties.FontColor.Substring(5, 2), 16);
+    private bool IsPlayerLine(ITextContainer paragraph) {
+        foreach (IText text in paragraph.TextContent) {
+            if (text is not FormatedText formattedText || formattedText.TextStyle.TextProperties.Bold is null)
+                return false;
+        }
 
-				return new FormattedText(formattedText.Text, formattedText.TextStyle.TextProperties.Bold != null, Color.FromArgb(r, g, b));
-			default:
-				return new FormattedText(text.Text, false, Color.Black);
-		}
-	}
+        return true;
+    }
+
+    private List<FormattedText> GetFormattedText(ITextContainer paragraph) {
+        return (from IText text in paragraph.TextContent select GetFormattedText(text))
+            .NotNull()
+            .ToList();
+    }
+
+    private FormattedText? GetFormattedText(IText text) {
+        if (text.Text is null) return null;
+
+        switch (text) {
+            case FormatedText formattedText:
+                if (string.IsNullOrWhiteSpace(formattedText.TextStyle.TextProperties.FontColor))
+                    return new FormattedText(
+                        text.Text,
+                        formattedText.TextStyle.TextProperties.Bold is not null,
+                        Color.Black);
+
+                //Format "#112233"
+                var r = Convert.ToInt32(formattedText.TextStyle.TextProperties.FontColor.Substring(1, 2), 16);
+                var g = Convert.ToInt32(formattedText.TextStyle.TextProperties.FontColor.Substring(3, 2), 16);
+                var b = Convert.ToInt32(formattedText.TextStyle.TextProperties.FontColor.Substring(5, 2), 16);
+
+                return new FormattedText(
+                    formattedText.Text,
+                    formattedText.TextStyle.TextProperties.Bold is not null,
+                    Color.FromArgb(r, g, b));
+            default: return new FormattedText(text.Text, false, Color.Black);
+        }
+    }
 }

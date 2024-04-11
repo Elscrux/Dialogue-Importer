@@ -1,22 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>net6.0-windows</TargetFramework>
-        <Nullable>enable</Nullable>
-        <UseWPF>true</UseWPF>
-        <ApplicationIcon>DialogueImplementationTool.ico</ApplicationIcon>
-        <LangVersion>default</LangVersion>
+      <TargetFramework>net8.0-windows</TargetFramework>
+      <Nullable>enable</Nullable>
+      <LangVersion>preview</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Autofac" Version="8.0.0" />
       <PackageReference Include="AODL" Version="1.2.0.1" />
       <PackageReference Include="DocX" Version="2.2.0" />
-      <PackageReference Include="gong-wpf-dragdrop" Version="3.2.0" />
+      <PackageReference Include="Mutagen.Bethesda.Autofac" Version="0.37.0" />
       <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.37.0" />
       <PackageReference Include="Mutagen.Bethesda.WPF" Version="0.37.0" />
       <PackageReference Include="pythonnet" Version="3.1.0-preview2023-11-04" />
-      <PackageReference Include="xunit" Version="2.4.2" />
+      <PackageReference Include="ReactiveUI.Fody" Version="18.0.10" />
     </ItemGroup>
 
     <ItemGroup>
@@ -50,7 +48,7 @@
       <Compile Update="Parser\NullDocumentParser.cs">
         <DependentUpon>DocumentParser.cs</DependentUpon>
       </Compile>
-      <Compile Update="Parser\DocXTextParser.cs">
+      <Compile Update="Parser\DocXDocumentParser.cs">
         <DependentUpon>DocumentParser.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Responses\InvalidStringFixer.cs">
@@ -65,23 +63,8 @@
       <Compile Update="Dialogue\Responses\Trimmer.cs">
         <DependentUpon>IDialogueResponsePostProcessor.cs</DependentUpon>
       </Compile>
-      <Compile Update="Dialogue\Topics\InvalidStringFixer.cs">
-        <DependentUpon>IDialogueTopicPostProcessor.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Dialogue\Topics\Trimmer.cs">
-        <DependentUpon>IDialogueTopicPostProcessor.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Dialogue\Topics\SayOnceChecker.cs">
-        <DependentUpon>IDialogueTopicPostProcessor.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Dialogue\Topics\BackToOptionsLinker.cs">
-        <DependentUpon>IDialogueTopicPostProcessor.cs</DependentUpon>
-      </Compile>
       <Compile Update="Dialogue\Responses\BackToDialogueRemover.cs">
         <DependentUpon>IDialogueResponsePostProcessor.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Dialogue\Topics\GoodbyeChecker.cs">
-        <DependentUpon>IDialogueTopicPostProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Conversation\BlockingChecker.cs">
         <DependentUpon>IConversationProcessor.cs</DependentUpon>
@@ -92,8 +75,14 @@
       <Compile Update="Dialogue\Conversation\SharedInfoConverter.cs">
         <DependentUpon>IConversationProcessor.cs</DependentUpon>
       </Compile>
-      <Compile Update="Dialogue\Topics\EmotionClassifier.cs">
-        <DependentUpon>IDialogueTopicPostProcessor.cs</DependentUpon>
+      <Compile Update="Dialogue\Conversation\BackToOptionsLinker.cs">
+        <DependentUpon>IConversationProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Topics\SuccessFailureSeparator.cs">
+        <DependentUpon>IDialogueTopicProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Parser\DocumentParser.cs">
+        <DependentUpon>DocumentIterator.cs</DependentUpon>
       </Compile>
     </ItemGroup>
 
