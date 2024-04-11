@@ -108,7 +108,7 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
     }
 
     public List<DialogueTopic> ParseScene(int index) {
-        return ParseOneLiner(index);
+        return ParseDialogue(index);
     }
 
     private DialogueTopicInfo AddTopicInfo(Paragraph paragraph) {

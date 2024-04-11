@@ -175,7 +175,7 @@ public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
     }
 
     public List<DialogueTopic> ParseScene(int index) {
-        return ParseOneLiner(index);
+        return ParseDialogue(index);
     }
 
     private void MergeLists() {

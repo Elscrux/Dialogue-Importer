@@ -1,4 +1,8 @@
-﻿using System.Windows;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
+using DialogueImplementationTool.Dialogue.Model;
+using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Extension;
 using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Skyrim.Internals;
@@ -56,6 +60,39 @@ public sealed class GenericScene(IDialogueContext context) : SceneFactory(contex
 
         return scene;
     }
+
+    protected override List<DialogueTopic> TransformLines(List<DialogueTopic> topics) {
+        // Use default implementation for simple dialogue
+        if (!Is3x3Scene(topics)) return base.TransformLines(topics);
+
+        // Use 3x3 dialogue implementation if there are any links
+        foreach (var topic in topics) {
+            topic.ConvertResponsesToTopicInfos();
+
+            var speakerName = topic.GetPlayerText();
+            var speaker = GetSpeaker(speakerName);
+
+            foreach (var topicInfo in topic.TopicInfos) {
+                topicInfo.Random = true;
+                topicInfo.Speaker = speaker;
+                topicInfo.Prompt = string.Empty;
+            }
+        }
+
+        return [..topics];
+    }
+
+    protected override IReadOnlyList<AliasSpeaker> GetSpeakers(List<DialogueTopic> topics) {
+        if (!Is3x3Scene(topics)) return base.GetSpeakers(topics);
+
+        var speakerNames = topics.SelectMany(topic => topic.TopicInfos)
+            .Select(x => x.Prompt)
+            .Distinct();
+
+        return Context.GetAliasSpeakers(speakerNames);
+    }
+
+    private static bool Is3x3Scene(List<DialogueTopic> topics) => topics.Count > 1;
 
     public override void PreProcessSpeakers() {
         //Make sure there are only two speakers

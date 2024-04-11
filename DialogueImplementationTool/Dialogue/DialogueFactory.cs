@@ -45,6 +45,7 @@ public abstract class DialogueFactory(IDialogueContext context) {
         if (topicInfo.SayOnce) flags.Flags |= DialogResponses.Flag.SayOnce;
         if (topicInfo.Goodbye) flags.Flags |= DialogResponses.Flag.Goodbye;
         if (topicInfo.InvisibleContinue) flags.Flags |= DialogResponses.Flag.InvisibleContinue;
+        if (topicInfo.Random) flags.Flags |= DialogResponses.Flag.Random;
 
         if (topicInfo.SharedInfo is not null) {
             var dialogResponses =

@@ -21,7 +21,7 @@ public abstract partial class SceneFactory(IDialogueContext context) : DialogueF
         if (scene is null) return;
 
         //Add lines
-        AddLines(quest, scene, topics.SelectMany(x => x.TopicInfos).ToList());
+        AddLines(quest, scene, topics.ToList());
     }
 
     protected abstract Scene? GetCurrentScene(IQuest quest);
@@ -29,13 +29,13 @@ public abstract partial class SceneFactory(IDialogueContext context) : DialogueF
     private void AddLines(
         IQuest quest,
         Scene scene,
-        List<DialogueTopicInfo> topicsInfos) {
+        List<DialogueTopic> topics) {
         uint currentPhaseIndex = 0;
 
         scene.LastActionIndex ??= 1;
 
-        foreach (var topicInfo in topicsInfos) {
-            var aliasSpeaker = GetSpeaker(topicInfo.Speaker.Name);
+        foreach (var topic in topics) {
+            var aliasSpeaker = GetSpeaker(topic.TopicInfos[0].Speaker.Name);
 
             var sceneTopic = new DialogTopic(Context.GetNextFormKey(), Context.Release) {
                 Priority = 2500,
@@ -43,14 +43,16 @@ public abstract partial class SceneFactory(IDialogueContext context) : DialogueF
                 Category = DialogTopic.CategoryEnum.Scene,
                 Subtype = DialogTopic.SubtypeEnum.Scene,
                 SubtypeName = "SCEN",
-                Responses = [GetResponses(quest, topicInfo)],
+                Responses = topic.TopicInfos
+                    .Select(info => GetResponses(quest, info))
+                    .ToExtendedList(),
             };
             Context.AddDialogTopic(sceneTopic);
 
             AddTopic(sceneTopic, aliasSpeaker.AliasIndex);
         }
 
-        scene.LastActionIndex = Convert.ToUInt32(topicsInfos.Count * _aliasIndices.Count);
+        scene.LastActionIndex = Convert.ToUInt32(topics.Count * _aliasIndices.Count);
 
         void AddTopic(IDialogTopicGetter topic, int speakerAliasId) {
             scene.Phases.Add(new ScenePhase { Name = string.Empty, EditorWidth = 200 });
@@ -153,18 +155,17 @@ public abstract partial class SceneFactory(IDialogueContext context) : DialogueF
             .ToList();
 
         //break up topics for every new speaker
-        var topicInfos = topics.ToTopicInfoList();
-        var separatedTopics = ParseLines(topicInfos);
+        var separatedTopics = TransformLines(topics);
 
         topics.Clear();
-        topics.AddRange([new DialogueTopic { TopicInfos = separatedTopics }]);
+        topics.AddRange(separatedTopics);
 
         PreProcessSpeakers();
     }
 
     public abstract void PreProcessSpeakers();
 
-    private IReadOnlyList<AliasSpeaker> GetSpeakers(IEnumerable<DialogueTopic> topics) {
+    protected virtual IReadOnlyList<AliasSpeaker> GetSpeakers(List<DialogueTopic> topics) {
         //Get speaker strings
         var speakerNames = topics
             .SelectMany(topic => topic.TopicInfos)
@@ -177,41 +178,43 @@ public abstract partial class SceneFactory(IDialogueContext context) : DialogueF
         return Context.GetAliasSpeakers(speakerNames);
     }
 
-    private List<DialogueTopicInfo> ParseLines(List<DialogueTopicInfo> topicInfos) {
-        var separatedTopics = new List<DialogueTopicInfo>();
+    protected virtual List<DialogueTopic> TransformLines(List<DialogueTopic> topics) {
+        var separatedTopics = new List<DialogueTopic>();
         var currentSpeaker = string.Empty;
         var currentLines = new List<DialogueResponse>();
 
-        void AddCurrentTopic() {
-            if (currentLines.Any()) {
-                var dialogueTopicInfo = new DialogueTopicInfo {
-                    Responses = [..currentLines],
-                    Speaker = GetSpeaker(currentSpeaker),
-                };
+        foreach (var response in topics.SelectMany(x => x.TopicInfos).SelectMany(x => x.Responses)) {
+            var match = SceneLineRegex().Match(response.Response);
+            if (!match.Success) continue;
 
-                separatedTopics.Add(dialogueTopicInfo);
+            var speaker = match.Groups[1].Value;
+            if (currentSpeaker != speaker) {
+                AddCurrentTopic();
+                currentSpeaker = speaker;
             }
 
-            currentLines.Clear();
-        }
-
-        foreach (var topic in topicInfos) {
-            foreach (var response in topic.Responses) {
-                var match = SceneLineRegex().Match(response.Response);
-                if (!match.Success) continue;
-
-                var speaker = match.Groups[1].Value;
-                if (currentSpeaker != speaker) {
-                    AddCurrentTopic();
-                    currentSpeaker = speaker;
-                }
-
-                currentLines.Add(response with { Response = match.Groups[2].Value });
-            }
+            currentLines.Add(response with { Response = match.Groups[2].Value });
         }
 
         if (currentLines.Count != 0) AddCurrentTopic();
         return separatedTopics;
+
+        void AddCurrentTopic() {
+            if (currentLines.Count != 0) {
+                var dialogueTopic = new DialogueTopic {
+                    TopicInfos = [
+                        new DialogueTopicInfo {
+                            Responses = [..currentLines],
+                            Speaker = GetSpeaker(currentSpeaker),
+                        },
+                    ],
+                };
+
+                separatedTopics.Add(dialogueTopic);
+            }
+
+            currentLines.Clear();
+        }
     }
 
     public override void PostProcess() { }

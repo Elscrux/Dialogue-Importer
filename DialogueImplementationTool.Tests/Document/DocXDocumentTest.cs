@@ -2,6 +2,7 @@
 using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Parser;
 using FluentAssertions;
+using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Tests.Document;
 
 public sealed class DocXDocumentTest {
@@ -19,14 +20,11 @@ public sealed class DocXDocumentTest {
             _testConstants.DialogueProcessor);
 
         var dialogueTopics = docXDocumentParser.ParseScene(0);
-        
+
         // Import
         dialogueTopics.Should().ContainSingle();
-        dialogueTopics[0].TopicInfos.Should().HaveCount(6);
-        foreach (var topicInfo in dialogueTopics[0].TopicInfos) {
-            topicInfo.Responses.Should().ContainSingle();
-        }
-        
+        dialogueTopics[0].TopicInfos[0].Responses.Should().HaveCount(6);
+
         // Process
         List<GeneratedDialogue> generatedDialogue = [
             new GeneratedDialogue(_testConstants.SkyrimDialogueContext,
@@ -36,7 +34,7 @@ public sealed class DocXDocumentTest {
         ];
         _testConstants.DialogueProcessor.Process(generatedDialogue);
 
-        var secondResponse = generatedDialogue[0].Topics[0].TopicInfos[1].Responses[0];
+        var secondResponse = generatedDialogue[0].Topics[0].TopicInfos[0].Responses[1];
         secondResponse.Response.Should().NotContain("morose");
         secondResponse.ScriptNote.Should().Be("morose");
 
@@ -50,6 +48,54 @@ public sealed class DocXDocumentTest {
         }
     }
 
+    [Fact]
+    public void TestScene3x3() {
+        _testConstants.SpeakerSelection = new InjectedSpeakerSelection(new Dictionary<string, AliasSpeaker> {
+            { "Ornev", new AliasSpeaker(_testConstants.Speaker1.FormKey, "Ornev") },
+            { "Claxter", new AliasSpeaker(_testConstants.Speaker2.FormKey, "Claxter") },
+        });
+
+        var docXDocumentParser = new DocXDocumentParser(
+            Path.GetFullPath("../../../Document/Examples/[Locked] Brina Cross City Scenes.docx"),
+            _testConstants.DialogueProcessor);
+
+        var dialogueTopics = docXDocumentParser.ParseScene(2);
+
+        // Import
+        dialogueTopics.Should().HaveCount(3);
+        dialogueTopics[0].TopicInfos.Should().ContainSingle();
+        dialogueTopics[0].TopicInfos[0].Responses.Should().HaveCount(2);
+        dialogueTopics[1].TopicInfos.Should().ContainSingle();
+        dialogueTopics[1].TopicInfos[0].Responses.Should().HaveCount(2);
+        dialogueTopics[2].TopicInfos.Should().ContainSingle();
+        dialogueTopics[2].TopicInfos[0].Responses.Should().HaveCount(3);
+
+        // Process
+        List<GeneratedDialogue> generatedDialogue = [
+            new GeneratedDialogue(_testConstants.SkyrimDialogueContext,
+                DialogueType.GenericScene,
+                dialogueTopics,
+                _testConstants.Speaker1.FormKey),
+        ];
+        _testConstants.DialogueProcessor.Process(generatedDialogue);
+
+        var secondTopic = generatedDialogue[0].Topics[1].TopicInfos[0].Responses[0];
+        secondTopic.Response.Should().NotContain("nervous");
+        secondTopic.ScriptNote.Should().Be("nervous");
+
+        // Implement
+        new DialogueImplementer(_testConstants.SkyrimDialogueContext).ImplementDialogue(generatedDialogue);
+
+        _testConstants.Mod.Scenes.Should().ContainSingle();
+        _testConstants.Mod.DialogTopics.Should().HaveCount(3);
+        _testConstants.Mod.DialogTopics.First().Responses.Should().HaveCount(2);
+        _testConstants.Mod.DialogTopics.Skip(1).First().Responses.Should().HaveCount(2);
+        _testConstants.Mod.DialogTopics.Skip(2).First().Responses.Should().HaveCount(3);
+        foreach (var dialogResponses in _testConstants.Mod.DialogTopics.SelectMany(topic => topic.Responses)) {
+            dialogResponses.Flags.Should().NotBeNull();
+            dialogResponses.Flags!.Flags.Should().HaveFlag(DialogResponses.Flag.Random);
+        }
+    }
 
     [Fact]
     public void TestGreeting() {
@@ -57,7 +103,7 @@ public sealed class DocXDocumentTest {
             Path.GetFullPath("../../../Document/Examples/[Locked] Relia Niveus dialogue.docx"),
             _testConstants.DialogueProcessor);
 
-        var dialogueTopics = docXDocumentParser.ParseScene(0);
+        var dialogueTopics = docXDocumentParser.ParseOneLiner(0);
 
         // Import
         dialogueTopics.Should().ContainSingle();

@@ -34,4 +34,17 @@ public sealed class DialogueTopic {
 
         return prompts[0];
     }
+
+    public void ConvertResponsesToTopicInfos() {
+        var newInfos = new List<DialogueTopicInfo>();
+
+        foreach (var topicInfo in TopicInfos) {
+            foreach (var response in topicInfo.Responses) {
+                newInfos.Add(topicInfo with { Responses = [response] });
+            }
+        }
+
+        TopicInfos.Clear();
+        TopicInfos.AddRange(newInfos);
+    }
 }
