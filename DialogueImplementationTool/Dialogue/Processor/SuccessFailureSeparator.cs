@@ -6,6 +6,7 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 public sealed partial class SuccessFailureSeparator : IDialogueTopicProcessor {
     public void Process(DialogueTopic topic) {
         for (var i = 0; i < topic.TopicInfos.Count; i++) {
+            // Check for any success and failure tags
             var topicInfo = topic.TopicInfos[i];
             DialogueResponse? successResponse = null;
             DialogueResponse? failureResponse = null;
@@ -21,11 +22,13 @@ public sealed partial class SuccessFailureSeparator : IDialogueTopicProcessor {
             var failureIndex = topicInfo.Responses.IndexOf(failureResponse);
             if (successIndex == -1 || failureIndex == -1) return;
 
+            // When there are both a success and failure tag, start processing
             successResponse.Response = SuccessRegex().Replace(successResponse.Response, string.Empty).Trim();
             failureResponse.Response = FailureRegex().Replace(failureResponse.Response, string.Empty).Trim();
             var successFirst = successIndex < failureIndex;
             var minIndex = successFirst ? successIndex : failureIndex;
 
+            // Separate response ranges
             var responses = topicInfo.Responses.ToArray();
             var successResponses = successFirst ? responses[successIndex..failureIndex] : responses[successIndex..];
 
@@ -33,11 +36,20 @@ public sealed partial class SuccessFailureSeparator : IDialogueTopicProcessor {
 
             var previousResponses = successIndex > 0 && failureIndex > 0 ? responses[..minIndex] : null;
 
+            // Insert new topic infos
             topic.TopicInfos.RemoveAt(i);
-            topic.TopicInfos.Insert(i, topicInfo with { Responses = failureResponses.ToList() });
-            topic.TopicInfos.Insert(i, topicInfo with { Responses = successResponses.ToList() });
-            if (previousResponses is not null)
-                topic.TopicInfos.Insert(i, topicInfo with { Responses = previousResponses.ToList() });
+            var failureInfo = topicInfo with { Responses = failureResponses.ToList() };
+            var successInfo = topicInfo with { Responses = successResponses.ToList() };
+            if (previousResponses is null) {
+                // Have success and failure topic infos
+                topic.TopicInfos.Insert(i, failureInfo);
+                topic.TopicInfos.Insert(i, successInfo);
+            } else {
+                // In case there is previous dialogue, but success and failure options in a next topic
+                var previousInfo = topicInfo with { Responses = previousResponses.ToList() };
+                topic.TopicInfos.Insert(i, previousInfo);
+                previousInfo.Append(new DialogueTopic { TopicInfos = [successInfo, failureInfo] });
+            }
         }
     }
 
