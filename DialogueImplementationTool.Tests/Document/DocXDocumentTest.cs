@@ -1,4 +1,5 @@
 ﻿using DialogueImplementationTool.Dialogue;
+using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Parser;
 using FluentAssertions;
 namespace DialogueImplementationTool.Tests.Document;

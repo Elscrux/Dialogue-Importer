@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using DialogueImplementationTool.Dialogue;
-using DialogueImplementationTool.Dialogue.Topics;
+using DialogueImplementationTool.Dialogue.Model;
+using DialogueImplementationTool.Dialogue.Processor;
 namespace DialogueImplementationTool.Parser;
 
 public interface IDocumentParser : IDocumentIterator {
@@ -16,11 +17,11 @@ public interface IDocumentParser : IDocumentIterator {
 
                 var dialogueTopics = ParseDialogue(dialogueType, i);
                 foreach (var topic in dialogueTopics.EnumerateLinks()) {
+                    DialogueProcessor.Process(topic);
+
                     foreach (var topicInfo in topic.TopicInfos) {
                         DialogueProcessor.PostProcess(topicInfo);
                     }
-
-                    DialogueProcessor.Process(topic);
                 }
 
                 dialogue.Add(

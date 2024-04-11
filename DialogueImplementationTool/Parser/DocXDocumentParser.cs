@@ -4,8 +4,8 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using DialogueImplementationTool.Dialogue.Responses;
-using DialogueImplementationTool.Dialogue.Topics;
+using DialogueImplementationTool.Dialogue.Model;
+using DialogueImplementationTool.Dialogue.Processor;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -81,12 +81,12 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
                         }));
         } else {
             //One new branch, NPC starts to talk
-            var currentBranchInfo = new DialogueTopicInfo();
-            var currentBranch = new DialogueTopic { TopicInfos = [currentBranchInfo] };
+            var currentTopicInfo = new DialogueTopicInfo();
+            var currentBranch = new DialogueTopic { TopicInfos = [currentTopicInfo] };
             branches.Add(currentBranch);
 
-            AddLinksAndResponses(list.Items[0], currentBranchInfo);
-            DialogueProcessor.PreProcess(currentBranchInfo);
+            AddLinksAndResponses(list.Items[0], currentTopicInfo);
+            DialogueProcessor.PreProcess(currentTopicInfo);
         }
 
         return branches;

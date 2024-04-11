@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using DialogueImplementationTool.Dialogue.Speaker;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;

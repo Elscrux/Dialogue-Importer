@@ -1,6 +1,6 @@
 ﻿using DialogueImplementationTool.Dialogue;
-using DialogueImplementationTool.Dialogue.Responses;
-using DialogueImplementationTool.Dialogue.Topics;
+using DialogueImplementationTool.Dialogue.Model;
+using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Parser;
 namespace DialogueImplementationTool.Tests;
 

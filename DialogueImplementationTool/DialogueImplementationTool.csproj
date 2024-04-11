@@ -51,38 +51,68 @@
       <Compile Update="Parser\DocXDocumentParser.cs">
         <DependentUpon>DocumentParser.cs</DependentUpon>
       </Compile>
-      <Compile Update="Dialogue\Responses\InvalidStringFixer.cs">
-        <DependentUpon>IDialogueResponsePreProcessor.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Dialogue\Responses\ScriptNotesParser.cs">
-        <DependentUpon>IDialogueResponsePreProcessor.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Dialogue\Responses\BracesRemover.cs">
-        <DependentUpon>IDialogueResponsePostProcessor.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Dialogue\Responses\Trimmer.cs">
-        <DependentUpon>IDialogueResponsePostProcessor.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Dialogue\Responses\BackToDialogueRemover.cs">
-        <DependentUpon>IDialogueResponsePostProcessor.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Dialogue\Conversation\BlockingChecker.cs">
-        <DependentUpon>IConversationProcessor.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Dialogue\Conversation\SameResponseChecker.cs">
-        <DependentUpon>IConversationProcessor.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Dialogue\Conversation\SharedInfoConverter.cs">
-        <DependentUpon>IConversationProcessor.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Dialogue\Conversation\BackToOptionsLinker.cs">
-        <DependentUpon>IConversationProcessor.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Dialogue\Topics\SuccessFailureSeparator.cs">
-        <DependentUpon>IDialogueTopicProcessor.cs</DependentUpon>
-      </Compile>
       <Compile Update="Parser\DocumentParser.cs">
         <DependentUpon>DocumentIterator.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Speaker\NpcSpeaker.cs">
+        <DependentUpon>ISpeaker.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Speaker\AliasSpeaker.cs">
+        <DependentUpon>ISpeaker.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\SkyrimDialogueContext.cs">
+        <DependentUpon>IDialogueContext.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Speaker\InjectedSpeakerSelection.cs">
+        <DependentUpon>ISpeakerSelection.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\TopicInfoInvalidStringFixer.cs">
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\RandomChecker.cs">
+        <DependentUpon>IDialogueTopicProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\TopicInfoTrimmer.cs">
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\EmotionChecker.cs">
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\GoodbyeChecker.cs">
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\BracesRemover.cs">
+        <DependentUpon>IDialogueResponsePostProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\BlockingChecker.cs">
+        <DependentUpon>IConversationProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\BackToDialogueRemover.cs">
+        <DependentUpon>IDialogueResponsePostProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\BackToOptionsLinker.cs">
+        <DependentUpon>IConversationProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\InvalidStringFixer.cs">
+        <DependentUpon>IDialogueResponsePreProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\SameResponseChecker.cs">
+        <DependentUpon>IConversationProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\ScriptNotesParser.cs">
+        <DependentUpon>IDialogueResponsePreProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\SharedInfoConverter.cs">
+        <DependentUpon>IConversationProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\SuccessFailureSeparator.cs">
+        <DependentUpon>IDialogueTopicProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\SayOnceChecker.cs">
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\Trimmer.cs">
+        <DependentUpon>IDialogueResponsePostProcessor.cs</DependentUpon>
       </Compile>
     </ItemGroup>
 

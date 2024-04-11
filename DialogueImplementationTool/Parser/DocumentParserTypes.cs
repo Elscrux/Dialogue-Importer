@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using DialogueImplementationTool.Dialogue;
-using DialogueImplementationTool.Dialogue.Topics;
+using DialogueImplementationTool.Dialogue.Model;
+using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Extension;
 using Mutagen.Bethesda.Plugins;
+using ISpeaker = DialogueImplementationTool.Dialogue.Speaker.ISpeaker;
 namespace DialogueImplementationTool.Parser;
 
 public sealed class GeneratedDialogue {

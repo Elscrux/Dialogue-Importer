@@ -7,34 +7,32 @@ namespace DialogueImplementationTool.Dialogue;
 
 public sealed class DialogueImplementer {
     private readonly IDialogueContext _context;
-
-    private readonly Dictionary<DialogueType, DialogueFactory> _dialogueFactories;
+    private readonly Dictionary<DialogueType, Func<DialogueFactory>> _dialogueFactories;
 
     public DialogueImplementer(IDialogueContext context) {
         _context = context;
         _dialogueFactories = Enum
             .GetValues<DialogueType>()
             .ToDictionary(type => type,
-                type => (DialogueFactory) (type switch {
-                    DialogueType.Dialogue => new Dialogue(context),
-                    DialogueType.Greeting => new Greeting(context),
-                    DialogueType.Farewell => new Farewell(context),
-                    DialogueType.Idle => new Idle(context),
-                    DialogueType.GenericScene => new GenericScene(context),
-                    DialogueType.QuestScene => new QuestScene(context),
+                type => (Func<DialogueFactory>) (type switch {
+                    DialogueType.Dialogue => () => new Dialogue(context),
+                    DialogueType.Greeting => () => new Greeting(context),
+                    DialogueType.Farewell => () => new Farewell(context),
+                    DialogueType.Idle => () =>new Idle(context),
+                    DialogueType.GenericScene => () => new GenericScene(context),
+                    DialogueType.QuestScene => () => new QuestScene(context),
                     _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
                 }));
     }
 
     public void ImplementDialogue(List<GeneratedDialogue> dialogue) {
-        dialogue.Where(d => d.Topics.Count > 0)
-            .ForEach(d => _dialogueFactories[d.Type].PreProcess(d.Topics));
+        foreach (var generatedDialogue in dialogue) {
+            if (generatedDialogue.Topics.Count == 0) continue;
 
-        dialogue.Where(d => d.Topics.Count > 0)
-            .ForEach(d => _dialogueFactories[d.Type].GenerateDialogue(_context.Quest, d.Topics));
-
-        //Do post processing
-        dialogue.Select(d => _dialogueFactories[d.Type])
-            .ForEach(d => d.PostProcess());
+            var dialogueFactory = _dialogueFactories[generatedDialogue.Type]();
+            dialogueFactory.PreProcess(generatedDialogue.Topics);
+            dialogueFactory.GenerateDialogue(_context.Quest, generatedDialogue.Topics);
+            dialogueFactory.PostProcess();
+        }
     }
 }

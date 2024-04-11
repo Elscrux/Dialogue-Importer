@@ -1,5 +1,5 @@
 ﻿using System.Collections.ObjectModel;
-using DialogueImplementationTool.Dialogue;
+using DialogueImplementationTool.Dialogue.Speaker;
 using Mutagen.Bethesda.Plugins;
 using ReactiveUI;
 namespace DialogueImplementationTool.UI.Models;

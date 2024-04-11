@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using DialogueImplementationTool.Dialogue.Responses;
-using DialogueImplementationTool.Dialogue.Topics;
+using DialogueImplementationTool.Dialogue.Model;
+using DialogueImplementationTool.Dialogue.Speaker;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Skyrim.Internals;
@@ -224,7 +224,7 @@ public abstract partial class SceneFactory(IDialogueContext context) : DialogueF
             }
         }
 
-        throw new InvalidOperationException("Didn't find speaker");
+        throw new InvalidOperationException($"Didn't find speaker {name}");
     }
 
     [GeneratedRegex(@"([^:]*):? *([\S\s]+)")]

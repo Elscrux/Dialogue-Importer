@@ -1,7 +1,8 @@
 ﻿using System.IO;
 using System.Windows.Input;
 using DialogueImplementationTool.Dialogue;
-using DialogueImplementationTool.Dialogue.Topics;
+using DialogueImplementationTool.Dialogue.Processor;
+using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Parser;
 using DialogueImplementationTool.UI.Models;
 using DialogueImplementationTool.UI.Services;

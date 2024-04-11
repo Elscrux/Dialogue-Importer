@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using DialogueImplementationTool.Dialogue;
-using DialogueImplementationTool.Dialogue.Topics;
+using DialogueImplementationTool.Dialogue.Processor;
 using DialogueImplementationTool.Parser;
 using DialogueImplementationTool.Services;
 using DialogueImplementationTool.UI.Models;

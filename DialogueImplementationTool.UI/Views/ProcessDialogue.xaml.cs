@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using DialogueImplementationTool.Dialogue;
+using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.UI.ViewModels;
 namespace DialogueImplementationTool.UI.Views;
 

@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
-using DialogueImplementationTool.Dialogue;
+using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.UI.Models;
 using GongSolutions.Wpf.DragDrop;
 using Mutagen.Bethesda.Plugins;

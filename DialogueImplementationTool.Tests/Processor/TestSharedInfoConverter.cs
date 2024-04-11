@@ -1,5 +1,4 @@
-﻿using DialogueImplementationTool.Dialogue.Conversation;
-using DialogueImplementationTool.Dialogue.Topics;
+﻿using DialogueImplementationTool.Dialogue.Processor;
 using FluentAssertions;
 namespace DialogueImplementationTool.Tests.Processor;
 

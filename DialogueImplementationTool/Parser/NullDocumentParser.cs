@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using DialogueImplementationTool.Dialogue.Topics;
+using DialogueImplementationTool.Dialogue.Model;
+using DialogueImplementationTool.Dialogue.Processor;
 namespace DialogueImplementationTool.Parser;
 
 public sealed class NullDocumentParser(string filePath) : IDocumentParser {

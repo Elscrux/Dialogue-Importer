@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Windows;
 using Autofac;
-using DialogueImplementationTool.Dialogue.Topics;
+using DialogueImplementationTool.Dialogue.Processor;
 using DialogueImplementationTool.Parser;
 using DialogueImplementationTool.Services;
 using DialogueImplementationTool.UI.Models;
@@ -34,24 +34,19 @@ public partial class App {
         builder.RegisterType<MainWindowVM>()
             .SingleInstance();
 
-        builder.RegisterType<DialogueVM>()
-            .SingleInstance();
+        builder.RegisterType<DialogueVM>();
 
-        builder.RegisterType<DialogueProcessor>()
-            .SingleInstance();
+        builder.RegisterType<DialogueProcessor>();
 
         builder.RegisterType<OutputPathProvider>()
             .SingleInstance();
 
         builder.RegisterType<SpeakerFavoritesSelection>()
-            .As<ISpeakerFavoritesSelection>()
-            .SingleInstance();
+            .As<ISpeakerFavoritesSelection>();
 
-        builder.RegisterType<OpenDocumentTextParser>()
-            .SingleInstance();
+        builder.RegisterType<OpenDocumentTextParser>();
 
-        builder.RegisterType<DocXDocumentParser>()
-            .SingleInstance();
+        builder.RegisterType<DocXDocumentParser>();
 
         builder.RegisterType<MainWindow>()
             .SingleInstance();
