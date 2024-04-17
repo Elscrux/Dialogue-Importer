@@ -16,6 +16,12 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace DialogueImplementationTool.UI.ViewModels;
 
+public enum LoadState {
+    NotLoaded,
+    InProgress,
+    Loaded,
+}
+
 public sealed class MainWindowVM : ViewModel {
     private const string ModName = "DialogueOutput";
     private readonly Func<EmotionChecker, DialogueProcessor> _dialogueProcessorFactory;
@@ -25,6 +31,15 @@ public sealed class MainWindowVM : ViewModel {
     private readonly SkyrimMod _mod;
     private readonly ISpeakerFavoritesSelection _speakerFavoritesSelection;
     private PythonEmotionClassifier? _emotionClassifier;
+
+    public OutputPathProvider OutputPathProvider { get; }
+    public List<string> Extensions { get; }
+    public IEnumerable<Type> QuestTypes { get; } = typeof(IQuestGetter).AsEnumerable();
+    public string PythonDllPath { get; set; } = string.Empty;
+    public ILinkCache<ISkyrimMod, ISkyrimModGetter> LinkCache { get; }
+    [Reactive] public FormKey QuestFormKey { get; set; }
+    [Reactive] public bool ValidQuest { get; set; }
+    [Reactive] public LoadState PythonState { get; set; }
 
     public MainWindowVM(
         OutputPathProvider outputPathProvider,
@@ -51,19 +66,11 @@ public sealed class MainWindowVM : ViewModel {
             .Build();
         LinkCache = environment.LinkCache;
 
-        TrySetPythonPath();
+        Task.Run(TrySetPythonFromEnv);
 
         this.WhenAnyValue(x => x.QuestFormKey)
             .Subscribe(_ => ValidQuest = !QuestFormKey.IsNull);
     }
-
-    public OutputPathProvider OutputPathProvider { get; }
-    public List<string> Extensions { get; }
-    public IEnumerable<Type> QuestTypes { get; } = typeof(IQuestGetter).AsEnumerable();
-    public string PythonDllPath { get; set; } = string.Empty;
-    public ILinkCache<ISkyrimMod, ISkyrimModGetter> LinkCache { get; }
-    [Reactive] public FormKey QuestFormKey { get; set; }
-    [Reactive] public bool ValidQuest { get; set; }
 
     private string GetNewModName() {
         var index = 1;
@@ -78,7 +85,7 @@ public sealed class MainWindowVM : ViewModel {
         return ModName + index;
     }
 
-    private void TrySetPythonPath() {
+    private void TrySetPythonFromEnv() {
         var paths = Environment.GetEnvironmentVariable("PATH");
         if (paths is null) return;
 
@@ -103,11 +110,14 @@ public sealed class MainWindowVM : ViewModel {
         if (_emotionClassifier?.PythonDllPath == PythonDllPath) return;
 
         try {
+            PythonState = LoadState.InProgress;
             _emotionClassifier?.Dispose();
             _emotionClassifier = null;
             _emotionClassifier = _emotionClassifierFactory(PythonDllPath);
+            PythonState = LoadState.Loaded;
         } catch (Exception e) {
             Console.WriteLine($"Failed to load emotion classifier: {e.Message}");
+            PythonState = LoadState.NotLoaded;
         }
     }
 
