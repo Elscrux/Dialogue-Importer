@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Reactive.Linq;
 using DialogueImplementationTool.Dialogue;
 using DialogueImplementationTool.Dialogue.Processor;
 using DialogueImplementationTool.Parser;
@@ -35,8 +36,8 @@ public sealed class MainWindowVM : ViewModel {
     public OutputPathProvider OutputPathProvider { get; }
     public List<string> Extensions { get; }
     public IEnumerable<Type> QuestTypes { get; } = typeof(IQuestGetter).AsEnumerable();
-    public string PythonDllPath { get; set; } = string.Empty;
     public ILinkCache<ISkyrimMod, ISkyrimModGetter> LinkCache { get; }
+    [Reactive] public string PythonDllPath { get; set; } = string.Empty;
     [Reactive] public FormKey QuestFormKey { get; set; }
     [Reactive] public bool ValidQuest { get; set; }
     [Reactive] public LoadState PythonState { get; set; }
@@ -66,7 +67,7 @@ public sealed class MainWindowVM : ViewModel {
             .Build();
         LinkCache = environment.LinkCache;
 
-        Task.Run(TrySetPythonFromEnv);
+        TrySetPythonFromEnv();
 
         this.WhenAnyValue(x => x.QuestFormKey)
             .Subscribe(_ => ValidQuest = !QuestFormKey.IsNull);
@@ -100,7 +101,7 @@ public sealed class MainWindowVM : ViewModel {
                 .FirstOrDefault(File.Exists);
             if (filePath is null) continue;
 
-            RefreshPython(filePath);
+            Observable.Start(() => RefreshPython(filePath), RxApp.MainThreadScheduler).Subscribe();
             break;
         }
     }

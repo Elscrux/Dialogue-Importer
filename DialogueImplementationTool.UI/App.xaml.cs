@@ -25,8 +25,7 @@ public partial class App {
 
         builder.RegisterType<PythonEmotionClassifier>()
             .AsSelf()
-            .As<IEmotionClassifier>()
-            .SingleInstance();
+            .As<IEmotionClassifier>();
 
         builder.RegisterType<EmotionChecker>()
             .SingleInstance();
