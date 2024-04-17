@@ -46,6 +46,18 @@ public static class TestDialogue {
         };
     }
 
+    private static DialogueTopic GetTopicInfos(ISpeaker speaker, string prompt, IEnumerable<string> infos) {
+        return new DialogueTopic {
+            TopicInfos = infos
+                .Select(r => new DialogueTopicInfo {
+                    Speaker = speaker,
+                    Prompt = prompt,
+                    Responses = [new DialogueResponse { Response = r }],
+                })
+                .ToList(),
+        };
+    }
+
     public static List<GeneratedDialogue> TopicAsGeneratedDialogue(DialogueTopic topic) {
         var testConstants = new TestConstants();
         return [
@@ -58,7 +70,7 @@ public static class TestDialogue {
 
     public static DialogueTopic GetGreetingTopicCraneShore1() {
         var testConstants = new TestConstants();
-        return GetTopic(
+        return GetTopicInfos(
             testConstants.Speaker1,
             string.Empty,
             [
