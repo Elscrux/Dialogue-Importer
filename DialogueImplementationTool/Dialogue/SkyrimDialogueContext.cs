@@ -40,6 +40,10 @@ public sealed class SkyrimDialogueContext(
     public DialogTopic? GetTopic(string editorId) {
         if (!linkCache.TryResolveIdentifier<IDialogTopicGetter>(editorId, out var formKey)) return null;
 
+        return GetTopic(formKey);
+    }
+
+    public DialogTopic GetTopic(FormKey formKey) {
         var topic = linkCache.ResolveContext<DialogTopic, IDialogTopicGetter>(formKey);
         return topic.GetOrAddAsOverride(mod);
     }

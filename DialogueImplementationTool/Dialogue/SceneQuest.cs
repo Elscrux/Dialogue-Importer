@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DialogueImplementationTool.Extension;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace DialogueImplementationTool.Dialogue;
 
 public sealed class QuestScene(IDialogueContext context) : SceneFactory(context) {
-    // todo remove static member
-    private static int _questSceneCount = 1;
-
     protected override Scene GetCurrentScene(IQuest quest) {
         //Detect existing aliases
         foreach (var alias in quest.Aliases) {
@@ -33,12 +31,13 @@ public sealed class QuestScene(IDialogueContext context) : SceneFactory(context)
         }
 
         //Add scene
-        // todo refactor with Naming.GetFirstFreeIndex
         var scene = AddScene(
-            $"{quest.EditorID}Scene_{_questSceneCount}",
+            Naming.GetFirstFreeIndex(
+                i => $"{quest.EditorID}Scene_{i}",
+                name => !Context.LinkCache.TryResolve<ISceneGetter>(name, out _),
+                1),
             quest.FormKey);
         Context.AddScene(scene);
-        _questSceneCount++;
 
         return scene;
     }

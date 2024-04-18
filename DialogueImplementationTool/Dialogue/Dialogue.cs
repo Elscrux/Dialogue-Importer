@@ -37,11 +37,12 @@ public sealed class Dialogue(IDialogueContext context) : DialogueFactory(context
 
                 var playerText = rawTopic.Topic.GetPlayerText();
                 var responses = GetTopicInfos(quest, rawTopic.Topic);
-                var dontUsePrompt = playerText.IsNullOrWhitespace();
-                if (dontUsePrompt)
+                var dontUsePrompt = !playerText.IsNullOrWhitespace();
+                if (dontUsePrompt) {
                     foreach (var response in responses) {
                         response.Prompt = null;
                     }
+                }
 
                 var dialogTopic = new DialogTopic(rawTopic.FormKey, Context.Release) {
                     EditorID = $"{quest.EditorID}{speakerName}{_npcIndices[speakerName]}Topic{rawTopic.IndexString}",

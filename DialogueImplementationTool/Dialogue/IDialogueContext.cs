@@ -17,5 +17,6 @@ public interface IDialogueContext {
     void AddDialogBranch(DialogBranch branch);
     void AddDialogTopic(DialogTopic topic);
     DialogTopic? GetTopic(string editorId);
+    DialogTopic GetTopic(FormKey formKey);
     IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IEnumerable<string> speakerNames);
 }

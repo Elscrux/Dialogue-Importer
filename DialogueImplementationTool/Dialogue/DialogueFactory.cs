@@ -49,7 +49,7 @@ public abstract class DialogueFactory(IDialogueContext context) {
 
         if (topicInfo.SharedInfo is not null) {
             var dialogResponses =
-                topicInfo.SharedInfo.GetResponseData(quest, Context, GetResponses, GetSpeakerConditions);
+                topicInfo.SharedInfo.GetResponseData(quest, Context, TopicInfos, GetSpeakerConditions);
             dialogResponses.PreviousDialog = previousDialog;
             dialogResponses.Flags = flags;
 
@@ -57,21 +57,24 @@ public abstract class DialogueFactory(IDialogueContext context) {
         }
 
         return new DialogResponses(Context.GetNextFormKey(), Context.Release) {
-            Responses = topicInfo.Responses.Select((line, i) => new DialogResponse {
-                    Text = line.Response,
-                    ScriptNotes = line.ScriptNote,
-                    ResponseNumber = (byte) (i + 1), //Starts with 1
-                    Flags = DialogResponse.Flag.UseEmotionAnimation,
-                    Emotion = line.Emotion,
-                    EmotionValue = line.EmotionValue,
-                })
-                .ToExtendedList(),
+            Responses = TopicInfos(topicInfo).ToExtendedList(),
             Prompt = topicInfo.Prompt.IsNullOrWhitespace() ? null : topicInfo.Prompt,
             Conditions = GetSpeakerConditions(topicInfo.Speaker),
             FavorLevel = FavorLevel.None,
             Flags = flags,
             PreviousDialog = previousDialog,
         };
+
+        static IEnumerable<DialogResponse> TopicInfos(DialogueTopicInfo info) {
+            return info.Responses.Select((line, i) => new DialogResponse {
+                Text = line.Response,
+                ScriptNotes = line.ScriptNote,
+                ResponseNumber = (byte) (i + 1), //Starts with 1
+                Flags = DialogResponse.Flag.UseEmotionAnimation,
+                Emotion = line.Emotion,
+                EmotionValue = line.EmotionValue,
+            });
+        }
     }
 
     public ExtendedList<Condition> GetSpeakerConditions(ISpeaker speaker) {

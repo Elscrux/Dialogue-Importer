@@ -1,15 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using DialogueImplementationTool.Extension;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace DialogueImplementationTool.Dialogue.Model;
 
 public sealed class SharedInfo {
-    // todo remove static member
-    private static readonly Dictionary<FormKey, int> SharedLineCount = new();
-    private DialogTopic? _topic;
-
     public SharedInfo(DialogueTopicInfo responseDataTopicInfo) {
         if (responseDataTopicInfo.Speaker is null)
             throw new ArgumentException($"{nameof(responseDataTopicInfo)} can't have an empty speaker");
@@ -23,30 +21,47 @@ public sealed class SharedInfo {
     public DialogResponses GetResponseData(
         IQuest quest,
         IDialogueContext modContext,
-        Func<IQuest, DialogueTopicInfo, FormKey?, DialogResponses> getResponses,
+        Func<DialogueTopicInfo, IEnumerable<DialogResponse>> getResponses,
         Func<Speaker.ISpeaker, ExtendedList<Condition>> getSpeakerConditions) {
         if (ResponseData is null) {
-            _topic ??= new DialogTopic(modContext.GetNextFormKey(), modContext.Release) {
-                EditorID = $"{quest.EditorID}SharedInfos",
-                Name = $"{quest.EditorID}SharedInfos",
-                Priority = 2500,
-                Quest = new FormLinkNullable<IQuestGetter>(quest.FormKey),
-                Category = DialogTopic.CategoryEnum.Misc,
-                Subtype = DialogTopic.SubtypeEnum.SharedInfo,
-                SubtypeName = "IDAT",
-                Responses = [],
+            var dialogResponses = getResponses(ResponseDataTopicInfo);
+            var dialogTopic = modContext.LinkCache.PriorityOrder
+                .SelectMany(x => x.EnumerateMajorRecords<IDialogTopicGetter>())
+                .FirstOrDefault(t => t is { Subtype: DialogTopic.SubtypeEnum.SharedInfo, IsDeleted: false } && t.Quest.FormKey == quest.FormKey);
+
+            // Create new shared info topic if it doesn't exist in the current quest
+            DialogTopic newDialogueTopic;
+            if (dialogTopic is null) {
+                var dialogTopicEditorId = Naming.GetFirstFreeIndex(
+                    i => i == 1 ? $"{quest.EditorID}Shared" : $"{quest.EditorID}Shared{i}",
+                    name => !modContext.LinkCache.TryResolve<IDialogResponsesGetter>(name, out _),
+                    1);
+
+                newDialogueTopic = new DialogTopic(modContext.GetNextFormKey(), modContext.Release) {
+                    EditorID = dialogTopicEditorId,
+                    Name = dialogTopicEditorId,
+                    Priority = 2500,
+                    Quest = new FormLinkNullable<IQuestGetter>(quest.FormKey),
+                    Category = DialogTopic.CategoryEnum.Misc,
+                    Subtype = DialogTopic.SubtypeEnum.SharedInfo,
+                    SubtypeName = "IDAT",
+                    Responses = [],
+                };
+                modContext.AddDialogTopic(newDialogueTopic);
+            } else {
+                newDialogueTopic = modContext.GetTopic(dialogTopic.FormKey);
+            }
+
+            var responses = new DialogResponses(modContext.GetNextFormKey(), modContext.Release) {
+                EditorID = Naming.GetFirstFreeIndex(
+                    i => $"{quest.EditorID}{ResponseDataTopicInfo.Speaker.Name}Shared{i}",
+                    name => !modContext.LinkCache.TryResolve<IDialogResponsesGetter>(name, out _),
+                    1),
+                Responses = dialogResponses.ToExtendedList(),
             };
+            newDialogueTopic.Responses.Add(responses);
 
-            modContext.AddDialogTopic(_topic);
-
-            var lastFormKey = _topic.Responses.Count > 0 ? _topic.Responses[^1].FormKey : FormKey.Null;
-            var dialogResponses = getResponses(quest, ResponseDataTopicInfo, lastFormKey);
-            // Todo refactor with Naming.GetFirstFreeIndex
-            dialogResponses.EditorID = GetNextSharedEditorID(quest.EditorID);
-
-            _topic.Responses.Add(dialogResponses);
-
-            ResponseData = dialogResponses;
+            ResponseData = responses;
         }
 
         return new DialogResponses(modContext.GetNextFormKey(), modContext.Release) {
@@ -55,20 +70,5 @@ public sealed class SharedInfo {
             FavorLevel = FavorLevel.None,
             Flags = new DialogResponseFlags(),
         };
-    }
-
-    private string GetNextSharedEditorID(string? questEditorId) {
-        var newCount = 1;
-        if (!SharedLineCount.TryGetValue(ResponseDataTopicInfo.Speaker.FormKey, out var count)) {
-            SharedLineCount.Add(ResponseDataTopicInfo.Speaker.FormKey, newCount);
-        } else {
-            newCount = count + 1;
-            SharedLineCount[ResponseDataTopicInfo.Speaker.FormKey] = newCount;
-        }
-
-        return questEditorId
-               + ResponseDataTopicInfo.Speaker.Name
-               + "Shared"
-               + newCount;
     }
 }
