@@ -45,9 +45,6 @@
       <Compile Update="Parser\OpenDocumentTextParser.cs">
         <DependentUpon>DocumentParser.cs</DependentUpon>
       </Compile>
-      <Compile Update="Parser\NullDocumentParser.cs">
-        <DependentUpon>DocumentParser.cs</DependentUpon>
-      </Compile>
       <Compile Update="Parser\DocXDocumentParser.cs">
         <DependentUpon>DocumentParser.cs</DependentUpon>
       </Compile>
