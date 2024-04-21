@@ -1,11 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using DynamicData;
 namespace DialogueImplementationTool.Dialogue.Model;
 
-public sealed record DialogueTopicInfo {
+public sealed class DialogueTopicInfo {
     public SharedInfo? SharedInfo { get; set; }
 
-    public Speaker.ISpeaker Speaker { get; set; }
+    public Speaker.ISpeaker Speaker { get; set; } = null!;
 
     public string Prompt { get; set; } = string.Empty;
     public List<DialogueResponse> Responses { get; init; } = [];
@@ -14,6 +16,20 @@ public sealed record DialogueTopicInfo {
     public bool Goodbye { get; set; }
     public bool InvisibleContinue { get; set; }
     public bool Random { get; set; }
+
+    public DialogueTopicInfo CopyWith(IEnumerable<DialogueResponse> newResponses) {
+        return new DialogueTopicInfo {
+            SharedInfo = SharedInfo,
+            Speaker = Speaker,
+            Prompt = Prompt,
+            Responses = newResponses.ToList(),
+            Links = Links.ToList(),
+            SayOnce = SayOnce,
+            Goodbye = Goodbye,
+            InvisibleContinue = InvisibleContinue,
+            Random = Random,
+        };
+    }
 
     /// <summary>
     ///     Links dialogue to be played after this topic, linked with an invisible continue

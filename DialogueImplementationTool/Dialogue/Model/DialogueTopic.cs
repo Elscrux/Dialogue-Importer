@@ -40,7 +40,7 @@ public sealed class DialogueTopic {
 
         foreach (var topicInfo in TopicInfos) {
             foreach (var response in topicInfo.Responses) {
-                newInfos.Add(topicInfo with { Responses = [response] });
+                newInfos.Add(topicInfo.CopyWith([response]));
             }
         }
 

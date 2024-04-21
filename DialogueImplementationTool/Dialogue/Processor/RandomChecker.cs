@@ -21,9 +21,7 @@ public sealed partial class RandomChecker : IDialogueTopicProcessor {
             for (var responseIndex = 1; responseIndex < topicInfo.Responses.Count; responseIndex++)
                 topic.TopicInfos.Insert(
                     i + responseIndex,
-                    topicInfo with {
-                        Responses = [topicInfo.Responses[responseIndex]],
-                    });
+                    topicInfo.CopyWith([topicInfo.Responses[responseIndex]]));
 
             topicInfo.Responses.RemoveRange(1, topicInfo.Responses.Count - 1);
         }

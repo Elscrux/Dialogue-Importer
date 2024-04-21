@@ -20,8 +20,9 @@ public sealed class SharedInfoConverter : IConversationProcessor {
                     foreach (var response in topicInfo.Responses) {
                         //Get unique shared line
                         var sharedLine = new SharedLine(response, topicInfo.Speaker);
-                        if (sharedLines.TryGetValue(sharedLine, out var existingSharedLine))
+                        if (sharedLines.TryGetValue(sharedLine, out var existingSharedLine)) {
                             sharedLine = existingSharedLine;
+                        }
 
                         //Setup links
                         if (lastLink is not null) lastLink.Next = sharedLine;
@@ -202,7 +203,7 @@ public sealed class SharedInfoConverter : IConversationProcessor {
         }
 
         public Speaker.ISpeaker Speaker { get; }
-        public List<SharedLineLink> Users { get; } = new();
+        public List<SharedLineLink> Users { get; } = [];
 
         public bool Equals(SharedLine? other) {
             if (ReferenceEquals(null, other)) return false;
@@ -216,13 +217,8 @@ public sealed class SharedInfoConverter : IConversationProcessor {
         }
     }
 
-    private sealed class CommonSharedLine {
-        public CommonSharedLine(SharedLine sharedLine) {
-            SharedLines.Add(sharedLine);
-        }
-
-        public List<SharedLine> SharedLines { get; } = new();
-
+    private sealed class CommonSharedLine(SharedLine sharedLine) {
+        public List<SharedLine> SharedLines { get; } = [sharedLine];
         public SharedLine? CommonLast { get; set; }
         public SharedLine? CommonNext { get; set; }
     }

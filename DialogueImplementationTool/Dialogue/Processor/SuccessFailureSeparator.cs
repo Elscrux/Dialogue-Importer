@@ -38,15 +38,15 @@ public sealed partial class SuccessFailureSeparator : IDialogueTopicProcessor {
 
             // Insert new topic infos
             topic.TopicInfos.RemoveAt(i);
-            var failureInfo = topicInfo with { Responses = failureResponses.ToList() };
-            var successInfo = topicInfo with { Responses = successResponses.ToList() };
+            var failureInfo = topicInfo.CopyWith(failureResponses.ToList());
+            var successInfo = topicInfo.CopyWith(successResponses.ToList());
             if (previousResponses is null) {
                 // Have success and failure topic infos
                 topic.TopicInfos.Insert(i, failureInfo);
                 topic.TopicInfos.Insert(i, successInfo);
             } else {
                 // In case there is previous dialogue, but success and failure options in a next topic
-                var previousInfo = topicInfo with { Responses = previousResponses.ToList() };
+                var previousInfo = topicInfo.CopyWith(previousResponses.ToList());
                 topic.TopicInfos.Insert(i, previousInfo);
                 previousInfo.Append(new DialogueTopic { TopicInfos = [successInfo, failureInfo] });
             }
