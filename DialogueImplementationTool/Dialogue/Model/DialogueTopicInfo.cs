@@ -59,4 +59,90 @@ public sealed class DialogueTopicInfo {
         Links.Clear();
         Links.Add(nextTopic);
     }
+
+    public DialogueTopicInfo SplitOffDialogue(
+        DialogueTopicInfo splitOffTopicInfo) {
+        var startingResponse = splitOffTopicInfo.Responses[0];
+        const string invisibleCont = "(invis cont)";
+
+        //Search for topics that were nested behind invisible continues through shared dialogue
+        var currentInfo = this;
+        var indexOf = currentInfo.SharedInfo is null
+            ? currentInfo.Responses.IndexOf(startingResponse)
+            : -1;
+        while (indexOf == -1
+               && currentInfo is { Links: [{ TopicInfos: [{ Prompt: invisibleCont } nextTopicInfo] }] }) {
+            currentInfo = nextTopicInfo;
+            if (currentInfo.SharedInfo is null) indexOf = currentInfo.Responses.IndexOf(startingResponse);
+        }
+
+        switch (indexOf) {
+            case -1:
+                throw new InvalidOperationException(
+                    $"ERROR: Response {startingResponse.Response} is not part of {string.Join(" ", currentInfo.Responses)}");
+            case 0: {
+                // Split info starts the topic, make the current topic the split info
+                var nextRange = currentInfo.Responses.GetRange(
+                    splitOffTopicInfo.Responses.Count,
+                    currentInfo.Responses.Count - splitOffTopicInfo.Responses.Count);
+                if (nextRange.Count > 0) {
+                    // If something comes after the split info, create a new topic for it
+                    // currentTopic => nextTopic
+                    var nextTopic = new DialogueTopic {
+                        TopicInfos = {
+                            new DialogueTopicInfo {
+                                Prompt = invisibleCont,
+                                Speaker = currentInfo.Speaker,
+                                Responses = nextRange,
+                            },
+                        },
+                    };
+
+                    currentInfo.Append(nextTopic);
+                }
+
+                // Get rid of all lines that aren't part of the invisible continue
+                currentInfo.Responses.RemoveRange(
+                    splitOffTopicInfo.Responses.Count,
+                    currentInfo.Responses.Count - splitOffTopicInfo.Responses.Count);
+                return currentInfo;
+            }
+            default: {
+                // Split info is in the middle of the topic, either at the end or the middle
+                var invisibleContTopicInfo = new DialogueTopicInfo {
+                    Prompt = invisibleCont,
+                    Speaker = currentInfo.Speaker,
+                    Responses = splitOffTopicInfo.Responses,
+                };
+                var invisibleContTopic = new DialogueTopic { TopicInfos = [invisibleContTopicInfo] };
+                currentInfo.Append(invisibleContTopic);
+
+                var nextRange = currentInfo.Responses.GetRange(
+                    indexOf + splitOffTopicInfo.Responses.Count,
+                    currentInfo.Responses.Count - splitOffTopicInfo.Responses.Count - indexOf);
+                if (nextRange.Count > 0) {
+                    // Inserting the split info in the middle of other responses
+                    // currentTopic => invisibleContTopic => nextTopic
+
+                    // Build next topic from the remaining responses
+                    var nextTopic = new DialogueTopic {
+                        TopicInfos = [
+                            new DialogueTopicInfo {
+                                Prompt = invisibleCont,
+                                Speaker = currentInfo.Speaker,
+                                Responses = nextRange,
+                            },
+                        ],
+                    };
+
+                    // Handle all the linking, flags etc.
+                    invisibleContTopicInfo.Append(nextTopic);
+                }
+
+                // Get rid of all lines that aren't part of the base topic and are now part of the invisible continue or the next topic after that
+                currentInfo.Responses.RemoveRange(indexOf, currentInfo.Responses.Count - indexOf);
+                return invisibleContTopicInfo;
+            }
+        }
+    }
 }

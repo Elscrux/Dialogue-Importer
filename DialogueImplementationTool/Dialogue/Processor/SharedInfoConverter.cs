@@ -88,7 +88,6 @@ public sealed class SharedInfoConverter : IConversationProcessor {
         //Remove empty common shared lines
         commonSharedLines.RemoveWhere(l => l.SharedLines.Count == 0);
 
-        const string invisibleCont = "(invis cont)";
         foreach (var commonSharedLine in commonSharedLines) {
             var firstShared = commonSharedLine.SharedLines[0];
 
@@ -102,91 +101,10 @@ public sealed class SharedInfoConverter : IConversationProcessor {
 
             //Integrate into dialogue structure and setup all the linking correctly
             foreach (var (topicUsingLine, _, _) in firstShared.Users) {
-                var currentTopicInfo = topicUsingLine;
+                if (topicUsingLine.SharedInfo is not null) continue;
 
-                //Search for topics that were nested behind invisible continues through shared dialogue
-                var indexOf = currentTopicInfo.SharedInfo is null ?
-                    currentTopicInfo.Responses.IndexOf(firstShared) :
-                    -1;
-                while (indexOf == -1
-                       && currentTopicInfo is { Links: [{ TopicInfos: [{ Prompt: invisibleCont } nextTopicInfo] }] }) {
-                    currentTopicInfo = nextTopicInfo;
-                    if (currentTopicInfo.SharedInfo is null) indexOf = currentTopicInfo.Responses.IndexOf(firstShared);
-                }
-
-                switch (indexOf) {
-                    case -1:
-                        Console.Write(
-                            $"ERROR: Response {firstShared.Response} is not part of {string.Join(" ", currentTopicInfo.Responses)}");
-                        break;
-                    case 0: {
-                        // Shared info starts the topic, make the current topic the shared info
-                        currentTopicInfo.SharedInfo = sharedInfo;
-
-                        var nextRange = currentTopicInfo.Responses.GetRange(sharedTopicInfo.Responses.Count,
-                            currentTopicInfo.Responses.Count - sharedTopicInfo.Responses.Count - indexOf);
-                        if (nextRange.Count > 0) {
-                            // If something comes after the shared info, create a new topic for it
-                            // currentTopic => nextTopic
-                            var nextTopic = new DialogueTopic {
-                                TopicInfos = {
-                                    new DialogueTopicInfo {
-                                        Prompt = invisibleCont,
-                                        Speaker = currentTopicInfo.Speaker,
-                                        Responses = nextRange,
-                                    },
-                                },
-                            };
-
-                            currentTopicInfo.Append(nextTopic);
-                        }
-
-                        // Get rid of all lines that aren't part of the invisible continue
-                        currentTopicInfo.Responses.RemoveRange(indexOf + sharedTopicInfo.Responses.Count,
-                            currentTopicInfo.Responses.Count - sharedTopicInfo.Responses.Count);
-                        break;
-                    }
-                    default: {
-                        // Shared info is in the middle of the topic, either at the end or the middle
-                        var dialogueTopicInfo = new DialogueTopicInfo {
-                            Prompt = invisibleCont,
-                            SharedInfo = sharedInfo,
-                            Speaker = currentTopicInfo.Speaker,
-                            Responses = sharedTopicInfo.Responses,
-                        };
-                        var invisibleContTopic = new DialogueTopic {
-                            TopicInfos = [
-                                dialogueTopicInfo,
-                            ],
-                        };
-                        currentTopicInfo.Append(invisibleContTopic);
-
-                        var nextRange = currentTopicInfo.Responses.GetRange(indexOf + sharedTopicInfo.Responses.Count,
-                            currentTopicInfo.Responses.Count - sharedTopicInfo.Responses.Count - indexOf);
-                        if (nextRange.Count > 0) {
-                            // Inserting the shared info in the middle of other responses
-                            // currentTopic => invisibleContTopic => nextTopic
-
-                            // Build next topic from the remaining responses
-                            var nextTopic = new DialogueTopic {
-                                TopicInfos = [
-                                    new DialogueTopicInfo {
-                                        Prompt = invisibleCont,
-                                        Speaker = currentTopicInfo.Speaker,
-                                        Responses = nextRange,
-                                    },
-                                ],
-                            };
-
-                            // Handle all the linking, flags etc.
-                            dialogueTopicInfo.Append(nextTopic);
-                        }
-
-                        // Get rid of all lines that aren't part of the base topic and are now part of the invisible continue or the next topic after that
-                        currentTopicInfo.Responses.RemoveRange(indexOf, currentTopicInfo.Responses.Count - indexOf);
-                        break;
-                    }
-                }
+                var dialogueTopicInfo = topicUsingLine.SplitOffDialogue(sharedTopicInfo);
+                dialogueTopicInfo.SharedInfo = sharedInfo;
             }
         }
     }
