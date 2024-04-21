@@ -8,23 +8,17 @@ public sealed class TestSharedInfoConverter {
         var topic = TestDialogue.GetDialogueTopicCraneShore1();
         var generatedDialogue = TestDialogue.TopicAsGeneratedDialogue(topic);
 
-        topic.TopicInfos[0].Links[3].TopicInfos[0].Responses.Count.Should().Be(7);
+        var persuadeOption = topic.TopicInfos[0].Links[3].TopicInfos[0];
+        persuadeOption.Responses.Should().HaveCount(7);
 
         var sharedInfoConverter = new SharedInfoConverter();
         sharedInfoConverter.Process(generatedDialogue);
 
-        topic.TopicInfos[0].Links[3].TopicInfos[0].Responses.Count.Should().Be(3);
-        topic.TopicInfos[0].Links[3].TopicInfos[0].Links.Count.Should().Be(1);
-        topic.TopicInfos[0].Links[3].TopicInfos[0].Links[0].TopicInfos.Count.Should().Be(1);
-        topic.TopicInfos[0]
-            .Links[3]
-            .TopicInfos[0]
-            .Links[0]
-            .TopicInfos[0]
-            .Responses[0]
-            .Response.Should()
-            .Be("Anyway, why are we talking again?");
-        topic.TopicInfos[0].Links[3].TopicInfos[0].Links[0].TopicInfos[0].SharedInfo.Should().NotBeNull();
+        persuadeOption.Responses.Should().HaveCount(3);
+        persuadeOption.Links.Should().ContainSingle();
+        persuadeOption.Links[0].TopicInfos.Should().ContainSingle();
+        persuadeOption.Links[0].TopicInfos[0].Responses[0].Response.Should().Be("Anyway, why are we talking again?");
+        persuadeOption.Links[0].TopicInfos[0].SharedInfo.Should().BeNull();
     }
 
     [Fact]
@@ -32,7 +26,8 @@ public sealed class TestSharedInfoConverter {
         var topic = TestDialogue.GetDialogueTopicCraneShore1();
         var generatedDialogue = TestDialogue.TopicAsGeneratedDialogue(topic);
 
-        topic.TopicInfos[0].Links[3].TopicInfos[0].Responses.Count.Should().Be(7);
+        var persuadeOption = topic.TopicInfos[0].Links[3];
+        persuadeOption.TopicInfos[0].Responses.Should().HaveCount(7);
 
         // do success separation first
         var successFailureSeparator = new SuccessFailureSeparator();
@@ -43,25 +38,21 @@ public sealed class TestSharedInfoConverter {
         var sharedInfoConverter = new SharedInfoConverter();
         sharedInfoConverter.Process(generatedDialogue);
 
-        topic.TopicInfos[0].Links[3].TopicInfos[0].Responses.Count.Should().Be(3);
-        topic.TopicInfos[0].Links[3].TopicInfos[0].Links.Count.Should().Be(1);
-        topic.TopicInfos[0].Links[3].TopicInfos[0].Links[0].TopicInfos[0].SharedInfo.Should().NotBeNull();
-        topic.TopicInfos[0]
-            .Links[3]
-            .TopicInfos[0]
-            .Links[0]
+        var persuadeFirstOption = persuadeOption.TopicInfos[0];
+        persuadeFirstOption.Responses.Should().HaveCount(3);
+        persuadeFirstOption.Links.Should().ContainSingle();
+        persuadeFirstOption.Links[0].TopicInfos[0].SharedInfo.Should().BeNull();
+        persuadeFirstOption.Links[0]
             .TopicInfos[0]
             .Responses[0]
             .Response.Should()
             .Be("Anyway, why are we talking again?");
 
-        topic.TopicInfos[0].Links[3].TopicInfos[1].Responses.Count.Should().Be(2);
-        topic.TopicInfos[0].Links[3].TopicInfos[1].Links.Count.Should().Be(1);
-        topic.TopicInfos[0].Links[3].TopicInfos[1].Links[0].TopicInfos[0].SharedInfo.Should().NotBeNull();
-        topic.TopicInfos[0]
-            .Links[3]
-            .TopicInfos[1]
-            .Links[0]
+        var persuadeSecondOption = persuadeOption.TopicInfos[1];
+        persuadeSecondOption.Responses.Should().HaveCount(2);
+        persuadeSecondOption.Links.Should().ContainSingle();
+        persuadeSecondOption.Links[0].TopicInfos[0].SharedInfo.Should().BeNull();
+        persuadeSecondOption.Links[0]
             .TopicInfos[0]
             .Responses[0]
             .Response.Should()

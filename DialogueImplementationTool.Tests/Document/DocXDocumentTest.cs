@@ -128,7 +128,7 @@ public sealed class DocXDocumentTest {
         // Implement
         new DialogueImplementer(_testConstants.SkyrimDialogueContext).ImplementDialogue(generatedDialogue);
 
-        _testConstants.Mod.DialogTopics.Should().HaveCount(1);
+        _testConstants.Mod.DialogTopics.Should().ContainSingle();
         _testConstants.Mod.DialogTopics.First().Responses.Should().HaveCount(2);
     }
 

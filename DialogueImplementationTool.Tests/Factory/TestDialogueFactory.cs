@@ -31,7 +31,7 @@ public sealed class TestDialogueFactory {
         greetingFactory.PostProcess();
 
         _testConstants.Mod.DialogBranches.Should().ContainSingle();
-        _testConstants.Mod.DialogTopics.Should().HaveCount(8);
+        _testConstants.Mod.DialogTopics.Should().HaveCount(7);
 
         var firstTopic = _testConstants.Mod.DialogTopics.First();
         firstTopic.Responses.Should().ContainSingle();
@@ -44,5 +44,13 @@ public sealed class TestDialogueFactory {
         illusionTopic.Name!.String.Should().Be("There's no need to be like that. We can be friends. (Illusion) [Hard]?");
         illusionTopic.Responses[0].Responses.Should().ContainSingle();
         illusionTopic.Responses[1].Responses.Should().ContainSingle();
+
+        var persuadeTopic = _testConstants.Mod.DialogTopics.Skip(5).First();
+        persuadeTopic.Responses.Should().HaveCount(2);
+        persuadeTopic.Name!.String.Should().Be("You think Crane Shore could be more than it is? (Persuade) [average]");
+        persuadeTopic.Responses[0].Responses.Should().HaveCount(3);
+        persuadeTopic.Responses[1].Responses.Should().HaveCount(2);
+        persuadeTopic.Responses[0].LinkTo.Should().ContainSingle();
+        persuadeTopic.Responses[1].LinkTo.Should().ContainSingle();
     }
 }

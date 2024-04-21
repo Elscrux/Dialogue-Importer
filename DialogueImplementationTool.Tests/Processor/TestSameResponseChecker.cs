@@ -8,11 +8,11 @@ public sealed class TestSameResponseChecker {
         var topic = TestDialogue.GetDialogueTopicCraneShore1();
         var generatedDialogue = TestDialogue.TopicAsGeneratedDialogue(topic);
 
-        topic.TopicInfos[0].Links[0].TopicInfos[0].Responses.Count.Should().Be(0);
+        topic.TopicInfos[0].Links[0].TopicInfos[0].Responses.Should().HaveCount(0);
 
         var sameResponseChecker = new SameResponseChecker();
         sameResponseChecker.Process(generatedDialogue);
 
-        topic.TopicInfos[0].Links[0].TopicInfos[0].Responses.Count.Should().Be(1);
+        topic.TopicInfos[0].Links[0].TopicInfos[0].Responses.Should().ContainSingle();
     }
 }
