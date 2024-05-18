@@ -7,11 +7,14 @@ public sealed partial class SayOnceChecker : IDialogueTopicInfoProcessor {
         if (topicInfo.Responses.Count == 0) return;
 
         var response = topicInfo.Responses[0];
-        var previousResponse = response.Response;
+        var regex = InitialRegex();
 
-        response.Response = InitialRegex().Replace(response.Response, string.Empty);
+        if (regex.Match(response.Response) is not { Success: true }) return;
 
-        if (response.Response != previousResponse) topicInfo.SayOnce = true;
+        topicInfo.SayOnce = true;
+        response.Response = regex
+            .Replace(response.Response, string.Empty)
+            .Trim();
     }
 
     [GeneratedRegex(@"\[(initial)( (greeting))?\]", RegexOptions.IgnoreCase, "en-DE")]

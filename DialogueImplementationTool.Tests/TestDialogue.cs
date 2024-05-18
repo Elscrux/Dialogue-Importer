@@ -75,6 +75,7 @@ public static class TestDialogue {
             string.Empty,
             [
                 "[initial] Come on in and look around. We stock everything the Company tells us to stock, and then some.",
+                "[initial greeting] Come on in and look around. We stock everything the Company tells us to stock, and then some.",
                 "You're talking to a Sun-Screamer, so watch your words.",
                 "[if player is a Nord] You're not a Sea-Born are you? Or Talos forbid, a Scale-Fin?",
                 "What do you want? Can't you see I'm busy?",

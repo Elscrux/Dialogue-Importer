@@ -1,6 +1,7 @@
 ﻿using DialogueImplementationTool.Dialogue;
 using DialogueImplementationTool.Dialogue.Model;
 using FluentAssertions;
+using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Tests.Factory;
 
 public sealed class TestDialogueFactory {
@@ -16,7 +17,7 @@ public sealed class TestDialogueFactory {
         greetingFactory.PostProcess();
 
         _testConstants.Mod.DialogTopics.Should().ContainSingle();
-        _testConstants.Mod.DialogTopics.First().Responses.Should().HaveCount(6);
+        _testConstants.Mod.DialogTopics.First().Responses.Should().HaveCount(7);
     }
 
     [Fact]
