@@ -66,7 +66,7 @@ public sealed class Dialogue(IDialogueContext context) : DialogueFactory(context
                             var linkFormKey = Context.GetNextFormKey();
                             var newLink = new LinkedTopic(linkFormKey,
                                 topicInfo.Links[linkIndex],
-                                rawTopic.IndexString + GetIndex(linkIndex + 1, !rawTopic.IndexType),
+                                GetIndex(linkIndex + 1, !rawTopic.IndexType),
                                 !rawTopic.IndexType);
 
                             createdTopics.Add(newLink);
@@ -77,11 +77,19 @@ public sealed class Dialogue(IDialogueContext context) : DialogueFactory(context
                             responses[topicInfoIndex].LinkTo.Add(new FormLink<IDialogGetter>(linkedTopic.FormKey));
                         }
                     }
-                }
-            }
 
-            char GetIndex(int index, bool type) {
-                return type ? (char) (48 + index) : (char) (64 + index);
+                    string GetIndex(int index, bool type) {
+                        if (topicInfo.InvisibleContinue) {
+                            return rawTopic.IndexString + '_';
+                        }
+
+                        var nextChar = type
+                            ? (char) (48 + index)
+                            : (char) (64 + index);
+
+                        return rawTopic.IndexString.TrimEnd('_') + nextChar;
+                    }
+                }
             }
         }
     }
