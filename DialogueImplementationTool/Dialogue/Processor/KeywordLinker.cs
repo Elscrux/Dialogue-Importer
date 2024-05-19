@@ -14,7 +14,7 @@ public sealed partial class KeywordLinker : IConversationProcessor {
     private static partial Regex KeywordDestinationRegex();
 
     // I guess the effects of the bait must have thrown me off. [merge to DONE above]
-    [GeneratedRegex(@"\[[^\]]*(?:merge|go) to ([A-Z]+)[^\]]*\]$")]
+    [GeneratedRegex(@"\[[^\]]*(?:merge|go|back) to ([A-Z]+)[^\]]*\]$")]
     private static partial Regex KeywordLinkRegex();
 
     // Anyway, I need you to go fetch him before they try to drown him in the waves. Think you can manage that? [HERE]
@@ -22,7 +22,7 @@ public sealed partial class KeywordLinker : IConversationProcessor {
     private static partial Regex OptionsDestinationRegex();
 
     // Decided you weren't so busy after all? [merge to options after HERE above]
-    [GeneratedRegex(@"\[[^\]]*(?:merge|go) to (?:options after )?([A-Z]+)[^\]]*\]$")]
+    [GeneratedRegex(@"\[[^\]]*(?:merge|go|back) to (?:options after )?([A-Z]+)[^\]]*\]$")]
     private static partial Regex OptionsLinkRegex();
 
     public void Process(IList<GeneratedDialogue> dialogues) {
