@@ -9,6 +9,7 @@ public sealed class DialogueProcessor(EmotionChecker emotionChecker) {
         new SharedInfoConverter(),
         new BlockingChecker(),
         new BackToOptionsLinker(),
+        new KeywordLinker(),
     ];
 
     private readonly IEnumerable<IDialogueTopicInfoProcessor> _topicInfoPostProcessors = [
