@@ -111,6 +111,9 @@
       <Compile Update="Dialogue\Processor\Trimmer.cs">
         <DependentUpon>IDialogueResponsePostProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\Processor\KeywordLinker.cs">
+        <DependentUpon>IConversationProcessor.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>
