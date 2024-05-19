@@ -5,11 +5,11 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed class DialogueProcessor(EmotionChecker emotionChecker) {
     private readonly IConversationProcessor[] _conversationProcessors = [
+        new BackToOptionsLinker(),
+        new KeywordLinker(),
         new SameResponseChecker(),
         new SharedInfoConverter(),
         new BlockingChecker(),
-        new BackToOptionsLinker(),
-        new KeywordLinker(),
     ];
 
     private readonly IEnumerable<IDialogueTopicInfoProcessor> _topicInfoPostProcessors = [
