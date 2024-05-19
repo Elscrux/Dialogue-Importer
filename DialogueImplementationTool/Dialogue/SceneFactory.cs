@@ -181,39 +181,44 @@ public abstract partial class SceneFactory(IDialogueContext context) : DialogueF
     protected virtual List<DialogueTopic> TransformLines(List<DialogueTopic> topics) {
         var separatedTopics = new List<DialogueTopic>();
         var currentSpeaker = string.Empty;
-        var currentLines = new List<DialogueResponse>();
+        var currentInfos = new List<DialogueTopicInfo>();
 
-        foreach (var response in topics.SelectMany(x => x.TopicInfos).SelectMany(x => x.Responses)) {
-            var match = SceneLineRegex().Match(response.Response);
-            if (!match.Success) continue;
+        foreach (var topic in topics) {
+            foreach (var info in topic.TopicInfos) {
+                if (info.Responses.Count != 1) throw new InvalidOperationException("Only one response per topic is allowed");
+                
+                var response = info.Responses[0];
+                var match = SceneLineRegex().Match(response.Response);
+                if (!match.Success) continue;
 
-            var speaker = match.Groups[1].Value;
-            if (currentSpeaker != speaker) {
-                AddCurrentTopic();
-                currentSpeaker = speaker;
+                var speaker = match.Groups[1].Value;
+                if (currentSpeaker != speaker || (currentInfos.Count > 0 && currentInfos[^1].SharedInfo is not null)) {
+                    AddCurrentTopic();
+                    currentSpeaker = speaker;
+                }
+
+                info.Responses[0].Response = match.Groups[2].Value;
+                info.Speaker = GetSpeaker(currentSpeaker);
+                currentInfos.Add(info);
             }
 
-            currentLines.Add(response with { Response = match.Groups[2].Value });
+            AddCurrentTopic();
+            currentSpeaker = string.Empty;
         }
 
-        if (currentLines.Count != 0) AddCurrentTopic();
+        if (currentInfos.Count != 0) AddCurrentTopic();
         return separatedTopics;
 
         void AddCurrentTopic() {
-            if (currentLines.Count != 0) {
+            if (currentInfos.Count != 0) {
                 var dialogueTopic = new DialogueTopic {
-                    TopicInfos = [
-                        new DialogueTopicInfo {
-                            Responses = [..currentLines],
-                            Speaker = GetSpeaker(currentSpeaker),
-                        },
-                    ],
+                    TopicInfos = currentInfos.ToList(),
                 };
 
                 separatedTopics.Add(dialogueTopic);
             }
 
-            currentLines.Clear();
+            currentInfos.Clear();
         }
     }
 

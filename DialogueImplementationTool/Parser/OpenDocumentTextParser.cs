@@ -174,10 +174,6 @@ public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
         return [new DialogueTopic { TopicInfos = topics }];
     }
 
-    public List<DialogueTopic> ParseScene(int index) {
-        return ParseDialogue(index);
-    }
-
     private void MergeLists() {
         var startingIndex = 0;
         while (startingIndex < _doc.Content.Count) {

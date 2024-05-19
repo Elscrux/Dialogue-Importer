@@ -68,6 +68,37 @@ public static class TestDialogue {
         ];
     }
 
+    public static DialogueTopic GetSceneBranchesOldwallScene1() {
+        var testConstants = new TestConstants();
+        return GetTopicInfos(
+            testConstants.Speaker1,
+            string.Empty,
+            [
+                "Jastara: Godehard. Well met.",
+                "Godehard: Well met, good day, good evening. Are you after another old war story of mine?",
+                "Godehard: What do you say?",
+                "Jastara: I wanted to write a song about it - for my daughter.",
+                "Jastara:Who was your commander at the Red Ring?",
+                "Godehard: Sevino Seloth, Captain from Cheydinhal, half man, half Dark Elf.",
+                "Jastara: Thank you. That's what I had forgotten.",
+            ]);
+    }
+
+    public static DialogueTopic GetSceneBranchesOldwallScene2() {
+        var testConstants = new TestConstants();
+        return GetTopicInfos(
+            testConstants.Speaker1,
+            string.Empty,
+            [
+                "Jastara: Godehard. Well met.",
+                "Godehard: Well met, good day, good evening. Are you after another old war story of mine?",
+                "Godehard: What do you think?",
+                "Jastara: A story of my own I have to offer, that I do. Those brigands were back, and they made quite a lot of noise.",
+                "Godehard: Is that so? Find them and scold them, I will, and with a guard or two at my back.",
+                "Jastara: Thank you. That should be enough.",
+            ]);
+    }
+
     public static DialogueTopic GetGreetingTopicCraneShore1() {
         var testConstants = new TestConstants();
         return GetTopicInfos(

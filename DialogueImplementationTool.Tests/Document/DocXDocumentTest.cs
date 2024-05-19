@@ -19,11 +19,11 @@ public sealed class DocXDocumentTest {
             Path.GetFullPath("../../../Document/Examples/[Locked] Brina Cross City Scenes.docx"),
             _testConstants.DialogueProcessor);
 
-        var dialogueTopics = docXDocumentParser.ParseScene(0);
+        var dialogueTopics = (docXDocumentParser as IDocumentParser).ParseScene(0);
 
         // Import
         dialogueTopics.Should().ContainSingle();
-        dialogueTopics[0].TopicInfos[0].Responses.Should().HaveCount(6);
+        dialogueTopics[0].TopicInfos.Should().HaveCount(6);
 
         // Process
         List<GeneratedDialogue> generatedDialogue = [
@@ -34,7 +34,7 @@ public sealed class DocXDocumentTest {
         ];
         _testConstants.DialogueProcessor.Process(generatedDialogue);
 
-        var secondResponse = generatedDialogue[0].Topics[0].TopicInfos[0].Responses[1];
+        var secondResponse = generatedDialogue[0].Topics[0].TopicInfos[1].Responses[0];
         secondResponse.Response.Should().NotContain("morose");
         secondResponse.ScriptNote.Should().Be("morose");
 
@@ -49,6 +49,49 @@ public sealed class DocXDocumentTest {
     }
 
     [Fact]
+    public void TestSceneWithBranches() {
+        _testConstants.SpeakerSelection = new InjectedSpeakerSelection(new Dictionary<string, AliasSpeaker> {
+            { "Jastara", new AliasSpeaker(_testConstants.Speaker1.FormKey, "Jastara") },
+            { "Godehard", new AliasSpeaker(_testConstants.Speaker2.FormKey, "Godehard") },
+        });
+
+        var docXDocumentParser = new DocXDocumentParser(
+            Path.GetFullPath("../../../Document/Examples/[Locked] Oldwall Radiant Scenes.docx"),
+            _testConstants.DialogueProcessor);
+
+        var dialogueTopics = (docXDocumentParser as IDocumentParser).ParseScene(0)
+            .Concat((docXDocumentParser as IDocumentParser).ParseScene(1))
+            .ToList();
+
+        // Import
+        dialogueTopics.Should().HaveCount(2);
+        dialogueTopics[0].TopicInfos.Should().HaveCount(8);
+        dialogueTopics[1].TopicInfos.Should().HaveCount(8);
+
+        // Process
+        List<GeneratedDialogue> generatedDialogue = [
+            new GeneratedDialogue(_testConstants.SkyrimDialogueContext,
+                DialogueType.GenericScene,
+                [dialogueTopics[0]],
+                _testConstants.Speaker1.FormKey),
+            new GeneratedDialogue(_testConstants.SkyrimDialogueContext,
+                DialogueType.GenericScene,
+                [dialogueTopics[1]],
+                _testConstants.Speaker1.FormKey),
+        ];
+        _testConstants.DialogueProcessor.Process(generatedDialogue);
+
+        generatedDialogue[0].Topics[0].TopicInfos.Should().HaveCount(8);
+        generatedDialogue[1].Topics[0].TopicInfos.Should().HaveCount(8);
+
+        // Implement
+        new DialogueImplementer(_testConstants.SkyrimDialogueContext).ImplementDialogue(generatedDialogue);
+
+        _testConstants.Mod.Scenes.Should().HaveCount(2);
+        _testConstants.Mod.DialogTopics.Should().HaveCount(15); // 7 + 7 + 1 (shared dialogue)
+    }
+
+    [Fact]
     public void TestScene3x3() {
         _testConstants.SpeakerSelection = new InjectedSpeakerSelection(new Dictionary<string, AliasSpeaker> {
             { "Ornev", new AliasSpeaker(_testConstants.Speaker1.FormKey, "Ornev") },
@@ -59,16 +102,13 @@ public sealed class DocXDocumentTest {
             Path.GetFullPath("../../../Document/Examples/[Locked] Brina Cross City Scenes.docx"),
             _testConstants.DialogueProcessor);
 
-        var dialogueTopics = docXDocumentParser.ParseScene(2);
+        var dialogueTopics = (docXDocumentParser as IDocumentParser).ParseScene(2);
 
         // Import
         dialogueTopics.Should().HaveCount(3);
-        dialogueTopics[0].TopicInfos.Should().ContainSingle();
-        dialogueTopics[0].TopicInfos[0].Responses.Should().HaveCount(2);
-        dialogueTopics[1].TopicInfos.Should().ContainSingle();
-        dialogueTopics[1].TopicInfos[0].Responses.Should().HaveCount(2);
-        dialogueTopics[2].TopicInfos.Should().ContainSingle();
-        dialogueTopics[2].TopicInfos[0].Responses.Should().HaveCount(3);
+        dialogueTopics[0].TopicInfos.Should().HaveCount(2);
+        dialogueTopics[1].TopicInfos.Should().HaveCount(2);
+        dialogueTopics[2].TopicInfos.Should().HaveCount(3);
 
         // Process
         List<GeneratedDialogue> generatedDialogue = [

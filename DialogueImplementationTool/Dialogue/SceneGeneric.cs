@@ -92,7 +92,7 @@ public sealed class GenericScene(IDialogueContext context) : SceneFactory(contex
         return Context.GetAliasSpeakers(speakerNames);
     }
 
-    private static bool Is3x3Scene(List<DialogueTopic> topics) => topics.Count > 1;
+    private static bool Is3x3Scene(List<DialogueTopic> topics) => topics[0].TopicInfos[0].Prompt != string.Empty;
 
     public override void PreProcessSpeakers() {
         //Make sure there are only two speakers

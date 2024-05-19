@@ -46,7 +46,11 @@ public interface IDocumentParser : IDocumentIterator {
         };
     }
 
-    protected List<DialogueTopic> ParseDialogue(int index);
-    protected List<DialogueTopic> ParseOneLiner(int index);
-    protected List<DialogueTopic> ParseScene(int index);
+    List<DialogueTopic> ParseDialogue(int index);
+    List<DialogueTopic> ParseOneLiner(int index);
+    List<DialogueTopic> ParseScene(int index) {
+        var topics = ParseDialogue(index);
+        foreach (var topic in topics) topic.ConvertResponsesToTopicInfos();
+        return topics;
+    }
 }

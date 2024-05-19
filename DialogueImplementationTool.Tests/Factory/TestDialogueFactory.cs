@@ -1,7 +1,6 @@
 ﻿using DialogueImplementationTool.Dialogue;
 using DialogueImplementationTool.Dialogue.Model;
 using FluentAssertions;
-using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Tests.Factory;
 
 public sealed class TestDialogueFactory {

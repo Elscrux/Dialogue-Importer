@@ -107,10 +107,6 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
         return [new DialogueTopic { TopicInfos = topicInfos }];
     }
 
-    public List<DialogueTopic> ParseScene(int index) {
-        return ParseDialogue(index);
-    }
-
     private DialogueTopicInfo AddTopicInfo(Paragraph paragraph) {
         var topicInfo = new DialogueTopicInfo();
         var startingIndentation = paragraph.IndentLevel;
