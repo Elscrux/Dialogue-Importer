@@ -9,20 +9,25 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 using KeywordLink = (string Keyword, DialogueTopic Topic, DialogueTopicInfo TopicInfo);
 
 public sealed partial class KeywordLinker : IConversationProcessor {
+    private const string FillerRegexPart = @"[^\]]*";
+    private const string MergeRegexPart = "(?:merge|go|back)";
+    private const string OptionsAfterRegexPart = "(?:options after )";
+    private const string KeywordRegexPart = "([A-Z]+)";
+
     // [DONE] We should bring this back to Telwyne. She'll probably have some ideas on where these eels might be burrowed.
-    [GeneratedRegex(@"^\[([A-Z]+)\]")]
+    [GeneratedRegex($@"^\[{KeywordRegexPart}\]")]
     private static partial Regex KeywordDestinationRegex();
 
     // I guess the effects of the bait must have thrown me off. [merge to DONE above]
-    [GeneratedRegex(@"\[[^\]]*(?:merge|go|back) to ([A-Z]+)[^\]]*\]$")]
+    [GeneratedRegex($@"\[{FillerRegexPart}{MergeRegexPart} to {KeywordRegexPart}{FillerRegexPart}\]$")]
     private static partial Regex KeywordLinkRegex();
 
     // Anyway, I need you to go fetch him before they try to drown him in the waves. Think you can manage that? [HERE]
-    [GeneratedRegex(@"\[([A-Z]+)\]$")]
+    [GeneratedRegex($@"\[{KeywordRegexPart}\]$")]
     private static partial Regex OptionsDestinationRegex();
 
     // Decided you weren't so busy after all? [merge to options after HERE above]
-    [GeneratedRegex(@"\[[^\]]*(?:merge|go|back) to (?:options after )?([A-Z]+)[^\]]*\]$")]
+    [GeneratedRegex($@"\[{FillerRegexPart}{MergeRegexPart} to {OptionsAfterRegexPart}?{KeywordRegexPart}{FillerRegexPart}\]$")]
     private static partial Regex OptionsLinkRegex();
 
     public void Process(IList<GeneratedDialogue> dialogues) {
