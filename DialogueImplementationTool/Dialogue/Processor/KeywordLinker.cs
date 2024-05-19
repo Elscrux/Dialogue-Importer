@@ -32,6 +32,7 @@ public sealed partial class KeywordLinker : IConversationProcessor {
 
     public void Process(IList<GeneratedDialogue> dialogues) {
         ProcessKeywordLinks(dialogues);
+        // todo support links to the middle of dialogue (create shared infos and so on)
         ProcessOptionLinks(dialogues);
     }
 
