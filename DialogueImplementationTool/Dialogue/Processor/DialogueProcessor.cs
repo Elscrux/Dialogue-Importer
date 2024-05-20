@@ -3,8 +3,35 @@ using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Parser;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
-public sealed class DialogueProcessor(EmotionChecker emotionChecker) {
-    private readonly IConversationProcessor[] _conversationProcessors = [
+public class DialogueProcessor(EmotionChecker emotionChecker) : IDialogueProcessor {
+    public List<IDialogueResponseProcessor> ResponseProcessors { get; } = [
+        new InvalidStringFixer(),
+        new NoteExtractor(),
+        new EmptyBracesRemover(),
+        new BackToDialogueRemover(),
+        new ScriptNotesParser(),
+        new Trimmer(),
+    ];
+
+    public List<IDialogueTopicInfoProcessor> TopicInfoPostProcessors { get; } = [
+        emotionChecker,
+    ];
+
+    public List<IDialogueTopicInfoProcessor> TopicInfoPreProcessors { get; } = [
+        new SayOnceChecker(),
+        new GoodbyeChecker(),
+        new TopicInfoTrimmer(),
+        new TopicInfoInvalidStringFixer(),
+    ];
+
+    public List<IDialogueTopicProcessor> TopicProcessors { get; } = [
+        new SuccessFailureSeparator(),
+        new RandomChecker(),
+    ];
+
+    public List<IDialogueProcessor> TopicListProcessors { get; } = [];
+
+    public List<IConversationProcessor> ConversationProcessors { get; } = [
         new BackToOptionsLinker(),
         new KeywordLinker(),
         new SameResponseChecker(),
@@ -12,45 +39,41 @@ public sealed class DialogueProcessor(EmotionChecker emotionChecker) {
         new BlockingChecker(),
     ];
 
-    private readonly IEnumerable<IDialogueTopicInfoProcessor> _topicInfoPostProcessors = [
-        emotionChecker,
-    ];
-
-    private readonly IEnumerable<IDialogueTopicInfoProcessor> _topicInfoPreProcessors = [
-        new SayOnceChecker(),
-        new GoodbyeChecker(),
-        new TopicInfoTrimmer(),
-        new TopicInfoInvalidStringFixer(),
-    ];
-
-    private readonly IEnumerable<IDialogueTopicProcessor> _topicProcessors = [
-        new SuccessFailureSeparator(),
-        new RandomChecker(),
-    ];
-
-    public void PreProcess(DialogueTopicInfo topicInfo) {
-        foreach (var preProcessor in _topicInfoPreProcessors) {
-            preProcessor.Process(topicInfo);
+    public virtual void PreProcess(DialogueTopicInfo topicInfo) {
+        foreach (var processor in TopicInfoPreProcessors) {
+            processor.Process(topicInfo);
         }
     }
 
-    public void PostProcess(DialogueTopicInfo topicInfo) {
-        foreach (var postProcessor in _topicInfoPostProcessors) {
-            postProcessor.Process(topicInfo);
+    public virtual void PostProcess(DialogueTopicInfo topicInfo) {
+        foreach (var processor in TopicInfoPostProcessors) {
+            processor.Process(topicInfo);
         }
     }
 
-    public void Process(DialogueTopic topic) {
-        foreach (var postProcessor in _topicProcessors) {
-            foreach (var link in topic.EnumerateLinks()) {
-                postProcessor.Process(link);
+    public virtual void Process(DialogueResponse response, IReadOnlyList<FormattedText> textSnippets) {
+        foreach (var processor in ResponseProcessors) {
+            processor.Process(response, textSnippets);
+        }
+    }
+
+    public virtual void Process(DialogueTopic topic) {
+        foreach (var processor in TopicProcessors) {
+            foreach (var link in topic.EnumerateLinks(true)) {
+                processor.Process(link);
             }
         }
     }
 
-    public void Process(List<GeneratedDialogue> dialogue) {
-        foreach (var processor in _conversationProcessors) {
-            processor.Process(dialogue);
+    public void Process(List<DialogueTopic> topics) {
+        foreach (var processor in TopicListProcessors) {
+            processor.Process(topics);
+        }
+    }
+
+    public virtual void Process(Conversation conversation) {
+        foreach (var processor in ConversationProcessors) {
+            processor.Process(conversation);
         }
     }
 }

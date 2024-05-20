@@ -4,7 +4,7 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue;
 
-public abstract class OneLinerFactory(IDialogueContext context) : DialogueFactory(context) {
+public abstract class OneLinerFactory(IDialogueContext context) : BaseDialogueFactory(context) {
     protected void GenerateDialogue(IQuest quest, List<DialogueTopic> topics, DialogTopic dialogTopic) {
         var topicsInfoList = topics.ToTopicInfoList();
 

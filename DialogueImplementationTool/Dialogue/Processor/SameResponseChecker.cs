@@ -17,8 +17,8 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 /// </example>
 /// </summary>
 public sealed class SameResponseChecker : IConversationProcessor {
-    public void Process(IList<GeneratedDialogue> dialogues) {
-        foreach (var dialogue in dialogues) {
+    public void Process(Conversation conversation) {
+        foreach (var dialogue in conversation) {
             CheckTopics(dialogue.Topics);
         }
     }

@@ -1,18 +1,26 @@
 using DialogueImplementationTool.Dialogue.Processor;
+using DialogueImplementationTool.Parser;
+using DialogueImplementationTool.Tests.Samples;
 using FluentAssertions;
 namespace DialogueImplementationTool.Tests.Processor;
 
 public sealed class TestSameResponseChecker {
+    private readonly TestConstants _testConstants = new();
+
     [Fact]
     public void TestDialogueTopicCraneShore1() {
-        var topic = TestDialogue.GetDialogueTopicCraneShore1();
-        var generatedDialogue = TestDialogue.TopicAsGeneratedDialogue(topic);
+        // Import
+        var (_, dialogue) = TestSamples.GetCraneShoreDialogue(_testConstants);
 
-        topic.TopicInfos[0].Links[0].TopicInfos[0].Responses.Should().HaveCount(0);
+        // Check
+        dialogue.Topics[0].TopicInfos[0].Links[0].TopicInfos[0].Responses.Should().HaveCount(0);
 
+        // Process
+        Conversation conversation = [dialogue];
         var sameResponseChecker = new SameResponseChecker();
-        sameResponseChecker.Process(generatedDialogue);
+        sameResponseChecker.Process(conversation);
 
-        topic.TopicInfos[0].Links[0].TopicInfos[0].Responses.Should().ContainSingle();
+        // Check
+        conversation[0].Topics[0].TopicInfos[0].Links[0].TopicInfos[0].Responses.Should().ContainSingle();
     }
 }

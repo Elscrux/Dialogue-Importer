@@ -1,49 +1,53 @@
-﻿using DialogueImplementationTool.Dialogue;
-using DialogueImplementationTool.Dialogue.Processor;
-using DialogueImplementationTool.Parser;
+﻿using DialogueImplementationTool.Dialogue.Processor;
+using DialogueImplementationTool.Tests.Samples;
 using FluentAssertions;
 namespace DialogueImplementationTool.Tests.Processor;
 
 public sealed class TestKeywordLinker {
+    private readonly TestConstants _testConstants = new();
+
     [Fact]
     public void TestStyleGuideLinks() {
-        var topic = TestDialogue.GetDialogueTopicStyleGuideLinks();
-        var generatedDialogue = TestDialogue.TopicAsGeneratedDialogue(topic);
+        // Import
+        var (dialogueLink, _, _) = TestSamples.GetStyleGuideDialogue(_testConstants);
 
+        // Process
+        Conversation conversation = [dialogueLink];
         var keywordLinker = new KeywordLinker();
-        keywordLinker.Process(generatedDialogue);
+        keywordLinker.Process(conversation);
 
-        generatedDialogue[0].Topics[0].TopicInfos[0].Responses[0].Response.Should().NotStartWith("[DONE]");
+        // Check
+        conversation[0].Topics[0].TopicInfos[0].Responses[0].FullResponse.Should().NotStartWith("[DONE]");
 
-        // One link from the first link
-        generatedDialogue[0].Topics[0].TopicInfos[0].Links[0].TopicInfos[0].Responses[0].Response.Should().NotEndWith("[merge to DONE above]");
-        generatedDialogue[0].Topics[0].TopicInfos[0].Links[0].TopicInfos[0].Links.Should().ContainSingle();
-        generatedDialogue[0].Topics[0].TopicInfos[0].Links[0].TopicInfos[0].InvisibleContinue.Should().BeTrue();
+        // One link from the second link
+        var secondResponse = conversation[0].Topics[1].TopicInfos[0];
+        secondResponse.Responses[0].FullResponse.Should().NotEndWith("[merge to DONE above]");
+        secondResponse.Links.Should().ContainSingle();
+        secondResponse.InvisibleContinue.Should().BeTrue();
 
-        // Another link from the second link
-        generatedDialogue[0].Topics[0].TopicInfos[0].Links[1].TopicInfos[0].Responses[0].Response.Should().NotEndWith("[merge to DONE above]");
-        generatedDialogue[0].Topics[0].TopicInfos[0].Links[1].TopicInfos[0].Links.Should().ContainSingle();
-        generatedDialogue[0].Topics[0].TopicInfos[0].Links[0].TopicInfos[0].InvisibleContinue.Should().BeTrue();
+        // Another link from the third link
+        var thirdResponse = conversation[0].Topics[2].TopicInfos[0];
+        thirdResponse.Responses[0].FullResponse.Should().NotEndWith("[merge to DONE above]");
+        thirdResponse.Links.Should().ContainSingle();
+        thirdResponse.InvisibleContinue.Should().BeTrue();
     }
 
     [Fact]
     public void TestStyleGuideOptionsLinks() {
-        var testConstants = new TestConstants();
-        var topics = TestDialogue.GetDialogueTopicStyleGuideOptionsLinks();
-        List<GeneratedDialogue> generatedDialogue = [
-            new GeneratedDialogue(testConstants.SkyrimDialogueContext,
-                DialogueType.Dialogue,
-                topics,
-                testConstants.Speaker1.FormKey),
-        ];
+        // Import
+        var (_, dialogueOptions1, dialogueOptions2) = TestSamples.GetStyleGuideDialogue(_testConstants);
 
+        // Process
+        Conversation conversation = [dialogueOptions1, dialogueOptions2];
         var keywordLinker = new KeywordLinker();
-        keywordLinker.Process(generatedDialogue);
+        keywordLinker.Process(conversation);
 
-        generatedDialogue[0].Topics[0].TopicInfos[0].Responses[0].Response.Should().NotEndWith("[HERE]");
+        // Check
+        conversation[0].Topics[0].TopicInfos[0].Responses[0].FullResponse.Should().NotEndWith("[HERE]");
 
-        generatedDialogue[0].Topics[1].TopicInfos[0].Responses[0].Response.Should().NotEndWith("[merge to HERE above]");
-        generatedDialogue[0].Topics[1].TopicInfos[0].Links.Should().HaveCount(2);
-        generatedDialogue[0].Topics[1].TopicInfos[0].InvisibleContinue.Should().BeFalse();
+        var dialogueTopicInfo = conversation[1].Topics[0].TopicInfos[0];
+        dialogueTopicInfo.Responses[0].FullResponse.Should().NotEndWith("[merge to HERE above]");
+        dialogueTopicInfo.Links.Should().HaveCount(2);
+        dialogueTopicInfo.InvisibleContinue.Should().BeFalse();
     }
 }

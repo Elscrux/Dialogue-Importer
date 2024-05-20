@@ -3,5 +3,5 @@ using DialogueImplementationTool.Parser;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public interface IConversationProcessor {
-    void Process(IList<GeneratedDialogue> dialogues);
+    void Process(Conversation conversation);
 }

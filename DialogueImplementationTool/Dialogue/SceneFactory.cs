@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using DialogueImplementationTool.Dialogue.Model;
+using DialogueImplementationTool.Dialogue.Processor;
 using DialogueImplementationTool.Dialogue.Speaker;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
@@ -11,23 +11,44 @@ using Noggog;
 using Condition = Mutagen.Bethesda.Skyrim.Condition;
 namespace DialogueImplementationTool.Dialogue;
 
-public abstract partial class SceneFactory(IDialogueContext context) : DialogueFactory(context) {
+public abstract class GenericScene3X3Factory(IDialogueContext context) : BaseDialogueFactory(context) {
     private List<int> _aliasIndices = [];
     protected IReadOnlyList<AliasSpeaker> AliasSpeakers = [];
     protected List<(FormKey FormKey, List<AliasSpeaker> Speakers)> NameMappedSpeakers = [];
 
-    public override void GenerateDialogue(IQuest quest, List<DialogueTopic> topics) {
-        var scene = GetCurrentScene(quest);
+    public override IDialogueProcessor ConfigureProcessor(DialogueProcessor dialogueProcessor) {
+        // Add scene response processor
+        var noteExtractorIndex = dialogueProcessor.ResponseProcessors.FindIndex(p => p is NoteExtractor);
+        dialogueProcessor.ResponseProcessors.Insert(noteExtractorIndex, new SceneResponseProcessor());
+
+        var processor = base.ConfigureProcessor(dialogueProcessor);
+        return new FuncDialogueProcessor(processor) {
+            ProcessTopic = (topic, baseAction) => {
+                // Convert parsed response format to topic infos
+                topic.ConvertResponsesToTopicInfos();
+                baseAction(topic);
+            },
+            ProcessTopics = (topics, baseAction) => {
+                var mergedLines = MergeSpeakerLines(topics);
+                topics.Clear();
+                topics.AddRange(mergedLines);
+
+                baseAction(topics);
+            },
+        };
+    }
+
+    public override void GenerateDialogue(List<DialogueTopic> topics) {
+        var scene = GetCurrentScene();
         if (scene is null) return;
 
         //Add lines
-        AddLines(quest, scene, topics.ToList());
+        AddLines(scene, topics.ToList());
     }
 
-    protected abstract Scene? GetCurrentScene(IQuest quest);
+    protected abstract Scene? GetCurrentScene();
 
     private void AddLines(
-        IQuest quest,
         Scene scene,
         List<DialogueTopic> topics) {
         uint currentPhaseIndex = 0;
@@ -39,12 +60,12 @@ public abstract partial class SceneFactory(IDialogueContext context) : DialogueF
 
             var sceneTopic = new DialogTopic(Context.GetNextFormKey(), Context.Release) {
                 Priority = 2500,
-                Quest = new FormLinkNullable<IQuestGetter>(quest),
+                Quest = new FormLinkNullable<IQuestGetter>(Context.Quest),
                 Category = DialogTopic.CategoryEnum.Scene,
                 Subtype = DialogTopic.SubtypeEnum.Scene,
                 SubtypeName = "SCEN",
                 Responses = topic.TopicInfos
-                    .Select(info => GetResponses(quest, info))
+                    .Select(info => GetResponses(Context.Quest, info))
                     .ToExtendedList(),
             };
             Context.AddDialogTopic(sceneTopic);
@@ -147,78 +168,134 @@ public abstract partial class SceneFactory(IDialogueContext context) : DialogueF
     }
 
     public override void PreProcess(List<DialogueTopic> topics) {
-        AliasSpeakers = GetSpeakers(topics);
+        // Set up speaker
+        AliasSpeakers = GetAliasSpeakers(topics);
 
         NameMappedSpeakers = AliasSpeakers
             .GroupBy(x => x.FormKey)
             .Select(x => (x.Key, x.ToList()))
             .ToList();
 
-        //break up topics for every new speaker
-        var separatedTopics = TransformLines(topics);
+        // Set speaker from prompt
+        foreach (var topic in topics) {
+            SetSpeakerFromPrompt(topic);
+        }
 
-        topics.Clear();
-        topics.AddRange(separatedTopics);
+        TransformLines(topics);
 
         PreProcessSpeakers();
     }
 
     public abstract void PreProcessSpeakers();
 
-    protected virtual IReadOnlyList<AliasSpeaker> GetSpeakers(List<DialogueTopic> topics) {
+    private IReadOnlyList<AliasSpeaker> GetAliasSpeakers(List<DialogueTopic> topics) {
         //Get speaker strings
         var speakerNames = topics
             .SelectMany(topic => topic.TopicInfos)
-            .SelectMany(topicInfo => topicInfo.Responses, (_, response) => SceneLineRegex().Match(response.Response))
-            .Where(match => match.Success)
-            .Select(match => match.Groups[1].Value)
+            .Select(topicInfo => topicInfo.Prompt)
             .ToHashSet();
 
         //Map speaker form keys
         return Context.GetAliasSpeakers(speakerNames);
     }
 
-    protected virtual List<DialogueTopic> TransformLines(List<DialogueTopic> topics) {
+    protected virtual void TransformLines(List<DialogueTopic> topics) {
+        FlattenTopicLinks(topics);
+    }
+
+    private static void FlattenTopicLinks(List<DialogueTopic> topics) {
+        var counter = 0;
+        while (counter < topics.Count) {
+            var topic = topics[counter];
+
+            // Move links to the main topic
+            foreach (var link in topic.EnumerateLinks(false)) {
+                topics.Insert(counter + 1, link);
+                counter++;
+            }
+
+            // Remove links
+            foreach (var topicInfo in topic.TopicInfos) {
+                topicInfo.Links.Clear();
+            }
+
+            counter++;
+        }
+    }
+
+    private void SetSpeakerFromPrompt(DialogueTopic topic) {
+        foreach (var topicInfo in topic.TopicInfos) {
+            var speaker = GetSpeaker(topicInfo.Prompt);
+            topicInfo.Speaker = speaker;
+            topicInfo.Prompt = string.Empty;
+
+            // Set all links to the same speaker
+            foreach (var link in topicInfo.Links.EnumerateLinks(true)) {
+                foreach (var info in link.TopicInfos) {
+                    info.Speaker = speaker;
+                    info.Prompt = string.Empty;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Merges lines that have the same speaker
+    /// </summary>
+    /// <param name="topics">Topics to merge</param>
+    /// <returns>Merged topics</returns>
+    /// <exception cref="InvalidOperationException">Only one response per topic is allowed</exception>
+    private List<DialogueTopic> MergeSpeakerLines(List<DialogueTopic> topics) {
         var separatedTopics = new List<DialogueTopic>();
-        var currentSpeaker = string.Empty;
-        var currentInfos = new List<DialogueTopicInfo>();
+        string? currentSpeaker = null;
+        var currentLines = new List<DialogueResponse>();
 
         foreach (var topic in topics) {
-            foreach (var info in topic.TopicInfos) {
-                if (info.Responses.Count != 1) throw new InvalidOperationException("Only one response per topic is allowed");
-                
-                var response = info.Responses[0];
-                var match = SceneLineRegex().Match(response.Response);
-                if (!match.Success) continue;
+            foreach (var topicInfo in topic.TopicInfos) {
+                if (topicInfo.Responses.Count != 1)
+                    throw new InvalidOperationException("Only one response per topic is allowed");
 
-                var speaker = match.Groups[1].Value;
-                if (currentSpeaker != speaker || (currentInfos.Count > 0 && currentInfos[^1].SharedInfo is not null)) {
+                // Find speaker name in start note and set prompt to it
+                var response = topicInfo.Responses[0];
+                var note = response.StartNotes.Find(note =>
+                    SceneResponseProcessor.GetSpeaker(note) is not null);
+                if (note is null) continue;
+
+                response.StartNotes.Remove(note);
+                var speaker = SceneResponseProcessor.GetSpeaker(note)!;
+                topicInfo.Prompt = speaker;
+                currentSpeaker ??= speaker;
+
+                // If the speaker updated or the last info is shared, add the current topic
+                if (currentSpeaker != speaker) {
                     AddCurrentTopic();
                     currentSpeaker = speaker;
                 }
 
-                info.Responses[0].Response = match.Groups[2].Value;
-                info.Speaker = GetSpeaker(currentSpeaker);
-                currentInfos.Add(info);
+                currentLines.Add(response);
             }
 
             AddCurrentTopic();
-            currentSpeaker = string.Empty;
+            currentSpeaker = null;
         }
 
-        if (currentInfos.Count != 0) AddCurrentTopic();
         return separatedTopics;
 
         void AddCurrentTopic() {
-            if (currentInfos.Count != 0) {
+            if (currentLines.Count != 0 && currentSpeaker is not null) {
                 var dialogueTopic = new DialogueTopic {
-                    TopicInfos = currentInfos.ToList(),
+                    TopicInfos = [
+                        new DialogueTopicInfo {
+                            Prompt = currentSpeaker,
+                            Responses = currentLines.ToList()
+                        }
+                    ],
                 };
 
                 separatedTopics.Add(dialogueTopic);
             }
 
-            currentInfos.Clear();
+            currentLines.Clear();
         }
     }
 
@@ -234,7 +311,4 @@ public abstract partial class SceneFactory(IDialogueContext context) : DialogueF
 
         throw new InvalidOperationException($"Didn't find speaker {name}");
     }
-
-    [GeneratedRegex(@"([^:]*):? *([\S\s]+)")]
-    private static partial Regex SceneLineRegex();
 }

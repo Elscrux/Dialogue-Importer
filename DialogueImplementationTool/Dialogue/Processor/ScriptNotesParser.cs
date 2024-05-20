@@ -1,32 +1,30 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text.RegularExpressions;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Parser;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
-// todo this doesn't work when the script note is split across multiple formatted text parts (like "[" "script note" "]") - implement this in another step to work with this properly
-public sealed partial class ScriptNotesParser : IDialogueResponsePreProcessor {
+public sealed class ScriptNotesParser : IDialogueResponseProcessor {
     private static readonly Color OrangeColor = Color.Orange;
     private static readonly Color SimilarThreshold = Color.FromArgb(64, 64, 16);
 
-    public DialogueResponse Process(DialogueResponse response, FormattedText text) {
-        if (AreColorsSimilar(text.Color, OrangeColor, SimilarThreshold)) {
-            var newScriptNotePart =
-                string.Join(' ', InvalidBracesRegex().Matches(text.Text).Select(m => m.Groups[1].Value));
-            return new DialogueResponse { ScriptNote = response.ScriptNote + newScriptNotePart };
-        }
+    public void Process(DialogueResponse response, IReadOnlyList<FormattedText> textSnippets) {
+        var scriptNotes = response.Notes()
+            .Where(note => note.Colors.Any(color => AreColorsSimilar(color, OrangeColor, SimilarThreshold)))
+            .ToList();
 
-        return response;
+        response.ScriptNote = string.Join(' ', scriptNotes.Select(x => x.Text));
+
+        foreach (var scriptNote in scriptNotes) {
+            response.RemoveNote(scriptNote);
+        }
     }
 
-    private bool AreColorsSimilar(Color color1, Color color2, Color thresholdColor) {
+    private static bool AreColorsSimilar(Color color1, Color color2, Color thresholdColor) {
         return Math.Abs(color1.R - color2.R) < thresholdColor.R
                && Math.Abs(color1.G - color2.G) < thresholdColor.G
                && Math.Abs(color1.B - color2.B) < thresholdColor.B;
     }
-
-    [GeneratedRegex(@"\[([^\[\]]*)\]")]
-    private static partial Regex InvalidBracesRegex();
 }

@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq.Expressions;
 using System.Windows.Input;
 using DialogueImplementationTool.Dialogue;
 using DialogueImplementationTool.Dialogue.Processor;
@@ -25,7 +26,6 @@ public sealed class DialogueVM : ViewModel {
         OutputPathProvider outputPathProvider) {
         SpeakerFavoritesSelection = speakerFavoritesSelection;
         _documentParser = documentParser;
-        var dialogueImplementer = new DialogueImplementer(context);
         LinkCache = context.LinkCache;
 
         Title = Path.GetFileName(documentParser.FilePath);
@@ -46,149 +46,125 @@ public sealed class DialogueVM : ViewModel {
         });
 
         SetSpeaker = ReactiveCommand.Create((FormKey formKey) => SpeakerFormKey = formKey);
-        SelectIndex = ReactiveCommand.Create<string>(
-            indexStr => {
-                switch (int.Parse(indexStr)) {
-                    case 1:
-                        if (ValidSpeaker) GreetingSelected = !GreetingSelected;
-                        break;
-                    case 2:
-                        if (ValidSpeaker) FarewellSelected = !FarewellSelected;
-                        break;
-                    case 3:
-                        if (ValidSpeaker) IdleSelected = !IdleSelected;
-                        break;
-                    case 4:
-                        if (ValidSpeaker) DialogueSelected = !DialogueSelected;
-                        break;
-                    case 5:
-                        GenericSceneSelected = !GenericSceneSelected;
-                        break;
-                    case 6:
-                        QuestSceneSelected = !QuestSceneSelected;
-                        break;
+        SelectIndex = ReactiveCommand.Create<string>(indexStr => {
+            switch (int.Parse(indexStr)) {
+                case 1:
+                    if (ValidSpeaker) GreetingSelected = !GreetingSelected;
+                    break;
+                case 2:
+                    if (ValidSpeaker) FarewellSelected = !FarewellSelected;
+                    break;
+                case 3:
+                    if (ValidSpeaker) IdleSelected = !IdleSelected;
+                    break;
+                case 4:
+                    if (ValidSpeaker) DialogueSelected = !DialogueSelected;
+                    break;
+                case 5:
+                    GenericSceneSelected = !GenericSceneSelected;
+                    break;
+                case 6:
+                    QuestSceneSelected = !QuestSceneSelected;
+                    break;
+            }
+        });
+
+        Save = ReactiveCommand.Create(() => {
+            ImplementDialogue(context, dialogueProcessor);
+
+            var fileInfo = new FileInfo(Path.Combine(outputPathProvider.OutputPath, context.Mod.ModKey.FileName));
+
+            if (fileInfo.Directory is { Exists: false }) fileInfo.Directory?.Create();
+            context.Mod.WriteToBinaryParallel(fileInfo.FullName);
+
+            SavedSession = true;
+        });
+
+        BacktrackMany = ReactiveCommand.Create(() => {
+            _documentParser.BacktrackMany();
+            RefreshPreview(false);
+        });
+
+        Previous = ReactiveCommand.Create(() => {
+            _documentParser.Previous();
+            RefreshPreview(false);
+        });
+
+        Next = ReactiveCommand.Create(() => {
+            _documentParser.Next();
+            RefreshPreview(true);
+        });
+
+        SkipMany = ReactiveCommand.Create(() => {
+            _documentParser.SkipMany();
+            RefreshPreview(true);
+        });
+
+        this.WhenAnyValue(v => v._documentParser.Index)
+            .Subscribe(_ => {
+                IsNotFirstIndex = Index > 0;
+                IsNotLastIndex = Index < _documentParser.LastIndex;
+
+                if (DialogueTypeList.Count > Index) {
+                    if (DialogueTypeList[Index].Speaker == FormKey.Null) {
+                        // Keep current speaker for fresh dialogue and set in list
+                        DialogueTypeList[Index].Speaker = SpeakerFormKey;
+                        DialogueTypeList[Index].UseGetIsAliasRef = UseGetIsAliasRef;
+                    } else {
+                        // Load speaker from list
+                        SpeakerFormKey = DialogueTypeList[Index].Speaker;
+                        UseGetIsAliasRef = DialogueTypeList[Index].UseGetIsAliasRef;
+                    }
+
+                    GreetingSelected = DialogueTypeList[Index].Selection[DialogueType.Greeting];
+                    FarewellSelected = DialogueTypeList[Index].Selection[DialogueType.Farewell];
+                    IdleSelected = DialogueTypeList[Index].Selection[DialogueType.Idle];
+                    DialogueSelected = DialogueTypeList[Index].Selection[DialogueType.Dialogue];
+                    GenericSceneSelected = DialogueTypeList[Index].Selection[DialogueType.GenericScene];
+                    QuestSceneSelected = DialogueTypeList[Index].Selection[DialogueType.QuestScene];
                 }
             });
 
-        Save = ReactiveCommand.Create(
-            () => {
-                var generatedDialogue = _documentParser.GetDialogue(context, DialogueTypeList);
-                dialogueProcessor.Process(generatedDialogue);
-                dialogueImplementer.ImplementDialogue(generatedDialogue);
-
-                var fileInfo = new FileInfo(Path.Combine(outputPathProvider.OutputPath, context.Mod.ModKey.FileName));
-
-                if (fileInfo.Directory is { Exists: false }) fileInfo.Directory?.Create();
-                context.Mod.WriteToBinaryParallel(fileInfo.FullName);
-
-                SavedSession = true;
-            });
-
-        BacktrackMany = ReactiveCommand.Create(
-            () => {
-                _documentParser.BacktrackMany();
-                RefreshPreview(false);
-            });
-
-        Previous = ReactiveCommand.Create(
-            () => {
-                _documentParser.Previous();
-                RefreshPreview(false);
-            });
-
-        Next = ReactiveCommand.Create(
-            () => {
-                _documentParser.Next();
-                RefreshPreview(true);
-            });
-
-        SkipMany = ReactiveCommand.Create(
-            () => {
-                _documentParser.SkipMany();
-                RefreshPreview(true);
-            });
-
-        this.WhenAnyValue(v => v._documentParser.Index)
-            .Subscribe(
-                _ => {
-                    IsNotFirstIndex = Index > 0;
-                    IsNotLastIndex = Index < _documentParser.LastIndex;
-
-                    if (DialogueTypeList.Count > Index) {
-                        if (DialogueTypeList[Index].Speaker == FormKey.Null) {
-                            // Keep current speaker for fresh dialogue and set in list
-                            DialogueTypeList[Index].Speaker = SpeakerFormKey;
-                            DialogueTypeList[Index].UseGetIsAliasRef = UseGetIsAliasRef;
-                        } else {
-                            // Load speaker from list
-                            SpeakerFormKey = DialogueTypeList[Index].Speaker;
-                            UseGetIsAliasRef = DialogueTypeList[Index].UseGetIsAliasRef;
-                        }
-
-                        GreetingSelected = DialogueTypeList[Index].Selection[DialogueType.Greeting];
-                        FarewellSelected = DialogueTypeList[Index].Selection[DialogueType.Farewell];
-                        IdleSelected = DialogueTypeList[Index].Selection[DialogueType.Idle];
-                        DialogueSelected = DialogueTypeList[Index].Selection[DialogueType.Dialogue];
-                        GenericSceneSelected = DialogueTypeList[Index].Selection[DialogueType.GenericScene];
-                        QuestSceneSelected = DialogueTypeList[Index].Selection[DialogueType.QuestScene];
-                    }
-                });
-
         this.WhenAnyValue(v => v.SpeakerFormKey)
-            .Subscribe(
-                _ => {
-                    ValidSpeaker = SpeakerFormKey != FormKey.Null;
-                    if (DialogueTypeList.Count > Index) DialogueTypeList[Index].Speaker = SpeakerFormKey;
-                    speakerFavoritesSelection.AddSpeaker(new NpcSpeaker(LinkCache, SpeakerFormKey));
-                });
-
-        this.WhenAnyValue(v => v.GreetingSelected)
-            .Subscribe(
-                _ => {
-                    if (DialogueTypeList.Count > Index)
-                        DialogueTypeList[Index].Selection[DialogueType.Greeting] = GreetingSelected;
-                });
-
-        this.WhenAnyValue(v => v.FarewellSelected)
-            .Subscribe(
-                _ => {
-                    if (DialogueTypeList.Count > Index)
-                        DialogueTypeList[Index].Selection[DialogueType.Farewell] = FarewellSelected;
-                });
-
-        this.WhenAnyValue(v => v.IdleSelected)
-            .Subscribe(
-                _ => {
-                    if (DialogueTypeList.Count > Index)
-                        DialogueTypeList[Index].Selection[DialogueType.Idle] = IdleSelected;
-                });
-
-        this.WhenAnyValue(v => v.DialogueSelected)
-            .Subscribe(
-                _ => {
-                    if (DialogueTypeList.Count > Index)
-                        DialogueTypeList[Index].Selection[DialogueType.Dialogue] = DialogueSelected;
-                });
-
-        this.WhenAnyValue(v => v.GenericSceneSelected)
-            .Subscribe(
-                _ => {
-                    if (DialogueTypeList.Count > Index)
-                        DialogueTypeList[Index].Selection[DialogueType.GenericScene] = GenericSceneSelected;
-                });
-
-        this.WhenAnyValue(v => v.QuestSceneSelected)
-            .Subscribe(
-                _ => {
-                    if (DialogueTypeList.Count > Index)
-                        DialogueTypeList[Index].Selection[DialogueType.QuestScene] = QuestSceneSelected;
-                });
+            .Subscribe(_ => {
+                ValidSpeaker = SpeakerFormKey != FormKey.Null;
+                if (DialogueTypeList.Count > Index) DialogueTypeList[Index].Speaker = SpeakerFormKey;
+                speakerFavoritesSelection.AddSpeaker(new NpcSpeaker(LinkCache, SpeakerFormKey));
+            });
 
         this.WhenAnyValue(v => v.UseGetIsAliasRef)
-            .Subscribe(
-                x => {
-                    if (DialogueTypeList.Count > Index) DialogueTypeList[Index].UseGetIsAliasRef = x;
+            .Subscribe(x => {
+                if (DialogueTypeList.Count > Index) DialogueTypeList[Index].UseGetIsAliasRef = x;
+            });
+
+        SetupSelectionSubscription(vm => vm.GreetingSelected, DialogueType.Greeting);
+        SetupSelectionSubscription(vm => vm.FarewellSelected, DialogueType.Farewell);
+        SetupSelectionSubscription(vm => vm.IdleSelected, DialogueType.Idle);
+        SetupSelectionSubscription(vm => vm.DialogueSelected, DialogueType.Dialogue);
+        SetupSelectionSubscription(vm => vm.GenericSceneSelected, DialogueType.GenericScene);
+        SetupSelectionSubscription(vm => vm.QuestSceneSelected, DialogueType.QuestScene);
+
+        void SetupSelectionSubscription(Expression<Func<DialogueVM, bool>> property, DialogueType type) {
+            this.WhenAnyValue(property)
+                .Subscribe(selected => {
+                    if (DialogueTypeList.Count > Index) {
+                        DialogueTypeList[Index].Selection[type] = selected;
+                    }
                 });
+        }
+    }
+
+    private void ImplementDialogue(IDialogueContext context, DialogueProcessor dialogueProcessor) {
+        var conversation =
+            BaseDialogueFactory.PrepareDialogue(context, dialogueProcessor, _documentParser, DialogueTypeList);
+
+        // Conversation wide processing
+        dialogueProcessor.Process(conversation);
+
+        // Actually create the dialogues
+        foreach (var dialogue in conversation) {
+            dialogue.Factory.Create(dialogue);
+        }
     }
 
     public ISpeakerFavoritesSelection SpeakerFavoritesSelection { get; }

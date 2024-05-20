@@ -25,7 +25,8 @@ public partial class App {
 
         builder.RegisterType<PythonEmotionClassifier>()
             .AsSelf()
-            .As<IEmotionClassifier>();
+            .As<IEmotionClassifier>()
+            .SingleInstance();
 
         builder.RegisterType<EmotionChecker>()
             .SingleInstance();
@@ -35,7 +36,9 @@ public partial class App {
 
         builder.RegisterType<DialogueVM>();
 
-        builder.RegisterType<DialogueProcessor>();
+        builder.RegisterType<DialogueProcessor>()
+            .AsSelf()
+            .As<IDialogueProcessor>();
 
         builder.RegisterType<OutputPathProvider>()
             .SingleInstance();

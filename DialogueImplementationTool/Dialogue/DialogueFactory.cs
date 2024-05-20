@@ -1,103 +1,100 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using DialogueImplementationTool.Dialogue.Model;
-using DialogueImplementationTool.Dialogue.Speaker;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace DialogueImplementationTool.Dialogue;
 
-public abstract class DialogueFactory(IDialogueContext context) {
-    protected readonly IDialogueContext Context = context;
+public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFactory(context) {
+    private readonly Dictionary<string, int> _npcIndices = new();
 
-    public abstract void PreProcess(List<DialogueTopic> topics);
-    public abstract void GenerateDialogue(IQuest quest, List<DialogueTopic> topics);
-    public abstract void PostProcess();
+    public override void PreProcess(List<DialogueTopic> topics) { }
 
-    protected static Condition GetFormKeyCondition(
-        Condition.Function function,
-        FormKey formKey,
-        float comparisonValue = 1,
-        bool or = false) {
-        var condition = new ConditionFloat {
-            CompareOperator = CompareOperator.EqualTo,
-            ComparisonValue = comparisonValue,
-            Data = new FunctionConditionData {
-                Function = function,
-                ParameterOneRecord = new FormLink<ISkyrimMajorRecordGetter>(formKey),
-            },
-        };
+    public override void GenerateDialogue(List<DialogueTopic> topics) {
+        foreach (var topic in topics) {
+            // Use the first speaker for the editor id
+            var speakerName = topic.TopicInfos[0].Speaker.Name;
+            if (!_npcIndices.TryAdd(speakerName, 1)) _npcIndices[speakerName] += 1;
 
-        if (or) condition.Flags = Condition.Flag.OR;
+            var branch = new DialogBranch(Context.GetNextFormKey(), Context.Release) {
+                EditorID = Context.Quest.EditorID + speakerName + _npcIndices[speakerName],
+                Quest = new FormLinkNullable<IQuestGetter>(Context.Quest.FormKey),
+            };
 
-        return condition;
-    }
+            branch.Flags |= topic.Blocking ? DialogBranch.Flag.Blocking : DialogBranch.Flag.TopLevel;
+            Context.AddDialogBranch(branch);
 
-    protected ExtendedList<DialogResponses> GetTopicInfos(IQuest quest, DialogueTopic topic) {
-        return topic.TopicInfos.Select(info => GetResponses(quest, info)).ToExtendedList();
-    }
+            var startingFormKey = Context.GetNextFormKey();
+            branch.StartingTopic = new FormLinkNullable<IDialogTopicGetter>(startingFormKey);
 
-    public DialogResponses GetResponses(IQuest quest, DialogueTopicInfo topicInfo, FormKey? previousDialogue = null) {
-        var previousDialog = new FormLinkNullable<IDialogResponsesGetter>(previousDialogue ?? FormKey.Null);
+            var createdTopics = new List<LinkedTopic>();
+            var topicQueue = new Queue<LinkedTopic>();
+            topicQueue.Enqueue(new LinkedTopic(startingFormKey, topic, string.Empty, true));
 
-        var flags = new DialogResponseFlags();
+            while (topicQueue.Any()) {
+                var rawTopic = topicQueue.Dequeue();
 
-        if (topicInfo.SayOnce) flags.Flags |= DialogResponses.Flag.SayOnce;
-        if (topicInfo.Goodbye) flags.Flags |= DialogResponses.Flag.Goodbye;
-        if (topicInfo.InvisibleContinue) flags.Flags |= DialogResponses.Flag.InvisibleContinue;
-        if (topicInfo.Random) flags.Flags |= DialogResponses.Flag.Random;
+                var playerText = rawTopic.Topic.GetPlayerText();
+                var responses = GetTopicInfos(Context.Quest, rawTopic.Topic);
+                var dontUsePrompt = !playerText.IsNullOrWhitespace();
+                if (dontUsePrompt) {
+                    foreach (var response in responses) {
+                        response.Prompt = null;
+                    }
+                }
 
-        if (topicInfo.SharedInfo is not null) {
-            var dialogResponses =
-                topicInfo.SharedInfo.GetResponseData(quest, Context, TopicInfos, GetSpeakerConditions);
-            dialogResponses.PreviousDialog = previousDialog;
-            dialogResponses.Flags = flags;
+                var dialogTopic = new DialogTopic(rawTopic.FormKey, Context.Release) {
+                    EditorID = $"{Context.Quest.EditorID}{speakerName}{_npcIndices[speakerName]}Topic{rawTopic.IndexString}",
+                    Priority = 2500,
+                    Name = dontUsePrompt ? playerText : null,
+                    Branch = new FormLinkNullable<IDialogBranchGetter>(branch),
+                    Quest = new FormLinkNullable<IQuestGetter>(Context.Quest.FormKey),
+                    Subtype = DialogTopic.SubtypeEnum.Custom,
+                    Category = DialogTopic.CategoryEnum.Topic,
+                    SubtypeName = "CUST",
+                    Responses = responses,
+                };
+                Context.AddDialogTopic(dialogTopic);
 
-            return dialogResponses;
+                // Add links
+                for (var topicInfoIndex = 0; topicInfoIndex < rawTopic.Topic.TopicInfos.Count; topicInfoIndex++) {
+                    var topicInfo = rawTopic.Topic.TopicInfos[topicInfoIndex];
+                    for (var linkIndex = 0; linkIndex < topicInfo.Links.Count; linkIndex++) {
+                        var linkedTopic = createdTopics.Find(t => t.Topic == topicInfo.Links[linkIndex]);
+                        if (linkedTopic is null) {
+                            var linkFormKey = Context.GetNextFormKey();
+                            var newLink = new LinkedTopic(linkFormKey,
+                                topicInfo.Links[linkIndex],
+                                GetIndex(linkIndex + 1, !rawTopic.IndexType),
+                                !rawTopic.IndexType);
+
+                            createdTopics.Add(newLink);
+                            topicQueue.Enqueue(newLink);
+
+                            responses[topicInfoIndex].LinkTo.Add(new FormLink<IDialogGetter>(linkFormKey));
+                        } else {
+                            responses[topicInfoIndex].LinkTo.Add(new FormLink<IDialogGetter>(linkedTopic.FormKey));
+                        }
+                    }
+
+                    string GetIndex(int index, bool type) {
+                        if (topicInfo.InvisibleContinue) {
+                            return rawTopic.IndexString + '_';
+                        }
+
+                        var nextChar = type
+                            ? (char) (48 + index)
+                            : (char) (64 + index);
+
+                        return rawTopic.IndexString.TrimEnd('_') + nextChar;
+                    }
+                }
+            }
         }
-
-        return new DialogResponses(Context.GetNextFormKey(), Context.Release) {
-            Responses = TopicInfos(topicInfo).ToExtendedList(),
-            Prompt = topicInfo.Prompt.IsNullOrWhitespace() ? null : topicInfo.Prompt,
-            Conditions = GetSpeakerConditions(topicInfo.Speaker),
-            FavorLevel = FavorLevel.None,
-            Flags = flags,
-            PreviousDialog = previousDialog,
-        };
-
-        static IEnumerable<DialogResponse> TopicInfos(DialogueTopicInfo info) {
-            return info.Responses.Select((line, i) => new DialogResponse {
-                Text = line.Response,
-                ScriptNotes = line.ScriptNote,
-                ResponseNumber = (byte) (i + 1), //Starts with 1
-                Flags = DialogResponse.Flag.UseEmotionAnimation,
-                Emotion = line.Emotion,
-                EmotionValue = line.EmotionValue,
-            });
-        }
     }
 
-    public ExtendedList<Condition> GetSpeakerConditions(ISpeaker speaker) {
-        var list = new ExtendedList<Condition>();
+    public override void PostProcess() { }
 
-        if (speaker is AliasSpeaker aliasSpeaker)
-            list.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 1,
-                Data = new FunctionConditionData {
-                    Function = Condition.Function.GetIsAliasRef,
-                    ParameterOneNumber = aliasSpeaker.AliasIndex,
-                },
-            });
-        else if (Context.LinkCache.TryResolve<INpcGetter>(speaker.FormKey, out var npc))
-            list.Add(GetFormKeyCondition(Condition.Function.GetIsID, npc.FormKey));
-        else if (Context.LinkCache.TryResolve<IFactionGetter>(speaker.FormKey, out var faction))
-            list.Add(GetFormKeyCondition(Condition.Function.GetInFaction, faction.FormKey));
-        else if (Context.LinkCache.TryResolve<IVoiceTypeGetter>(speaker.FormKey, out var voiceType))
-            list.Add(GetFormKeyCondition(Condition.Function.GetIsVoiceType, voiceType.FormKey));
-        else if (Context.LinkCache.TryResolve<IFormListGetter>(speaker.FormKey, out var formList))
-            list.Add(GetFormKeyCondition(Condition.Function.GetIsVoiceType, formList.FormKey));
-
-        return list;
-    }
+    private sealed record LinkedTopic(FormKey FormKey, DialogueTopic Topic, string IndexString, bool IndexType);
 }

@@ -3,10 +3,8 @@ using System.Linq;
 namespace DialogueImplementationTool.Dialogue.Model;
 
 public static class DialogueTopicExtensions {
-    public static IEnumerable<DialogueTopic> EnumerateLinks(
-        this IEnumerable<DialogueTopic> topics,
-        bool includeSelf = true) {
-        return topics.SelectMany(topic => topic.EnumerateLinks());
+    public static IEnumerable<DialogueTopic> EnumerateLinks(this IEnumerable<DialogueTopic> topics, bool includeSelf) {
+        return topics.SelectMany(topic => topic.EnumerateLinks(includeSelf));
     }
 
     /// <summary>
@@ -21,8 +19,7 @@ public static class DialogueTopicExtensions {
         var browsedLinks = new HashSet<DialogueTopic>();
         var allTopics = new List<DialogueTopic>();
 
-        // TODO TEST THIS
-        foreach (var topic in topicList.EnumerateLinks(false)) {
+        foreach (var topic in topicList.EnumerateLinks(true)) {
             var indexOf = allTopics.IndexOf(topic);
             allTopics.Insert(indexOf + 1, topic);
             if (!browsedLinks.Add(topic)) continue;

@@ -4,24 +4,24 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue;
 
-public sealed class Idle(IDialogueContext context) : OneLinerFactory(context) {
-    private static readonly PostProcessOptions PostProcessOptions = new(true);
+public sealed class FarewellFactory(IDialogueContext context) : OneLinerFactory(context) {
+    private static readonly PostProcessOptions PostProcessOptions = new(true, 2);
     private DialogTopic? _topic;
 
-    public override void GenerateDialogue(IQuest quest, List<DialogueTopic> topics) {
-        var editorId = $"{quest.EditorID}Idles";
+    public override void GenerateDialogue(List<DialogueTopic> topics) {
+        var editorId = $"{Context.Quest.EditorID}Goodbyes";
 
         _topic = Context.GetTopic(editorId) ?? new DialogTopic(Context.GetNextFormKey(), Context.Release) {
             EditorID = editorId,
             Name = editorId,
             Priority = 2500,
-            Quest = new FormLinkNullable<IQuestGetter>(quest.FormKey),
+            Quest = new FormLinkNullable<IQuestGetter>(Context.Quest.FormKey),
             Category = DialogTopic.CategoryEnum.Misc,
-            Subtype = DialogTopic.SubtypeEnum.Idle,
-            SubtypeName = "IDLE",
+            Subtype = DialogTopic.SubtypeEnum.Goodbye,
+            SubtypeName = "GBYE",
         };
 
-        GenerateDialogue(quest, topics, _topic);
+        GenerateDialogue(Context.Quest, topics, _topic);
     }
 
     public override void PostProcess() {

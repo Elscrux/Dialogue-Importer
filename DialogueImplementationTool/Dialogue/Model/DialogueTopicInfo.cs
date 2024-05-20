@@ -60,8 +60,7 @@ public sealed class DialogueTopicInfo {
         Links.Add(nextTopic);
     }
 
-    public DialogueTopicInfo SplitOffDialogue(
-        DialogueTopicInfo splitOffTopicInfo) {
+    public DialogueTopicInfo SplitOffDialogue(DialogueTopicInfo splitOffTopicInfo) {
         var startingResponse = splitOffTopicInfo.Responses[0];
         const string invisibleCont = "(invis cont)";
 
@@ -79,7 +78,7 @@ public sealed class DialogueTopicInfo {
         switch (indexOf) {
             case -1:
                 throw new InvalidOperationException(
-                    $"ERROR: Response {startingResponse.Response} is not part of {string.Join(" ", currentInfo.Responses)}");
+                    $"ERROR: Response {startingResponse.FullResponse} is not part of {string.Join(" ", currentInfo.Responses)}");
             case 0: {
                 // Split info starts the topic, make the current topic the split info
                 var nextRange = currentInfo.Responses.GetRange(

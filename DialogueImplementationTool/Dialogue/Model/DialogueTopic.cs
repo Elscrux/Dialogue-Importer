@@ -6,13 +6,13 @@ public sealed class DialogueTopic {
     public List<DialogueTopicInfo> TopicInfos { get; init; } = [];
     public bool Blocking { get; set; }
 
-    public IEnumerable<DialogueTopic> EnumerateLinks(bool includeSelf = true) {
+    public IEnumerable<DialogueTopic> EnumerateLinks(bool includeSelf) {
         if (includeSelf) yield return this;
 
         var returnedLinks = new HashSet<DialogueTopic>();
 
         var queue = new Queue<DialogueTopic>(TopicInfos.SelectMany(x => x.Links));
-        while (queue.Any()) {
+        while (queue.Count != 0) {
             var dialogueTopic = queue.Dequeue();
             if (!returnedLinks.Add(dialogueTopic)) continue;
 

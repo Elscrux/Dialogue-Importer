@@ -1,15 +1,27 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using DialogueImplementationTool.Dialogue.Model;
-using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Extension;
 using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Skyrim.Internals;
 namespace DialogueImplementationTool.Dialogue;
 
-public sealed class GenericScene(IDialogueContext context) : SceneFactory(context) {
-    protected override Scene? GetCurrentScene(IQuest quest) {
+public class GenericGenericScene3X3Factory(IDialogueContext context) : GenericScene3X3Factory(context) {
+    public override BaseDialogueFactory SpecifyType(List<DialogueTopic> topics) {
+        // 3x3 scenes have a prompt set on their topic infos
+        if (topics.Exists(t => t.TopicInfos.Exists(x => x.Prompt != string.Empty))) {
+            return new GenericScene3x3Factory(Context);
+        }
+
+        return this;
+    }
+
+    public override void PreProcessSpeakers() {
+        //Make sure there are only two speakers
+        if (NameMappedSpeakers.Count != 2) MessageBox.Show("Error, there can only be 2 NPCs");
+    }
+
+    protected override Scene? GetCurrentScene() {
         if (AliasSpeakers is not [{ } speaker1, { } speaker2]) return null;
 
         //Assign alias indices
@@ -20,7 +32,7 @@ public sealed class GenericScene(IDialogueContext context) : SceneFactory(contex
         var npc2 = Context.LinkCache.Resolve<INpcGetter>(speaker2.FormKey);
 
         //Add quest
-        var baseName = $"{quest.EditorID}Scene{npc1.GetName() + npc2.GetName()}";
+        var baseName = $"{Context.Quest.EditorID}Scene{npc1.GetName() + npc2.GetName()}";
         var questEditorId = Naming.GetFirstFreeIndex(
             i => baseName + i,
             name => !Context.LinkCache.TryResolve<IQuestGetter>(name, out _),
@@ -46,7 +58,7 @@ public sealed class GenericScene(IDialogueContext context) : SceneFactory(contex
             EditorID = questEditorId,
             Priority = 10,
             Type = Quest.TypeEnum.None,
-            Name = $"{quest.Name?.String} Scene {npc1.GetName()} {npc2.GetName()} {questEditorId[^1]}",
+            Name = $"{Context.Quest.Name?.String} Scene {npc1.GetName()} {npc2.GetName()} {questEditorId[^1]}",
             Event = RecordTypes.ADIA,
             Aliases = [alias1, alias2, alias3, alias4],
         };
@@ -59,43 +71,5 @@ public sealed class GenericScene(IDialogueContext context) : SceneFactory(contex
         Context.AddScene(scene);
 
         return scene;
-    }
-
-    protected override List<DialogueTopic> TransformLines(List<DialogueTopic> topics) {
-        // Use default implementation for simple dialogue
-        if (!Is3x3Scene(topics)) return base.TransformLines(topics);
-
-        // Use 3x3 dialogue implementation if there are any links
-        foreach (var topic in topics) {
-            topic.ConvertResponsesToTopicInfos();
-
-            var speakerName = topic.GetPlayerText();
-            var speaker = GetSpeaker(speakerName);
-
-            foreach (var topicInfo in topic.TopicInfos) {
-                topicInfo.Random = true;
-                topicInfo.Speaker = speaker;
-                topicInfo.Prompt = string.Empty;
-            }
-        }
-
-        return [..topics];
-    }
-
-    protected override IReadOnlyList<AliasSpeaker> GetSpeakers(List<DialogueTopic> topics) {
-        if (!Is3x3Scene(topics)) return base.GetSpeakers(topics);
-
-        var speakerNames = topics.SelectMany(topic => topic.TopicInfos)
-            .Select(x => x.Prompt)
-            .Distinct();
-
-        return Context.GetAliasSpeakers(speakerNames);
-    }
-
-    private static bool Is3x3Scene(List<DialogueTopic> topics) => topics[0].TopicInfos[0].Prompt != string.Empty;
-
-    public override void PreProcessSpeakers() {
-        //Make sure there are only two speakers
-        if (NameMappedSpeakers.Count != 2) MessageBox.Show("Error, there can only be 2 NPCs");
     }
 }

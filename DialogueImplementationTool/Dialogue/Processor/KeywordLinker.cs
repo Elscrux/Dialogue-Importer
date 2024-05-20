@@ -14,33 +14,31 @@ public sealed partial class KeywordLinker : IConversationProcessor {
     private const string OptionsAfterRegexPart = "(?:options after )";
     private const string KeywordRegexPart = "([A-Z]+)";
 
-    // [DONE] We should bring this back to Telwyne. She'll probably have some ideas on where these eels might be burrowed.
-    [GeneratedRegex($@"^\[{KeywordRegexPart}\]")]
-    private static partial Regex KeywordDestinationRegex();
+    // [DONE], [HERE]
+    [GeneratedRegex($"{KeywordRegexPart}")]
+    private static partial Regex SimpleKeywordRegex();
 
-    // I guess the effects of the bait must have thrown me off. [merge to DONE above]
-    [GeneratedRegex($@"\[{FillerRegexPart}{MergeRegexPart} to {KeywordRegexPart}{FillerRegexPart}\]$")]
-    private static partial Regex KeywordLinkRegex();
+    // [merge to DONE above]
+    [GeneratedRegex($"{FillerRegexPart}{MergeRegexPart} to {KeywordRegexPart}{FillerRegexPart}")]
+    private static partial Regex LinkSimpleRegex();
 
-    // Anyway, I need you to go fetch him before they try to drown him in the waves. Think you can manage that? [HERE]
-    [GeneratedRegex($@"\[{KeywordRegexPart}\]$")]
-    private static partial Regex OptionsDestinationRegex();
+    // [merge to options after HERE above]
+    [GeneratedRegex(
+        $"{FillerRegexPart}{MergeRegexPart} to {OptionsAfterRegexPart}?{KeywordRegexPart}{FillerRegexPart}")]
+    private static partial Regex LinkOptionsRegex();
 
-    // Decided you weren't so busy after all? [merge to options after HERE above]
-    [GeneratedRegex($@"\[{FillerRegexPart}{MergeRegexPart} to {OptionsAfterRegexPart}?{KeywordRegexPart}{FillerRegexPart}\]$")]
-    private static partial Regex OptionsLinkRegex();
-
-    public void Process(IList<GeneratedDialogue> dialogues) {
-        ProcessKeywordLinks(dialogues);
+    public void Process(Conversation conversation) {
+        ProcessKeywordLinks(conversation);
         // todo support links to the middle of dialogue (create shared infos and so on)
-        ProcessOptionLinks(dialogues);
+        ProcessOptionLinks(conversation);
     }
 
-    private static void ProcessOptionLinks(IList<GeneratedDialogue> dialogues) {
+    private static void ProcessOptionLinks(Conversation conversation) {
         var optionsDestinations =
-            GetKeywordTopicInfoDictionary(dialogues, info => OptionsDestinationRegex().Match(info.Responses[^1].Response));
-        var optionsLinks =
-            GetAllKeywordTopicInfo(dialogues, info => OptionsLinkRegex().Match(info.Responses[^1].Response));
+            GetKeywordTopicInfoDictionary(conversation,
+                info => GetKeyword(info.Responses[^1].EndsNotes, SimpleKeywordRegex()));
+        var optionsLinks = GetAllKeywordTopicInfo(conversation,
+            info => GetKeyword(info.Responses[^1].EndsNotes, LinkOptionsRegex()));
 
         foreach (var (keyword, _, linkTopicInfo) in optionsLinks) {
             if (linkTopicInfo.Links.Count > 0) {
@@ -53,23 +51,20 @@ public sealed partial class KeywordLinker : IConversationProcessor {
                 continue;
             }
 
-            destination.TopicInfo.Responses[^1].Response = OptionsDestinationRegex()
-                .Replace(destination.TopicInfo.Responses[^1].Response, string.Empty)
-                .Trim();
-
-            linkTopicInfo.Responses[^1].Response = OptionsLinkRegex()
-                .Replace(linkTopicInfo.Responses[^1].Response, string.Empty)
-                .Trim();
+            destination.TopicInfo.Responses[^1].RemoveNote(x => SimpleKeywordRegex().IsMatch(x));
+            linkTopicInfo.Responses[^1].RemoveNote(x => LinkOptionsRegex().IsMatch(x));
 
             linkTopicInfo.Links.AddRange(destination.TopicInfo.Links);
         }
     }
 
-    private static void ProcessKeywordLinks(IList<GeneratedDialogue> dialogues) {
+    private static void ProcessKeywordLinks(Conversation conversation) {
         var keywordDestination =
-            GetKeywordTopicInfoDictionary(dialogues, info => KeywordDestinationRegex().Match(info.Responses[0].Response));
+            GetKeywordTopicInfoDictionary(conversation,
+                info => GetKeyword(info.Responses[0].StartNotes, SimpleKeywordRegex()));
         var keywordLinks =
-            GetAllKeywordTopicInfo(dialogues, info => KeywordLinkRegex().Match(info.Responses[^1].Response));
+            GetAllKeywordTopicInfo(conversation,
+                info => GetKeyword(info.Responses[^1].EndsNotes, LinkSimpleRegex()));
 
         foreach (var (keyword, _, linkTopicInfo) in keywordLinks) {
             if (linkTopicInfo.Links.Count > 0) {
@@ -82,13 +77,8 @@ public sealed partial class KeywordLinker : IConversationProcessor {
                 continue;
             }
 
-            destination.TopicInfo.Responses[0].Response = KeywordDestinationRegex()
-                .Replace(destination.TopicInfo.Responses[0].Response, string.Empty)
-                .Trim();
-
-            linkTopicInfo.Responses[^1].Response = KeywordLinkRegex()
-                .Replace(linkTopicInfo.Responses[^1].Response, string.Empty)
-                .Trim();
+            destination.TopicInfo.Responses[0].RemoveNote(x => SimpleKeywordRegex().IsMatch(x));
+            linkTopicInfo.Responses[^1].RemoveNote(x => LinkSimpleRegex().IsMatch(x));
 
             linkTopicInfo.Links.Add(destination.Topic);
             linkTopicInfo.InvisibleContinue = true;
@@ -96,19 +86,18 @@ public sealed partial class KeywordLinker : IConversationProcessor {
     }
 
     private static Dictionary<string, KeywordLink> GetKeywordTopicInfoDictionary(
-        IList<GeneratedDialogue> dialogues,
-        Func<DialogueTopicInfo, Match> regex) {
+        Conversation conversation,
+        Func<DialogueTopicInfo, string?> getKeyword) {
         var keywordDictionary = new Dictionary<string, KeywordLink>();
 
-        foreach (var dialogue in dialogues) {
-            foreach (var topic in dialogue.Topics.SelectMany(x => x.EnumerateLinks())) {
+        foreach (var dialogue in conversation) {
+            foreach (var topic in dialogue.Topics.SelectMany(x => x.EnumerateLinks(true))) {
                 foreach (var info in topic.TopicInfos) {
                     if (info.Responses.Count == 0) continue;
 
-                    var match = regex(info);
-                    if (!match.Success) continue;
+                    var keyword = getKeyword(info);
+                    if (keyword is null) continue;
 
-                    var keyword = match.Groups[1].Value;
                     if (!keywordDictionary.TryAdd(keyword, (keyword, topic, info))) {
                         Console.WriteLine(
                             $"Destination keyword {keyword} already exists in dialogue {topic.TopicInfos[0].Prompt}");
@@ -121,24 +110,31 @@ public sealed partial class KeywordLinker : IConversationProcessor {
     }
 
     private static List<KeywordLink> GetAllKeywordTopicInfo(
-        IList<GeneratedDialogue> dialogues,
-        Func<DialogueTopicInfo, Match> regex) {
+        Conversation conversation,
+        Func<DialogueTopicInfo, string?> getKeyword) {
         var list = new List<KeywordLink>();
 
-        foreach (var dialogue in dialogues) {
-            foreach (var topic in dialogue.Topics.SelectMany(x => x.EnumerateLinks())) {
+        foreach (var dialogue in conversation) {
+            foreach (var topic in dialogue.Topics.SelectMany(x => x.EnumerateLinks(true))) {
                 foreach (var info in topic.TopicInfos) {
                     if (info.Responses.Count == 0) continue;
 
-                    var match = regex(info);
-                    if (!match.Success) continue;
+                    var keyword = getKeyword(info);
+                    if (keyword is null) continue;
 
-                    var keyword = match.Groups[1].Value;
                     list.Add((keyword, topic, info));
                 }
             }
         }
 
         return list;
+    }
+
+    private static string? GetKeyword(List<Note> notes, Regex regex) {
+        return notes
+            .Select(note => regex.Match(note.Text))
+            .Where(match => match.Success)
+            .Select(match => match.Groups[1].Value)
+            .FirstOrDefault();
     }
 }

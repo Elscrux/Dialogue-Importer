@@ -1,8 +1,6 @@
 ﻿using DialogueImplementationTool.Dialogue;
-using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Dialogue.Processor;
 using DialogueImplementationTool.Dialogue.Speaker;
-using DialogueImplementationTool.Parser;
 using DialogueImplementationTool.Services;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
@@ -44,18 +42,4 @@ public class TestConstants {
     public NpcSpeaker Speaker2 { get; }
     public NpcSpeaker Speaker3 { get; }
     public DialogueProcessor DialogueProcessor { get; } = new(new EmotionChecker(new NullEmotionClassifier()));
-
-    public void ProcessEverything(List<GeneratedDialogue> dialogue) {
-        foreach (var generatedDialogue in dialogue) {
-            foreach (var topic in generatedDialogue.Topics) {
-                foreach (var topicInfo in topic.TopicInfos) DialogueProcessor.PreProcess(topicInfo);
-
-                DialogueProcessor.Process(topic);
-
-                foreach (var topicInfo in topic.TopicInfos) DialogueProcessor.PostProcess(topicInfo);
-            }
-        }
-
-        DialogueProcessor.Process(dialogue);
-    }
 }

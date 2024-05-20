@@ -3,10 +3,8 @@ using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Parser;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
-public sealed class InvalidStringFixer : IDialogueResponseProcessor {
+public sealed class EmptyBracesRemover : IDialogueResponseProcessor {
     public void Process(DialogueResponse response, IReadOnlyList<FormattedText> textSnippets) {
-        foreach (var (invalid, fix) in InvalidString.InvalidStrings) {
-            response.Response = response.Response.Replace(invalid, fix);
-        }
+        response.RemoveNote(text => text.Trim() == string.Empty);
     }
 }

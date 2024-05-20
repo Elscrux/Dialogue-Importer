@@ -18,29 +18,32 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="Dialogue\Dialogue.cs">
-        <DependentUpon>DialogueFactory.cs</DependentUpon>
+      <Compile Update="Dialogue\DialogueFactory.cs">
+        <DependentUpon>BaseDialogueFactory.cs</DependentUpon>
       </Compile>
-      <Compile Update="Dialogue\Farewell.cs">
+      <Compile Update="Dialogue\FarewellFactory.cs">
         <DependentUpon>OneLinerFactory.cs</DependentUpon>
       </Compile>
-      <Compile Update="Dialogue\SceneGeneric.cs">
+      <Compile Update="Dialogue\GenericSceneFactory.cs">
         <DependentUpon>SceneFactory.cs</DependentUpon>
       </Compile>
-      <Compile Update="Dialogue\Greeting.cs">
+      <Compile Update="Dialogue\GenericScene3x3Factory.cs">
+        <DependentUpon>GenericSceneFactory.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\GreetingFactory.cs">
         <DependentUpon>OneLinerFactory.cs</DependentUpon>
       </Compile>
-      <Compile Update="Dialogue\Idle.cs">
+      <Compile Update="Dialogue\IdleFactory.cs">
         <DependentUpon>OneLinerFactory.cs</DependentUpon>
       </Compile>
-      <Compile Update="Dialogue\SceneQuest.cs">
+      <Compile Update="Dialogue\QuestSceneFactory.cs">
         <DependentUpon>SceneFactory.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\OneLinerFactory.cs">
-        <DependentUpon>DialogueFactory.cs</DependentUpon>
+        <DependentUpon>BaseDialogueFactory.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\SceneFactory.cs">
-        <DependentUpon>DialogueFactory.cs</DependentUpon>
+        <DependentUpon>BaseDialogueFactory.cs</DependentUpon>
       </Compile>
       <Compile Update="Parser\OpenDocumentTextParser.cs">
         <DependentUpon>DocumentParser.cs</DependentUpon>
@@ -78,26 +81,26 @@
       <Compile Update="Dialogue\Processor\GoodbyeChecker.cs">
         <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
-      <Compile Update="Dialogue\Processor\BracesRemover.cs">
-        <DependentUpon>IDialogueResponsePostProcessor.cs</DependentUpon>
+      <Compile Update="Dialogue\Processor\EmptyBracesRemover.cs">
+        <DependentUpon>IDialogueResponseProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\BlockingChecker.cs">
         <DependentUpon>IConversationProcessor.cs</DependentUpon>
       </Compile>
-      <Compile Update="Dialogue\Processor\BackToDialogueRemover.cs">
-        <DependentUpon>IDialogueResponsePostProcessor.cs</DependentUpon>
+      <Compile Update="Dialogue\Processor\EmptyBackToDialogueRemover.cs">
+        <DependentUpon>IDialogueResponseProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\BackToOptionsLinker.cs">
         <DependentUpon>IConversationProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\InvalidStringFixer.cs">
-        <DependentUpon>IDialogueResponsePreProcessor.cs</DependentUpon>
+        <DependentUpon>IDialogueResponseProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\SameResponseChecker.cs">
         <DependentUpon>IConversationProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\ScriptNotesParser.cs">
-        <DependentUpon>IDialogueResponsePreProcessor.cs</DependentUpon>
+        <DependentUpon>IDialogueResponseProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\SharedInfoConverter.cs">
         <DependentUpon>IConversationProcessor.cs</DependentUpon>
@@ -109,10 +112,19 @@
         <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\Trimmer.cs">
-        <DependentUpon>IDialogueResponsePostProcessor.cs</DependentUpon>
+        <DependentUpon>IDialogueResponseProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\KeywordLinker.cs">
         <DependentUpon>IConversationProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\NoteExtractor.cs">
+        <DependentUpon>IDialogueResponseProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\FuncDialogueProcessor.cs">
+        <DependentUpon>IDialogueProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\DialogueProcessor.cs">
+        <DependentUpon>IDialogueProcessor.cs</DependentUpon>
       </Compile>
     </ItemGroup>
 

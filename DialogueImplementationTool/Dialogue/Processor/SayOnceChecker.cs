@@ -6,17 +6,11 @@ public sealed partial class SayOnceChecker : IDialogueTopicInfoProcessor {
     public void Process(DialogueTopicInfo topicInfo) {
         if (topicInfo.Responses.Count == 0) return;
 
-        var response = topicInfo.Responses[0];
-        var regex = InitialRegex();
-
-        if (regex.Match(response.Response) is not { Success: true }) return;
-
-        topicInfo.SayOnce = true;
-        response.Response = regex
-            .Replace(response.Response, string.Empty)
-            .Trim();
+        if (topicInfo.Responses[0].StartNotes.RemoveAll(x => InitialRegex().IsMatch(x.Text)) > 0) {
+            topicInfo.SayOnce = true;
+        }
     }
 
-    [GeneratedRegex(@"\[(initial)( (greeting))?\]", RegexOptions.IgnoreCase, "en-DE")]
+    [GeneratedRegex("(initial)( (greeting))?", RegexOptions.IgnoreCase, "en-DE")]
     private static partial Regex InitialRegex();
 }

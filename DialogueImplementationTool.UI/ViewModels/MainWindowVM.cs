@@ -26,8 +26,8 @@ public enum LoadState {
 public sealed class MainWindowVM : ViewModel {
     private const string ModName = "DialogueOutput";
     private readonly Func<EmotionChecker, DialogueProcessor> _dialogueProcessorFactory;
-    private readonly Func<IDialogueContext, DialogueProcessor, IDocumentParser, DialogueVM> _dialogueVMFactory;
-    private readonly Dictionary<string, Func<string, DialogueProcessor, IDocumentParser>> _documentIterators;
+    private readonly Func<IDialogueContext, IDialogueProcessor, IDocumentParser, DialogueVM> _dialogueVMFactory;
+    private readonly Dictionary<string, Func<string, IDocumentParser>> _documentIterators;
     private readonly Func<string, PythonEmotionClassifier> _emotionClassifierFactory;
     private readonly SkyrimMod _mod;
     private readonly ISpeakerFavoritesSelection _speakerFavoritesSelection;
@@ -45,17 +45,17 @@ public sealed class MainWindowVM : ViewModel {
     public MainWindowVM(
         OutputPathProvider outputPathProvider,
         ISpeakerFavoritesSelection speakerFavoritesSelection,
-        Func<IDialogueContext, DialogueProcessor, IDocumentParser, DialogueVM> dialogueVMFactory,
+        Func<IDialogueContext, IDialogueProcessor, IDocumentParser, DialogueVM> dialogueVMFactory,
         Func<EmotionChecker, DialogueProcessor> dialogueProcessorFactory,
         Func<string, PythonEmotionClassifier> emotionClassifierFactory,
-        Func<string, DialogueProcessor, OpenDocumentTextParser> openDocumentTextIteratorFactory,
-        Func<string, DialogueProcessor, DocXDocumentParser> docXIteratorFactory) {
+        Func<string, OpenDocumentTextParser> openDocumentTextIteratorFactory,
+        Func<string, DocXDocumentParser> docXIteratorFactory) {
         OutputPathProvider = outputPathProvider;
         _speakerFavoritesSelection = speakerFavoritesSelection;
         _dialogueVMFactory = dialogueVMFactory;
         _dialogueProcessorFactory = dialogueProcessorFactory;
         _emotionClassifierFactory = emotionClassifierFactory;
-        _documentIterators = new Dictionary<string, Func<string, DialogueProcessor, IDocumentParser>> {
+        _documentIterators = new Dictionary<string, Func<string, IDocumentParser>> {
             { ".odt", openDocumentTextIteratorFactory },
             { ".docx", docXIteratorFactory },
         };
@@ -127,9 +127,9 @@ public sealed class MainWindowVM : ViewModel {
         var documentParserFactory = _documentIterators.GetValueOrDefault(extension);
         if (documentParserFactory is null) throw new InvalidOperationException($"No parser exists for {extension}");
 
-        var dialogueProcessor =
-            _dialogueProcessorFactory(
-                new EmotionChecker((IEmotionClassifier?) _emotionClassifier ?? new NullEmotionClassifier()));
+        var emotionClassifier = (IEmotionClassifier?) _emotionClassifier ?? new NullEmotionClassifier();
+        var emotionChecker = new EmotionChecker(emotionClassifier);
+        var dialogueProcessor = _dialogueProcessorFactory(emotionChecker);
         return _dialogueVMFactory(
             new SkyrimDialogueContext(
                 LinkCache,
@@ -137,6 +137,6 @@ public sealed class MainWindowVM : ViewModel {
                 LinkCache.ResolveContext<IQuest, IQuestGetter>(QuestFormKey).GetOrAddAsOverride(_mod),
                 new UISpeakerSelection(LinkCache, _speakerFavoritesSelection)),
             dialogueProcessor,
-            documentParserFactory(filePath, dialogueProcessor));
+            documentParserFactory(filePath));
     }
 }

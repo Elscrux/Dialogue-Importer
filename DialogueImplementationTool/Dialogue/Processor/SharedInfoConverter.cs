@@ -7,12 +7,12 @@ using Noggog;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed class SharedInfoConverter : IConversationProcessor {
-    public void Process(IList<GeneratedDialogue> dialogues) {
+    public void Process(Conversation conversation) {
         // Convert to shared line objects that store the speaker and text per line/response
         // and links to the shared line to be able to check which lines are reused multiple times
         var sharedLines = new HashSet<SharedLine>();
-        foreach (var generated in dialogues) {
-            foreach (var topic in generated.Topics.EnumerateLinks()) {
+        foreach (var generated in conversation) {
+            foreach (var topic in generated.Topics.EnumerateLinks(true)) {
                 foreach (var topicInfo in topic.TopicInfos) {
                     SharedLine? last = null;
                     SharedLineLink? lastLink = null;
@@ -136,6 +136,8 @@ public sealed class SharedInfoConverter : IConversationProcessor {
     private sealed record SharedLine : DialogueResponse {
         public SharedLine(DialogueResponse dialogueResponse, Speaker.ISpeaker speaker) {
             Response = dialogueResponse.Response;
+            StartNotes = dialogueResponse.StartNotes;
+            EndsNotes = dialogueResponse.EndsNotes;
             ScriptNote = dialogueResponse.ScriptNote;
             Speaker = speaker;
         }

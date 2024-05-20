@@ -17,8 +17,7 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
     private const int FirstIndentationLevel = 0;
     private readonly DocX _doc;
 
-    public DocXDocumentParser(string path, DialogueProcessor dialogueProcessor) {
-        DialogueProcessor = dialogueProcessor;
+    public DocXDocumentParser(string path) {
         FilePath = path;
 
         var tryLoading = true;
@@ -44,7 +43,6 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
         LastIndex = _doc.Lists.Count - 1;
     }
 
-    public DialogueProcessor DialogueProcessor { get; }
     public string FilePath { get; }
     [Reactive] public int Index { get; set; }
     public int LastIndex { get; }
@@ -58,12 +56,12 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
     }
 
     public string Preview(int index) {
-        return index < 0 || index >= _doc.Lists.Count ?
-            string.Empty :
-            _doc.Lists[index].Items.FirstOrDefault()?.Text ?? string.Empty;
+        return index < 0 || index >= _doc.Lists.Count
+            ? string.Empty
+            : _doc.Lists[index].Items.FirstOrDefault()?.Text ?? string.Empty;
     }
 
-    public List<DialogueTopic> ParseDialogue(int index) {
+    public List<DialogueTopic> ParseDialogue(IDialogueProcessor processor, int index) {
         var branches = new List<DialogueTopic>();
         var list = _doc.Lists[index];
 
@@ -75,8 +73,8 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
                 list.Items.Where(p => p.IndentLevel == FirstIndentationLevel)
                     .Select(
                         x => {
-                            var currentBranchInfo = AddTopicInfo(x);
-                            DialogueProcessor.PreProcess(currentBranchInfo);
+                            var currentBranchInfo = AddTopicInfo(processor, x);
+                            processor.PreProcess(currentBranchInfo);
                             return new DialogueTopic { TopicInfos = [currentBranchInfo] };
                         }));
         } else {
@@ -85,46 +83,47 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
             var currentBranch = new DialogueTopic { TopicInfos = [currentTopicInfo] };
             branches.Add(currentBranch);
 
-            AddLinksAndResponses(list.Items[0], currentTopicInfo);
-            DialogueProcessor.PreProcess(currentTopicInfo);
+            AddLinksAndResponses(processor, list.Items[0], currentTopicInfo);
+            processor.PreProcess(currentTopicInfo);
         }
 
         return branches;
     }
 
-    public List<DialogueTopic> ParseOneLiner(int index) {
+    public List<DialogueTopic> ParseOneLiner(IDialogueProcessor processor, int index) {
         var topicInfos = _doc.Lists[index]
             .Items
             .Where(p => p.IndentLevel == FirstIndentationLevel)
             .Select(
                 p => {
-                    var topic = new DialogueTopicInfo { Responses = { DialogueResponse.Build(GetFormattedText(p)) } };
-                    DialogueProcessor.PreProcess(topic);
-                    return topic;
+                    var topicInfo = new DialogueTopicInfo();
+                    topicInfo.Responses.Add(processor.BuildResponse(GetFormattedText(p)));
+                    processor.PreProcess(topicInfo);
+                    return topicInfo;
                 })
             .ToList();
 
         return [new DialogueTopic { TopicInfos = topicInfos }];
     }
 
-    private DialogueTopicInfo AddTopicInfo(Paragraph paragraph) {
+    private DialogueTopicInfo AddTopicInfo(IDialogueProcessor processor, Paragraph paragraph) {
         var topicInfo = new DialogueTopicInfo();
         var startingIndentation = paragraph.IndentLevel;
 
         topicInfo.Prompt = paragraph.Text;
 
         paragraph = paragraph.NextParagraph;
-        if (paragraph.IndentLevel == startingIndentation + 1) AddLinksAndResponses(paragraph, topicInfo);
+        if (paragraph.IndentLevel == startingIndentation + 1) AddLinksAndResponses(processor, paragraph, topicInfo);
 
         return topicInfo;
     }
 
-    private void AddLinksAndResponses(Paragraph paragraph, DialogueTopicInfo topicInfo) {
+    private void AddLinksAndResponses(IDialogueProcessor processor, Paragraph paragraph, DialogueTopicInfo topicInfo) {
         var startingIndentation = paragraph.IndentLevel;
 
         //Add further responses
         while (paragraph is not null && paragraph.IndentLevel == startingIndentation) {
-            topicInfo.Responses.Add(DialogueResponse.Build(GetFormattedText(paragraph)));
+            topicInfo.Responses.Add(processor.BuildResponse(GetFormattedText(paragraph)));
 
             paragraph = paragraph.NextParagraph;
             while (paragraph is { IndentLevel: null } && paragraph.Xml != paragraph.NextParagraph.Xml)
@@ -134,9 +133,9 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
         //Add links
         while (paragraph is not null && paragraph.IndentLevel > startingIndentation) {
             if (paragraph.IndentLevel == startingIndentation + 1) {
-                var nextTopicInfo = AddTopicInfo(paragraph);
+                var nextTopicInfo = AddTopicInfo(processor, paragraph);
                 topicInfo.Links.Add(new DialogueTopic { TopicInfos = [nextTopicInfo] });
-                DialogueProcessor.PreProcess(nextTopicInfo);
+                processor.PreProcess(nextTopicInfo);
             }
 
             paragraph = paragraph.NextParagraph;
@@ -147,7 +146,7 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
         return paragraph.MagicText.NotNull().All(magicText => magicText.formatting?.Bold is not (null or false));
     }
 
-    private IEnumerable<FormattedText> GetFormattedText(Paragraph paragraph) {
+    private List<FormattedText> GetFormattedText(Paragraph paragraph) {
         return paragraph.MagicText
             .NotNull()
             .Select(

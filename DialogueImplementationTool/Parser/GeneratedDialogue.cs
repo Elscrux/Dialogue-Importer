@@ -10,13 +10,16 @@ using ISpeaker = DialogueImplementationTool.Dialogue.Speaker.ISpeaker;
 namespace DialogueImplementationTool.Parser;
 
 public sealed class GeneratedDialogue {
+    public BaseDialogueFactory Factory { get; }
+    public List<DialogueTopic> Topics { get; }
+
     public GeneratedDialogue(
         IDialogueContext context,
-        DialogueType type,
+        BaseDialogueFactory factory,
         List<DialogueTopic> topics,
         FormKey speakerFormKey,
         bool useGetIsAliasRef = false) {
-        Type = type;
+        Factory = factory;
         Topics = topics;
 
         ISpeaker speaker;
@@ -28,15 +31,12 @@ public sealed class GeneratedDialogue {
         }
 
         //Set speaker for all linked topics
-        foreach (var topic in topics.EnumerateLinks()) {
+        foreach (var topic in topics.EnumerateLinks(true)) {
             foreach (var topicInfo in topic.TopicInfos) {
                 topicInfo.Speaker = speaker;
             }
         }
     }
-
-    public DialogueType Type { get; }
-    public List<DialogueTopic> Topics { get; }
 }
 
 public sealed class DialogueSelection {

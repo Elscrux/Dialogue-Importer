@@ -17,9 +17,8 @@ namespace DialogueImplementationTool.Parser;
 public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
     private readonly TextDocument _doc = new();
 
-    public OpenDocumentTextParser(string filePath, DialogueProcessor dialogueProcessor) {
+    public OpenDocumentTextParser(string filePath) {
         FilePath = filePath;
-        DialogueProcessor = dialogueProcessor;
         var tryLoading = true;
         while (tryLoading)
             try {
@@ -35,7 +34,7 @@ public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
                     case MessageBoxResult.OK:
                     case MessageBoxResult.Yes:
                         break;
-                    default: throw new ArgumentOutOfRangeException();
+                    default: throw new InvalidOperationException();
                 }
             }
 
@@ -51,7 +50,6 @@ public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
     }
 
     public string FilePath { get; }
-    public DialogueProcessor DialogueProcessor { get; }
     [Reactive] public int Index { get; set; }
     public int LastIndex { get; }
 
@@ -107,7 +105,7 @@ public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
         return string.Empty;
     }
 
-    public List<DialogueTopic> ParseDialogue(int index) {
+    public List<DialogueTopic> ParseDialogue(IDialogueProcessor processor, int index) {
         if (_doc.Content[index] is not List list) return [];
 
         var branches = new List<DialogueTopic>();
@@ -132,8 +130,8 @@ public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
                 if (branch is not ListItem branchItem) continue;
 
                 //Player dialogue - every entry is a new branch
-                var currentBranch = AddTopicInfo(branchItem);
-                DialogueProcessor.PreProcess(currentBranch);
+                var currentBranch = AddTopicInfo(processor, branchItem);
+                processor.PreProcess(currentBranch);
                 branches.Add(new DialogueTopic { TopicInfos = [currentBranch] });
             }
         } else {
@@ -141,14 +139,14 @@ public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
             var currentBranch = new DialogueTopicInfo();
             branches.Add(new DialogueTopic { TopicInfos = [currentBranch] });
 
-            AddLinksAndResponses(list, currentBranch);
-            DialogueProcessor.PreProcess(currentBranch);
+            AddLinksAndResponses(processor, list, currentBranch);
+            processor.PreProcess(currentBranch);
         }
 
         return branches;
     }
 
-    public List<DialogueTopic> ParseOneLiner(int index) {
+    public List<DialogueTopic> ParseOneLiner(IDialogueProcessor processor, int index) {
         if (_doc.Content[index] is not List list) return [];
 
         var topics = new List<DialogueTopicInfo>();
@@ -159,10 +157,10 @@ public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
                 switch (itemContent) {
                     case Paragraph paragraph:
                         //Set player text
-                        var topic = new DialogueTopicInfo
-                            { Responses = { DialogueResponse.Build(GetFormattedText(paragraph)) } };
-                        DialogueProcessor.PreProcess(topic);
-                        topics.Add(topic);
+                        var topicInfo = new DialogueTopicInfo();
+                        topicInfo.Responses.Add(processor.BuildResponse(GetFormattedText(paragraph)));
+                        processor.PreProcess(topicInfo);
+                        topics.Add(topicInfo);
                         break;
                     default:
                         Console.WriteLine($"Warning: Didn't recognize {listContent.GetType()} as response type");
@@ -187,8 +185,6 @@ public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
             var listAdded = ListAdded();
 
             if (!listAdded) startingIndex++;
-
-            continue;
 
             bool ListAdded() {
                 var added = false;
@@ -225,7 +221,7 @@ public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
         }
     }
 
-    private DialogueTopicInfo AddTopicInfo(IContentContainer listItem) {
+    private DialogueTopicInfo AddTopicInfo(IDialogueProcessor processor, IContentContainer listItem) {
         var topic = new DialogueTopicInfo();
 
         foreach (IContent itemContent in listItem.Content) {
@@ -237,7 +233,7 @@ public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
                     break;
                 case List linksAndResponsesList:
                     //Add links and responses
-                    AddLinksAndResponses(linksAndResponsesList, topic);
+                    AddLinksAndResponses(processor, linksAndResponsesList, topic);
 
                     break;
                 default:
@@ -250,7 +246,10 @@ public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
         return topic;
     }
 
-    private void AddLinksAndResponses(IContentContainer list, DialogueTopicInfo topicInfo) {
+    private void AddLinksAndResponses(
+        IDialogueProcessor processor,
+        IContentContainer list,
+        DialogueTopicInfo topicInfo) {
         foreach (IContent listContent in list.Content) {
             if (listContent is not ListItem listItem) continue;
 
@@ -258,17 +257,17 @@ public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
                 switch (topicContent) {
                     case Paragraph paragraph:
                         //Add responses
-                        topicInfo.Responses.Add(DialogueResponse.Build(GetFormattedText(paragraph)));
+                        topicInfo.Responses.Add(processor.BuildResponse(GetFormattedText(paragraph)));
                         break;
                     case List linkList:
                         //Add links
                         foreach (IContent linkContent in linkList.Content) {
                             if (linkContent is not ListItem linkItem) continue;
 
-                            var nextTopicInfo = AddTopicInfo(linkItem);
+                            var nextTopicInfo = AddTopicInfo(processor, linkItem);
                             var nextTopic = new DialogueTopic { TopicInfos = [nextTopicInfo] };
                             topicInfo.Links.Add(nextTopic);
-                            DialogueProcessor.PreProcess(nextTopicInfo);
+                            processor.PreProcess(nextTopicInfo);
                         }
 
                         break;
