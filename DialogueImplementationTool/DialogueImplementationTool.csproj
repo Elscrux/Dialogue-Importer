@@ -69,19 +69,19 @@
         <DependentUpon>ISpeakerSelection.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\TopicInfoInvalidStringFixer.cs">
-        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+        <DependentUpon>PlayerIDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\RandomChecker.cs">
         <DependentUpon>IDialogueTopicProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\TopicInfoTrimmer.cs">
-        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+        <DependentUpon>PlayerIDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\EmotionChecker.cs">
-        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+        <DependentUpon>PlayerIDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\GoodbyeChecker.cs">
-        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+        <DependentUpon>PlayerIDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\EmptyBracesRemover.cs">
         <DependentUpon>IDialogueResponseProcessor.cs</DependentUpon>
@@ -111,7 +111,7 @@
         <DependentUpon>IDialogueTopicProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\SayOnceChecker.cs">
-        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+        <DependentUpon>PlayerIDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\Trimmer.cs">
         <DependentUpon>IDialogueResponseProcessor.cs</DependentUpon>

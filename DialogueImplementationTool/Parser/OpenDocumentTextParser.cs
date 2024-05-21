@@ -131,7 +131,7 @@ public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
 
                 //Player dialogue - every entry is a new branch
                 var currentBranch = AddTopicInfo(processor, branchItem);
-                processor.PreProcess(currentBranch);
+                processor.Process(currentBranch);
                 branches.Add(new DialogueTopic { TopicInfos = [currentBranch] });
             }
         } else {
@@ -140,7 +140,7 @@ public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
             branches.Add(new DialogueTopic { TopicInfos = [currentBranch] });
 
             AddLinksAndResponses(processor, list, currentBranch);
-            processor.PreProcess(currentBranch);
+            processor.Process(currentBranch);
         }
 
         return branches;
@@ -159,7 +159,7 @@ public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
                         //Set player text
                         var topicInfo = new DialogueTopicInfo();
                         topicInfo.Responses.Add(processor.BuildResponse(GetFormattedText(paragraph)));
-                        processor.PreProcess(topicInfo);
+                        processor.Process(topicInfo);
                         topics.Add(topicInfo);
                         break;
                     default:
@@ -267,7 +267,7 @@ public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
                             var nextTopicInfo = AddTopicInfo(processor, linkItem);
                             var nextTopic = new DialogueTopic { TopicInfos = [nextTopicInfo] };
                             topicInfo.Links.Add(nextTopic);
-                            processor.PreProcess(nextTopicInfo);
+                            processor.Process(nextTopicInfo);
                         }
 
                         break;

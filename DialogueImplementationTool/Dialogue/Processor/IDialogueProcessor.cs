@@ -16,9 +16,8 @@ public interface IDialogueProcessor {
         return dialogueResponse;
     }
 
-    void PreProcess(DialogueTopicInfo topicInfo);
-    void PostProcess(DialogueTopicInfo topicInfo);
     void Process(DialogueResponse response, IReadOnlyList<FormattedText> textSnippets);
+    void Process(DialogueTopicInfo topicInfo);
     void Process(DialogueTopic topic);
     void Process(List<DialogueTopic> topics);
     void Process(Conversation conversation);

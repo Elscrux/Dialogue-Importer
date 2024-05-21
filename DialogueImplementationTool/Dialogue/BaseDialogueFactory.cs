@@ -49,11 +49,11 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
 
             // Process topic and topic infos
             foreach (var topic in topics.EnumerateLinks(true)) {
-                factorySpecificProcessor.Process(topic);
-
                 foreach (var topicInfo in topic.TopicInfos) {
-                    factorySpecificProcessor.PostProcess(topicInfo);
+                    factorySpecificProcessor.Process(topicInfo);
                 }
+
+                factorySpecificProcessor.Process(topic);
             }
 
             factorySpecificProcessor.Process(topics);

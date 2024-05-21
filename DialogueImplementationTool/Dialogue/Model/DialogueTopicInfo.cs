@@ -19,6 +19,8 @@ public sealed class DialogueTopicInfo {
     public bool Random { get; set; }
     public List<Condition> ExtraConditions { get; } = [];
 
+    public IEnumerable<Note> AllNotes() => Responses.SelectMany(r => r.Notes());
+
     public DialogueTopicInfo CopyWith(IEnumerable<DialogueResponse> newResponses) {
         return new DialogueTopicInfo {
             SharedInfo = SharedInfo,

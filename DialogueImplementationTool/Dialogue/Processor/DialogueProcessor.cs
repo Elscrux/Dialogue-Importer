@@ -13,15 +13,12 @@ public class DialogueProcessor(EmotionChecker emotionChecker) : IDialogueProcess
         new Trimmer(),
     ];
 
-    public List<IDialogueTopicInfoProcessor> TopicInfoPostProcessors { get; } = [
-        emotionChecker,
-    ];
-
-    public List<IDialogueTopicInfoProcessor> TopicInfoPreProcessors { get; } = [
+    public List<IDialogueTopicInfoProcessor> TopicInfoProcessors { get; } = [
         new SayOnceChecker(),
         new GoodbyeChecker(),
         new TopicInfoTrimmer(),
         new TopicInfoInvalidStringFixer(),
+        emotionChecker,
     ];
 
     public List<IDialogueTopicProcessor> TopicProcessors { get; } = [
@@ -39,21 +36,15 @@ public class DialogueProcessor(EmotionChecker emotionChecker) : IDialogueProcess
         new BlockingChecker(),
     ];
 
-    public virtual void PreProcess(DialogueTopicInfo topicInfo) {
-        foreach (var processor in TopicInfoPreProcessors) {
-            processor.Process(topicInfo);
-        }
-    }
-
-    public virtual void PostProcess(DialogueTopicInfo topicInfo) {
-        foreach (var processor in TopicInfoPostProcessors) {
-            processor.Process(topicInfo);
-        }
-    }
-
     public virtual void Process(DialogueResponse response, IReadOnlyList<FormattedText> textSnippets) {
         foreach (var processor in ResponseProcessors) {
             processor.Process(response, textSnippets);
+        }
+    }
+
+    public virtual void Process(DialogueTopicInfo topicInfo) {
+        foreach (var processor in TopicInfoProcessors) {
+            processor.Process(topicInfo);
         }
     }
 

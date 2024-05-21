@@ -74,7 +74,7 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
                     .Select(
                         x => {
                             var currentBranchInfo = AddTopicInfo(processor, x);
-                            processor.PreProcess(currentBranchInfo);
+                            processor.Process(currentBranchInfo);
                             return new DialogueTopic { TopicInfos = [currentBranchInfo] };
                         }));
         } else {
@@ -84,7 +84,7 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
             branches.Add(currentBranch);
 
             AddLinksAndResponses(processor, list.Items[0], currentTopicInfo);
-            processor.PreProcess(currentTopicInfo);
+            processor.Process(currentTopicInfo);
         }
 
         return branches;
@@ -98,7 +98,7 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
                 p => {
                     var topicInfo = new DialogueTopicInfo();
                     topicInfo.Responses.Add(processor.BuildResponse(GetFormattedText(p)));
-                    processor.PreProcess(topicInfo);
+                    processor.Process(topicInfo);
                     return topicInfo;
                 })
             .ToList();
@@ -135,7 +135,7 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
             if (paragraph.IndentLevel == startingIndentation + 1) {
                 var nextTopicInfo = AddTopicInfo(processor, paragraph);
                 topicInfo.Links.Add(new DialogueTopic { TopicInfos = [nextTopicInfo] });
-                processor.PreProcess(nextTopicInfo);
+                processor.Process(nextTopicInfo);
             }
 
             paragraph = paragraph.NextParagraph;
