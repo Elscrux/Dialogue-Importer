@@ -131,6 +131,9 @@
       <Compile Update="Dialogue\Processor\SceneResponseProcessor.cs">
         <DependentUpon>IDialogueResponseProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\Processor\PlayerIsRaceChecker.cs">
+        <DependentUpon>PlayerIDialogueTopicInfoProcessor.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

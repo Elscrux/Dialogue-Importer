@@ -148,4 +148,10 @@ public sealed class DialogueTopicInfo {
             }
         }
     }
+
+    public void RemoveNote(Note note) {
+        foreach (var response in Responses) {
+            response.RemoveNote(note);
+        }
+    }
 }

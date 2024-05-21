@@ -18,6 +18,7 @@ public class DialogueProcessor(EmotionChecker emotionChecker) : IDialogueProcess
         new GoodbyeChecker(),
         new TopicInfoTrimmer(),
         new TopicInfoInvalidStringFixer(),
+        new PlayerIsRaceChecker(),
         emotionChecker,
     ];
 
