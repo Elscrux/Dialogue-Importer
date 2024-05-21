@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using DynamicData;
+using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Model;
 
 public sealed class DialogueTopicInfo {
@@ -16,6 +17,7 @@ public sealed class DialogueTopicInfo {
     public bool Goodbye { get; set; }
     public bool InvisibleContinue { get; set; }
     public bool Random { get; set; }
+    public List<Condition> ExtraConditions { get; } = [];
 
     public DialogueTopicInfo CopyWith(IEnumerable<DialogueResponse> newResponses) {
         return new DialogueTopicInfo {

@@ -124,7 +124,7 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
 
         if (topicInfo.SharedInfo is not null) {
             var dialogResponses =
-                topicInfo.SharedInfo.GetResponseData(quest, Context, TopicInfos, GetSpeakerConditions);
+                topicInfo.SharedInfo.GetResponseData(quest, Context, TopicInfos, GetConditions);
             dialogResponses.PreviousDialog = previousDialog;
             dialogResponses.Flags = flags;
 
@@ -134,7 +134,7 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
         return new DialogResponses(Context.GetNextFormKey(), Context.Release) {
             Responses = TopicInfos(topicInfo).ToExtendedList(),
             Prompt = topicInfo.Prompt.IsNullOrWhitespace() ? null : topicInfo.Prompt,
-            Conditions = GetSpeakerConditions(topicInfo),
+            Conditions = GetConditions(topicInfo),
             FavorLevel = FavorLevel.None,
             Flags = flags,
             PreviousDialog = previousDialog,
@@ -152,7 +152,7 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
         }
     }
 
-    public ExtendedList<Condition> GetSpeakerConditions(DialogueTopicInfo topicInfo) {
+    public ExtendedList<Condition> GetConditions(DialogueTopicInfo topicInfo) {
         var list = new ExtendedList<Condition>();
 
         if (topicInfo.Speaker is AliasSpeaker aliasSpeaker) {
@@ -180,6 +180,8 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
             data.VoiceTypeOrList.Link.SetTo(formList.FormKey);
             list.Add(GetFormKeyCondition(data));
         }
+
+        list.AddRange(topicInfo.ExtraConditions);
 
         return list;
     }
