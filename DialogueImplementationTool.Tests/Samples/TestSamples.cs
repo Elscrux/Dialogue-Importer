@@ -15,9 +15,7 @@ public static class TestSamples {
                 documentParser,
                 new DialogueSelection {
                     Speaker = testConstants.Speaker1.FormKey,
-                    Selection = {
-                        [type] = true,
-                    },
+                    SelectedTypes = { type },
                 },
                 index)
             .First();

@@ -104,25 +104,24 @@ public sealed class DialogueVM : ViewModel {
             .Subscribe(_ => {
                 IsNotFirstIndex = Index > 0;
                 IsNotLastIndex = Index < _documentParser.LastIndex;
+                if (DialogueTypeList.Count <= Index) return;
 
-                if (DialogueTypeList.Count > Index) {
-                    if (DialogueTypeList[Index].Speaker == FormKey.Null) {
-                        // Keep current speaker for fresh dialogue and set in list
-                        DialogueTypeList[Index].Speaker = SpeakerFormKey;
-                        DialogueTypeList[Index].UseGetIsAliasRef = UseGetIsAliasRef;
-                    } else {
-                        // Load speaker from list
-                        SpeakerFormKey = DialogueTypeList[Index].Speaker;
-                        UseGetIsAliasRef = DialogueTypeList[Index].UseGetIsAliasRef;
-                    }
-
-                    GreetingSelected = DialogueTypeList[Index].Selection[DialogueType.Greeting];
-                    FarewellSelected = DialogueTypeList[Index].Selection[DialogueType.Farewell];
-                    IdleSelected = DialogueTypeList[Index].Selection[DialogueType.Idle];
-                    DialogueSelected = DialogueTypeList[Index].Selection[DialogueType.Dialogue];
-                    GenericSceneSelected = DialogueTypeList[Index].Selection[DialogueType.GenericScene];
-                    QuestSceneSelected = DialogueTypeList[Index].Selection[DialogueType.QuestScene];
+                if (DialogueTypeList[Index].Speaker == FormKey.Null) {
+                    // Keep current speaker for fresh dialogue and set in list
+                    DialogueTypeList[Index].Speaker = SpeakerFormKey;
+                    DialogueTypeList[Index].UseGetIsAliasRef = UseGetIsAliasRef;
+                } else {
+                    // Load speaker from list
+                    SpeakerFormKey = DialogueTypeList[Index].Speaker;
+                    UseGetIsAliasRef = DialogueTypeList[Index].UseGetIsAliasRef;
                 }
+
+                GreetingSelected = DialogueTypeList[Index].SelectedTypes.Contains(DialogueType.Greeting);
+                FarewellSelected = DialogueTypeList[Index].SelectedTypes.Contains(DialogueType.Farewell);
+                IdleSelected = DialogueTypeList[Index].SelectedTypes.Contains(DialogueType.Idle);
+                DialogueSelected = DialogueTypeList[Index].SelectedTypes.Contains(DialogueType.Dialogue);
+                GenericSceneSelected = DialogueTypeList[Index].SelectedTypes.Contains(DialogueType.GenericScene);
+                QuestSceneSelected = DialogueTypeList[Index].SelectedTypes.Contains(DialogueType.QuestScene);
             });
 
         this.WhenAnyValue(v => v.SpeakerFormKey)
@@ -147,8 +146,12 @@ public sealed class DialogueVM : ViewModel {
         void SetupSelectionSubscription(Expression<Func<DialogueVM, bool>> property, DialogueType type) {
             this.WhenAnyValue(property)
                 .Subscribe(selected => {
-                    if (DialogueTypeList.Count > Index) {
-                        DialogueTypeList[Index].Selection[type] = selected;
+                    if (DialogueTypeList.Count <= Index) return;
+
+                    if (selected) {
+                        DialogueTypeList[Index].SelectedTypes.Add(type);
+                    } else {
+                        DialogueTypeList[Index].SelectedTypes.Remove(type);
                     }
                 });
         }

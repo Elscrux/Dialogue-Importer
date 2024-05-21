@@ -72,8 +72,7 @@ public partial class MainWindow {
 
         //Save warning
         if (dialogueVM.SavedSession
-            || !dialogueVM.DialogueTypeList.Exists(selection => selection.Selection.Any(type => type.Value)))
-            return;
+            || dialogueVM.DialogueTypeList.TrueForAll(s => s.SelectedTypes.Count == 0)) return;
 
         if (MessageBox.Show(
                 "You didn't save your changes, do you want to save now?",

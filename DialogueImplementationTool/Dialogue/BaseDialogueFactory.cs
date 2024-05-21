@@ -35,9 +35,7 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
         IDocumentParser documentParser,
         DialogueSelection selection,
         int index) {
-        foreach (var (type, selected) in selection.Selection) {
-            if (!selected) continue;
-
+        foreach (var type in selection.SelectedTypes) {
             // Setup factory and factory specific processing
             var factory = GetBaseFactory(type, context);
             var factorySpecificProcessor = factory.ConfigureProcessor(dialogueProcessor);
