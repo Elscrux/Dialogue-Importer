@@ -29,7 +29,7 @@ public class DialogueProcessor(EmotionChecker emotionChecker) : IDialogueProcess
         new RandomChecker(),
     ];
 
-    public List<IDialogueProcessor> TopicListProcessors { get; } = [];
+    public List<IDialogueTopicListProcessor> TopicListProcessors { get; } = [];
 
     public List<IConversationProcessor> ConversationProcessors { get; } = [
         new BackToOptionsLinker(),
