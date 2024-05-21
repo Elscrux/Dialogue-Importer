@@ -8,7 +8,6 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Skyrim.Internals;
 using Noggog;
-using Condition = Mutagen.Bethesda.Skyrim.Condition;
 namespace DialogueImplementationTool.Dialogue;
 
 public abstract class GenericScene3X3Factory(IDialogueContext context) : BaseDialogueFactory(context) {
@@ -126,6 +125,10 @@ public abstract class GenericScene3X3Factory(IDialogueContext context) : BaseDia
     }
 
     protected static QuestAlias GetEventAlias(string name, byte[] eventData, FormKey npc1, FormKey npc2) {
+        var data1 = new GetIsIDConditionData();
+        var data2 = new GetIsIDConditionData();
+        data1.Object.Link.SetTo(npc1);
+        data2.Object.Link.SetTo(npc2);
         return new QuestAlias {
             Name = name,
             FindMatchingRefFromEvent = new FindMatchingRefFromEvent {
@@ -133,8 +136,8 @@ public abstract class GenericScene3X3Factory(IDialogueContext context) : BaseDia
                 EventData = eventData,
             },
             Conditions = [
-                GetFormKeyCondition(Condition.Function.GetIsID, npc1, 1, true),
-                GetFormKeyCondition(Condition.Function.GetIsID, npc2, 1, true),
+                GetFormKeyCondition(data1, or: true),
+                GetFormKeyCondition(data2, or: true),
             ],
             Flags = QuestAlias.Flag.AllowReserved,
             VoiceTypes = new FormLinkNullable<IAliasVoiceTypeGetter>(FormKey.Null),

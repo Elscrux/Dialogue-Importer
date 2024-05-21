@@ -67,7 +67,7 @@ public class GenericGenericScene3X3Factory(IDialogueContext context) : GenericSc
         //Add scene
         var scene = AddScene($"{questEditorId}Scene", sceneQuest.FormKey);
         scene.Flags = new Scene.Flag();
-        scene.Flags |= Scene.Flag.BeginOnQuestStart | Scene.Flag.StopOnQuestEnd | Scene.Flag.Interruptable;
+        scene.Flags |= Scene.Flag.BeginOnQuestStart | Scene.Flag.StopQuestOnEnd | Scene.Flag.Interruptable;
         Context.AddScene(scene);
 
         return scene;

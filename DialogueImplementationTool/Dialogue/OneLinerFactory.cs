@@ -25,9 +25,11 @@ public abstract class OneLinerFactory(IDialogueContext context) : BaseDialogueFa
     ====================================================*/
     private static FormKey GetMainSpeaker(IDialogResponses responses) {
         foreach (var condition in responses.Conditions) {
-            if (condition is not ConditionFloat { Data: FunctionConditionData data }) continue;
+            if (condition is not ConditionFloat { Data: IGetIsIDConditionDataGetter getisID }) continue;
 
-            if (data.Function == Condition.Function.GetIsID) return data.ParameterOneRecord.FormKey;
+            if (getisID.Object.UsesLink()) {
+                return getisID.Object.Link.FormKey;
+            }
         }
 
         return FormKey.Null;

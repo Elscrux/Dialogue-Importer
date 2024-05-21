@@ -94,17 +94,13 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
     }
 
     protected static Condition GetFormKeyCondition(
-        Condition.Function function,
-        FormKey formKey,
+        ConditionData data,
         float comparisonValue = 1,
         bool or = false) {
         var condition = new ConditionFloat {
             CompareOperator = CompareOperator.EqualTo,
             ComparisonValue = comparisonValue,
-            Data = new FunctionConditionData {
-                Function = function,
-                ParameterOneRecord = new FormLink<ISkyrimMajorRecordGetter>(formKey),
-            },
+            Data = data,
         };
 
         if (or) condition.Flags = Condition.Flag.OR;
@@ -138,7 +134,7 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
         return new DialogResponses(Context.GetNextFormKey(), Context.Release) {
             Responses = TopicInfos(topicInfo).ToExtendedList(),
             Prompt = topicInfo.Prompt.IsNullOrWhitespace() ? null : topicInfo.Prompt,
-            Conditions = GetSpeakerConditions(topicInfo.Speaker),
+            Conditions = GetSpeakerConditions(topicInfo),
             FavorLevel = FavorLevel.None,
             Flags = flags,
             PreviousDialog = previousDialog,
@@ -156,26 +152,34 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
         }
     }
 
-    public ExtendedList<Condition> GetSpeakerConditions(ISpeaker speaker) {
+    public ExtendedList<Condition> GetSpeakerConditions(DialogueTopicInfo topicInfo) {
         var list = new ExtendedList<Condition>();
 
-        if (speaker is AliasSpeaker aliasSpeaker)
+        if (topicInfo.Speaker is AliasSpeaker aliasSpeaker) {
             list.Add(new ConditionFloat {
                 CompareOperator = CompareOperator.EqualTo,
                 ComparisonValue = 1,
-                Data = new FunctionConditionData {
-                    Function = Condition.Function.GetIsAliasRef,
-                    ParameterOneNumber = aliasSpeaker.AliasIndex,
+                Data = new GetIsAliasRefConditionData {
+                    ReferenceAliasIndex = aliasSpeaker.AliasIndex,
                 },
             });
-        else if (Context.LinkCache.TryResolve<INpcGetter>(speaker.FormKey, out var npc))
-            list.Add(GetFormKeyCondition(Condition.Function.GetIsID, npc.FormKey));
-        else if (Context.LinkCache.TryResolve<IFactionGetter>(speaker.FormKey, out var faction))
-            list.Add(GetFormKeyCondition(Condition.Function.GetInFaction, faction.FormKey));
-        else if (Context.LinkCache.TryResolve<IVoiceTypeGetter>(speaker.FormKey, out var voiceType))
-            list.Add(GetFormKeyCondition(Condition.Function.GetIsVoiceType, voiceType.FormKey));
-        else if (Context.LinkCache.TryResolve<IFormListGetter>(speaker.FormKey, out var formList))
-            list.Add(GetFormKeyCondition(Condition.Function.GetIsVoiceType, formList.FormKey));
+        } else if (Context.LinkCache.TryResolve<INpcGetter>(topicInfo.Speaker.FormKey, out var npc)) {
+            var data = new GetIsIDConditionData();
+            data.Object.Link.SetTo(npc.FormKey);
+            list.Add(GetFormKeyCondition(data));
+        } else if (Context.LinkCache.TryResolve<IFactionGetter>(topicInfo.Speaker.FormKey, out var faction)) {
+            var data = new GetInFactionConditionData();
+            data.Faction.Link.SetTo(faction.FormKey);
+            list.Add(GetFormKeyCondition(data));
+        } else if (Context.LinkCache.TryResolve<IVoiceTypeGetter>(topicInfo.Speaker.FormKey, out var voiceType)) {
+            var data = new GetIsVoiceTypeConditionData();
+            data.VoiceTypeOrList.Link.SetTo(voiceType.FormKey);
+            list.Add(GetFormKeyCondition(data));
+        } else if (Context.LinkCache.TryResolve<IFormListGetter>(topicInfo.Speaker.FormKey, out var formList)) {
+            var data = new GetIsVoiceTypeConditionData();
+            data.VoiceTypeOrList.Link.SetTo(formList.FormKey);
+            list.Add(GetFormKeyCondition(data));
+        }
 
         return list;
     }

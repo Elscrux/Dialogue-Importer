@@ -22,7 +22,7 @@ public sealed class SharedInfo {
         IQuest quest,
         IDialogueContext modContext,
         Func<DialogueTopicInfo, IEnumerable<DialogResponse>> getResponses,
-        Func<Speaker.ISpeaker, ExtendedList<Condition>> getSpeakerConditions) {
+        Func<DialogueTopicInfo, ExtendedList<Condition>> getSpeakerConditions) {
         if (ResponseData is null) {
             var dialogResponses = getResponses(ResponseDataTopicInfo);
             var dialogTopic = modContext.LinkCache.PriorityOrder
@@ -66,7 +66,7 @@ public sealed class SharedInfo {
 
         return new DialogResponses(modContext.GetNextFormKey(), modContext.Release) {
             ResponseData = new FormLinkNullable<IDialogResponsesGetter>(ResponseData.FormKey),
-            Conditions = getSpeakerConditions(ResponseDataTopicInfo.Speaker),
+            Conditions = getSpeakerConditions(ResponseDataTopicInfo),
             FavorLevel = FavorLevel.None,
             Flags = new DialogResponseFlags(),
         };

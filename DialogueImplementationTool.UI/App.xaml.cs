@@ -56,8 +56,9 @@ public partial class App {
         var container = builder.Build();
 
         using var scope = container.BeginLifetimeScope();
-        var pathProvider = new PluginListingsPathProvider(new GameReleaseInjection(GameRelease.SkyrimSE));
-        if (!File.Exists(pathProvider.Path)) MessageBox.Show($"Make sure {pathProvider.Path} exists.");
+        var pathProvider = new PluginListingsPathProvider();
+        var path = pathProvider.Get(GameRelease.SkyrimSE);
+        if (!File.Exists(path)) MessageBox.Show($"Make sure {path} exists.");
 
         var window = scope.Resolve<MainWindow>();
         window.Show();
