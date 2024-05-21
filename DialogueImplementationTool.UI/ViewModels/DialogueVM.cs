@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 using System.Windows.Input;
 using DialogueImplementationTool.Dialogue;
 using DialogueImplementationTool.Dialogue.Processor;
@@ -7,15 +8,17 @@ using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Parser;
 using DialogueImplementationTool.UI.Models;
 using DialogueImplementationTool.UI.Services;
+using Mutagen.Bethesda.Json;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Skyrim;
+using Newtonsoft.Json;
 using Noggog.WPF;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace DialogueImplementationTool.UI.ViewModels;
 
-public sealed class DialogueVM : ViewModel {
+public sealed partial class DialogueVM : ViewModel {
     private readonly IDocumentParser _documentParser;
 
     public DialogueVM(
@@ -34,6 +37,7 @@ public sealed class DialogueVM : ViewModel {
         //Clear dialogue data
         DialogueTypeList.Clear();
         for (var i = 0; i <= _documentParser.LastIndex; i++) DialogueTypeList.Add(new DialogueSelection());
+        LoadSelection();
 
         //Set buttons to unchecked
         GreetingSelected = FarewellSelected =
@@ -70,6 +74,8 @@ public sealed class DialogueVM : ViewModel {
         });
 
         Save = ReactiveCommand.Create(() => {
+            SaveSelection();
+
             ImplementDialogue(context, dialogueProcessor);
 
             var fileInfo = new FileInfo(Path.Combine(outputPathProvider.OutputPath, context.Mod.ModKey.FileName));
@@ -169,6 +175,55 @@ public sealed class DialogueVM : ViewModel {
             dialogue.Factory.Create(dialogue);
         }
     }
+
+#region SelectionPersistance
+    [GeneratedRegex("[\\/:*?\"<>|]")]
+    private static partial Regex IllegalFileNameRegex();
+
+    private string SelectionsPath =>
+        Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory,
+            "Selections",
+            IllegalFileNameRegex().Replace(_documentParser.FilePath + ".selections", string.Empty));
+
+    private readonly JsonSerializerSettings _serializerSettings = new() {
+        Formatting = Formatting.Indented,
+        TypeNameHandling = TypeNameHandling.Auto,
+        Converters = {
+            JsonConvertersMixIn.FormKey,
+            JsonConvertersMixIn.ModKey,
+        },
+    };
+
+    private void LoadSelection() {
+        var selectionsPath = SelectionsPath;
+        if (!File.Exists(selectionsPath)) return;
+
+        var text = File.ReadAllText(selectionsPath);
+        var selections = JsonConvert.DeserializeObject<List<DialogueSelection>>(text, _serializerSettings);
+        if (selections is null) return;
+
+        for (var i = 0; i < selections.Count; i++) {
+            if (DialogueTypeList.Count <= i) {
+                DialogueTypeList.Add(selections[i]);
+            } else {
+                DialogueTypeList[i] = selections[i];
+            }
+        }
+    }
+
+    private void SaveSelection() {
+        var selections = JsonConvert.SerializeObject(DialogueTypeList, _serializerSettings);
+        var directoryName = Path.GetDirectoryName(SelectionsPath);
+        if (directoryName is null) return;
+
+        if (!Directory.Exists(directoryName)) {
+            Directory.CreateDirectory(directoryName);
+        }
+
+        File.WriteAllText(SelectionsPath, selections);
+    }
+#endregion
 
     public ISpeakerFavoritesSelection SpeakerFavoritesSelection { get; }
 
