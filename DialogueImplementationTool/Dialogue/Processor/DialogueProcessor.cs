@@ -3,7 +3,7 @@ using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Parser;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
-public class DialogueProcessor(EmotionChecker emotionChecker) : IDialogueProcessor {
+public sealed class DialogueProcessor(EmotionChecker emotionChecker) : IDialogueProcessor {
     public List<IDialogueResponseProcessor> ResponseProcessors { get; } = [
         new InvalidStringFixer(),
         new NoteExtractor(),
@@ -40,19 +40,19 @@ public class DialogueProcessor(EmotionChecker emotionChecker) : IDialogueProcess
 
     public DialogueProcessor Clone() => new(emotionChecker);
 
-    public virtual void Process(DialogueResponse response, IReadOnlyList<FormattedText> textSnippets) {
+    public void Process(DialogueResponse response, IReadOnlyList<FormattedText> textSnippets) {
         foreach (var processor in ResponseProcessors) {
             processor.Process(response, textSnippets);
         }
     }
 
-    public virtual void Process(DialogueTopicInfo topicInfo) {
+    public void Process(DialogueTopicInfo topicInfo) {
         foreach (var processor in TopicInfoProcessors) {
             processor.Process(topicInfo);
         }
     }
 
-    public virtual void Process(DialogueTopic topic) {
+    public void Process(DialogueTopic topic) {
         foreach (var processor in TopicProcessors) {
             foreach (var link in topic.EnumerateLinks(true)) {
                 processor.Process(link);
@@ -66,7 +66,7 @@ public class DialogueProcessor(EmotionChecker emotionChecker) : IDialogueProcess
         }
     }
 
-    public virtual void Process(Conversation conversation) {
+    public void Process(Conversation conversation) {
         foreach (var processor in ConversationProcessors) {
             processor.Process(conversation);
         }
