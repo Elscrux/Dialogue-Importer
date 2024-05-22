@@ -1,6 +1,7 @@
 ﻿using DialogueImplementationTool.Parser;
 using DialogueImplementationTool.Tests.Samples;
 using FluentAssertions;
+using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Tests.Factory;
 
 public sealed class TestGreetingFactory {
@@ -44,5 +45,7 @@ public sealed class TestGreetingFactory {
         // Check
         _testConstants.Mod.DialogTopics.Should().ContainSingle();
         _testConstants.Mod.DialogTopics.First().Responses.Should().HaveCount(2);
+        _testConstants.Mod.DialogTopics.First().Responses[0].Flags!
+            .Flags.HasFlag(DialogResponses.Flag.Random).Should().BeTrue();
     }
 }
