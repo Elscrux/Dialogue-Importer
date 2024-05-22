@@ -120,6 +120,7 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
 
     private void AddLinksAndResponses(IDialogueProcessor processor, Paragraph paragraph, DialogueTopicInfo topicInfo) {
         var startingIndentation = paragraph.IndentLevel;
+        var nextIndentation = startingIndentation + 1;
 
         //Add further responses
         while (paragraph is not null
@@ -132,12 +133,15 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
         }
 
         //Add links
-        while (paragraph is not null && paragraph.IndentLevel > startingIndentation) {
-            if (paragraph.IndentLevel == startingIndentation + 1) {
+        while (paragraph is not null
+               && (paragraph.IndentLevel is null || paragraph.IndentLevel > startingIndentation)) {
+            if (paragraph.IndentLevel == nextIndentation) {
                 var nextTopicInfo = AddTopicInfo(processor, paragraph);
                 topicInfo.Links.Add(new DialogueTopic { TopicInfos = [nextTopicInfo] });
                 processor.Process(nextTopicInfo);
             }
+
+            if (paragraph.NextParagraph is null || paragraph.Xml == paragraph.NextParagraph.Xml) break;
 
             paragraph = paragraph.NextParagraph;
         }
