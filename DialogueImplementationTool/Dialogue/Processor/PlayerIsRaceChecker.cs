@@ -43,28 +43,28 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicInfoProcessor {
     public void Process(DialogueTopicInfo topicInfo) {
         foreach (var note in topicInfo.AllNotes()) {
             var match = IsRaceRegex().Match(note.Text);
-            if (match.Success) {
-                var matchingRace = match.Groups.Values.Skip(1).First(x => x.Success);
-                var (regular, vampire) = RaceFormKeys[match.Groups.Values.IndexOf(matchingRace)];
+            if (!match.Success) continue;
 
-                var getIsRace = new GetIsRaceConditionData();
-                getIsRace.Race.Link.SetTo(regular);
-                topicInfo.ExtraConditions.Add(new ConditionFloat {
-                    Data = getIsRace,
-                    ComparisonValue = 1,
-                    CompareOperator = CompareOperator.EqualTo,
-                    Flags = Condition.Flag.OR,
-                });
+            var matchingRace = match.Groups.Values.Skip(1).First(x => x.Success);
+            var (regular, vampire) = RaceFormKeys[match.Groups.Values.IndexOf(matchingRace)];
 
-                var getIsRaceVampire = new GetIsRaceConditionData();
-                getIsRaceVampire.Race.Link.SetTo(vampire);
-                topicInfo.ExtraConditions.Add(new ConditionFloat {
-                    Data = getIsRaceVampire,
-                    ComparisonValue = 1,
-                    CompareOperator = CompareOperator.EqualTo,
-                    Flags = Condition.Flag.OR,
-                });
-            }
+            var getIsRace = new GetIsRaceConditionData();
+            getIsRace.Race.Link.SetTo(regular);
+            topicInfo.ExtraConditions.Add(new ConditionFloat {
+                Data = getIsRace,
+                ComparisonValue = 1,
+                CompareOperator = CompareOperator.EqualTo,
+                Flags = Condition.Flag.OR,
+            });
+
+            var getIsRaceVampire = new GetIsRaceConditionData();
+            getIsRaceVampire.Race.Link.SetTo(vampire);
+            topicInfo.ExtraConditions.Add(new ConditionFloat {
+                Data = getIsRaceVampire,
+                ComparisonValue = 1,
+                CompareOperator = CompareOperator.EqualTo,
+                Flags = Condition.Flag.OR,
+            });
 
             topicInfo.RemoveNote(note);
         }
