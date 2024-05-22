@@ -26,7 +26,7 @@ public enum LoadState {
 public sealed class MainWindowVM : ViewModel {
     private const string ModName = "DialogueOutput";
     private readonly Func<EmotionChecker, DialogueProcessor> _dialogueProcessorFactory;
-    private readonly Func<IDialogueContext, IDialogueProcessor, IDocumentParser, DialogueVM> _dialogueVMFactory;
+    private readonly Func<IDialogueContext, DialogueProcessor, IDocumentParser, DialogueVM> _dialogueVMFactory;
     private readonly Dictionary<string, Func<string, IDocumentParser>> _documentIterators;
     private readonly Func<string, PythonEmotionClassifier> _emotionClassifierFactory;
     private readonly SkyrimMod _mod;
@@ -45,7 +45,7 @@ public sealed class MainWindowVM : ViewModel {
     public MainWindowVM(
         OutputPathProvider outputPathProvider,
         ISpeakerFavoritesSelection speakerFavoritesSelection,
-        Func<IDialogueContext, IDialogueProcessor, IDocumentParser, DialogueVM> dialogueVMFactory,
+        Func<IDialogueContext, DialogueProcessor, IDocumentParser, DialogueVM> dialogueVMFactory,
         Func<EmotionChecker, DialogueProcessor> dialogueProcessorFactory,
         Func<string, PythonEmotionClassifier> emotionClassifierFactory,
         Func<string, OpenDocumentTextParser> openDocumentTextIteratorFactory,
