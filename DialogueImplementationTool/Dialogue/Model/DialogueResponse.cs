@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Model;
 
+[DebuggerDisplay("{ToString()}")]
 public record DialogueResponse {
     public string Response { get; set; } = string.Empty;
 
@@ -71,5 +73,9 @@ public record DialogueResponse {
 
     public override int GetHashCode() {
         return HashCode.Combine(FullResponse, ScriptNote);
+    }
+
+    public override string ToString() {
+        return FullResponse;
     }
 }

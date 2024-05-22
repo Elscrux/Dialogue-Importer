@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using DynamicData;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Model;
 
+[DebuggerDisplay("{ToString()}")]
 public sealed class DialogueTopicInfo {
     public SharedInfo? SharedInfo { get; set; }
 
@@ -153,5 +155,11 @@ public sealed class DialogueTopicInfo {
         foreach (var response in Responses) {
             response.RemoveNote(note);
         }
+    }
+
+    public override string ToString() {
+        if (Responses.Count == 0) return "Empty topic info";
+
+        return Responses[0].ToString();
     }
 }

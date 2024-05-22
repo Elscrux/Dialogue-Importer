@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 namespace DialogueImplementationTool.Dialogue.Model;
 
+[DebuggerDisplay("{ToString()}")]
 public sealed class DialogueTopic {
     public List<DialogueTopicInfo> TopicInfos { get; init; } = [];
     public bool Blocking { get; set; }
@@ -46,5 +48,12 @@ public sealed class DialogueTopic {
 
         TopicInfos.Clear();
         TopicInfos.AddRange(newInfos);
+    }
+
+    public override string ToString() {
+        var playerText = GetPlayerText();
+        if (!string.IsNullOrEmpty(playerText)) return playerText;
+
+        return $"Topic with {TopicInfos.Count} prompts";
     }
 }
