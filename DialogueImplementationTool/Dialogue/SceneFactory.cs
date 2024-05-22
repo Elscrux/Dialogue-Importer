@@ -302,8 +302,6 @@ public abstract class GenericScene3X3Factory(IDialogueContext context) : BaseDia
         }
     }
 
-    public override void PostProcess() { }
-
     public AliasSpeaker GetSpeaker(string name) {
         name = ISpeaker.GetSpeakerName(name);
         foreach (var (_, speakers) in NameMappedSpeakers) {

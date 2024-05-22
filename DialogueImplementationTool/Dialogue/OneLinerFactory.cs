@@ -55,33 +55,4 @@ public abstract class OneLinerFactory(IDialogueContext context) : BaseDialogueFa
     }
 
     public override void PreProcess(List<DialogueTopic> topics) { }
-
-    protected static void PostProcess(IDialogTopic topic, PostProcessOptions options) {
-        // ReorderBySpeaker(topic);
-        if (options.RandomFlags) SetRandomFlags(topic, true);
-        if (options.ResetHours > 0) SetResetHours(topic, options.ResetHours);
-    }
-
-    private static void SetResetHours(IDialogTopic topic, float resetHours) {
-        foreach (var response in topic.Responses) {
-            response.Flags ??= new DialogResponseFlags();
-            response.Flags.ResetHours = resetHours;
-        }
-    }
-
-    private static void SetRandomFlags(IDialogTopic topic, bool addRandomEndFlag) {
-        for (var index = 0; index < topic.Responses.Count; index++) {
-            var response = topic.Responses[index];
-            response.Flags ??= new DialogResponseFlags();
-            if ((response.Flags.Flags & DialogResponses.Flag.SayOnce) != 0) continue;
-
-            response.Flags.Flags |= DialogResponses.Flag.Random;
-
-            if (addRandomEndFlag && (index + 1 >= topic.Responses.Count
-                                     || GetMainSpeaker(topic.Responses[index + 1]) != GetMainSpeaker(response)))
-                response.Flags.Flags |= DialogResponses.Flag.RandomEnd;
-        }
-    }
-
-    protected sealed record PostProcessOptions(bool RandomFlags = false, float ResetHours = 0);
 }

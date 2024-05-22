@@ -1,17 +1,21 @@
 ﻿using System.Collections.Generic;
 using DialogueImplementationTool.Dialogue.Model;
+using DialogueImplementationTool.Dialogue.Processor;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue;
 
 public sealed class GreetingFactory(IDialogueContext context) : OneLinerFactory(context) {
-    private static readonly PostProcessOptions PostProcessOptions = new(true, 2);
-    private DialogTopic? _topic;
+    public override IDialogueProcessor ConfigureProcessor(DialogueProcessor dialogueProcessor) {
+        dialogueProcessor.TopicInfoProcessors.Add(new RandomTopicInfo());
+        dialogueProcessor.TopicInfoProcessors.Add(new ResetHourTopicInfo(2));
+        return base.ConfigureProcessor(dialogueProcessor);
+    }
 
     public override void GenerateDialogue(List<DialogueTopic> topics) {
         var editorId = $"{Context.Quest.EditorID}Hellos";
 
-        _topic = Context.GetTopic(editorId) ?? new DialogTopic(Context.GetNextFormKey(), Context.Release) {
+        var topic = Context.GetTopic(editorId) ?? new DialogTopic(Context.GetNextFormKey(), Context.Release) {
             EditorID = editorId,
             Name = editorId,
             Priority = 2500,
@@ -21,10 +25,6 @@ public sealed class GreetingFactory(IDialogueContext context) : OneLinerFactory(
             SubtypeName = "HELO",
         };
 
-        GenerateDialogue(Context.Quest, topics, _topic);
-    }
-
-    public override void PostProcess() {
-        if (_topic is not null) PostProcess(_topic, PostProcessOptions);
+        GenerateDialogue(Context.Quest, topics, topic);
     }
 }

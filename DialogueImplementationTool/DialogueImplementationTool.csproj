@@ -69,19 +69,19 @@
         <DependentUpon>ISpeakerSelection.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\TopicInfoInvalidStringFixer.cs">
-        <DependentUpon>PlayerIDialogueTopicInfoProcessor.cs</DependentUpon>
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\RandomChecker.cs">
         <DependentUpon>IDialogueTopicProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\TopicInfoTrimmer.cs">
-        <DependentUpon>PlayerIDialogueTopicInfoProcessor.cs</DependentUpon>
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\EmotionChecker.cs">
-        <DependentUpon>PlayerIDialogueTopicInfoProcessor.cs</DependentUpon>
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\GoodbyeChecker.cs">
-        <DependentUpon>PlayerIDialogueTopicInfoProcessor.cs</DependentUpon>
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\EmptyBracesRemover.cs">
         <DependentUpon>IDialogueResponseProcessor.cs</DependentUpon>
@@ -111,7 +111,7 @@
         <DependentUpon>IDialogueTopicProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\SayOnceChecker.cs">
-        <DependentUpon>PlayerIDialogueTopicInfoProcessor.cs</DependentUpon>
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\Trimmer.cs">
         <DependentUpon>IDialogueResponseProcessor.cs</DependentUpon>
@@ -131,8 +131,14 @@
       <Compile Update="Dialogue\Processor\SceneResponseProcessor.cs">
         <DependentUpon>IDialogueResponseProcessor.cs</DependentUpon>
       </Compile>
-      <Compile Update="Dialogue\Processor\PlayerIsRaceChecker.cs">
+      <Compile Update="Dialogue\Processor\IsRaceChecker.cs">
         <DependentUpon>PlayerIDialogueTopicInfoProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\RandomTopicInfo.cs">
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\ResetHourTopicInfo.cs">
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
     </ItemGroup>
 

@@ -94,7 +94,5 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
         }
     }
 
-    public override void PostProcess() { }
-
     private sealed record LinkedTopic(FormKey FormKey, DialogueTopic Topic, string IndexString, bool IndexType);
 }

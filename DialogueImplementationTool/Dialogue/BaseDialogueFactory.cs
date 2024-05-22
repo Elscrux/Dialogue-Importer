@@ -15,7 +15,6 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
 
     public abstract void PreProcess(List<DialogueTopic> topics);
     public abstract void GenerateDialogue(List<DialogueTopic> topics);
-    public abstract void PostProcess();
 
     public static BaseDialogueFactory GetBaseFactory(DialogueType type, IDialogueContext context) {
         return type switch {
@@ -90,7 +89,6 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
 
         PreProcess(generatedDialogue.Topics);
         GenerateDialogue(generatedDialogue.Topics);
-        PostProcess();
     }
 
     protected static Condition GetFormKeyCondition(
@@ -121,6 +119,7 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
         if (topicInfo.Goodbye) flags.Flags |= DialogResponses.Flag.Goodbye;
         if (topicInfo.InvisibleContinue) flags.Flags |= DialogResponses.Flag.InvisibleContinue;
         if (topicInfo.Random) flags.Flags |= DialogResponses.Flag.Random;
+        if (topicInfo.ResetHours is > 0 and <= 24) flags.ResetHours = topicInfo.ResetHours;
 
         if (topicInfo.SharedInfo is not null) {
             var dialogResponses =
