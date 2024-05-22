@@ -37,6 +37,8 @@ public class DialogueProcessor(EmotionChecker emotionChecker) : IDialogueProcess
         new BlockingChecker(),
     ];
 
+    public DialogueProcessor Clone() => new(emotionChecker);
+
     public virtual void Process(DialogueResponse response, IReadOnlyList<FormattedText> textSnippets) {
         foreach (var processor in ResponseProcessors) {
             processor.Process(response, textSnippets);

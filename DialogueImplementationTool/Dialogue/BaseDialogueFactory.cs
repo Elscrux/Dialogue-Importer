@@ -35,16 +35,18 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
         DialogueSelection selection,
         int index) {
         foreach (var type in selection.SelectedTypes) {
+            var processor = dialogueProcessor.Clone();
+
             // Setup factory and factory specific processing
             var factory = GetBaseFactory(type, context);
-            var factorySpecificProcessor = factory.ConfigureProcessor(dialogueProcessor);
+            var factorySpecificProcessor = factory.ConfigureProcessor(processor);
 
             // Parse document
             var topics = documentParser.Parse(type, factorySpecificProcessor, index);
 
             // Use more specific factory if needed
             factory = factory.SpecifyType(topics);
-            factorySpecificProcessor = factory.ConfigureProcessor(dialogueProcessor);
+            factorySpecificProcessor = factory.ConfigureProcessor(processor);
 
             // Process topic and topic infos
             foreach (var topic in topics.EnumerateLinks(true)) {

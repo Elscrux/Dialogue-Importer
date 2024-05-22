@@ -24,6 +24,7 @@ public sealed class TestDialogueFactory {
         conversation[0].Topics[0].TopicInfos[0].Responses[1].ScriptNote.Should().Be("emphasis: cosmopolitan");
         conversation[0].Topics[0].TopicInfos[0].Responses[2].HasNote("back to options").Should().BeFalse();
         conversation[0].Topics[0].TopicInfos[0].Links.Should().BeEmpty();
+        conversation[0].Topics[0].TopicInfos[0].Random.Should().BeFalse();
 
         var links = conversation[0].Topics[1].TopicInfos[0].Links;
         links[0].TopicInfos[0].Links.Should().HaveCount(2);
