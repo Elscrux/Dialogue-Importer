@@ -10,7 +10,7 @@ using Mutagen.Bethesda.Skyrim.Internals;
 using Noggog;
 namespace DialogueImplementationTool.Dialogue;
 
-public abstract class GenericScene3X3Factory(IDialogueContext context) : BaseDialogueFactory(context) {
+public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFactory(context) {
     private List<int> _aliasIndices = [];
     protected IReadOnlyList<AliasSpeaker> AliasSpeakers = [];
     protected List<(FormKey FormKey, List<AliasSpeaker> Speakers)> NameMappedSpeakers = [];

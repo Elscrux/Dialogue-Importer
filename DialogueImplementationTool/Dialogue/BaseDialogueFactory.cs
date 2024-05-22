@@ -22,8 +22,8 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
             DialogueType.Greeting => new GreetingFactory(context),
             DialogueType.Farewell => new FarewellFactory(context),
             DialogueType.Idle => new IdleFactory(context),
-            DialogueType.GenericScene => new GenericGenericScene3X3Factory(context),
-            DialogueType.QuestScene => new QuestGenericScene3X3Factory(context),
+            DialogueType.GenericScene => new GenericGenericSceneFactory(context),
+            DialogueType.QuestScene => new QuestSceneFactory(context),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
         };
     }

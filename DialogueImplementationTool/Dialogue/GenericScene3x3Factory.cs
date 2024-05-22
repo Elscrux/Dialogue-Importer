@@ -3,7 +3,7 @@ using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Dialogue.Processor;
 namespace DialogueImplementationTool.Dialogue;
 
-public sealed class GenericScene3x3Factory(IDialogueContext context) : GenericGenericScene3X3Factory(context) {
+public sealed class GenericScene3x3Factory(IDialogueContext context) : GenericGenericSceneFactory(context) {
     public override IDialogueProcessor ConfigureProcessor(DialogueProcessor dialogueProcessor) {
         // Skip pre-processing of regular scene factory
         return dialogueProcessor;

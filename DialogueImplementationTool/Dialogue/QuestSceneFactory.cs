@@ -7,7 +7,7 @@ using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace DialogueImplementationTool.Dialogue;
 
-public sealed class QuestGenericScene3X3Factory(IDialogueContext context) : GenericScene3X3Factory(context) {
+public sealed class QuestSceneFactory(IDialogueContext context) : SceneFactory(context) {
     protected override Scene GetCurrentScene() {
         //Detect existing aliases
         foreach (var alias in Context.Quest.Aliases) {

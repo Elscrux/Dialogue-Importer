@@ -82,7 +82,7 @@ public sealed class TestGenericSceneFactory {
         scene1.Topics[1].TopicInfos[0].Links.Should().ContainSingle();
 
         // Process
-        var genericSceneFactory = new GenericGenericScene3X3Factory(_testConstants.SkyrimDialogueContext);
+        var genericSceneFactory = new GenericGenericSceneFactory(_testConstants.SkyrimDialogueContext);
         genericSceneFactory.PreProcess(scene1.Topics);
         genericSceneFactory.PreProcess(scene2.Topics);
 
