@@ -65,11 +65,13 @@ public sealed partial class NoteExtractor : IDialogueResponseProcessor {
 
                 processedSnippets = newSnippets;
 
-                // Add note
-                notes.Add(new Note {
-                    Text = match.Groups[1].Value,
-                    Colors = colors,
-                });
+                // Add notes
+                notes.AddRange(match.Groups[1].Value
+                    .Split(',')
+                    .Select(subNote => new Note {
+                        Text = subNote.Trim(),
+                        Colors = colors,
+                    }));
 
                 match = regex.Match(response.Response);
             }
