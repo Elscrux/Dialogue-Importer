@@ -40,7 +40,7 @@ public sealed class SharedInfo {
                 newDialogueTopic = new DialogTopic(modContext.GetNextFormKey(), modContext.Release) {
                     EditorID = dialogTopicEditorId,
                     Name = dialogTopicEditorId,
-                    Priority = 2500,
+                    Priority = 50,
                     Quest = new FormLinkNullable<IQuestGetter>(quest.FormKey),
                     Category = DialogTopic.CategoryEnum.Misc,
                     Subtype = DialogTopic.SubtypeEnum.SharedInfo,

@@ -46,7 +46,7 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
 
                 var dialogTopic = new DialogTopic(rawTopic.FormKey, Context.Release) {
                     EditorID = $"{Context.Quest.EditorID}{speakerName}{_npcIndices[speakerName]}Topic{rawTopic.IndexString}",
-                    Priority = 2500,
+                    Priority = 50,
                     Name = dontUsePrompt ? playerText : null,
                     Branch = new FormLinkNullable<IDialogBranchGetter>(branch),
                     Quest = new FormLinkNullable<IQuestGetter>(Context.Quest.FormKey),

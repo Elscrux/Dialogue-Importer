@@ -58,7 +58,7 @@ public abstract class GenericScene3X3Factory(IDialogueContext context) : BaseDia
             var aliasSpeaker = GetSpeaker(topic.TopicInfos[0].Speaker.Name);
 
             var sceneTopic = new DialogTopic(Context.GetNextFormKey(), Context.Release) {
-                Priority = 2500,
+                Priority = 50,
                 Quest = new FormLinkNullable<IQuestGetter>(Context.Quest),
                 Category = DialogTopic.CategoryEnum.Scene,
                 Subtype = DialogTopic.SubtypeEnum.Scene,
