@@ -122,12 +122,13 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
         var startingIndentation = paragraph.IndentLevel;
 
         //Add further responses
-        while (paragraph is not null && paragraph.IndentLevel == startingIndentation) {
+        while (paragraph is not null
+               && (paragraph.IndentLevel is null || paragraph.IndentLevel == startingIndentation)) {
             topicInfo.Responses.Add(processor.BuildResponse(GetFormattedText(paragraph)));
 
+            if (paragraph.NextParagraph is null || paragraph.Xml == paragraph.NextParagraph.Xml) break;
+
             paragraph = paragraph.NextParagraph;
-            while (paragraph is { IndentLevel: null } && paragraph.Xml != paragraph.NextParagraph.Xml)
-                paragraph = paragraph.NextParagraph;
         }
 
         //Add links
