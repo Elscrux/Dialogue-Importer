@@ -9,7 +9,6 @@ using DialogueImplementationTool.UI.Services;
 using DialogueImplementationTool.UI.ViewModels;
 using DialogueImplementationTool.UI.Views;
 using Mutagen.Bethesda;
-using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins.Order.DI;
 namespace DialogueImplementationTool.UI;
 
@@ -26,9 +25,6 @@ public partial class App {
         builder.RegisterType<PythonEmotionClassifier>()
             .AsSelf()
             .As<IEmotionClassifier>()
-            .SingleInstance();
-
-        builder.RegisterType<EmotionChecker>()
             .SingleInstance();
 
         builder.RegisterType<MainWindowVM>()
