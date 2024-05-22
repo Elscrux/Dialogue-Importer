@@ -30,9 +30,9 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
 
             var createdTopics = new List<LinkedTopic>();
             var topicQueue = new Queue<LinkedTopic>();
-            topicQueue.Enqueue(new LinkedTopic(startingFormKey, topic, string.Empty, true));
+            topicQueue.Enqueue(new LinkedTopic(startingFormKey, topic, string.Empty));
 
-            while (topicQueue.Any()) {
+            while (topicQueue.Count != 0) {
                 var rawTopic = topicQueue.Dequeue();
 
                 var playerText = rawTopic.Topic.GetPlayerText();
@@ -45,7 +45,7 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                 }
 
                 var dialogTopic = new DialogTopic(rawTopic.FormKey, Context.Release) {
-                    EditorID = $"{Context.Quest.EditorID}{speakerName}{_npcIndices[speakerName]}Topic{rawTopic.IndexString}",
+                    EditorID = $"{Context.Quest.EditorID}{speakerName}{_npcIndices[speakerName]}Topic{rawTopic.Identifier}",
                     Priority = 50,
                     Name = dontUsePrompt ? playerText : null,
                     Branch = new FormLinkNullable<IDialogBranchGetter>(branch),
@@ -64,10 +64,10 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                         var linkedTopic = createdTopics.Find(t => t.Topic == topicInfo.Links[linkIndex]);
                         if (linkedTopic is null) {
                             var linkFormKey = Context.GetNextFormKey();
-                            var newLink = new LinkedTopic(linkFormKey,
+                            var newLink = new LinkedTopic(
+                                linkFormKey,
                                 topicInfo.Links[linkIndex],
-                                GetIndex(linkIndex + 1, !rawTopic.IndexType),
-                                !rawTopic.IndexType);
+                                GetIndex(linkIndex + 1));
 
                             createdTopics.Add(newLink);
                             topicQueue.Enqueue(newLink);
@@ -78,21 +78,35 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                         }
                     }
 
-                    string GetIndex(int index, bool type) {
+                    string GetIndex(int index) {
+                        // Invisible continues add an underscore to the identifier
                         if (topicInfo.InvisibleContinue) {
-                            return rawTopic.IndexString + '_';
+                            return rawTopic.Identifier + '_';
                         }
 
-                        var nextChar = type
-                            ? (char) (48 + index)
-                            : (char) (64 + index);
+                        // Non-invisible continues don't have an underscore 
+                        var lastIdentifier = rawTopic.Identifier.TrimEnd('_');
 
-                        return rawTopic.IndexString.TrimEnd('_') + nextChar;
+                        // If this is the first link, return the first identifier
+                        if (lastIdentifier.Length == 0) {
+                            return LetterChar().ToString();
+                        }
+
+                        // Alternate between letters and numbers
+                        var lastChar = lastIdentifier.Last();
+                        if (char.IsLetter(lastChar)) {
+                            return lastIdentifier + NumberChar();
+                        }
+
+                        return lastIdentifier + LetterChar();
+
+                        char NumberChar() => (char) (48 + index);
+                        char LetterChar() => (char) (64 + index);
                     }
                 }
             }
         }
     }
 
-    private sealed record LinkedTopic(FormKey FormKey, DialogueTopic Topic, string IndexString, bool IndexType);
+    private sealed record LinkedTopic(FormKey FormKey, DialogueTopic Topic, string Identifier);
 }
