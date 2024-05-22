@@ -1,24 +1,27 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using DialogueImplementationTool.Dialogue.Model;
+using DialogueImplementationTool.Extension;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace DialogueImplementationTool.Dialogue;
 
 public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFactory(context) {
-    private readonly Dictionary<string, int> _npcIndices = new();
-
     public override void PreProcess(List<DialogueTopic> topics) { }
 
     public override void GenerateDialogue(List<DialogueTopic> topics) {
         foreach (var topic in topics) {
             // Use the first speaker for the editor id
             var speakerName = topic.TopicInfos[0].Speaker.Name;
-            if (!_npcIndices.TryAdd(speakerName, 1)) _npcIndices[speakerName] += 1;
+            var baseName = Context.Quest.EditorID + speakerName;
+            var branchEditorId = Naming.GetFirstFreeIndex(
+                i => baseName + i,
+                editorId => !Context.LinkCache.TryResolveIdentifier<IDialogBranchGetter>(editorId, out _),
+                1);
 
             var branch = new DialogBranch(Context.GetNextFormKey(), Context.Release) {
-                EditorID = Context.Quest.EditorID + speakerName + _npcIndices[speakerName],
+                EditorID = branchEditorId,
                 Quest = new FormLinkNullable<IQuestGetter>(Context.Quest.FormKey),
             };
 
@@ -35,8 +38,8 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
             while (topicQueue.Count != 0) {
                 var rawTopic = topicQueue.Dequeue();
 
-                var playerText = rawTopic.Topic.GetPlayerText();
                 var responses = GetTopicInfos(Context.Quest, rawTopic.Topic);
+                var playerText = rawTopic.Topic.GetPlayerText();
                 var dontUsePrompt = !playerText.IsNullOrWhitespace();
                 if (dontUsePrompt) {
                     foreach (var response in responses) {
@@ -44,8 +47,10 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                     }
                 }
 
+                var editorID = $"{branchEditorId}Topic{rawTopic.Identifier}";
+                
                 var dialogTopic = new DialogTopic(rawTopic.FormKey, Context.Release) {
-                    EditorID = $"{Context.Quest.EditorID}{speakerName}{_npcIndices[speakerName]}Topic{rawTopic.Identifier}",
+                    EditorID = editorID,
                     Priority = 50,
                     Name = dontUsePrompt ? playerText : null,
                     Branch = new FormLinkNullable<IDialogBranchGetter>(branch),

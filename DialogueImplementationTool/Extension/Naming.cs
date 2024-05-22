@@ -5,7 +5,7 @@ public static class Naming {
     public static string GetFirstFreeIndex(
         Func<int, string> selector,
         Func<string, bool> isFree,
-        int start = 0,
+        int start,
         int end = int.MaxValue) {
         for (var i = start; i < end; i++) {
             var index = selector(i);
