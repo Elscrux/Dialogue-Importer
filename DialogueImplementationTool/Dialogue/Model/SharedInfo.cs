@@ -58,6 +58,7 @@ public sealed class SharedInfo {
                     name => !modContext.LinkCache.TryResolve<IDialogResponsesGetter>(name, out _),
                     1),
                 Responses = dialogResponses.ToExtendedList(),
+                Conditions = getConditions(ResponseDataTopicInfo),
             };
             newDialogueTopic.Responses.Add(responses);
 

@@ -81,7 +81,7 @@ public sealed class TestDialogueFactory {
     [Fact]
     public void TestMalwonDialogue() {
         // Import
-        var(_, _, dialogue) = TestSamples.GetMalwonDialogue(_testConstants);
+        var (_, _, dialogue) = TestSamples.GetMalwonDialogue(_testConstants);
 
         // Process
         Conversation conversation = [dialogue];
@@ -117,5 +117,13 @@ public sealed class TestDialogueFactory {
 
         // Implement
         conversation.Create();
+
+        // Check shared conditions
+        var sharedInfo = _testConstants.Mod.DialogTopics
+            .First(x => x.EditorID is not null && x.EditorID.EndsWith("Shared"));
+
+        foreach (var response in sharedInfo.Responses) {
+            response.Conditions.Should().ContainSingle();
+        }
     }
 }
