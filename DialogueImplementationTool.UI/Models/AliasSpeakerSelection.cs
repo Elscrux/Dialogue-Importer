@@ -13,8 +13,7 @@ public sealed class AliasSpeakerSelection : ReactiveObject {
         Name = ISpeaker.GetSpeakerName(name);
 
         this.WhenAnyValue(x => x.FormKey)
-            .Subscribe(
-                _ => { speakerFavoritesSelection.AddSpeaker(new NpcSpeaker(linkCache, FormKey)); });
+            .Subscribe(_ => speakerFavoritesSelection.AddSpeaker(new NpcSpeaker(linkCache, FormKey)));
     }
 
     public string Name { get; set; }

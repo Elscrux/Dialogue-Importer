@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Globalization;
+using System.Text.RegularExpressions;
 using Mutagen.Bethesda.Plugins;
 namespace DialogueImplementationTool.Dialogue.Speaker;
 
@@ -8,7 +9,9 @@ public partial interface ISpeaker {
     public string Name { get; }
 
     public static string GetSpeakerName(string name) {
-        return ReplaceRegex().Replace(name, string.Empty);
+        name = ReplaceRegex().Replace(name, string.Empty);
+        return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name)
+            .Replace(" ", string.Empty);
     }
 
     [GeneratedRegex(@"\s+|-")]
