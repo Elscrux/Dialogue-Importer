@@ -9,7 +9,7 @@ using KeywordLink = (string Keyword, DialogueTopic Topic, DialogueTopicInfo Topi
 
 public sealed partial class KeywordLinker : IConversationProcessor {
     private const string FillerRegexPart = @"[^\]]*";
-    private const string MergeRegexPart = "(?:merge|go|back)";
+    private const string MergeRegexPart = "(?:merge|go|back) ";
     private const string OptionsAfterRegexPart = "(?:options after )";
     private const string KeywordRegexPart = "([A-Z]+)";
 
@@ -18,12 +18,12 @@ public sealed partial class KeywordLinker : IConversationProcessor {
     private static partial Regex SimpleKeywordRegex();
 
     // [merge to DONE above]
-    [GeneratedRegex($"{FillerRegexPart}{MergeRegexPart} to {KeywordRegexPart}{FillerRegexPart}")]
+    [GeneratedRegex($"{FillerRegexPart}(?:{MergeRegexPart})?to {KeywordRegexPart}{FillerRegexPart}")]
     private static partial Regex LinkSimpleRegex();
 
     // [merge to options after HERE above]
-    [GeneratedRegex(
-        $"{FillerRegexPart}{MergeRegexPart} to {OptionsAfterRegexPart}?{KeywordRegexPart}{FillerRegexPart}")]
+    [GeneratedRegex($"{FillerRegexPart}(?:{MergeRegexPart})?to "
+                    + $"{OptionsAfterRegexPart}?{KeywordRegexPart}{FillerRegexPart}")]
     private static partial Regex LinkOptionsRegex();
 
     public void Process(Conversation conversation) {
