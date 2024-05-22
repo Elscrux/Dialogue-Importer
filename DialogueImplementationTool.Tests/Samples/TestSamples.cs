@@ -69,6 +69,17 @@ public static class TestSamples {
             GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 1));
     }
 
+    public static (GeneratedDialogue Greeting, GeneratedDialogue Farewell, GeneratedDialogue Dialogue)
+        GetMalwonDialogue(TestConstants testConstants) {
+        var docXDocumentParser = new DocXDocumentParser(
+            Path.GetFullPath("../../../Samples/Documents/[Locked] Malwon.docx"));
+
+        return (
+            GetDialogue(testConstants, docXDocumentParser, DialogueType.Greeting, 0),
+            GetDialogue(testConstants, docXDocumentParser, DialogueType.Farewell, 1),
+            GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 2));
+    }
+
     public static (GeneratedDialogue DialogueLink, GeneratedDialogue DialogueOptions1, GeneratedDialogue
         DialogueOptions2)
         GetStyleGuideDialogue(TestConstants testConstants) {

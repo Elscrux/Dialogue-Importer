@@ -7,7 +7,7 @@ public sealed class TestDialogueFactory {
     private readonly TestConstants _testConstants = new();
 
     [Fact]
-    public void TestDialogue() {
+    public void TestBrinaCrossDialogue() {
         // Import
         var (_, dialogueTopics, _) = TestSamples.GetBrinaCrossDialogue(_testConstants);
 
@@ -41,7 +41,7 @@ public sealed class TestDialogueFactory {
     }
 
     [Fact]
-    public void TestDialogueFactoryCreate() {
+    public void TestCraneShoreDialogue() {
         // Import
         var (_, dialogue) = TestSamples.GetCraneShoreDialogue(_testConstants);
 
@@ -76,5 +76,46 @@ public sealed class TestDialogueFactory {
         persuadeTopic.Responses[1].Responses.Should().HaveCount(2);
         persuadeTopic.Responses[0].LinkTo.Should().ContainSingle();
         persuadeTopic.Responses[1].LinkTo.Should().ContainSingle();
+    }
+
+    [Fact]
+    public void TestMalwonDialogue() {
+        // Import
+        var(_, _, dialogue) = TestSamples.GetMalwonDialogue(_testConstants);
+
+        // Process
+        Conversation conversation = [dialogue];
+        _testConstants.DialogueProcessor.Process(conversation);
+
+        // Check structure
+        conversation[0].Topics.Should().ContainSingle();
+        conversation[0].Topics[0].TopicInfos.Should().ContainSingle();
+
+        var rootTopicInfo = conversation[0].Topics[0].TopicInfos[0];
+        rootTopicInfo.Links.Should().HaveCount(3);
+        var fishingGearTopic = rootTopicInfo.Links[0];
+        fishingGearTopic.TopicInfos.Should().ContainSingle();
+        fishingGearTopic.TopicInfos[0].Links.Should().HaveCount(3);
+        var archeryTopic = fishingGearTopic.TopicInfos[0].Links[0];
+        archeryTopic.TopicInfos.Should().HaveCount(2);
+        var successTopicInfo = archeryTopic.TopicInfos[0];
+        successTopicInfo.Links.Should().BeEmpty();
+        var failureTopicInfo = archeryTopic.TopicInfos[1];
+        failureTopicInfo.Links.Should().HaveCount(3);
+
+        var nestedIntimidateTopic = fishingGearTopic.TopicInfos[0].Links[1];
+        nestedIntimidateTopic.TopicInfos.Should().HaveCount(2);
+
+        var nestedPersuadeTopic = fishingGearTopic.TopicInfos[0].Links[2];
+        nestedPersuadeTopic.TopicInfos.Should().HaveCount(2);
+
+        var intimidateTopic = rootTopicInfo.Links[1];
+        intimidateTopic.TopicInfos.Should().HaveCount(2);
+
+        var persuadeTopic = rootTopicInfo.Links[2];
+        persuadeTopic.TopicInfos.Should().HaveCount(2);
+
+        // Implement
+        conversation.Create();
     }
 }
