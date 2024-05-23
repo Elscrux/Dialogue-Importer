@@ -21,6 +21,19 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 /// </summary>
 public sealed class CollapseNoteOnlyResponse : IDialogueTopicInfoProcessor {
     public void Process(DialogueTopicInfo topicInfo) {
+        // Merge start notes into next line if applicable
+        while (topicInfo.Responses.Count > 1) {
+            var firstResponse = topicInfo.Responses[0];
+            var secondResponse = topicInfo.Responses[1];
+            if (firstResponse.Response.IsNullOrEmpty() && firstResponse.Notes().Count > 0) {
+                secondResponse.StartNotes.AddRange(firstResponse.Notes());
+                topicInfo.Responses.RemoveAt(0);
+            } else {
+                break;
+            }
+        }
+
+        // Merge notes into previous line if applicable
         var counter = 1;
         while (counter < topicInfo.Responses.Count) {
             var response = topicInfo.Responses[counter];

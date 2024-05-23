@@ -132,12 +132,15 @@
         <DependentUpon>IDialogueResponseProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\IsRaceChecker.cs">
-        <DependentUpon>PlayerIDialogueTopicInfoProcessor.cs</DependentUpon>
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\RandomTopicInfo.cs">
         <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\ResetHourTopicInfo.cs">
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\CollapseNoteOnlyResponse.cs">
         <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
     </ItemGroup>
