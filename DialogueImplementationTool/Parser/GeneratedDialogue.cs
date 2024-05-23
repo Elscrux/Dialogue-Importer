@@ -38,7 +38,7 @@ public sealed class GeneratedDialogue {
 }
 
 public sealed class DialogueSelection {
-    public List<DialogueType> SelectedTypes { get; } = [];
+    public HashSet<DialogueType> SelectedTypes { get; } = [];
     public FormKey Speaker { get; set; } = FormKey.Null;
     public bool UseGetIsAliasRef { get; set; }
 }
