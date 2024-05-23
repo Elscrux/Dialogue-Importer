@@ -33,8 +33,7 @@ public partial class App {
         builder.RegisterType<DialogueVM>();
 
         builder.RegisterType<DialogueProcessor>()
-            .AsSelf()
-            .As<IDialogueProcessor>();
+            .AsSelf();
 
         builder.RegisterType<OutputPathProvider>()
             .SingleInstance();
