@@ -141,7 +141,7 @@
         <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\CollapseNoteOnlyResponse.cs">
-        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+        <DependentUpon>IConversationProcessor.cs</DependentUpon>
       </Compile>
     </ItemGroup>
 

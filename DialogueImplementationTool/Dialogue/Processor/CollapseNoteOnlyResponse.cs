@@ -19,7 +19,17 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 /// </code>
 /// </example>
 /// </summary>
-public sealed class CollapseNoteOnlyResponse : IDialogueTopicInfoProcessor {
+public sealed class CollapseNoteOnlyResponse : IConversationProcessor {
+    public void Process(Conversation conversation) {
+        foreach (var generatedDialogue in conversation) {
+            foreach (var topic in generatedDialogue.Topics) {
+                foreach (var topicInfo in topic.TopicInfos) {
+                    Process(topicInfo);
+                }
+            }
+        }
+    }
+
     public void Process(DialogueTopicInfo topicInfo) {
         // Merge start notes into next line if applicable
         while (topicInfo.Responses.Count > 1) {
