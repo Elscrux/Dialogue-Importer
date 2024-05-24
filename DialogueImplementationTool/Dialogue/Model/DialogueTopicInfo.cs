@@ -161,6 +161,6 @@ public sealed class DialogueTopicInfo {
     public override string ToString() {
         if (Responses.Count == 0) return "Empty topic info";
 
-        return Responses[0].ToString();
+        return string.Join(" | ", Responses);
     }
 }
