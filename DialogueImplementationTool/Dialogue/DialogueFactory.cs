@@ -20,10 +20,7 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                 editorId => !Context.LinkCache.TryResolveIdentifier<IDialogBranchGetter>(editorId, out _),
                 1);
 
-            var branch = new DialogBranch(Context.GetNextFormKey(), Context.Release) {
-                EditorID = branchEditorId,
-                Quest = new FormLinkNullable<IQuestGetter>(Context.Quest.FormKey),
-            };
+            var branch = new DialogBranch(Context.GetNextFormKey(), Context.Release) { EditorID = branchEditorId, Quest = new FormLinkNullable<IQuestGetter>(Context.Quest.FormKey), };
 
             branch.Flags |= topic.Blocking ? DialogBranch.Flag.Blocking : DialogBranch.Flag.TopLevel;
             Context.AddDialogBranch(branch);
@@ -47,10 +44,10 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                     }
                 }
 
-                var editorID = $"{branchEditorId}Topic{rawTopic.Identifier}";
-                
+                var editorId = $"{branchEditorId}Topic{rawTopic.Identifier}";
+
                 var dialogTopic = new DialogTopic(rawTopic.FormKey, Context.Release) {
-                    EditorID = editorID,
+                    EditorID = editorId,
                     Priority = 50,
                     Name = dontUsePrompt ? playerText : null,
                     Branch = new FormLinkNullable<IDialogBranchGetter>(branch),

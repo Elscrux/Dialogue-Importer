@@ -80,6 +80,13 @@ public static class TestSamples {
             GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 2));
     }
 
+    public static GeneratedDialogue GetMultiLevelConditionDialogue(TestConstants testConstants) {
+        var docXDocumentParser = new DocXDocumentParser(
+            Path.GetFullPath("../../../Samples/Documents/MultiLevelCondition.docx"));
+
+        return GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 0);
+    }
+
     public static (GeneratedDialogue DialogueLink, GeneratedDialogue DialogueOptions1, GeneratedDialogue
         DialogueOptions2)
         GetStyleGuideDialogue(TestConstants testConstants) {

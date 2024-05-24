@@ -56,38 +56,55 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
     }
 
     public string Preview(int index) {
-        return index < 0 || index >= _doc.Lists.Count
-            ? string.Empty
-            : _doc.Lists[index].Items.FirstOrDefault()?.Text ?? string.Empty;
+        return index < 0 || index >= _doc.Lists.Count ? string.Empty : _doc.Lists[index].Items.FirstOrDefault()?.Text ?? string.Empty;
     }
 
     public List<DialogueTopic> ParseDialogue(IDialogueProcessor processor, int index) {
         var branches = new List<DialogueTopic>();
         var list = _doc.Lists[index];
-
-        if (list.Items.Count == 0) return branches;
+        var paragraphs = EnumerateBetween(list.Items[0], list.Items[^1]);
 
         //Evaluate if the player starts dialogue
         if (IsPlayerLine(list.Items[0])) {
-            branches.AddRange(
-                list.Items.Where(p => p.IndentLevel == FirstIndentationLevel)
-                    .Select(
-                        x => {
-                            var currentBranchInfo = AddTopicInfo(processor, x);
-                            processor.Process(currentBranchInfo);
-                            return new DialogueTopic { TopicInfos = [currentBranchInfo] };
-                        }));
+            var listIndices = list.Items
+                .Select((p, i) => p.IndentLevel == FirstIndentationLevel ? i : -1)
+                .Where(i => i != -1)
+                .Append(list.Items.Count - 1)
+                .ToList();
+
+            for (var i = 0; i < listIndices.Count - 1; i++) {
+                var firstIndex = listIndices[i];
+                var lastIndex = listIndices[i + 1];
+
+                var enumerable = EnumerateBetween(list.Items[firstIndex], list.Items[lastIndex]);
+                using var enumerator = enumerable.GetEnumerator();
+                if (!enumerator.MoveNext()) continue;
+
+                var topic = GetTopic(processor, enumerator);
+                branches.Add(topic);
+            }
         } else {
             //One new branch, NPC starts to talk
-            var currentTopicInfo = new DialogueTopicInfo();
-            var currentBranch = new DialogueTopic { TopicInfos = [currentTopicInfo] };
-            branches.Add(currentBranch);
+            using var enumerator = paragraphs.GetEnumerator();
+            if (!enumerator.MoveNext()) return branches;
 
-            AddLinksAndResponses(processor, list.Items[0], currentTopicInfo);
-            processor.Process(currentTopicInfo);
+            var topicInfos = GetTopicInfos(processor, enumerator).ToList();
+            var currentBranch = new DialogueTopic { TopicInfos = topicInfos };
+            branches.Add(currentBranch);
         }
 
         return branches;
+
+        static IEnumerable<Paragraph> EnumerateBetween(Paragraph first, Paragraph last) {
+            var current = first;
+            while (current.Xml != last.Xml && current.Xml != current.NextParagraph.Xml) {
+                yield return current;
+
+                current = current.NextParagraph;
+            }
+
+            yield return last;
+        }
     }
 
     public List<DialogueTopic> ParseOneLiner(IDialogueProcessor processor, int index) {
@@ -106,63 +123,86 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
         return [new DialogueTopic { TopicInfos = topicInfos }];
     }
 
-    private DialogueTopicInfo AddTopicInfo(IDialogueProcessor processor, Paragraph paragraph) {
-        var topicInfo = new DialogueTopicInfo();
-        var startingIndentation = paragraph.IndentLevel;
+    private DialogueTopic GetTopic(IDialogueProcessor processor, IEnumerator<Paragraph> enumerator) {
+        var startingIndentation = enumerator.Current.IndentLevel;
+        var prompt = enumerator.Current.Text;
 
-        topicInfo.Prompt = paragraph.Text;
-
-        paragraph = paragraph.NextParagraph;
-        if (paragraph.IndentLevel == startingIndentation + 1) AddLinksAndResponses(processor, paragraph, topicInfo);
-
-        return topicInfo;
-    }
-
-    private void AddLinksAndResponses(IDialogueProcessor processor, Paragraph paragraph, DialogueTopicInfo topicInfo) {
-        var startingIndentation = paragraph.IndentLevel;
-        var nextIndentation = startingIndentation + 1;
-
-        //Add further responses
-        while (paragraph is not null
-               && (paragraph.IndentLevel is null || paragraph.IndentLevel == startingIndentation)) {
-            topicInfo.Responses.Add(processor.BuildResponse(GetFormattedText(paragraph)));
-
-            if (paragraph.NextParagraph is null || paragraph.Xml == paragraph.NextParagraph.Xml) break;
-
-            paragraph = paragraph.NextParagraph;
+        enumerator.MoveNext();
+        if (enumerator.Current.IndentLevel != startingIndentation + 1) {
+            return new DialogueTopic { TopicInfos = [new DialogueTopicInfo { Prompt = prompt }] };
         }
 
-        //Add links
-        while (paragraph is not null
-               && (paragraph.IndentLevel is null || paragraph.IndentLevel > startingIndentation)) {
-            if (paragraph.IndentLevel == nextIndentation) {
-                var nextTopicInfo = AddTopicInfo(processor, paragraph);
-                topicInfo.Links.Add(new DialogueTopic { TopicInfos = [nextTopicInfo] });
-                processor.Process(nextTopicInfo);
+        var list = new List<DialogueTopicInfo>();
+        foreach (var topicInfo in GetTopicInfos(processor, enumerator)) {
+            topicInfo.Prompt = prompt;
+            list.Add(topicInfo);
+        }
+
+        return new DialogueTopic { TopicInfos = list };
+    }
+
+    private IEnumerable<DialogueTopicInfo> GetTopicInfos(IDialogueProcessor processor, IEnumerator<Paragraph> enumerator) {
+        var startingIndentation = enumerator.Current.IndentLevel;
+        var abort = false;
+
+        while (!abort && enumerator.Current.IndentLevel == startingIndentation) {
+            var topicInfo = new DialogueTopicInfo();
+
+            //Add responses
+            var currentIndentation = startingIndentation;
+            while (enumerator.Current.IndentLevel is null || IsValidResponse(enumerator.Current, currentIndentation)) {
+                topicInfo.Responses.Add(processor.BuildResponse(GetFormattedText(enumerator.Current)));
+
+                if (enumerator.Current.IndentLevel is not null) currentIndentation = enumerator.Current.IndentLevel;
+                if (!enumerator.MoveNext()) {
+                    abort = true;
+                    break;
+                }
             }
 
-            if (paragraph.NextParagraph is null || paragraph.Xml == paragraph.NextParagraph.Xml) break;
+            if (abort) {
+                processor.Process(topicInfo);
+                yield return topicInfo;
 
-            paragraph = paragraph.NextParagraph;
+                break;
+            }
+
+            //Add links
+            while (enumerator.Current.IndentLevel is null || enumerator.Current.IndentLevel > startingIndentation) {
+                if (IsPlayerLine(enumerator.Current)) {
+                    var nextTopic = GetTopic(processor, enumerator);
+                    topicInfo.Links.Add(nextTopic);
+                } else {
+                    if (!enumerator.MoveNext()) {
+                        abort = true;
+                        break;
+                    }
+                }
+            }
+
+            processor.Process(topicInfo);
+            yield return topicInfo;
+        }
+
+        bool IsValidResponse(Paragraph newParagraph, int? currentIndentation) {
+            // No indent level means it's text between list entries, we just include them for good measure
+            // List entries that are not player lines and in the current indentation scope are also included
+            return newParagraph.IndentLevel is null
+                   || newParagraph.IndentLevel >= currentIndentation && !IsPlayerLine(newParagraph);
         }
     }
 
-    private bool IsPlayerLine(Paragraph paragraph) {
+    private static bool IsPlayerLine(Paragraph paragraph) {
         return paragraph.MagicText.NotNull().All(magicText => magicText.formatting?.Bold is not (null or false));
     }
 
-    private List<FormattedText> GetFormattedText(Paragraph paragraph) {
+    private static List<FormattedText> GetFormattedText(Paragraph paragraph) {
         return paragraph.MagicText
             .NotNull()
-            .Select(
-                text => new FormattedText(
-                    text.text,
-                    text.formatting?.Bold ?? false,
-                    text.formatting?.FontColor ?? Color.Black))
+            .Select(text => new FormattedText(
+                text.text,
+                text.formatting?.Bold ?? false,
+                text.formatting?.FontColor ?? Color.Black))
             .ToList();
-    }
-
-    private FormattedText GetFormattedText(Xceed.Document.NET.FormattedText text) {
-        return new FormattedText(text.text, text.formatting.Bold ?? false, text.formatting.FontColor ?? Color.Black);
     }
 }

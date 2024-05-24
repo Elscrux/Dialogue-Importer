@@ -127,4 +127,55 @@ public sealed class TestDialogueFactory {
             response.Conditions.Should().ContainSingle();
         }
     }
+
+    [Fact]
+    public void TestMultiLevelConditionDialogue() {
+        // Import
+        var dialogue = TestSamples.GetMultiLevelConditionDialogue(_testConstants);
+
+        // Process
+        Conversation conversation = [dialogue];
+        _testConstants.DialogueProcessor.Process(conversation);
+
+        // Check
+        conversation[0].Topics.Should().ContainSingle();
+        conversation[0].Topics[0].TopicInfos.Should().HaveCount(3);
+
+        var firstTopicInfo = conversation[0].Topics[0].TopicInfos[0];
+        firstTopicInfo.Responses.Should().HaveCount(2);
+        firstTopicInfo.Responses[0].HasNote("if SABOTAGED").Should().BeTrue();
+        firstTopicInfo.Responses[0].Response.Should().Be("Well, just look at what happened in Hero's Rest recently. That should tell you all you need to know.");
+        firstTopicInfo.Links.Should().ContainSingle();
+        firstTopicInfo.Links[0].TopicInfos.Should().ContainSingle();
+        firstTopicInfo.Links[0].TopicInfos[0].Responses.Should().HaveCount(2);
+        firstTopicInfo.Links[0].GetPlayerText().Should().Be("Test");
+
+        var secondTopicInfo = conversation[0].Topics[0].TopicInfos[1];
+        secondTopicInfo.Responses.Should().ContainSingle();
+        secondTopicInfo.Responses[0].HasNote("if HELPED").Should().BeTrue();
+        secondTopicInfo.Responses[0].Response.Should().Be("Oh, I'd rather not go into that. It's not my place to discuss such things.");
+        secondTopicInfo.Links.Should().BeEmpty();
+
+        var thirdTopicInfo = conversation[0].Topics[0].TopicInfos[2];
+        thirdTopicInfo.Responses.Should().HaveCount(5);
+        thirdTopicInfo.Responses[0].HasNote("else").Should().BeTrue();
+        thirdTopicInfo.Responses[0].Response.Should().Be("Well, I'm... glad you asked.");
+        thirdTopicInfo.Links.Should().HaveCount(3);
+
+        var firstLink = thirdTopicInfo.Links[0];
+        firstLink.TopicInfos.Should().ContainSingle();
+        firstLink.TopicInfos[0].Responses.Should().HaveCount(2);
+        firstLink.TopicInfos[0].Links.Should().HaveCount(2);
+
+        var secondLink = thirdTopicInfo.Links[1];
+        secondLink.TopicInfos.Should().ContainSingle();
+        secondLink.TopicInfos[0].Responses.Should().HaveCount(2);
+        secondLink.TopicInfos[0].Links.Should().BeEmpty();
+
+
+        var thirdLink = thirdTopicInfo.Links[2];
+        thirdLink.TopicInfos.Should().ContainSingle();
+        thirdLink.TopicInfos[0].Responses.Should().ContainSingle();
+        thirdLink.TopicInfos[0].Links.Should().BeEmpty();
+    }
 }
