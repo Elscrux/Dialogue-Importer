@@ -31,10 +31,10 @@ public sealed class DialogueTopic {
     public string GetPlayerText() {
         var prompts = TopicInfos.Select(x => x.Prompt).Distinct().ToList();
 
-        // If there are multiple prompts, return empty string - prompts for the topics will be used instead
-        if (prompts.Count > 1) return string.Empty;
+        if (prompts.Count == 1) return prompts[0];
 
-        return prompts[0];
+        // If there are multiple prompts, return empty string - prompts for the topics will be used instead
+        return string.Empty;
     }
 
     public void ConvertResponsesToTopicInfos() {
