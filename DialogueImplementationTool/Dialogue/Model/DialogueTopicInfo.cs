@@ -69,15 +69,15 @@ public sealed class DialogueTopicInfo {
 
     public DialogueTopicInfo SplitOffDialogue(DialogueTopicInfo splitOffTopicInfo) {
         var startingResponse = splitOffTopicInfo.Responses[0];
-        const string invisibleCont = "(invis cont)";
 
         //Search for topics that were nested behind invisible continues through shared dialogue
         var currentInfo = this;
         var indexOf = currentInfo.SharedInfo is null
             ? currentInfo.Responses.IndexOf(startingResponse)
             : -1;
+
         while (indexOf == -1
-               && currentInfo is { Links: [{ TopicInfos: [{ Prompt: invisibleCont } nextTopicInfo] }] }) {
+               && currentInfo is { InvisibleContinue: true, Links: [{ TopicInfos: [var nextTopicInfo] }] }) {
             currentInfo = nextTopicInfo;
             if (currentInfo.SharedInfo is null) indexOf = currentInfo.Responses.IndexOf(startingResponse);
         }
@@ -97,7 +97,6 @@ public sealed class DialogueTopicInfo {
                     var nextTopic = new DialogueTopic {
                         TopicInfos = {
                             new DialogueTopicInfo {
-                                Prompt = invisibleCont,
                                 Speaker = currentInfo.Speaker,
                                 Responses = nextRange,
                             },
@@ -116,7 +115,6 @@ public sealed class DialogueTopicInfo {
             default: {
                 // Split info is in the middle of the topic, either at the end or the middle
                 var invisibleContTopicInfo = new DialogueTopicInfo {
-                    Prompt = invisibleCont,
                     Speaker = currentInfo.Speaker,
                     Responses = splitOffTopicInfo.Responses,
                 };
@@ -134,7 +132,6 @@ public sealed class DialogueTopicInfo {
                     var nextTopic = new DialogueTopic {
                         TopicInfos = [
                             new DialogueTopicInfo {
-                                Prompt = invisibleCont,
                                 Speaker = currentInfo.Speaker,
                                 Responses = nextRange,
                             },
