@@ -4,7 +4,7 @@ namespace DialogueImplementationTool.Dialogue.Model;
 
 public static class DialogueTopicExtensions {
     public static IEnumerable<DialogueTopic> EnumerateLinks(this IEnumerable<DialogueTopic> topics, bool includeSelf) {
-        return topics.SelectMany(topic => topic.EnumerateLinks(includeSelf));
+        return topics.SelectMany(topic => topic.EnumerateLinks(includeSelf)).Distinct();
     }
 
     /// <summary>

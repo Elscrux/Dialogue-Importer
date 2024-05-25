@@ -10,27 +10,29 @@ public sealed class SharedInfoConverter : IConversationProcessor {
         // Convert to shared line objects that store the speaker and text per line/response
         // and links to the shared line to be able to check which lines are reused multiple times
         var sharedLines = new HashSet<SharedLine>();
-        foreach (var generated in conversation) {
-            foreach (var topic in generated.Topics.EnumerateLinks(true)) {
-                foreach (var topicInfo in topic.TopicInfos) {
-                    SharedLine? last = null;
-                    SharedLineLink? lastLink = null;
-                    SharedLine? next = null;
-                    foreach (var response in topicInfo.Responses) {
-                        //Get unique shared line
-                        var sharedLine = new SharedLine(response, topicInfo.Speaker);
-                        if (sharedLines.TryGetValue(sharedLine, out var existingSharedLine)) {
-                            sharedLine = existingSharedLine;
-                        }
+        var topics = conversation
+            .SelectMany(x => x.Topics.EnumerateLinks(true))
+            .Distinct();
 
-                        //Setup links
-                        if (lastLink is not null) lastLink.Next = sharedLine;
-                        lastLink = new SharedLineLink(topicInfo, last, next);
-                        sharedLine.Users.Add(lastLink);
-                        last = sharedLine;
-
-                        sharedLines.Add(sharedLine);
+        foreach (var topic in topics) {
+            foreach (var topicInfo in topic.TopicInfos) {
+                SharedLine? last = null;
+                SharedLineLink? lastLink = null;
+                SharedLine? next = null;
+                foreach (var response in topicInfo.Responses) {
+                    //Get unique shared line
+                    var sharedLine = new SharedLine(response, topicInfo.Speaker);
+                    if (sharedLines.TryGetValue(sharedLine, out var existingSharedLine)) {
+                        sharedLine = existingSharedLine;
                     }
+
+                    //Setup links
+                    if (lastLink is not null) lastLink.Next = sharedLine;
+                    lastLink = new SharedLineLink(topicInfo, last, next);
+                    sharedLine.Users.Add(lastLink);
+                    last = sharedLine;
+
+                    sharedLines.Add(sharedLine);
                 }
             }
         }
