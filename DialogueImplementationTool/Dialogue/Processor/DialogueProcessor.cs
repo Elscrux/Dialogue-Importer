@@ -19,7 +19,6 @@ public sealed class DialogueProcessor(EmotionChecker emotionChecker) : IDialogue
         new TopicInfoTrimmer(),
         new TopicInfoInvalidStringFixer(),
         new PlayerIsRaceChecker(),
-        emotionChecker,
     ];
 
     public List<IDialogueTopicProcessor> TopicProcessors { get; } = [
@@ -38,6 +37,7 @@ public sealed class DialogueProcessor(EmotionChecker emotionChecker) : IDialogue
         new CollapseEmptyInvisibleContinues(),
         new BlockingChecker(),
         new MergeIdenticalTopics(),
+        emotionChecker,
     ];
 
     public DialogueProcessor Clone() => new(emotionChecker);
