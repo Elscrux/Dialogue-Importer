@@ -143,6 +143,9 @@
       <Compile Update="Dialogue\Processor\CollapseNoteOnlyResponse.cs">
         <DependentUpon>IConversationProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\Processor\CollapseEmptyInvisibleContinues.cs">
+        <DependentUpon>IConversationProcessor.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>
