@@ -118,7 +118,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
                         TopicInfos = {
                             new DialogueTopicInfo {
                                 Speaker = currentInfo.Speaker,
-                                Responses = nextRange,
+                                Responses = nextRange.ToList(),
                             },
                         },
                     };
@@ -136,7 +136,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
                 // Split info is in the middle of the topic, either at the end or the middle
                 var invisibleContTopicInfo = new DialogueTopicInfo {
                     Speaker = currentInfo.Speaker,
-                    Responses = splitOffTopicInfo.Responses,
+                    Responses = splitOffTopicInfo.Responses.ToList(),
                 };
                 var invisibleContTopic = new DialogueTopic { TopicInfos = [invisibleContTopicInfo] };
                 currentInfo.Append(invisibleContTopic);
