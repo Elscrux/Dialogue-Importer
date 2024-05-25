@@ -8,7 +8,7 @@ namespace DialogueImplementationTool.Dialogue.Model;
 
 [DebuggerDisplay("{ToString()}")]
 public sealed class DialogueTopicInfo {
-    public SharedInfo? SharedInfo { get; set; }
+    public SharedInfo? SharedInfo { get; private set; }
 
     public Speaker.ISpeaker Speaker { get; set; } = null!;
 
@@ -153,6 +153,27 @@ public sealed class DialogueTopicInfo {
         foreach (var response in Responses) {
             response.RemoveNote(note);
         }
+    }
+
+    public SharedInfo MakeSharedInfo() {
+        SharedInfo ??= new SharedInfo(this);
+        Responses.Clear();
+        return SharedInfo;
+    }
+
+    public void ApplySharedInfo(SharedInfo sharedInfo) {
+        SharedInfo = sharedInfo;
+
+        var topicInfo = sharedInfo.ResponseDataTopicInfo;
+        Speaker = topicInfo.Speaker;
+        Responses.Clear();
+        SayOnce = topicInfo.SayOnce;
+        Goodbye = topicInfo.Goodbye;
+        InvisibleContinue = topicInfo.InvisibleContinue;
+        Random = topicInfo.Random;
+        ResetHours = topicInfo.ResetHours;
+        ExtraConditions.Clear();
+        ExtraConditions.AddRange(topicInfo.ExtraConditions);
     }
 
     public override string ToString() {

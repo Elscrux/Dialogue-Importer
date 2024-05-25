@@ -124,7 +124,7 @@ public sealed class SharedInfoConverter : IConversationProcessor {
                     if (topicUsingLine.SharedInfo is not null) continue;
 
                     var dialogueTopicInfo = topicUsingLine.SplitOffDialogue(sharedTopicInfo);
-                    dialogueTopicInfo.SharedInfo = sharedInfo;
+                    dialogueTopicInfo.ApplySharedInfo(sharedInfo);
                 }
             }
         }
