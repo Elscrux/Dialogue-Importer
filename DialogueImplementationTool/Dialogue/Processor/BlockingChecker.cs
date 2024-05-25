@@ -7,7 +7,10 @@ public sealed class BlockingChecker : IConversationProcessor {
         foreach (var topic in conversation.SelectMany(x => x.Topics)) {
             if (topic.TopicInfos is not [var topicInfo]) continue;
 
-            if (topicInfo.Prompt.IsNullOrWhitespace()) topic.Blocking = true;
+            if (topicInfo.Prompt.IsNullOrWhitespace()) {
+                topic.TopicInfos[0].Prompt = "(blocking)";
+                topic.Blocking = true;
+            }
         }
     }
 }
