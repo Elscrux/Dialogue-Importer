@@ -22,7 +22,7 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 public sealed class CollapseNoteOnlyResponse : IConversationProcessor {
     public void Process(Conversation conversation) {
         foreach (var generatedDialogue in conversation) {
-            foreach (var topic in generatedDialogue.Topics) {
+            foreach (var topic in generatedDialogue.Topics.EnumerateLinks(true)) {
                 foreach (var topicInfo in topic.TopicInfos) {
                     Process(topicInfo);
                 }
