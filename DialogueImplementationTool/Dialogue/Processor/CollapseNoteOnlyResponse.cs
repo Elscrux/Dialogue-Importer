@@ -35,7 +35,7 @@ public sealed class CollapseNoteOnlyResponse : IConversationProcessor {
         while (topicInfo.Responses.Count > 1) {
             var firstResponse = topicInfo.Responses[0];
             var secondResponse = topicInfo.Responses[1];
-            if (firstResponse.Response.IsNullOrEmpty() && firstResponse.Notes().Count > 0) {
+            if (firstResponse.IsEmpty() && firstResponse.Notes().Count > 0) {
                 secondResponse.StartNotes.AddRange(firstResponse.Notes());
                 topicInfo.Responses.RemoveAt(0);
             } else {
@@ -48,7 +48,7 @@ public sealed class CollapseNoteOnlyResponse : IConversationProcessor {
         while (counter < topicInfo.Responses.Count) {
             var response = topicInfo.Responses[counter];
 
-            if (response.Response.IsNullOrEmpty() && response.Notes().Count > 0) {
+            if (response.IsEmpty() && response.Notes().Count > 0) {
                 topicInfo.Responses[counter - 1].EndsNotes.AddRange(response.Notes());
                 topicInfo.Responses.RemoveAt(counter);
             } else {

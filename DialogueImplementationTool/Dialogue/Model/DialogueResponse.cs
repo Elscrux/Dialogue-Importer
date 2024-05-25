@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 namespace DialogueImplementationTool.Dialogue.Model;
 
 [DebuggerDisplay("{ToString()}")]
@@ -63,6 +64,11 @@ public record DialogueResponse {
 
         return any;
     }
+
+    /// <summary>
+    /// Has empty response text
+    /// </summary>
+    public bool IsEmpty() => Response.IsNullOrEmpty();
 
     public virtual bool Equals(DialogueResponse? other) {
         if (ReferenceEquals(null, other)) return false;
