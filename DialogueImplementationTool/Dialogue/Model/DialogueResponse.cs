@@ -79,7 +79,8 @@ public record DialogueResponse {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
 
-        return FullResponse == other.FullResponse && ScriptNote == other.ScriptNote;
+        return FullResponse == other.FullResponse
+         && ScriptNote == other.ScriptNote;
     }
 
     public override int GetHashCode() {

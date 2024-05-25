@@ -5,10 +5,11 @@ using System.Linq;
 using DialogueImplementationTool.Dialogue.Speaker;
 using DynamicData;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 namespace DialogueImplementationTool.Dialogue.Model;
 
 [DebuggerDisplay("{ToString()}")]
-public sealed class DialogueTopicInfo {
+public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
     public SharedInfo? SharedInfo { get; private set; }
 
     public ISpeaker Speaker { get; set; } = null!;
@@ -23,6 +24,22 @@ public sealed class DialogueTopicInfo {
     public float ResetHours { get; set; }
     public List<Condition> ExtraConditions { get; init; } = [];
 
+    public DialogueTopicInfo() {}
+
+    public DialogueTopicInfo(DialogueTopicInfo other) {
+        SharedInfo = other.SharedInfo;
+        Speaker = other.Speaker;
+        Prompt = other.Prompt;
+        SayOnce = other.SayOnce;
+        ResetHours = other.ResetHours;
+        Goodbye = other.Goodbye;
+        InvisibleContinue = other.InvisibleContinue;
+        Random = other.Random;
+        Responses = other.Responses.ToList();
+        Links = other.Links.ToList();
+        ExtraConditions = other.ExtraConditions.ToList();
+    }
+
     public IEnumerable<Note> AllNotes() => Responses.SelectMany(r => r.Notes());
 
     public DialogueTopicInfo CopyWith(IEnumerable<DialogueResponse> newResponses) {
@@ -30,12 +47,14 @@ public sealed class DialogueTopicInfo {
             SharedInfo = SharedInfo,
             Speaker = Speaker,
             Prompt = Prompt,
-            Responses = newResponses.ToList(),
-            Links = Links.ToList(),
             SayOnce = SayOnce,
+            ResetHours = ResetHours,
             Goodbye = Goodbye,
             InvisibleContinue = InvisibleContinue,
             Random = Random,
+            Responses = newResponses.ToList(),
+            Links = Links.ToList(),
+            ExtraConditions = ExtraConditions.ToList(),
         };
     }
 
@@ -191,5 +210,53 @@ public sealed class DialogueTopicInfo {
 
     public void RemoveRedundantResponses() {
         Responses.RemoveAll(r => r.IsEmpty() && r.Notes().Count == 0);
+    }
+
+    public bool EqualsNoLinks(DialogueTopicInfo other) {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+
+        return Equals(SharedInfo, other.SharedInfo)
+         && Speaker.FormKey.Equals(other.Speaker.FormKey)
+         && Prompt == other.Prompt
+         && SayOnce == other.SayOnce
+         && Goodbye == other.Goodbye
+         && InvisibleContinue == other.InvisibleContinue
+         && Random == other.Random
+         && ResetHours.Equals(other.ResetHours)
+         && Responses.SequenceEqual(other.Responses)
+         && ExtraConditions.SequenceEqual(other.ExtraConditions);
+    }
+
+    public bool Equals(DialogueTopicInfo? other) {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+
+        return EqualsNoLinks(other)
+         && Links.Count == other.Links.Count
+         && Links.WithIndex().All(x => x.Item.EqualsNoLinks(other.Links[x.Index]));
+    }
+
+    public override bool Equals(object? obj) {
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj is not DialogueTopicInfo other) return false;
+
+        return Equals(other);
+    }
+
+    public override int GetHashCode() {
+        var hashCode = new HashCode();
+        hashCode.Add(SharedInfo);
+        hashCode.Add(Speaker);
+        hashCode.Add(Prompt);
+        hashCode.Add(Responses);
+        hashCode.Add(Links);
+        hashCode.Add(SayOnce);
+        hashCode.Add(Goodbye);
+        hashCode.Add(InvisibleContinue);
+        hashCode.Add(Random);
+        hashCode.Add(ResetHours);
+        hashCode.Add(ExtraConditions);
+        return hashCode.ToHashCode();
     }
 }

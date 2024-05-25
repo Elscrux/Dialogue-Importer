@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Noggog;
 namespace DialogueImplementationTool.Dialogue.Model;
 
 [DebuggerDisplay("{ToString()}")]
-public sealed class DialogueTopic {
+public sealed class DialogueTopic : IEquatable<DialogueTopic> {
     public List<DialogueTopicInfo> TopicInfos { get; init; } = [];
     public bool Blocking { get; set; }
 
@@ -56,4 +58,30 @@ public sealed class DialogueTopic {
 
         return $"Topic with {TopicInfos.Count} prompts";
     }
+
+    public bool EqualsNoLinks(DialogueTopic? other) {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+
+        return Blocking == other.Blocking
+         && TopicInfos.Count == other.TopicInfos.Count
+         && TopicInfos.WithIndex().All(x => x.Item.EqualsNoLinks(other.TopicInfos[x.Index]));
+    }
+
+    public bool Equals(DialogueTopic? other) {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+
+        return Blocking == other.Blocking
+         && TopicInfos.SequenceEqual(other.TopicInfos);
+    }
+
+    public override bool Equals(object? obj) {
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj is not DialogueTopic other) return false;
+
+        return Equals(other);
+    }
+
+    public override int GetHashCode() => HashCode.Combine(TopicInfos, Blocking);
 }
