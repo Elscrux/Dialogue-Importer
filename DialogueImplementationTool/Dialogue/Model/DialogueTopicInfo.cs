@@ -159,8 +159,18 @@ public sealed class DialogueTopicInfo {
     }
 
     public override string ToString() {
-        if (Responses.Count == 0) return "Empty topic info";
+        if (SharedInfo is not null) return $"[Shared] {GetResponseString(SharedInfo.ResponseDataTopicInfo)}";
 
-        return string.Join(" | ", Responses);
+        return GetResponseString(this);
+
+        string GetResponseString(DialogueTopicInfo topicInfo) {
+            if (topicInfo.Responses.Count == 0) return "Empty topic info";
+
+            return string.Join(" | ", topicInfo.Responses);
+        }
+    }
+
+    public void RemoveRedundantResponses() {
+        Responses.RemoveAll(r => r.IsEmpty() && r.Notes().Count == 0);
     }
 }
