@@ -103,6 +103,7 @@ public sealed class TestDialogueFactory {
         successTopicInfo.Links.Should().BeEmpty();
         var failureTopicInfo = archeryTopic.TopicInfos[1];
         failureTopicInfo.Links.Should().HaveCount(3);
+        failureTopicInfo.Links.Should().HaveElementAt(0, fishingGearTopic);
 
         var nestedIntimidateTopic = fishingGearTopic.TopicInfos[0].Links[1];
         nestedIntimidateTopic.TopicInfos.Should().HaveCount(2);

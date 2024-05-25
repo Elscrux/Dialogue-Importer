@@ -26,7 +26,7 @@ public sealed class BackToOptionsLinker : IConversationProcessor {
 
     private static bool RemoveBackToOptions(DialogueResponse response) =>
         response.EndsNotes.RemoveAll(
-            note => note.Text.Equals("back to options", StringComparison.OrdinalIgnoreCase)) > 0;
+            note => note.Text.Equals("back to options", StringComparison.Ordinal)) > 0;
 
     private static void AddBackToOptionsLink(DialogueTopic topic, DialogueTopicInfo incomingLink) {
         foreach (var topicInfo in topic.TopicInfos) {
