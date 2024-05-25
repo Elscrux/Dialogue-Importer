@@ -38,6 +38,10 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
 
                 var responses = GetTopicInfos(Context.Quest, rawTopic.Topic);
                 var playerText = rawTopic.Topic.GetPlayerText();
+                if (playerText.IsNullOrWhitespace()
+                    && rawTopic.Topic.TopicInfos.TrueForAll(x => x.InvisibleContinue)) {
+                    playerText = "(invis cont)";
+                }
                 var dontUsePrompt = !playerText.IsNullOrWhitespace();
                 if (dontUsePrompt) {
                     foreach (var response in responses) {
