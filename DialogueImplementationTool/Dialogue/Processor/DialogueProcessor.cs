@@ -37,6 +37,7 @@ public sealed class DialogueProcessor(EmotionChecker emotionChecker) : IDialogue
         new SharedInfoConverter(),
         new CollapseEmptyInvisibleContinues(),
         new BlockingChecker(),
+        new MergeIdenticalTopics(),
     ];
 
     public DialogueProcessor Clone() => new(emotionChecker);
