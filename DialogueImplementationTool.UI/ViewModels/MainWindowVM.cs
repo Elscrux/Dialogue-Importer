@@ -61,7 +61,7 @@ public sealed class MainWindowVM : ViewModel {
         };
         Extensions = _documentIterators.Keys.ToList();
 
-        _mod = new SkyrimMod(new ModKey(GetNewModName(), ModType.Plugin), SkyrimRelease.SkyrimSE);
+        _mod = new SkyrimMod(new ModKey(GetNewModName(), ModType.Plugin), SkyrimRelease.SkyrimSE, 1.7f);
         var environment = GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>.Create(GameRelease.SkyrimSE)
             .WithOutputMod(_mod)
             .Build();
