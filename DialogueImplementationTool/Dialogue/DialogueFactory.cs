@@ -29,7 +29,6 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
             var startingFormKey = Context.GetNextFormKey();
             branch.StartingTopic = new FormLinkNullable<IDialogTopicGetter>(startingFormKey);
 
-            var createdTopics = new List<LinkedTopic>();
             var topicQueue = new Queue<LinkedTopic>();
             topicQueue.Enqueue(new LinkedTopic(startingFormKey, topic, string.Empty));
 
@@ -49,7 +48,7 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                     }
                 }
 
-                var editorId = $"{branchEditorId}Topic{rawTopic.Identifier}";
+                var editorId = GetTopicEditorID(branchEditorId, rawTopic.Identifier);
 
                 var dialogTopic = new DialogTopic(rawTopic.FormKey, Context.Release) {
                     EditorID = editorId,
@@ -68,20 +67,44 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                 for (var topicInfoIndex = 0; topicInfoIndex < rawTopic.Topic.TopicInfos.Count; topicInfoIndex++) {
                     var topicInfo = rawTopic.Topic.TopicInfos[topicInfoIndex];
                     for (var linkIndex = 0; linkIndex < topicInfo.Links.Count; linkIndex++) {
-                        var linkedTopic = createdTopics.Find(t => t.Topic == topicInfo.Links[linkIndex]);
-                        if (linkedTopic is null) {
-                            var linkFormKey = Context.GetNextFormKey();
-                            var newLink = new LinkedTopic(
-                                linkFormKey,
-                                topicInfo.Links[linkIndex],
-                                GetIndex(linkIndex + 1));
+                        var nextIdentifier = GetIndex(linkIndex + 1);
 
-                            createdTopics.Add(newLink);
-                            topicQueue.Enqueue(newLink);
+                        var implementedLinkedTopic = Context.GetTopic(topicInfo.Links[linkIndex]);
+                        if (implementedLinkedTopic is null) {
+                            // Topic not implemented yet
+                            var linkedTopic = topicQueue
+                                .FirstOrDefault(x => x.Topic == topicInfo.Links[linkIndex]);
+                            
+                            if (linkedTopic is null) {
+                                // Queue up the linked topic for implementation
+                                linkedTopic = new LinkedTopic(
+                                    Context.GetNextFormKey(),
+                                    topicInfo.Links[linkIndex],
+                                    nextIdentifier);
 
-                            responses[topicInfoIndex].LinkTo.Add(new FormLink<IDialogGetter>(linkFormKey));
-                        } else {
+                                topicQueue.Enqueue(linkedTopic);
+                            } else {
+                                // Use existing queued linked topic
+                                // In case our identifier is shorter than the existing one,
+                                // we need update it to keep the tree structure flat
+                                if (nextIdentifier.Length < linkedTopic.Identifier.Length) {
+                                    linkedTopic.Identifier = nextIdentifier;
+                                }
+                            }
+
                             responses[topicInfoIndex].LinkTo.Add(new FormLink<IDialogGetter>(linkedTopic.FormKey));
+                        } else {
+                            // Use existing implemented topic
+                            responses[topicInfoIndex].LinkTo.Add(new FormLink<IDialogGetter>(implementedLinkedTopic.FormKey));
+                            
+                            // In case our identifier is shorter than the existing one,
+                            // we need update it to keep the tree structure flat
+                            var topicEditorID = GetTopicEditorID(branchEditorId, nextIdentifier);
+                            if (topicEditorID.Length < implementedLinkedTopic.EditorID?.Length) {
+                                var implementedTopic = Context.GetTopic(implementedLinkedTopic.FormKey);
+                                implementedTopic.EditorID = topicEditorID;
+                                implementedTopic.Branch.SetTo(branch.FormKey);
+                            }
                         }
                     }
 
@@ -113,7 +136,13 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                 }
             }
         }
+
+        string GetTopicEditorID(string branchEditorId, string identifier) {
+            return $"{branchEditorId}Topic{identifier}";
+        }
     }
 
-    private sealed record LinkedTopic(FormKey FormKey, DialogueTopic Topic, string Identifier);
+    private sealed record LinkedTopic(FormKey FormKey, DialogueTopic Topic, string Identifier) {
+        public string Identifier { get; set; } = Identifier;
+    }
 }

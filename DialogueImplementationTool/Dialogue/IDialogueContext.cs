@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Dialogue.Speaker;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
@@ -18,5 +19,6 @@ public interface IDialogueContext {
     void AddDialogTopic(DialogTopic topic);
     DialogTopic? GetTopic(string editorId);
     DialogTopic GetTopic(FormKey formKey);
+    IDialogTopicGetter? GetTopic(DialogueTopic topic);
     IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IEnumerable<string> speakerNames);
 }
