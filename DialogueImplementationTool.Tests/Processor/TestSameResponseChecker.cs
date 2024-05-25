@@ -1,5 +1,4 @@
 using DialogueImplementationTool.Dialogue.Processor;
-using DialogueImplementationTool.Parser;
 using DialogueImplementationTool.Tests.Samples;
 using FluentAssertions;
 namespace DialogueImplementationTool.Tests.Processor;
@@ -13,7 +12,7 @@ public sealed class TestSameResponseChecker {
         var (_, dialogue) = TestSamples.GetCraneShoreDialogue(_testConstants);
 
         // Check
-        dialogue.Topics[0].TopicInfos[0].Links[0].TopicInfos[0].Responses.Should().HaveCount(0);
+        dialogue.Topics[0].TopicInfos[0].Links[0].TopicInfos[0].Responses.Should().BeEmpty();
 
         // Process
         Conversation conversation = [dialogue];
@@ -22,5 +21,7 @@ public sealed class TestSameResponseChecker {
 
         // Check
         conversation[0].Topics[0].TopicInfos[0].Links[0].TopicInfos[0].Responses.Should().ContainSingle();
+        conversation[0].Topics[0].TopicInfos[0].Links[0].TopicInfos[0].Prompt.Should().Be("Are you always so hostile?");
+        conversation[0].Topics[0].TopicInfos[0].Links[1].TopicInfos[0].Prompt.Should().Be("Why so hostile?");
     }
 }

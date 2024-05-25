@@ -78,7 +78,8 @@ public sealed class TestGenericSceneFactory {
         // Check - second topic should be split in shared info processing
         scene1.Topics.Should().HaveCount(5);
         scene2.Topics.Should().HaveCount(5);
-        scene1.Topics[1].TopicInfos[0].Responses.Should().ContainSingle();
+        scene1.Topics[1].TopicInfos[0].SharedInfo.Should().NotBeNull();
+        scene1.Topics[1].TopicInfos[0].SharedInfo!.ResponseDataTopicInfo.Responses.Should().ContainSingle();
         scene1.Topics[1].TopicInfos[0].Links.Should().ContainSingle();
 
         // Process

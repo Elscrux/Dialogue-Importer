@@ -69,7 +69,7 @@ public static class TestSamples {
             GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 1));
     }
 
-    public static (GeneratedDialogue Greeting, GeneratedDialogue Farewell, GeneratedDialogue Dialogue)
+    public static (GeneratedDialogue Greeting, GeneratedDialogue Farewell, GeneratedDialogue Dialogue, GeneratedDialogue Dialogue2)
         GetMalwonDialogue(TestConstants testConstants) {
         var docXDocumentParser = new DocXDocumentParser(
             Path.GetFullPath("../../../Samples/Documents/[Locked] Malwon.docx"));
@@ -77,7 +77,8 @@ public static class TestSamples {
         return (
             GetDialogue(testConstants, docXDocumentParser, DialogueType.Greeting, 0),
             GetDialogue(testConstants, docXDocumentParser, DialogueType.Farewell, 1),
-            GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 2));
+            GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 2),
+            GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 3));
     }
 
     public static GeneratedDialogue GetMultiLevelConditionDialogue(TestConstants testConstants) {
