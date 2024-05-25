@@ -11,7 +11,7 @@ public sealed partial class KeywordLinker : IConversationProcessor {
     private const string FillerRegexPart = @"[^\]]*";
     private const string MergeRegexPart = "(?:merge|go|back) ";
     private const string OptionsAfterRegexPart = "(?:options after )";
-    private const string KeywordRegexPart = "([A-Z]+)";
+    private const string KeywordRegexPart = @"([A-Z_\d]+)";
 
     // [DONE], [HERE]
     [GeneratedRegex($"{KeywordRegexPart}")]
