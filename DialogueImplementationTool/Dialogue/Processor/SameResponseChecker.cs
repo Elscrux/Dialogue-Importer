@@ -38,7 +38,7 @@ public sealed class SameResponseChecker : IConversationProcessor {
                     queueBacklog.Enqueue(info.Links);
                 }
 
-                if (currentTopic.TopicInfos.TrueForAll(t => t.Responses.Count != 0)) continue;
+                if (currentTopic.TopicInfos.Exists(t => t.Responses.Count > 0)) continue;
 
                 // We found a topic with no infos that have any responses
                 // Search for the next topic with any responses and use its infos
@@ -48,8 +48,13 @@ public sealed class SameResponseChecker : IConversationProcessor {
 
                 if (nextTopic is null) continue;
 
+                var prompt = currentTopic.TopicInfos[0].Prompt;
                 currentTopic.TopicInfos.Clear();
-                currentTopic.TopicInfos.AddRange(nextTopic.TopicInfos);
+                var newInfos = nextTopic.TopicInfos.Select(info => new DialogueTopicInfo(info)).ToList();
+                foreach (var topicInfo in newInfos) {
+                    topicInfo.Prompt = prompt;
+                }
+                currentTopic.TopicInfos.AddRange(newInfos);
             }
         }
     }
