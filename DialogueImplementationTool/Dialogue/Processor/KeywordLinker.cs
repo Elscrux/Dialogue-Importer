@@ -51,7 +51,9 @@ public sealed partial class KeywordLinker : IConversationProcessor {
             }
 
             destination.TopicInfo.Responses[^1].RemoveNote(x => SimpleKeywordRegex().IsMatch(x));
+            destination.TopicInfo.RemoveRedundantResponses();
             linkTopicInfo.Responses[^1].RemoveNote(x => LinkOptionsRegex().IsMatch(x));
+            linkTopicInfo.RemoveRedundantResponses();
 
             linkTopicInfo.Links.AddRange(destination.TopicInfo.Links);
         }
@@ -77,7 +79,9 @@ public sealed partial class KeywordLinker : IConversationProcessor {
             }
 
             destination.TopicInfo.Responses[0].RemoveNote(x => SimpleKeywordRegex().IsMatch(x));
+            destination.TopicInfo.RemoveRedundantResponses();
             linkTopicInfo.Responses[^1].RemoveNote(x => LinkSimpleRegex().IsMatch(x));
+            linkTopicInfo.RemoveRedundantResponses();
 
             linkTopicInfo.Links.Add(destination.Topic);
             linkTopicInfo.InvisibleContinue = true;
