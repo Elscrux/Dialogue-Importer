@@ -49,9 +49,9 @@ public class GenericGenericSceneFactory(IDialogueContext context) : SceneFactory
         alias2.ID = 1;
         const QuestAlias.Flag genericSceneAliasFlags =
             QuestAlias.Flag.AllowReserved | QuestAlias.Flag.AllowReuseInQuest;
-        var alias3 = GetAlias(AliasSpeakers[0]);
+        var alias3 = CreateAlias(AliasSpeakers[0]);
         alias3.Flags |= genericSceneAliasFlags;
-        var alias4 = GetAlias(AliasSpeakers[1]);
+        var alias4 = CreateAlias(AliasSpeakers[1]);
         alias4.Flags |= genericSceneAliasFlags;
 
         var sceneQuest = new Quest(Context.GetNextFormKey(), Context.Release) {

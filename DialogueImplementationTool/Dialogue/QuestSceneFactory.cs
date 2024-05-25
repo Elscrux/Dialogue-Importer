@@ -9,25 +9,18 @@ namespace DialogueImplementationTool.Dialogue;
 
 public sealed class QuestSceneFactory(IDialogueContext context) : SceneFactory(context) {
     protected override Scene GetCurrentScene() {
-        //Detect existing aliases
-        foreach (var alias in Context.Quest.Aliases) {
-            if (alias.UniqueActor.IsNull) continue;
-
-            foreach (var speaker in AliasSpeakers.Where(speaker => speaker.FormKey == alias.UniqueActor.FormKey)) {
-                speaker.AliasIndex = Convert.ToInt32(alias.ID);
+        // Set alias indices
+        foreach (var aliasSpeaker in AliasSpeakers) {
+            var alias = Context.Quest.GetAlias(aliasSpeaker.FormKey);
+            if (alias is null) {
+                // Add missing alias
+                var questAlias = CreateAlias(aliasSpeaker);
+                Context.Quest.Aliases.Add(questAlias);
+                aliasSpeaker.AliasIndex = Context.Quest.Aliases.Count;
+            } else {
+                // Set existing alias index
+                aliasSpeaker.AliasIndex = Convert.ToInt32(alias.ID);
             }
-        }
-
-        //Add missing aliases
-        var addedAliases = new Dictionary<FormKey, QuestAlias>();
-        foreach (var speaker in AliasSpeakers.Where(speaker => speaker.AliasIndex == -1)) {
-            var alias = addedAliases.GetOrAdd(speaker.FormKey,
-                () => {
-                    speaker.AliasIndex = Context.Quest.Aliases.Count;
-                    return GetAlias(speaker);
-                });
-            speaker.AliasIndex = Context.Quest.Aliases.Count;
-            Context.Quest.Aliases.Add(alias);
         }
 
         //Add scene

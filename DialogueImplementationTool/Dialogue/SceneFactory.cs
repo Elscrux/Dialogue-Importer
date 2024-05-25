@@ -144,7 +144,7 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
         };
     }
 
-    protected static QuestAlias GetAlias(AliasSpeaker aliasSpeaker) {
+    protected static QuestAlias CreateAlias(AliasSpeaker aliasSpeaker) {
         return new QuestAlias {
             ID = Convert.ToUInt32(aliasSpeaker.AliasIndex),
             Name = aliasSpeaker.Name,
@@ -158,7 +158,7 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
 
         return new Scene(Context.GetNextFormKey(), Context.Release) {
             EditorID = editorId,
-            Actions = new ExtendedList<SceneAction>(),
+            Actions = [],
             Actors = _aliasIndices.Select(id => new SceneActor {
                     BehaviorFlags = SceneActor.BehaviorFlag.DeathEnd
                       | SceneActor.BehaviorFlag.CombatEnd
