@@ -36,6 +36,11 @@ public record DialogueResponse {
 
     public IReadOnlyList<Note> Notes() => StartNotes.Concat(EndsNotes).ToList();
 
+    public IReadOnlyList<Note> EndNotesAndStartIfResponseEmpty() =>
+        IsEmpty()
+            ? StartNotes.Concat(EndsNotes).ToList()
+            : EndsNotes;
+
     public bool HasNote(Note note) => Notes().Contains(note);
     public bool HasNote(string text) => Notes().Any(note => note.Text.Equals(text, StringComparison.OrdinalIgnoreCase));
     public bool HasNote(Predicate<string> noteMatches) => Notes().Any(note => noteMatches(note.Text));

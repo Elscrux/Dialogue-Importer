@@ -35,9 +35,9 @@ public sealed partial class KeywordLinker : IConversationProcessor {
     private static void ProcessOptionLinks(Conversation conversation) {
         var optionsDestinations =
             GetKeywordTopicInfoDictionary(conversation,
-                info => GetKeyword(info.Responses[^1].EndsNotes, SimpleKeywordRegex()));
+                info => GetKeyword(info.Responses[^1].EndNotesAndStartIfResponseEmpty(), SimpleKeywordRegex()));
         var optionsLinks = GetAllKeywordTopicInfo(conversation,
-            info => GetKeyword(info.Responses[^1].EndsNotes, LinkOptionsRegex()));
+            info => GetKeyword(info.Responses[^1].EndNotesAndStartIfResponseEmpty(), LinkOptionsRegex()));
 
         foreach (var (keyword, _, linkTopicInfo) in optionsLinks) {
             if (linkTopicInfo.Links.Count > 0) {
@@ -63,7 +63,7 @@ public sealed partial class KeywordLinker : IConversationProcessor {
                 info => GetKeyword(info.Responses[0].StartNotes, SimpleKeywordRegex()));
         var keywordLinks =
             GetAllKeywordTopicInfo(conversation,
-                info => GetKeyword(info.Responses[^1].EndsNotes, LinkSimpleRegex()));
+                info => GetKeyword(info.Responses[^1].EndNotesAndStartIfResponseEmpty(), LinkSimpleRegex()));
 
         foreach (var (keyword, _, linkTopicInfo) in keywordLinks) {
             if (linkTopicInfo.Links.Count > 0) {
@@ -129,7 +129,7 @@ public sealed partial class KeywordLinker : IConversationProcessor {
         return list;
     }
 
-    private static string? GetKeyword(List<Note> notes, Regex regex) {
+    private static string? GetKeyword(IEnumerable<Note> notes, Regex regex) {
         return notes
             .Select(note => regex.Match(note.Text))
             .Where(match => match.Success)
