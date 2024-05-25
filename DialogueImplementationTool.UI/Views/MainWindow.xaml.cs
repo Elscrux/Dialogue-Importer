@@ -43,10 +43,10 @@ public partial class MainWindow {
         if (folderDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK) yield break;
 
         foreach (var file in Directory.EnumerateFiles(
-                         folderDialog.SelectedPath,
-                         "*.*",
-                         SearchOption.AllDirectories)
-                     .Where(file => _vm.Extensions.Exists(file.EndsWith))) {
+                folderDialog.SelectedPath,
+                "*.*",
+                SearchOption.AllDirectories)
+            .Where(file => _vm.Extensions.Exists(file.EndsWith))) {
             yield return file;
         }
     }
@@ -72,13 +72,13 @@ public partial class MainWindow {
 
         //Save warning
         if (dialogueVM.SavedSession
-            || dialogueVM.DialogueTypeList.TrueForAll(s => s.SelectedTypes.Count == 0)) return;
+         || dialogueVM.DialogueTypeList.TrueForAll(s => s.SelectedTypes.Count == 0)) return;
 
         if (MessageBox.Show(
                 "You didn't save your changes, do you want to save now?",
                 string.Empty,
                 MessageBoxButton.YesNo)
-            == MessageBoxResult.Yes)
+         == MessageBoxResult.Yes)
             dialogueVM.Save.Execute(null);
     }
 

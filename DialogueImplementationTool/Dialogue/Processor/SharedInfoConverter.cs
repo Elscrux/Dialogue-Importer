@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using DialogueImplementationTool.Dialogue.Model;
+using DialogueImplementationTool.Dialogue.Speaker;
 using Noggog;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
@@ -101,14 +102,14 @@ public sealed class SharedInfoConverter : IConversationProcessor {
             // when all topic infos that use a shared line link to the same next line(s) (or none at all), merge those again or make sure it never splits
             // exclude lines that don't have a common last ancestor, because in this case these are still separate topics and an empty line would be needed as proxy in between
             if (commonSharedLine.CommonLast is not null
-                && firstShared.Users
+             && firstShared.Users
                     .Skip(1)
                     .All(x => x.TopicInfoUsingLine.Links.SequenceEqual(firstShared.Users[0].TopicInfoUsingLine.Links))) {
                 // Split off for all users
                 foreach (var (topicUsingLine, _, _) in firstShared.Users) {
                     topicUsingLine.SplitOffDialogue(sharedTopicInfo);
                 }
-                
+
                 // Then make sure all link to the same split off object
                 var links = firstShared.Users[0].TopicInfoUsingLine.Links.ToList();
                 foreach (var (topicUsingLine, _, _) in firstShared.Users.Skip(1)) {
@@ -135,7 +136,7 @@ public sealed class SharedInfoConverter : IConversationProcessor {
     }
 
     private sealed record SharedLine : DialogueResponse {
-        public SharedLine(DialogueResponse dialogueResponse, Speaker.ISpeaker speaker) {
+        public SharedLine(DialogueResponse dialogueResponse, ISpeaker speaker) {
             Response = dialogueResponse.Response;
             StartNotes = dialogueResponse.StartNotes;
             EndsNotes = dialogueResponse.EndsNotes;
@@ -143,7 +144,7 @@ public sealed class SharedInfoConverter : IConversationProcessor {
             Speaker = speaker;
         }
 
-        public Speaker.ISpeaker Speaker { get; }
+        public ISpeaker Speaker { get; }
         public List<SharedLineLink> Users { get; } = [];
 
         public bool Equals(SharedLine? other) {

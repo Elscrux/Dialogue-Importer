@@ -25,7 +25,7 @@ public sealed class TestCollapseNoteOnlyResponse {
         topicInfo.Responses[0].Response.Should().Be("I'm good.");
         topicInfo.Responses[0].HasNote("back to options").Should().BeTrue();
     }
-    
+
     [Fact]
     public void TestProcessStart() {
         // Arrange
@@ -49,7 +49,7 @@ public sealed class TestCollapseNoteOnlyResponse {
         topicInfo.Responses[0].HasNote("happy").Should().BeTrue();
         topicInfo.Responses[0].HasNote("very happy").Should().BeTrue();
     }
-    
+
     [Fact]
     public void TestProcessStartAndEnd() {
         // Arrange

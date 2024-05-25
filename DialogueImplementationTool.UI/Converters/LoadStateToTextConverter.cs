@@ -11,7 +11,7 @@ public class LoadStateToTextConverter : IValueConverter {
             LoadState.NotLoaded => "Not Loaded",
             LoadState.InProgress => "Loading",
             LoadState.Loaded => "Ready",
-            _ => throw new InvalidOperationException()
+            _ => throw new InvalidOperationException(),
         };
     }
 

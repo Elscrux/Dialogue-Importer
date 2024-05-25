@@ -56,7 +56,9 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
     }
 
     public string Preview(int index) {
-        return index < 0 || index >= _doc.Lists.Count ? string.Empty : _doc.Lists[index].Items.FirstOrDefault()?.Text ?? string.Empty;
+        return index < 0 || index >= _doc.Lists.Count
+            ? string.Empty
+            : _doc.Lists[index].Items.FirstOrDefault()?.Text ?? string.Empty;
     }
 
     public List<DialogueTopic> ParseDialogue(IDialogueProcessor processor, int index) {
@@ -188,7 +190,7 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
             // No indent level means it's text between list entries, we just include them for good measure
             // List entries that are not player lines and in the current indentation scope are also included
             return newParagraph.IndentLevel is null
-                   || newParagraph.IndentLevel >= currentIndentation && !IsPlayerLine(newParagraph);
+             || (newParagraph.IndentLevel >= currentIndentation && !IsPlayerLine(newParagraph));
         }
     }
 

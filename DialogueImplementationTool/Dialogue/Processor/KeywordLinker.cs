@@ -23,7 +23,7 @@ public sealed partial class KeywordLinker : IConversationProcessor {
 
     // [merge to options after HERE above]
     [GeneratedRegex($"{FillerRegexPart}(?:{MergeRegexPart})?to "
-                    + $"{OptionsAfterRegexPart}?{KeywordRegexPart}{FillerRegexPart}")]
+      + $"{OptionsAfterRegexPart}?{KeywordRegexPart}{FillerRegexPart}")]
     private static partial Regex LinkOptionsRegex();
 
     public void Process(Conversation conversation) {

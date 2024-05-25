@@ -67,12 +67,12 @@ public sealed class TestDialogueFactory {
         hostile1Topic.Name!.String.Should().Be("Are you always so hostile?");
         hostile1Topic.Responses.Should().ContainSingle();
         hostile1Topic.Responses[0].ResponseData.IsNull.Should().BeFalse();
-        
+
         var hostile2Topic = _testConstants.Mod.DialogTopics.Skip(3).First();
         hostile2Topic.Name!.String.Should().Be("Why so hostile?");
         hostile2Topic.Responses.Should().ContainSingle();
         hostile2Topic.Responses[0].ResponseData.IsNull.Should().BeFalse();
-        
+
         var illusionTopic = _testConstants.Mod.DialogTopics.Skip(4).First();
         illusionTopic.Responses.Should().HaveCount(2);
         illusionTopic.Name!.String.Should()

@@ -1,7 +1,6 @@
 ﻿<Application x:Class="DialogueImplementationTool.UI.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:ui="clr-namespace:DialogueImplementationTool.UI"
              xmlns:views="clr-namespace:DialogueImplementationTool.UI.Views">
     <Application.Resources>
         <ResourceDictionary>

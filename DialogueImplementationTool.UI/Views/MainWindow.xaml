@@ -4,7 +4,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:plugins="clr-namespace:Mutagen.Bethesda.WPF.Plugins;assembly=Mutagen.Bethesda.WPF"
         xmlns:viewModels="clr-namespace:DialogueImplementationTool.UI.ViewModels"
-        xmlns:ui="clr-namespace:DialogueImplementationTool.UI"
         xmlns:converters="clr-namespace:DialogueImplementationTool.UI.Converters"
         x:Class="DialogueImplementationTool.UI.Views.MainWindow"
         mc:Ignorable="d"
@@ -16,30 +15,30 @@
             <converters:LoadStateToBrushConverter x:Key="LoadStateToBrushConverter"/>
             <converters:LoadStateToTextConverter x:Key="LoadStateToTextConverter"/>
         </DockPanel.Resources>
-        
+
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="Open Output Folder"
                       Click="OpenFolder_OnClick"
-                      HorizontalAlignment="Left" VerticalAlignment="Top" />
+                      HorizontalAlignment="Left" VerticalAlignment="Top"/>
         </Menu>
 
         <Grid DockPanel.Dock="Top">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <Label Grid.Column="0"
                    Target="PythonDllPathTextBox"
-                   Content="Path to Python Dll" />
+                   Content="Path to Python Dll"/>
 
             <TextBox x:Name="PythonDllPathTextBox"
                      Grid.Column="1"
                      IsReadOnly="True"
                      Margin="2"
-                     Text="{Binding PythonDllPath}" />
+                     Text="{Binding PythonDllPath}"/>
 
             <TextBlock Grid.Column="2"
                        VerticalAlignment="Center"
@@ -48,28 +47,28 @@
 
             <Button Grid.Column="3"
                     Content="Select"
-                    Click="SelectionPythonPath_OnClick" />
+                    Click="SelectionPythonPath_OnClick"/>
         </Grid>
 
         <plugins:FormKeyPicker DockPanel.Dock="Top"
                                FormKey="{Binding QuestFormKey}"
                                LinkCache="{Binding LinkCache, Mode=OneWay}"
-                               ScopedTypes="{Binding QuestTypes, Mode=OneWay}" />
+                               ScopedTypes="{Binding QuestTypes, Mode=OneWay}"/>
 
         <Grid Visibility="{Binding ValidQuest, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition />
+                <RowDefinition/>
+                <RowDefinition/>
             </Grid.RowDefinitions>
 
             <Button Grid.Row="0"
                     Content="Select File" FontSize="36"
                     Margin="10"
-                    Click="SelectFile_OnClick" />
+                    Click="SelectFile_OnClick"/>
             <Button Grid.Row="1"
                     Content="Select Folder" FontSize="36"
                     Margin="10"
-                    Click="SelectFolder_OnClick" />
+                    Click="SelectFolder_OnClick"/>
         </Grid>
     </DockPanel>
 </Window>

@@ -22,7 +22,7 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicInfoProcessor {
 
     private const string MergedRacesRegexPart =
         $"{ArgonianRegexPart}|{AltmerRegexPart}|{BosmerRegexPart}|{BretonRegexPart}|{DunmerRegexPart}"
-        + $"|{ImperialRegexPart}|{KhajiitRegexPart}|{NordRegexPart}|{OrcRegexPart}|{RedguardRegexPart}";
+      + $"|{ImperialRegexPart}|{KhajiitRegexPart}|{NordRegexPart}|{OrcRegexPart}|{RedguardRegexPart}";
 
     [GeneratedRegex($@"player[\w\s]+(?:{MergedRacesRegexPart})")]
     private static partial Regex IsRaceRegex();

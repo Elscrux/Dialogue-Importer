@@ -12,7 +12,7 @@ public class LoadStateToBrushConverter : IValueConverter {
             LoadState.NotLoaded => Brushes.IndianRed,
             LoadState.InProgress => Brushes.CornflowerBlue,
             LoadState.Loaded => Brushes.ForestGreen,
-            _ => throw new InvalidOperationException()
+            _ => throw new InvalidOperationException(),
         };
     }
 

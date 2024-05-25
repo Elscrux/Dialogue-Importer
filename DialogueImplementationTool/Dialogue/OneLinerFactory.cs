@@ -54,5 +54,5 @@ public abstract class OneLinerFactory(IDialogueContext context) : BaseDialogueFa
         }
     }
 
-    public override void PreProcess(List<DialogueTopic> topics) { }
+    public override void PreProcess(List<DialogueTopic> topics) {}
 }

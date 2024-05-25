@@ -8,7 +8,7 @@ using Noggog;
 namespace DialogueImplementationTool.Dialogue;
 
 public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFactory(context) {
-    public override void PreProcess(List<DialogueTopic> topics) { }
+    public override void PreProcess(List<DialogueTopic> topics) {}
 
     public override void GenerateDialogue(List<DialogueTopic> topics) {
         foreach (var topic in topics) {
@@ -20,7 +20,8 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                 editorId => !Context.LinkCache.TryResolveIdentifier<IDialogBranchGetter>(editorId, out _),
                 1);
 
-            var branch = new DialogBranch(Context.GetNextFormKey(), Context.Release) { EditorID = branchEditorId, Quest = new FormLinkNullable<IQuestGetter>(Context.Quest.FormKey), };
+            var branch = new DialogBranch(Context.GetNextFormKey(), Context.Release)
+                { EditorID = branchEditorId, Quest = new FormLinkNullable<IQuestGetter>(Context.Quest.FormKey) };
 
             branch.Flags ??= new DialogBranch.Flag();
             branch.Flags |= topic.Blocking ? DialogBranch.Flag.Blocking : DialogBranch.Flag.TopLevel;
@@ -38,7 +39,7 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                 var responses = GetTopicInfos(Context.Quest, rawTopic.Topic);
                 var playerText = rawTopic.Topic.GetPlayerText();
                 if (playerText.IsNullOrWhitespace()
-                    && rawTopic.Topic.TopicInfos.TrueForAll(x => x.InvisibleContinue)) {
+                 && rawTopic.Topic.TopicInfos.TrueForAll(x => x.InvisibleContinue)) {
                     playerText = "(invis cont)";
                 }
                 var dontUsePrompt = !playerText.IsNullOrWhitespace();
@@ -74,7 +75,7 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                             // Topic not implemented yet
                             var linkedTopic = topicQueue
                                 .FirstOrDefault(x => x.Topic == topicInfo.Links[linkIndex]);
-                            
+
                             if (linkedTopic is null) {
                                 // Queue up the linked topic for implementation
                                 linkedTopic = new LinkedTopic(
@@ -96,7 +97,7 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                         } else {
                             // Use existing implemented topic
                             responses[topicInfoIndex].LinkTo.Add(new FormLink<IDialogGetter>(implementedLinkedTopic.FormKey));
-                            
+
                             // In case our identifier is shorter than the existing one,
                             // we need update it to keep the tree structure flat
                             var topicEditorID = GetTopicEditorID(branchEditorId, nextIdentifier);

@@ -42,5 +42,5 @@ public sealed class QuestSceneFactory(IDialogueContext context) : SceneFactory(c
         return scene;
     }
 
-    public override void PreProcessSpeakers() { }
+    public override void PreProcessSpeakers() {}
 }

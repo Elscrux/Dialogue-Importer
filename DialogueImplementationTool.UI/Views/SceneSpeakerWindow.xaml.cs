@@ -71,9 +71,9 @@ public sealed class SpeakerFavouriteFormKeyDragSource : IDragSource {
         return true;
     }
 
-    public void Dropped(IDropInfo dropInfo) { }
-    public void DragDropOperationFinished(DragDropEffects operationResult, IDragInfo dragInfo) { }
-    public void DragCancelled() { }
+    public void Dropped(IDropInfo dropInfo) {}
+    public void DragDropOperationFinished(DragDropEffects operationResult, IDragInfo dragInfo) {}
+    public void DragCancelled() {}
 
     public bool TryCatchOccurredException(Exception exception) {
         return true;

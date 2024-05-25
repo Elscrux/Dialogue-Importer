@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using DialogueImplementationTool.Parser;
+﻿using System.Linq;
 using Noggog;
 namespace DialogueImplementationTool.Dialogue.Processor;
 

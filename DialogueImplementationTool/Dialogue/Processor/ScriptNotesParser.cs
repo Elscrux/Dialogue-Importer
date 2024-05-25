@@ -24,7 +24,7 @@ public sealed class ScriptNotesParser : IDialogueResponseProcessor {
 
     private static bool AreColorsSimilar(Color color1, Color color2, Color thresholdColor) {
         return Math.Abs(color1.R - color2.R) < thresholdColor.R
-               && Math.Abs(color1.G - color2.G) < thresholdColor.G
-               && Math.Abs(color1.B - color2.B) < thresholdColor.B;
+         && Math.Abs(color1.G - color2.G) < thresholdColor.G
+         && Math.Abs(color1.B - color2.B) < thresholdColor.B;
     }
 }

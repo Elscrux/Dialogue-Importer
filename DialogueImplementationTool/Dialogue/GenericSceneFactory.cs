@@ -22,7 +22,7 @@ public class GenericGenericSceneFactory(IDialogueContext context) : SceneFactory
     }
 
     protected override Scene? GetCurrentScene() {
-        if (AliasSpeakers is not [{ } speaker1, { } speaker2]) return null;
+        if (AliasSpeakers is not [{} speaker1, {} speaker2]) return null;
 
         //Assign alias indices
         speaker1.AliasIndex = 2;

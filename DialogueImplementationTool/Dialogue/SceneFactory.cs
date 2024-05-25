@@ -160,8 +160,9 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
             EditorID = editorId,
             Actions = new ExtendedList<SceneAction>(),
             Actors = _aliasIndices.Select(id => new SceneActor {
-                    BehaviorFlags = SceneActor.BehaviorFlag.DeathEnd | SceneActor.BehaviorFlag.CombatEnd
-                                                                     | SceneActor.BehaviorFlag.DialoguePause,
+                    BehaviorFlags = SceneActor.BehaviorFlag.DeathEnd
+                      | SceneActor.BehaviorFlag.CombatEnd
+                      | SceneActor.BehaviorFlag.DialoguePause,
                     Flags = new SceneActor.Flag(),
                     ID = Convert.ToUInt32(id),
                 })
@@ -290,8 +291,8 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
                     TopicInfos = [
                         new DialogueTopicInfo {
                             Prompt = currentSpeaker,
-                            Responses = currentLines.ToList()
-                        }
+                            Responses = currentLines.ToList(),
+                        },
                     ],
                 };
 

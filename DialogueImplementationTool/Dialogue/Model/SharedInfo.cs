@@ -32,7 +32,9 @@ public sealed class SharedInfo {
             var dialogResponses = getResponses(ResponseDataTopicInfo);
             var dialogTopic = modContext.LinkCache.PriorityOrder
                 .SelectMany(x => x.EnumerateMajorRecords<IDialogTopicGetter>())
-                .FirstOrDefault(t => t is { Subtype: DialogTopic.SubtypeEnum.SharedInfo, IsDeleted: false } && t.Quest.FormKey == quest.FormKey);
+                .FirstOrDefault(t =>
+                    t is { Subtype: DialogTopic.SubtypeEnum.SharedInfo, IsDeleted: false }
+                 && t.Quest.FormKey == quest.FormKey);
 
             // Create new shared info topic if it doesn't exist in the current quest
             DialogTopic newDialogueTopic;

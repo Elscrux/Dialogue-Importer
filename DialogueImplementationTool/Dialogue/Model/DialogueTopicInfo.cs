@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using DialogueImplementationTool.Dialogue.Speaker;
 using DynamicData;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Model;
@@ -10,7 +11,7 @@ namespace DialogueImplementationTool.Dialogue.Model;
 public sealed class DialogueTopicInfo {
     public SharedInfo? SharedInfo { get; private set; }
 
-    public Speaker.ISpeaker Speaker { get; set; } = null!;
+    public ISpeaker Speaker { get; set; } = null!;
 
     public string Prompt { get; set; } = string.Empty;
     public List<DialogueResponse> Responses { get; init; } = [];
@@ -77,7 +78,7 @@ public sealed class DialogueTopicInfo {
             : -1;
 
         while (indexOf == -1
-               && currentInfo is { InvisibleContinue: true, Links: [{ TopicInfos: [var nextTopicInfo] }] }) {
+         && currentInfo is { InvisibleContinue: true, Links: [{ TopicInfos: [var nextTopicInfo] }] }) {
             currentInfo = nextTopicInfo;
             if (currentInfo.SharedInfo is null) indexOf = currentInfo.Responses.IndexOf(startingResponse);
         }

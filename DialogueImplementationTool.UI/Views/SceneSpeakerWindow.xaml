@@ -13,7 +13,7 @@
         <Button Content="Save and Close"
                 HorizontalAlignment="Left"
                 DockPanel.Dock="Top"
-                Click="Save_OnClick" />
+                Click="Save_OnClick"/>
 
         <StackPanel Orientation="Horizontal">
             <DataGrid AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
@@ -25,14 +25,14 @@
                     <DataGridTemplateColumn Header=" Speaker ">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock HorizontalAlignment="Center" Text="{Binding Name}" />
+                                <TextBlock HorizontalAlignment="Center" Text="{Binding Name}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                     <DataGridTemplateColumn>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock HorizontalAlignment="Center" Text="➞" />
+                                <TextBlock HorizontalAlignment="Center" Text="➞"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -47,7 +47,7 @@
                                     FormKey="{Binding FormKey, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                     EditorID="{Binding EditorID, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                     LinkCache="{Binding LinkCache, RelativeSource={RelativeSource FindAncestor, AncestorType=views:SceneSpeakerWindow}}"
-                                    ScopedTypes="{Binding ScopedTypes, RelativeSource={RelativeSource FindAncestor, AncestorType=views:SceneSpeakerWindow}}" />
+                                    ScopedTypes="{Binding ScopedTypes, RelativeSource={RelativeSource FindAncestor, AncestorType=views:SceneSpeakerWindow}}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -62,7 +62,7 @@
                          dd:DragDrop.UseDefaultEffectDataTemplate="True">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding EditorID}" />
+                            <TextBlock Text="{Binding EditorID}"/>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>

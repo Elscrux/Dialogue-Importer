@@ -9,7 +9,7 @@ public sealed class BackToOptionsLinker : IConversationProcessor {
             // Just remove back to option links from base topic
             // Going back to options here is the default behavior
             foreach (var response in generatedDialogue.Topics.SelectMany(topic =>
-                         topic.TopicInfos.SelectMany(topicInfo => topicInfo.Responses))) {
+                topic.TopicInfos.SelectMany(topicInfo => topicInfo.Responses))) {
                 RemoveBackToOptions(response);
             }
 

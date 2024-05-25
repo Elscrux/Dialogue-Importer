@@ -67,6 +67,7 @@ public sealed class SkyrimDialogueContext(
             if (playerText != string.Empty && playerText != implementedTopic.Name?.String) return false;
 
             if (topic.TopicInfos.Count != implementedTopic.Responses.Count) return false;
+
             for (var topicInfoIndex = 0; topicInfoIndex < topic.TopicInfos.Count; topicInfoIndex++) {
                 var topicInfo = topic.TopicInfos[topicInfoIndex];
                 var implementedTopicInfo = implementedTopic.Responses[topicInfoIndex];
@@ -79,7 +80,7 @@ public sealed class SkyrimDialogueContext(
 
                 // Check flags
                 if (topicInfo.InvisibleContinue
-                    != ((implementedTopicInfo.Flags?.Flags & DialogResponses.Flag.InvisibleContinue) != 0))
+                 != ((implementedTopicInfo.Flags?.Flags & DialogResponses.Flag.InvisibleContinue) != 0))
                     return false;
                 if (topicInfo.Goodbye != ((implementedTopicInfo.Flags?.Flags & DialogResponses.Flag.Goodbye) != 0))
                     return false;
@@ -90,6 +91,7 @@ public sealed class SkyrimDialogueContext(
 
                 // Check responses
                 if (topicInfo.Responses.Count != implementedTopicInfo.Responses.Count) return false;
+
                 for (var responseIndex = 0; responseIndex < topicInfo.Responses.Count; responseIndex++) {
                     var response = topicInfo.Responses[responseIndex];
                     var implementedResponse = implementedTopicInfo.Responses[responseIndex];
