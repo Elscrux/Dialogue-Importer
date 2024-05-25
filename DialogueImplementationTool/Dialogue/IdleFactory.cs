@@ -17,7 +17,6 @@ public sealed class IdleFactory(IDialogueContext context) : OneLinerFactory(cont
         var topic = Context.GetTopic(editorId) ?? new DialogTopic(Context.GetNextFormKey(), Context.Release) {
             EditorID = editorId,
             Name = editorId,
-            Priority = 50,
             Quest = new FormLinkNullable<IQuestGetter>(Context.Quest.FormKey),
             Category = DialogTopic.CategoryEnum.Misc,
             Subtype = DialogTopic.SubtypeEnum.Idle,
