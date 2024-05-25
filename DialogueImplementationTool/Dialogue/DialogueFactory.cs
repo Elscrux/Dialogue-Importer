@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Extension;
@@ -20,8 +21,10 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                 editorId => !Context.LinkCache.TryResolveIdentifier<IDialogBranchGetter>(editorId, out _),
                 1);
 
-            var branch = new DialogBranch(Context.GetNextFormKey(), Context.Release)
-                { EditorID = branchEditorId, Quest = new FormLinkNullable<IQuestGetter>(Context.Quest.FormKey) };
+            var branch = new DialogBranch(Context.GetNextFormKey(), Context.Release) {
+                EditorID = branchEditorId,
+                Quest = new FormLinkNullable<IQuestGetter>(Context.Quest.FormKey),
+            };
 
             branch.Flags ??= new DialogBranch.Flag();
             branch.Flags |= topic.Blocking ? DialogBranch.Flag.Blocking : DialogBranch.Flag.TopLevel;
@@ -53,7 +56,7 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
 
                 var dialogTopic = new DialogTopic(rawTopic.FormKey, Context.Release) {
                     EditorID = editorId,
-                    Priority = 50,
+                    Priority = GetDialoguePriority(Context.Quest, int.Parse(branchEditorId[baseName.Length..])),
                     Name = dontUsePrompt ? playerText : null,
                     Branch = new FormLinkNullable<IDialogBranchGetter>(branch),
                     Quest = new FormLinkNullable<IQuestGetter>(Context.Quest.FormKey),
@@ -141,6 +144,17 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
         string GetTopicEditorID(string branchEditorId, string identifier) {
             return $"{branchEditorId}Topic{identifier}";
         }
+    }
+
+    private static float GetDialoguePriority(IQuest quest, int dialogueIndex) {
+        return quest.Type switch {
+            Quest.TypeEnum.Misc => 70,
+            Quest.TypeEnum.Daedric => 85,
+            Quest.TypeEnum.SideQuest => 85,
+            _ => quest.EditorID != null && quest.EditorID.Contains("Dialogue")
+                ? Math.Clamp(50 - (dialogueIndex - 1) * 5, 0, 50)
+                : 50
+        };
     }
 
     private sealed record LinkedTopic(FormKey FormKey, DialogueTopic Topic, string Identifier) {
