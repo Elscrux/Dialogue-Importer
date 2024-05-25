@@ -9,10 +9,15 @@ namespace DialogueImplementationTool.Dialogue.Model;
 
 public sealed class SharedInfo {
     public SharedInfo(DialogueTopicInfo responseDataTopicInfo) {
-        if (responseDataTopicInfo.Speaker is null)
+        if (responseDataTopicInfo.Speaker is null) {
             throw new ArgumentException($"{nameof(responseDataTopicInfo)} can't have an empty speaker");
+        }
 
-        ResponseDataTopicInfo = responseDataTopicInfo;
+        ResponseDataTopicInfo = new DialogueTopicInfo {
+            Speaker = responseDataTopicInfo.Speaker,
+            Responses = responseDataTopicInfo.Responses.ToList(),
+            ExtraConditions = responseDataTopicInfo.ExtraConditions.ToList(),
+        };
     }
 
     public DialogResponses? ResponseData { get; set; }

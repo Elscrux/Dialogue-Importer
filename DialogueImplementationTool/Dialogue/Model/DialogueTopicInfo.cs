@@ -20,7 +20,7 @@ public sealed class DialogueTopicInfo {
     public bool InvisibleContinue { get; set; }
     public bool Random { get; set; }
     public float ResetHours { get; set; }
-    public List<Condition> ExtraConditions { get; } = [];
+    public List<Condition> ExtraConditions { get; init; } = [];
 
     public IEnumerable<Note> AllNotes() => Responses.SelectMany(r => r.Notes());
 
