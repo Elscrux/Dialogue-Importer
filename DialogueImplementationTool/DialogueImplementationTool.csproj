@@ -149,6 +149,9 @@
       <Compile Update="Dialogue\Processor\MergeIdenticalTopics.cs">
         <DependentUpon>IConversationProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\Processor\SetInvisibleContinuePrompt.cs">
+        <DependentUpon>IConversationProcessor.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

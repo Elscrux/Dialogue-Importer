@@ -36,6 +36,7 @@ public sealed class DialogueProcessor(EmotionChecker emotionChecker) : IDialogue
         new SharedInfoConverter(),
         new CollapseEmptyInvisibleContinues(),
         new BlockingChecker(),
+        new SetInvisibleContinuePrompt(),
         new MergeIdenticalTopics(),
         emotionChecker,
     ];
