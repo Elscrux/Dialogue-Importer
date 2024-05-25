@@ -22,6 +22,7 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
 
             var branch = new DialogBranch(Context.GetNextFormKey(), Context.Release) { EditorID = branchEditorId, Quest = new FormLinkNullable<IQuestGetter>(Context.Quest.FormKey), };
 
+            branch.Flags ??= new DialogBranch.Flag();
             branch.Flags |= topic.Blocking ? DialogBranch.Flag.Blocking : DialogBranch.Flag.TopLevel;
             Context.AddDialogBranch(branch);
 
