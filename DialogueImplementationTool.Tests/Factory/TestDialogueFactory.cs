@@ -1,6 +1,7 @@
 ﻿using DialogueImplementationTool.Parser;
 using DialogueImplementationTool.Tests.Samples;
 using FluentAssertions;
+using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Tests.Factory;
 
 public sealed class TestDialogueFactory {
@@ -82,11 +83,13 @@ public sealed class TestDialogueFactory {
 
         var persuadeTopic = _testConstants.Mod.DialogTopics.Skip(5).First();
         persuadeTopic.Responses.Should().HaveCount(2);
-        persuadeTopic.Name!.String.Should().Be("You think Crane Shore could be more than it is? (Persuade) [average]");
+        persuadeTopic.Name!.String.Should().Be("You think Crane Shore could be more than it is? (Persuade)");
         persuadeTopic.Responses[0].Responses.Should().HaveCount(3);
         persuadeTopic.Responses[1].Responses.Should().HaveCount(2);
         persuadeTopic.Responses[0].LinkTo.Should().ContainSingle();
         persuadeTopic.Responses[1].LinkTo.Should().ContainSingle();
+        persuadeTopic.Responses[0].Conditions.Should().HaveCount(2);
+        persuadeTopic.Responses[1].Conditions.Should().ContainSingle();
 
         // Check both persuade options link to the same final line
         persuadeTopic.Responses[1].LinkTo[0].FormKey.Should().Be(persuadeTopic.Responses[0].LinkTo[0].FormKey);
@@ -142,13 +145,25 @@ public sealed class TestDialogueFactory {
 
         var intimidateTopic = rootTopicInfo.Links[1];
         intimidateTopic.TopicInfos.Should().HaveCount(2);
+
+        intimidateTopic.TopicInfos[0].Prompt.FullText.Should()
+            .Be("Tell me what's going on and I won't hurt anyone. (Intimidate)");
         intimidateTopic.TopicInfos[0].SharedInfo.Should().NotBeNull();
+        intimidateTopic.TopicInfos[0].ExtraConditions.Should().ContainSingle();
+        intimidateTopic.TopicInfos[0].ExtraConditions[0].Data.Should().BeOfType<GetIntimidateSuccessConditionData>();
+
+        intimidateTopic.TopicInfos[1].Prompt.FullText.Should()
+            .Be("Tell me what's going on and I won't hurt anyone. (Intimidate)");
+        intimidateTopic.TopicInfos[1].ExtraConditions.Should().BeEmpty();
         intimidateTopic.TopicInfos[1].SharedInfo.Should().NotBeNull();
 
         var persuadeTopic = rootTopicInfo.Links[2];
         persuadeTopic.TopicInfos.Should().HaveCount(2);
         persuadeTopic.TopicInfos[0].SharedInfo.Should().NotBeNull();
+        persuadeTopic.TopicInfos[0].ExtraConditions.Should().ContainSingle();
+        persuadeTopic.TopicInfos[0].ExtraConditions[0].Data.Should().BeOfType<GetActorValueConditionData>();
         persuadeTopic.TopicInfos[1].SharedInfo.Should().NotBeNull();
+        persuadeTopic.TopicInfos[1].ExtraConditions.Should().BeEmpty();
 
 
         conversation[1].Topics.Should().ContainSingle();
