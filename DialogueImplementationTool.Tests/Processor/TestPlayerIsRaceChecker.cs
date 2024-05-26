@@ -22,7 +22,7 @@ public class TestPlayerIsRaceChecker {
             .StartNotes.Exists(x => x.Text == "if player is a Nord").Should().BeFalse();
 
         void CheckCondition(Condition condition, FormKey formKey) {
-            var data = condition.Data.Should().BeOfType<GetIsRaceConditionData>();
+            var data = condition.Data.Should().BeOfType<GetPCIsRaceConditionData>();
             data.Subject.Race.Link.FormKey.Should().Be(formKey);
             condition.Flags.Should().HaveFlag(Condition.Flag.OR);
         }

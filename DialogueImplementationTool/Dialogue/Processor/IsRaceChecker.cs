@@ -87,19 +87,19 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicProcessor {
     }
 
     private static void AddConditions(DialogueTopicInfo topicInfo, FormKey regular, FormKey vampire) {
-        var getIsRace = new GetIsRaceConditionData();
-        getIsRace.Race.Link.SetTo(regular);
+        var getPCIsRace = new GetPCIsRaceConditionData();
+        getPCIsRace.Race.Link.SetTo(regular);
         topicInfo.ExtraConditions.Add(new ConditionFloat {
-            Data = getIsRace,
+            Data = getPCIsRace,
             ComparisonValue = 1,
             CompareOperator = CompareOperator.EqualTo,
             Flags = Condition.Flag.OR,
         });
 
-        var getIsRaceVampire = new GetIsRaceConditionData();
-        getIsRaceVampire.Race.Link.SetTo(vampire);
+        var getPCIsRaceVampire = new GetPCIsRaceConditionData();
+        getPCIsRaceVampire.Race.Link.SetTo(vampire);
         topicInfo.ExtraConditions.Add(new ConditionFloat {
-            Data = getIsRaceVampire,
+            Data = getPCIsRaceVampire,
             ComparisonValue = 1,
             CompareOperator = CompareOperator.EqualTo,
             Flags = Condition.Flag.OR,
@@ -107,18 +107,18 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicProcessor {
     }
 
     private static void AddNegatedConditions(DialogueTopicInfo topicInfo, FormKey regular, FormKey vampire) {
-        var getIsRace = new GetIsRaceConditionData();
-        getIsRace.Race.Link.SetTo(regular);
+        var getPCIsRace = new GetPCIsRaceConditionData();
+        getPCIsRace.Race.Link.SetTo(regular);
         topicInfo.ExtraConditions.Add(new ConditionFloat {
-            Data = getIsRace,
+            Data = getPCIsRace,
             ComparisonValue = 0,
             CompareOperator = CompareOperator.EqualTo,
         });
 
-        var getIsRaceVampire = new GetIsRaceConditionData();
-        getIsRaceVampire.Race.Link.SetTo(vampire);
+        var getPCIsRaceVampire = new GetPCIsRaceConditionData();
+        getPCIsRaceVampire.Race.Link.SetTo(vampire);
         topicInfo.ExtraConditions.Add(new ConditionFloat {
-            Data = getIsRaceVampire,
+            Data = getPCIsRaceVampire,
             ComparisonValue = 0,
             CompareOperator = CompareOperator.EqualTo,
         });

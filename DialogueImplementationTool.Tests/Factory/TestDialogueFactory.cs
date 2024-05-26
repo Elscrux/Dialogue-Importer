@@ -127,6 +127,7 @@ public sealed class TestDialogueFactory {
         archeryTopic.TopicInfos[0].Prompt.FullText.Should().Be("I don't see any hunting gear either. (Archery) [easy]");
         archeryTopic.TopicInfos[0].ExtraConditions.Should().HaveCount(4);
         foreach (var extraCondition in archeryTopic.TopicInfos[0].ExtraConditions) {
+            extraCondition.Data.Should().BeOfType<GetPCIsRaceConditionData>();
             extraCondition.Flags.HasFlag(Condition.Flag.OR).Should().BeFalse();
         }
         archeryTopic.TopicInfos[1].SharedInfo.Should().BeNull();
