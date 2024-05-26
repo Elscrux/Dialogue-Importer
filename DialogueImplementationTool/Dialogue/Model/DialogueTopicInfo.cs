@@ -192,8 +192,6 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
         InvisibleContinue = topicInfo.InvisibleContinue;
         Random = topicInfo.Random;
         ResetHours = topicInfo.ResetHours;
-        ExtraConditions.Clear();
-        ExtraConditions.AddRange(topicInfo.ExtraConditions);
     }
 
     public override string ToString() {

@@ -119,7 +119,7 @@
       <Compile Update="Dialogue\Processor\KeywordLinker.cs">
         <DependentUpon>IConversationProcessor.cs</DependentUpon>
       </Compile>
-      <Compile Update="Dialogue\Processor\NoteExtractor.cs">
+      <Compile Update="Dialogue\Processor\ResponseNoteExtractor.cs">
         <DependentUpon>IDialogueResponseProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\FuncDialogueProcessor.cs">
@@ -151,6 +151,9 @@
       </Compile>
       <Compile Update="Dialogue\Processor\SetInvisibleContinuePrompt.cs">
         <DependentUpon>IConversationProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\TopicInfoNoteExtractor.cs">
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
     </ItemGroup>
 

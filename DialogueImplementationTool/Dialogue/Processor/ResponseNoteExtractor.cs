@@ -8,26 +8,18 @@ using DialogueImplementationTool.Parser;
 using Noggog;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
-public sealed partial class NoteExtractor : IDialogueResponseProcessor {
-    private const string NotePattern = @"\[([^\]]*)\]";
-
-    [GeneratedRegex($"^{NotePattern}")]
-    private static partial Regex StartNoteRegex();
-
-    [GeneratedRegex($"{NotePattern}$")]
-    private static partial Regex EndNoteRegex();
-
+public sealed partial class ResponseNoteExtractor : IDialogueResponseProcessor {
     public void Process(DialogueResponse response, IReadOnlyList<FormattedText> textSnippets) {
         var processedSnippets = textSnippets.ToList();
 
         ProcessNotes(
-            StartNoteRegex(),
+            NoteUtils.StartNoteRegex(),
             StringExt.TrimStart,
             (s, i) => s[..i],
             response.StartNotes,
             processedSnippets);
         ProcessNotes(
-            EndNoteRegex(),
+            NoteUtils.EndNoteRegex(),
             StringExt.TrimEnd,
             (s, i) => s[..^i],
             response.EndsNotes,
