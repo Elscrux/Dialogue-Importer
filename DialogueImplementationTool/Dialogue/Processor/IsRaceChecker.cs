@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using DialogueImplementationTool.Dialogue.Model;
@@ -66,7 +66,9 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicInfoProcessor {
                 Flags = Condition.Flag.OR,
             });
 
-            topicInfo.RemoveNote(note);
+            foreach (var response in topicInfo.Responses) {
+                response.RemoveNote(note);
+            }
         }
     }
 }

@@ -11,7 +11,9 @@ public sealed class SetInvisibleContinuePrompt : IConversationProcessor {
                 foreach (var link in topicInfo.Links) {
                     if (!link.GetPlayerText().IsNullOrEmpty()) continue;
 
-                    link.TopicInfos[0].Prompt = "(invis cont)";
+                    foreach (var info in link.TopicInfos) { 
+                        info.Prompt.Text = "(invis cont)";
+                    }
                 }
             }
         }

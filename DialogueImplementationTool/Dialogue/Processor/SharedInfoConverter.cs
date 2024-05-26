@@ -135,7 +135,7 @@ public sealed class SharedInfoConverter : IConversationProcessor {
         public SharedLine? Next { get; set; } = Next;
     }
 
-    private sealed record SharedLine : DialogueResponse {
+    private sealed class SharedLine : DialogueResponse, IEquatable<SharedLine> {
         public SharedLine(DialogueResponse dialogueResponse, ISpeaker speaker) {
             Response = dialogueResponse.Response;
             StartNotes = dialogueResponse.StartNotes;
@@ -147,15 +147,23 @@ public sealed class SharedInfoConverter : IConversationProcessor {
         public ISpeaker Speaker { get; }
         public List<SharedLineLink> Users { get; } = [];
 
+        public override bool Equals(object? obj) {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+
+            return Equals(obj as SharedLine);
+        }
+
         public bool Equals(SharedLine? other) {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
 
-            return base.Equals(other) && Speaker.FormKey.Equals(other.Speaker.FormKey);
+            return Equals(this, other)
+             && Speaker.FormKey.Equals(other.Speaker.FormKey);
         }
 
         public override int GetHashCode() {
-            return HashCode.Combine(base.GetHashCode(), Speaker.FormKey);
+            return HashCode.Combine(GetHashCode(this), Speaker.FormKey);
         }
     }
 

@@ -30,8 +30,17 @@ public sealed class DialogueTopic : IEquatable<DialogueTopic> {
         }
     }
 
+    public string GetPlayerFullText() {
+        var prompts = TopicInfos.Select(x => x.Prompt.FullText).Distinct().ToList();
+
+        if (prompts.Count == 1) return prompts[0];
+
+        // If there are multiple prompts, return empty string - prompts for the topics will be used instead
+        return string.Empty;
+    }
+
     public string GetPlayerText() {
-        var prompts = TopicInfos.Select(x => x.Prompt).Distinct().ToList();
+        var prompts = TopicInfos.Select(x => x.Prompt.Text).Distinct().ToList();
 
         if (prompts.Count == 1) return prompts[0];
 
@@ -53,7 +62,7 @@ public sealed class DialogueTopic : IEquatable<DialogueTopic> {
     }
 
     public override string ToString() {
-        var playerText = GetPlayerText();
+        var playerText = GetPlayerFullText();
         if (!string.IsNullOrEmpty(playerText)) return playerText;
 
         return $"Topic with {TopicInfos.Count} prompts";

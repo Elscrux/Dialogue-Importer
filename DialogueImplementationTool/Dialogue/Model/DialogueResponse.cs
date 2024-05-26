@@ -1,93 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using Mutagen.Bethesda.Skyrim;
-using Noggog;
 namespace DialogueImplementationTool.Dialogue.Model;
 
 [DebuggerDisplay("{ToString()}")]
-public record DialogueResponse {
-    public string Response { get; set; } = string.Empty;
-
-    public string FullResponse {
-        get {
-            var startNotes = NotesToString(StartNotes, true);
-            var endNotes = NotesToString(EndsNotes, false);
-            return startNotes + Response + endNotes;
-        }
+public class DialogueResponse : DialogueText, IEqualityComparer<DialogueResponse> {
+    public string Response {
+        get => Text;
+        set => Text = value;
     }
 
-    private static string NotesToString(List<Note> notes, bool start) {
-        if (notes.Count == 0) return string.Empty;
-
-        var join = '[' + string.Join("] [", notes.Select(x => x.Text)) + ']';
-        return start
-            ? join + ' '
-            : ' ' + join;
-    }
+    public string FullResponse => FullText;
 
     public string ScriptNote { get; set; } = string.Empty;
     public Emotion Emotion { get; set; } = Emotion.Neutral;
     public uint EmotionValue { get; set; } = 50;
 
-    public List<Note> StartNotes { get; init; } = [];
-    public List<Note> EndsNotes { get; init; } = [];
+    public override bool Equals(object? obj) => Equals(obj as DialogueResponse, this);
 
-    public IReadOnlyList<Note> Notes() => StartNotes.Concat(EndsNotes).ToList();
+    public bool Equals(DialogueResponse? x, DialogueResponse? y) {
+        if (ReferenceEquals(x, y)) return true;
+        if (ReferenceEquals(x, null)) return false;
+        if (ReferenceEquals(y, null)) return false;
 
-    public IReadOnlyList<Note> EndNotesAndStartIfResponseEmpty() =>
-        IsEmpty()
-            ? StartNotes.Concat(EndsNotes).ToList()
-            : EndsNotes;
-
-    public bool HasNote(Note note) => Notes().Contains(note);
-    public bool HasNote(string text) => Notes().Any(note => note.Text.Equals(text, StringComparison.OrdinalIgnoreCase));
-    public bool HasNote(Predicate<string> noteMatches) => Notes().Any(note => noteMatches(note.Text));
-
-    public void RemoveNote(Note note) {
-        StartNotes.Remove(note);
-        EndsNotes.Remove(note);
+        return x.FullResponse == y.FullResponse
+         && x.ScriptNote == y.ScriptNote;
     }
 
-    public void RemoveNote(string noteText) {
-        foreach (var note in Notes()) {
-            if (string.Equals(note.Text, noteText, StringComparison.OrdinalIgnoreCase)) {
-                RemoveNote(note);
-            }
-        }
-    }
+    public override int GetHashCode() => GetHashCode(this);
 
-    public bool RemoveNote(Predicate<string> noteMatches) {
-        var any = false;
-        foreach (var note in Notes()) {
-            if (!noteMatches(note.Text)) continue;
-
-            any = true;
-            RemoveNote(note);
-        }
-
-        return any;
-    }
-
-    /// <summary>
-    /// Has empty response text
-    /// </summary>
-    public bool IsEmpty() => Response.IsNullOrEmpty();
-
-    public virtual bool Equals(DialogueResponse? other) {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
-
-        return FullResponse == other.FullResponse
-         && ScriptNote == other.ScriptNote;
-    }
-
-    public override int GetHashCode() {
-        return HashCode.Combine(FullResponse, ScriptNote);
-    }
-
-    public override string ToString() {
-        return FullResponse;
-    }
+    public int GetHashCode(DialogueResponse obj) => HashCode.Combine(obj.FullResponse, obj.ScriptNote);
 }

@@ -41,7 +41,7 @@ public sealed partial class KeywordLinker : IConversationProcessor {
 
         foreach (var (keyword, _, linkTopicInfo) in optionsLinks) {
             if (linkTopicInfo.Links.Count > 0) {
-                Console.WriteLine($"Keyword {keyword} already has links in dialogue {linkTopicInfo.Prompt}");
+                Console.WriteLine($"Keyword {keyword} already has links in dialogue {linkTopicInfo.Prompt.FullText}");
                 continue;
             }
 
@@ -69,7 +69,7 @@ public sealed partial class KeywordLinker : IConversationProcessor {
 
         foreach (var (keyword, _, linkTopicInfo) in keywordLinks) {
             if (linkTopicInfo.Links.Count > 0) {
-                Console.WriteLine($"Keyword {keyword} already has links in dialogue {linkTopicInfo.Prompt}");
+                Console.WriteLine($"Keyword {keyword} already has links in dialogue {linkTopicInfo.Prompt.FullText}");
                 continue;
             }
 
@@ -103,7 +103,7 @@ public sealed partial class KeywordLinker : IConversationProcessor {
 
                     if (!keywordDictionary.TryAdd(keyword, (keyword, topic, info))) {
                         Console.WriteLine(
-                            $"Destination keyword {keyword} already exists in dialogue {topic.TopicInfos[0].Prompt}");
+                            $"Destination keyword {keyword} already exists in dialogue {topic.TopicInfos[0].Prompt.FullText}");
                     }
                 }
             }

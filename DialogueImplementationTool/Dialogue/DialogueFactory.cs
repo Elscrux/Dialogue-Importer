@@ -40,7 +40,7 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                 var rawTopic = topicQueue.Dequeue();
 
                 var responses = GetTopicInfos(Context.Quest, rawTopic.Topic);
-                var playerText = rawTopic.Topic.GetPlayerText();
+                var playerText = rawTopic.Topic.GetPlayerFullText();
                 var dontUsePrompt = !playerText.IsNullOrWhitespace();
                 if (dontUsePrompt) {
                     foreach (var response in responses) {

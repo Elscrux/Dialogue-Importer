@@ -14,7 +14,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
 
     public ISpeaker Speaker { get; set; } = null!;
 
-    public string Prompt { get; set; } = string.Empty;
+    public DialogueText Prompt { get; set; } = new();
     public List<DialogueResponse> Responses { get; init; } = [];
     public List<DialogueTopic> Links { get; init; } = [];
     public bool SayOnce { get; set; }
@@ -29,7 +29,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
     public DialogueTopicInfo(DialogueTopicInfo other) {
         SharedInfo = other.SharedInfo;
         Speaker = other.Speaker;
-        Prompt = other.Prompt;
+        Prompt = new DialogueText(other.Prompt);
         SayOnce = other.SayOnce;
         ResetHours = other.ResetHours;
         Goodbye = other.Goodbye;
@@ -46,7 +46,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
         return new DialogueTopicInfo {
             SharedInfo = SharedInfo,
             Speaker = Speaker,
-            Prompt = Prompt,
+            Prompt = new DialogueText(Prompt),
             SayOnce = SayOnce,
             ResetHours = ResetHours,
             Goodbye = Goodbye,
@@ -218,7 +218,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
 
         return Equals(SharedInfo, other.SharedInfo)
          && Speaker.FormKey.Equals(other.Speaker.FormKey)
-         && Prompt == other.Prompt
+         && Prompt.FullText == other.Prompt.FullText
          && SayOnce == other.SayOnce
          && Goodbye == other.Goodbye
          && InvisibleContinue == other.InvisibleContinue

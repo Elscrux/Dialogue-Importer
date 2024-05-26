@@ -63,7 +63,7 @@ public sealed class SkyrimDialogueContext(
         return null;
 
         bool Matches(IDialogTopicGetter implementedTopic) {
-            var playerText = topic.GetPlayerText();
+            var playerText = topic.GetPlayerFullText();
             if (playerText != string.Empty && playerText != implementedTopic.Name?.String) return false;
 
             if (topic.TopicInfos.Count != implementedTopic.Responses.Count) return false;
@@ -73,21 +73,17 @@ public sealed class SkyrimDialogueContext(
                 var implementedTopicInfo = implementedTopic.Responses[topicInfoIndex];
 
                 // Check prompt
-                if (playerText == string.Empty && topicInfo.Prompt != implementedTopicInfo.Prompt?.String) return false;
+                if (playerText == string.Empty && topicInfo.Prompt.FullText != implementedTopicInfo.Prompt?.String) return false;
 
                 // Check shared info
                 if (topicInfo.SharedInfo is null != implementedTopicInfo.ResponseData.IsNull) return false;
 
                 // Check flags
                 if (topicInfo.InvisibleContinue
-                 != ((implementedTopicInfo.Flags?.Flags & DialogResponses.Flag.InvisibleContinue) != 0))
-                    return false;
-                if (topicInfo.Goodbye != ((implementedTopicInfo.Flags?.Flags & DialogResponses.Flag.Goodbye) != 0))
-                    return false;
-                if (topicInfo.Random != ((implementedTopicInfo.Flags?.Flags & DialogResponses.Flag.Random) != 0))
-                    return false;
-                if (topicInfo.SayOnce != ((implementedTopicInfo.Flags?.Flags & DialogResponses.Flag.SayOnce) != 0))
-                    return false;
+                 != implementedTopicInfo.Flags?.Flags.HasFlag(DialogResponses.Flag.InvisibleContinue)) return false;
+                if (topicInfo.Goodbye != implementedTopicInfo.Flags?.Flags.HasFlag(DialogResponses.Flag.Goodbye)) return false;
+                if (topicInfo.Random != implementedTopicInfo.Flags?.Flags.HasFlag(DialogResponses.Flag.Random)) return false;
+                if (topicInfo.SayOnce != implementedTopicInfo.Flags?.Flags.HasFlag(DialogResponses.Flag.SayOnce)) return false;
 
                 // Check responses
                 if (topicInfo.Responses.Count != implementedTopicInfo.Responses.Count) return false;

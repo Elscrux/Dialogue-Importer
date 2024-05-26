@@ -20,7 +20,7 @@ public sealed class TestCollapseNoteOnlyResponse {
         collapseNoteOnlyResponse.Process(topicInfo);
 
         // Assert
-        topicInfo.Prompt.Should().Be("Hi, Player. How are you?");
+        topicInfo.Prompt.FullText.Should().Be("Hi, Player. How are you?");
         topicInfo.Responses.Should().ContainSingle();
         topicInfo.Responses[0].Response.Should().Be("I'm good.");
         topicInfo.Responses[0].HasNote("back to options").Should().BeTrue();
@@ -43,7 +43,7 @@ public sealed class TestCollapseNoteOnlyResponse {
         collapseNoteOnlyResponse.Process(topicInfo);
 
         // Assert
-        topicInfo.Prompt.Should().Be("Hi, Player. How are you?");
+        topicInfo.Prompt.FullText.Should().Be("Hi, Player. How are you?");
         topicInfo.Responses.Should().ContainSingle();
         topicInfo.Responses[0].Response.Should().Be("I'm good.");
         topicInfo.Responses[0].HasNote("happy").Should().BeTrue();
@@ -69,7 +69,7 @@ public sealed class TestCollapseNoteOnlyResponse {
         collapseNoteOnlyResponse.Process(topicInfo);
 
         // Assert
-        topicInfo.Prompt.Should().Be("Hi, Player. How are you?");
+        topicInfo.Prompt.FullText.Should().Be("Hi, Player. How are you?");
         topicInfo.Responses.Should().ContainSingle();
         topicInfo.Responses[0].Response.Should().Be("I'm good.");
         topicInfo.Responses[0].HasNote("happy").Should().BeTrue();

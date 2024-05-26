@@ -207,7 +207,7 @@ public sealed class TestDialogueFactory {
         firstTopicInfo.Links.Should().ContainSingle();
         firstTopicInfo.Links[0].TopicInfos.Should().ContainSingle();
         firstTopicInfo.Links[0].TopicInfos[0].Responses.Should().HaveCount(2);
-        firstTopicInfo.Links[0].GetPlayerText().Should().Be("Test");
+        firstTopicInfo.Links[0].GetPlayerFullText().Should().Be("Test");
 
         var secondTopicInfo = conversation[0].Topics[0].TopicInfos[1];
         secondTopicInfo.Responses.Should().ContainSingle();

@@ -17,7 +17,7 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
 
     public override IDialogueProcessor ConfigureProcessor(DialogueProcessor dialogueProcessor) {
         // Add scene response processor
-        var noteExtractorIndex = dialogueProcessor.ResponseProcessors.FindIndex(p => p is NoteExtractor);
+        var noteExtractorIndex = dialogueProcessor.ResponseProcessors.FindIndex(p => p is ResponseNoteExtractor);
         dialogueProcessor.ResponseProcessors.Insert(noteExtractorIndex, new SceneResponseProcessor());
 
         var processor = base.ConfigureProcessor(dialogueProcessor);
@@ -195,7 +195,7 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
         //Get speaker strings
         var speakerNames = topics
             .SelectMany(topic => topic.TopicInfos)
-            .Select(topicInfo => topicInfo.Prompt)
+            .Select(topicInfo => topicInfo.Prompt.FullText)
             .ToHashSet();
 
         //Map speaker form keys
@@ -228,7 +228,7 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
 
     private void SetSpeakerFromPrompt(DialogueTopic topic) {
         foreach (var topicInfo in topic.TopicInfos) {
-            var speaker = GetSpeaker(topicInfo.Prompt);
+            var speaker = GetSpeaker(topicInfo.Prompt.FullText);
             topicInfo.Speaker = speaker;
             topicInfo.Prompt = string.Empty;
 

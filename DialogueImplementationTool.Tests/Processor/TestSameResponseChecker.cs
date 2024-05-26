@@ -21,7 +21,7 @@ public sealed class TestSameResponseChecker {
 
         // Check
         conversation[0].Topics[0].TopicInfos[0].Links[0].TopicInfos[0].Responses.Should().ContainSingle();
-        conversation[0].Topics[0].TopicInfos[0].Links[0].TopicInfos[0].Prompt.Should().Be("Are you always so hostile?");
-        conversation[0].Topics[0].TopicInfos[0].Links[1].TopicInfos[0].Prompt.Should().Be("Why so hostile?");
+        conversation[0].Topics[0].TopicInfos[0].Links[0].TopicInfos[0].Prompt.FullText.Should().Be("Are you always so hostile?");
+        conversation[0].Topics[0].TopicInfos[0].Links[1].TopicInfos[0].Prompt.FullText.Should().Be("Why so hostile?");
     }
 }

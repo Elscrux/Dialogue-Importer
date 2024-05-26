@@ -5,13 +5,13 @@ using DialogueImplementationTool.Parser;
 using FluentAssertions;
 namespace DialogueImplementationTool.Tests.Processor;
 
-public sealed class TestNoteExtractor {
+public sealed class TestResponseNoteExtractor {
     [Fact]
     public void TestStartNotes() {
         const string text = "[excited] Yes!";
         var dialogueResponse = new DialogueResponse { Response = text };
 
-        var noteExtractor = new NoteExtractor();
+        var noteExtractor = new ResponseNoteExtractor();
         noteExtractor.Process(dialogueResponse, [new FormattedText(text, false, Color.Black)]);
 
         // Check
@@ -26,7 +26,7 @@ public sealed class TestNoteExtractor {
         const string text = "Yes! [back to options]";
         var dialogueResponse = new DialogueResponse { Response = text };
 
-        var noteExtractor = new NoteExtractor();
+        var noteExtractor = new ResponseNoteExtractor();
         noteExtractor.Process(dialogueResponse, [new FormattedText(text, false, Color.Black)]);
 
         // Check
@@ -41,7 +41,7 @@ public sealed class TestNoteExtractor {
         const string text = "[excited] Yes! [back to options]";
         var dialogueResponse = new DialogueResponse { Response = text };
 
-        var noteExtractor = new NoteExtractor();
+        var noteExtractor = new ResponseNoteExtractor();
         noteExtractor.Process(dialogueResponse, [new FormattedText(text, false, Color.Black)]);
 
         // Check
@@ -57,7 +57,7 @@ public sealed class TestNoteExtractor {
         const string text = "Yes! [ back to options , unlock CONFIRM ]";
         var dialogueResponse = new DialogueResponse { Response = text };
 
-        var noteExtractor = new NoteExtractor();
+        var noteExtractor = new ResponseNoteExtractor();
         noteExtractor.Process(dialogueResponse, [new FormattedText(text, false, Color.Black)]);
 
         // Check

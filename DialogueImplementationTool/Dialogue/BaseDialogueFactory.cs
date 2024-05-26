@@ -134,7 +134,7 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
 
         return new DialogResponses(Context.GetNextFormKey(), Context.Release) {
             Responses = TopicInfos(topicInfo).ToExtendedList(),
-            Prompt = topicInfo.Prompt.IsNullOrWhitespace() ? null : topicInfo.Prompt,
+            Prompt = topicInfo.Prompt.FullText.IsNullOrWhitespace() ? null : topicInfo.Prompt.FullText,
             Conditions = GetConditions(topicInfo),
             FavorLevel = FavorLevel.None,
             Flags = flags,

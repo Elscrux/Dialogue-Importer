@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using Noggog;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed class BlockingChecker : IConversationProcessor {
@@ -7,7 +6,7 @@ public sealed class BlockingChecker : IConversationProcessor {
         foreach (var topic in conversation.SelectMany(x => x.Topics)) {
             if (topic.TopicInfos is not [var topicInfo]) continue;
 
-            if (topicInfo.Prompt.IsNullOrWhitespace()) {
+            if (topicInfo.Prompt.IsEmpty()) {
                 topic.TopicInfos[0].Prompt = "(blocking)";
                 topic.Blocking = true;
             }
