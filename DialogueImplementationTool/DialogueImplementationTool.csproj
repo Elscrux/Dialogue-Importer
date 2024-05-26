@@ -132,7 +132,7 @@
         <DependentUpon>IDialogueResponseProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\IsRaceChecker.cs">
-        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+        <DependentUpon>IDialogueTopicProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\RandomTopicInfo.cs">
         <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>

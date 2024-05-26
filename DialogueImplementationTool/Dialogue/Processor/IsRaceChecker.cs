@@ -1,4 +1,4 @@
-﻿ using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using DialogueImplementationTool.Dialogue.Model;
@@ -8,7 +8,7 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
-public sealed partial class PlayerIsRaceChecker : IDialogueTopicInfoProcessor {
+public sealed partial class PlayerIsRaceChecker : IDialogueTopicProcessor {
     private const string ArgonianRegexPart = "(Argonian)";
     private const string AltmerRegexPart = "(Altmer|High Elf|Highelf)";
     private const string BosmerRegexPart = "(Bosmer|Wood Elf|Woodelf)";
@@ -27,6 +27,9 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicInfoProcessor {
     [GeneratedRegex($@"player[\w\s]+(?:{MergedRacesRegexPart})")]
     private static partial Regex IsRaceRegex();
 
+    [GeneratedRegex(@"\bnot\b")]
+    private static partial Regex NegatedRegex();
+
     private static readonly Dictionary<int, (FormKey Regular, FormKey Vampire)> RaceFormKeys = new() {
         { 1, (Skyrim.Race.ArgonianRace.FormKey, Skyrim.Race.ArgonianRaceVampire.FormKey) },
         { 2, (Skyrim.Race.HighElfRace.FormKey, Skyrim.Race.HighElfRaceVampire.FormKey) },
@@ -40,35 +43,75 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicInfoProcessor {
         { 10, (Skyrim.Race.RedguardRace.FormKey, Skyrim.Race.RedguardRaceVampire.FormKey) },
     };
 
-    public void Process(DialogueTopicInfo topicInfo) {
-        foreach (var note in topicInfo.AllNotes()) {
-            var match = IsRaceRegex().Match(note.Text);
-            if (!match.Success) continue;
+    public void Process(DialogueTopic topic) {
+        foreach (var topicInfo in topic.TopicInfos) {
+            foreach (var note in topicInfo.Prompt.Notes()) {
+                if (CheckNote(topicInfo, note)) {
+                    topicInfo.Prompt.RemoveNote(note);
+                }
+            }
 
-            var matchingRace = match.Groups.Values.Skip(1).First(x => x.Success);
-            var (regular, vampire) = RaceFormKeys[match.Groups.Values.IndexOf(matchingRace)];
-
-            var getIsRace = new GetIsRaceConditionData();
-            getIsRace.Race.Link.SetTo(regular);
-            topicInfo.ExtraConditions.Add(new ConditionFloat {
-                Data = getIsRace,
-                ComparisonValue = 1,
-                CompareOperator = CompareOperator.EqualTo,
-                Flags = Condition.Flag.OR,
-            });
-
-            var getIsRaceVampire = new GetIsRaceConditionData();
-            getIsRaceVampire.Race.Link.SetTo(vampire);
-            topicInfo.ExtraConditions.Add(new ConditionFloat {
-                Data = getIsRaceVampire,
-                ComparisonValue = 1,
-                CompareOperator = CompareOperator.EqualTo,
-                Flags = Condition.Flag.OR,
-            });
-
-            foreach (var response in topicInfo.Responses) {
-                response.RemoveNote(note);
+            foreach (var note in topicInfo.AllNotes()) {
+                if (CheckNote(topicInfo, note)) {
+                    foreach (var response in topicInfo.Responses) {
+                        response.RemoveNote(note);
+                    }
+                }
             }
         }
+    }
+
+    private static bool CheckNote(DialogueTopicInfo topicInfo, Note note) {
+        var match = IsRaceRegex().Match(note.Text);
+        if (!match.Success) return false;
+
+        var matchingRace = match.Groups.Values.Skip(1).First(x => x.Success);
+        var (regular, vampire) = RaceFormKeys[match.Groups.Values.IndexOf(matchingRace)];
+
+        if (NegatedRegex().IsMatch(note.Text)) {
+            AddNegatedConditions(topicInfo, regular, vampire);
+        } else {
+            AddConditions(topicInfo, regular, vampire);
+        }
+
+        return true;
+    }
+
+    private static void AddConditions(DialogueTopicInfo topicInfo, FormKey regular, FormKey vampire) {
+        var getIsRace = new GetIsRaceConditionData();
+        getIsRace.Race.Link.SetTo(regular);
+        topicInfo.ExtraConditions.Add(new ConditionFloat {
+            Data = getIsRace,
+            ComparisonValue = 1,
+            CompareOperator = CompareOperator.EqualTo,
+            Flags = Condition.Flag.OR,
+        });
+
+        var getIsRaceVampire = new GetIsRaceConditionData();
+        getIsRaceVampire.Race.Link.SetTo(vampire);
+        topicInfo.ExtraConditions.Add(new ConditionFloat {
+            Data = getIsRaceVampire,
+            ComparisonValue = 1,
+            CompareOperator = CompareOperator.EqualTo,
+            Flags = Condition.Flag.OR,
+        });
+    }
+
+    private static void AddNegatedConditions(DialogueTopicInfo topicInfo, FormKey regular, FormKey vampire) {
+        var getIsRace = new GetIsRaceConditionData();
+        getIsRace.Race.Link.SetTo(regular);
+        topicInfo.ExtraConditions.Add(new ConditionFloat {
+            Data = getIsRace,
+            ComparisonValue = 0,
+            CompareOperator = CompareOperator.EqualTo,
+        });
+
+        var getIsRaceVampire = new GetIsRaceConditionData();
+        getIsRaceVampire.Race.Link.SetTo(vampire);
+        topicInfo.ExtraConditions.Add(new ConditionFloat {
+            Data = getIsRaceVampire,
+            ComparisonValue = 0,
+            CompareOperator = CompareOperator.EqualTo,
+        });
     }
 }

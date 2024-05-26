@@ -20,12 +20,12 @@ public sealed class DialogueProcessor(EmotionChecker emotionChecker) : IDialogue
         new GoodbyeChecker(),
         new TopicInfoTrimmer(),
         new TopicInfoInvalidStringFixer(),
-        new PlayerIsRaceChecker(),
     ];
 
     // Runs after document parsing
     public List<IDialogueTopicProcessor> TopicProcessors { get; } = [
         new TopicInfoNoteExtractor(),
+        new PlayerIsRaceChecker(),
         new SuccessFailureSeparator(),
         new RandomChecker(),
     ];

@@ -123,6 +123,12 @@ public sealed class TestDialogueFactory {
 
         var archeryTopic = fishingGearTopic.TopicInfos[0].Links[0];
         archeryTopic.TopicInfos.Should().HaveCount(2);
+        archeryTopic.TopicInfos[0].SharedInfo.Should().NotBeNull();
+        archeryTopic.TopicInfos[0].Prompt.FullText.Should().Be("I don't see any hunting gear either. (Archery) [easy]");
+        archeryTopic.TopicInfos[0].ExtraConditions.Should().HaveCount(2);
+        archeryTopic.TopicInfos[0].ExtraConditions[0].Flags.HasFlag(Condition.Flag.OR).Should().BeFalse();
+        archeryTopic.TopicInfos[0].ExtraConditions[1].Flags.HasFlag(Condition.Flag.OR).Should().BeFalse();
+        archeryTopic.TopicInfos[1].SharedInfo.Should().BeNull();
 
         var successTopicInfo = archeryTopic.TopicInfos[0];
         successTopicInfo.Links.Should().HaveCount(3);
