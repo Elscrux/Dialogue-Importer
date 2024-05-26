@@ -65,13 +65,22 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicProcessor {
         var match = IsRaceRegex().Match(note.Text);
         if (!match.Success) return false;
 
-        var matchingRace = match.Groups.Values.Skip(1).First(x => x.Success);
-        var (regular, vampire) = RaceFormKeys[match.Groups.Values.IndexOf(matchingRace)];
+        var text = note.Text;
+        var negated = NegatedRegex().IsMatch(text);
+        while (match.Success) {
+            var matchingRace = match.Groups.Values.Skip(1).FirstOrDefault(x => x.Success);
+            if (matchingRace is null) break;
 
-        if (NegatedRegex().IsMatch(note.Text)) {
-            AddNegatedConditions(topicInfo, regular, vampire);
-        } else {
-            AddConditions(topicInfo, regular, vampire);
+            var (regular, vampire) = RaceFormKeys[match.Groups.Values.IndexOf(matchingRace)];
+
+            if (negated) {
+                AddNegatedConditions(topicInfo, regular, vampire);
+            } else {
+                AddConditions(topicInfo, regular, vampire);
+            }
+
+            text = text.Replace(matchingRace.Value, string.Empty);
+            match = IsRaceRegex().Match(text);
         }
 
         return true;
