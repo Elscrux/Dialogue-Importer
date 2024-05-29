@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
-using DialogueImplementationTool.Dialogue.Model;
+using DialogueImplementationTool.Extension;
 namespace DialogueImplementationTool.Dialogue.Processor;
-
-using KeywordLink = (string Keyword, DialogueTopic Topic, DialogueTopicInfo TopicInfo);
 
 public sealed partial class KeywordLinker : IConversationProcessor {
     private const string FillerRegexPart = @"[^\]]*";
@@ -33,11 +29,12 @@ public sealed partial class KeywordLinker : IConversationProcessor {
     }
 
     private static void ProcessOptionLinks(Conversation conversation) {
-        var optionsDestinations =
-            GetKeywordTopicInfoDictionary(conversation,
-                info => GetKeyword(info.Responses[^1].EndNotesAndStartIfResponseEmpty(), SimpleKeywordRegex()));
-        var optionsLinks = GetAllKeywordTopicInfo(conversation,
-            info => GetKeyword(info.Responses[^1].EndNotesAndStartIfResponseEmpty(), LinkOptionsRegex()));
+        var optionsDestinations = conversation.GetKeywordTopicInfoDictionary(
+            SimpleKeywordRegex(),
+            info => info.Responses[^1].EndNotesAndStartIfResponseEmpty());
+        var optionsLinks = conversation.GetAllKeywordTopicInfos(
+            LinkOptionsRegex(),
+            info => info.Responses[^1].EndNotesAndStartIfResponseEmpty());
 
         foreach (var (keyword, _, linkTopicInfo) in optionsLinks) {
             if (linkTopicInfo.Links.Count > 0) {
@@ -60,12 +57,12 @@ public sealed partial class KeywordLinker : IConversationProcessor {
     }
 
     private static void ProcessKeywordLinks(Conversation conversation) {
-        var keywordDestination =
-            GetKeywordTopicInfoDictionary(conversation,
-                info => GetKeyword(info.Responses[0].StartNotes, SimpleKeywordRegex()));
-        var keywordLinks =
-            GetAllKeywordTopicInfo(conversation,
-                info => GetKeyword(info.Responses[^1].EndNotesAndStartIfResponseEmpty(), LinkSimpleRegex()));
+        var keywordDestination = conversation.GetKeywordTopicInfoDictionary(
+            SimpleKeywordRegex(),
+            info => info.Responses[0].StartNotes);
+        var keywordLinks = conversation.GetAllKeywordTopicInfos(
+            LinkSimpleRegex(),
+            info => info.Responses[^1].EndNotesAndStartIfResponseEmpty());
 
         foreach (var (keyword, _, linkTopicInfo) in keywordLinks) {
             if (linkTopicInfo.Links.Count > 0) {
@@ -86,58 +83,5 @@ public sealed partial class KeywordLinker : IConversationProcessor {
             linkTopicInfo.Links.Add(destination.Topic);
             linkTopicInfo.InvisibleContinue = true;
         }
-    }
-
-    private static Dictionary<string, KeywordLink> GetKeywordTopicInfoDictionary(
-        Conversation conversation,
-        Func<DialogueTopicInfo, string?> getKeyword) {
-        var keywordDictionary = new Dictionary<string, KeywordLink>();
-
-        foreach (var dialogue in conversation) {
-            foreach (var topic in dialogue.Topics.SelectMany(x => x.EnumerateLinks(true))) {
-                foreach (var info in topic.TopicInfos) {
-                    if (info.Responses.Count == 0) continue;
-
-                    var keyword = getKeyword(info);
-                    if (keyword is null) continue;
-
-                    if (!keywordDictionary.TryAdd(keyword, (keyword, topic, info))) {
-                        Console.WriteLine(
-                            $"Destination keyword {keyword} already exists in dialogue {topic.TopicInfos[0].Prompt.FullText}");
-                    }
-                }
-            }
-        }
-
-        return keywordDictionary;
-    }
-
-    private static List<KeywordLink> GetAllKeywordTopicInfo(
-        Conversation conversation,
-        Func<DialogueTopicInfo, string?> getKeyword) {
-        var list = new List<KeywordLink>();
-
-        foreach (var dialogue in conversation) {
-            foreach (var topic in dialogue.Topics.SelectMany(x => x.EnumerateLinks(true))) {
-                foreach (var info in topic.TopicInfos) {
-                    if (info.Responses.Count == 0) continue;
-
-                    var keyword = getKeyword(info);
-                    if (keyword is null) continue;
-
-                    list.Add((keyword, topic, info));
-                }
-            }
-        }
-
-        return list;
-    }
-
-    private static string? GetKeyword(IEnumerable<Note> notes, Regex regex) {
-        return notes
-            .Select(note => regex.Match(note.Text))
-            .Where(match => match.Success)
-            .Select(match => match.Groups[1].Value)
-            .FirstOrDefault();
     }
 }
