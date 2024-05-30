@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Dialogue.Speaker;
+using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
@@ -9,6 +10,7 @@ namespace DialogueImplementationTool.Dialogue;
 
 public interface IDialogueContext {
     SkyrimRelease Release { get; }
+    IGameEnvironment Environment { get; }
     ILinkCache LinkCache { get; }
     IQuest Quest { get; }
     IMod Mod { get; }

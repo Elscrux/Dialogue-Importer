@@ -37,6 +37,7 @@ public class TestConstants {
         new InjectedSpeakerSelection(new Dictionary<string, AliasSpeaker>());
 
     public SkyrimDialogueContext SkyrimDialogueContext => new(LinkCache, Mod, Quest, SpeakerSelection);
+    public SkyrimDialogueContext SkyrimDialogueContext => new(Environment, Mod, Quest, SpeakerSelection, FormKeySelection);
     public Quest Quest { get; } = new(FormKey.Factory("000000:Quest.esp"), Release);
     public NpcSpeaker Speaker1 { get; }
     public NpcSpeaker Speaker2 { get; }

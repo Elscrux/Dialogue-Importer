@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Dialogue.Speaker;
+using DialogueImplementationTool.Services;
 using Mutagen.Bethesda;
+using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
@@ -10,13 +12,14 @@ using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue;
 
 public sealed class SkyrimDialogueContext(
-    ILinkCache<ISkyrimMod, ISkyrimModGetter> linkCache,
+    IGameEnvironment<ISkyrimMod, ISkyrimModGetter> environment,
     ISkyrimMod mod,
     IQuest quest,
     ISpeakerSelection speakerSelection)
     : IDialogueContext {
     public SkyrimRelease Release => SkyrimRelease.SkyrimSE;
-    public ILinkCache LinkCache { get; } = linkCache;
+    public IGameEnvironment Environment { get; } = environment;
+    public ILinkCache LinkCache { get; } = environment.LinkCache;
     public IQuest Quest { get; } = quest;
     public IMod Mod { get; } = mod;
 
@@ -41,18 +44,18 @@ public sealed class SkyrimDialogueContext(
     }
 
     public DialogTopic? GetTopic(string editorId) {
-        if (!linkCache.TryResolveIdentifier<IDialogTopicGetter>(editorId, out var formKey)) return null;
+        if (!environment.LinkCache.TryResolveIdentifier<IDialogTopicGetter>(editorId, out var formKey)) return null;
 
         return GetTopic(formKey);
     }
 
     public DialogTopic GetTopic(FormKey formKey) {
-        var topic = linkCache.ResolveContext<DialogTopic, IDialogTopicGetter>(formKey);
+        var topic = environment.LinkCache.ResolveContext<DialogTopic, IDialogTopicGetter>(formKey);
         return topic.GetOrAddAsOverride(mod);
     }
 
     public IDialogTopicGetter? GetTopic(DialogueTopic topic) {
-        foreach (var implementedTopic in linkCache.PriorityOrder.WinningOverrides<IDialogTopicGetter>()) {
+        foreach (var implementedTopic in environment.LinkCache.PriorityOrder.WinningOverrides<IDialogTopicGetter>()) {
             if (implementedTopic.Quest.FormKey != Quest.FormKey) continue;
 
             if (Matches(implementedTopic)) {
@@ -73,7 +76,8 @@ public sealed class SkyrimDialogueContext(
                 var implementedTopicInfo = implementedTopic.Responses[topicInfoIndex];
 
                 // Check prompt
-                if (playerText == string.Empty && topicInfo.Prompt.FullText != implementedTopicInfo.Prompt?.String) return false;
+                if (playerText == string.Empty && topicInfo.Prompt.FullText != implementedTopicInfo.Prompt?.String)
+                    return false;
 
                 // Check shared info
                 if (topicInfo.SharedInfo is null != implementedTopicInfo.ResponseData.IsNull) return false;

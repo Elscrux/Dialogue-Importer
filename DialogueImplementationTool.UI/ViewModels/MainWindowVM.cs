@@ -25,7 +25,7 @@ public enum LoadState {
 
 public sealed class MainWindowVM : ViewModel {
     private const string ModName = "DialogueOutput";
-    private readonly Func<EmotionChecker, DialogueProcessor> _dialogueProcessorFactory;
+    private readonly Func<IDialogueContext, EmotionChecker, DialogueProcessor> _dialogueProcessorFactory;
     private readonly Func<IDialogueContext, DialogueProcessor, IDocumentParser, DialogueVM> _dialogueVMFactory;
     private readonly Dictionary<string, Func<string, IDocumentParser>> _documentIterators;
     private readonly Func<string, PythonEmotionClassifier> _emotionClassifierFactory;
@@ -36,6 +36,7 @@ public sealed class MainWindowVM : ViewModel {
     public OutputPathProvider OutputPathProvider { get; }
     public List<string> Extensions { get; }
     public IEnumerable<Type> QuestTypes { get; } = typeof(IQuestGetter).AsEnumerable();
+    public IGameEnvironment<ISkyrimMod, ISkyrimModGetter> Environment { get; }
     public ILinkCache<ISkyrimMod, ISkyrimModGetter> LinkCache { get; }
     [Reactive] public string PythonDllPath { get; set; } = string.Empty;
     [Reactive] public FormKey QuestFormKey { get; set; }
@@ -46,7 +47,7 @@ public sealed class MainWindowVM : ViewModel {
         OutputPathProvider outputPathProvider,
         ISpeakerFavoritesSelection speakerFavoritesSelection,
         Func<IDialogueContext, DialogueProcessor, IDocumentParser, DialogueVM> dialogueVMFactory,
-        Func<EmotionChecker, DialogueProcessor> dialogueProcessorFactory,
+        Func<IDialogueContext, EmotionChecker, DialogueProcessor> dialogueProcessorFactory,
         Func<string, PythonEmotionClassifier> emotionClassifierFactory,
         Func<string, OpenDocumentTextParser> openDocumentTextIteratorFactory,
         Func<string, DocXDocumentParser> docXIteratorFactory) {
@@ -62,10 +63,10 @@ public sealed class MainWindowVM : ViewModel {
         Extensions = _documentIterators.Keys.ToList();
 
         _mod = new SkyrimMod(new ModKey(GetNewModName(), ModType.Plugin), SkyrimRelease.SkyrimSE, 1.7f);
-        var environment = GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>.Create(GameRelease.SkyrimSE)
+        Environment = GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>.Create(GameRelease.SkyrimSE)
             .WithOutputMod(_mod)
             .Build();
-        LinkCache = environment.LinkCache;
+        LinkCache = Environment.LinkCache;
 
         TrySetPythonFromEnv();
 
@@ -87,7 +88,7 @@ public sealed class MainWindowVM : ViewModel {
     }
 
     private void TrySetPythonFromEnv() {
-        var paths = Environment.GetEnvironmentVariable("PATH");
+        var paths = System.Environment.GetEnvironmentVariable("PATH");
         if (paths is null) return;
 
         foreach (var path in paths.Split(';')) {
@@ -129,14 +130,14 @@ public sealed class MainWindowVM : ViewModel {
 
         var emotionClassifier = (IEmotionClassifier?) _emotionClassifier ?? new NullEmotionClassifier();
         var emotionChecker = new EmotionChecker(emotionClassifier);
-        var dialogueProcessor = _dialogueProcessorFactory(emotionChecker);
-        return _dialogueVMFactory(
-            new SkyrimDialogueContext(
-                LinkCache,
-                _mod,
-                LinkCache.ResolveContext<IQuest, IQuestGetter>(QuestFormKey).GetOrAddAsOverride(_mod),
-                new UISpeakerSelection(LinkCache, _speakerFavoritesSelection)),
-            dialogueProcessor,
-            documentParserFactory(filePath));
+        var context = new SkyrimDialogueContext(
+            Environment,
+            _mod,
+            LinkCache.ResolveContext<IQuest, IQuestGetter>(QuestFormKey).GetOrAddAsOverride(_mod),
+            new UISpeakerSelection(LinkCache, _speakerFavoritesSelection),
+            new UIFormKeySelection(LinkCache));
+        var dialogueProcessor = _dialogueProcessorFactory(context, emotionChecker);
+
+        return _dialogueVMFactory(context, dialogueProcessor, documentParserFactory(filePath));
     }
 }
