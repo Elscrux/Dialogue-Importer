@@ -36,7 +36,7 @@ public sealed partial class KeywordLinker : IConversationProcessor {
             LinkOptionsRegex(),
             info => info.Responses[^1].EndNotesAndStartIfResponseEmpty());
 
-        foreach (var (keyword, _, linkTopicInfo) in optionsLinks) {
+        foreach (var (note, keyword, _, linkTopicInfo) in optionsLinks) {
             if (linkTopicInfo.Links.Count > 0) {
                 Console.WriteLine($"Keyword {keyword} already has links in dialogue {linkTopicInfo.Prompt.FullText}");
                 continue;
@@ -47,9 +47,9 @@ public sealed partial class KeywordLinker : IConversationProcessor {
                 continue;
             }
 
-            destination.TopicInfo.Responses[^1].RemoveNote(x => SimpleKeywordRegex().IsMatch(x));
+            destination.TopicInfo.Responses[^1].RemoveNote(x => x == keyword);
             destination.TopicInfo.RemoveRedundantResponses();
-            linkTopicInfo.Responses[^1].RemoveNote(x => LinkOptionsRegex().IsMatch(x));
+            linkTopicInfo.Responses[^1].RemoveNote(note);
             linkTopicInfo.RemoveRedundantResponses();
 
             linkTopicInfo.Links.AddRange(destination.TopicInfo.Links);
@@ -64,7 +64,7 @@ public sealed partial class KeywordLinker : IConversationProcessor {
             LinkSimpleRegex(),
             info => info.Responses[^1].EndNotesAndStartIfResponseEmpty());
 
-        foreach (var (keyword, _, linkTopicInfo) in keywordLinks) {
+        foreach (var (note, keyword, _, linkTopicInfo) in keywordLinks) {
             if (linkTopicInfo.Links.Count > 0) {
                 Console.WriteLine($"Keyword {keyword} already has links in dialogue {linkTopicInfo.Prompt.FullText}");
                 continue;
@@ -75,9 +75,9 @@ public sealed partial class KeywordLinker : IConversationProcessor {
                 continue;
             }
 
-            destination.TopicInfo.Responses[0].RemoveNote(x => SimpleKeywordRegex().IsMatch(x));
+            destination.TopicInfo.Responses[0].RemoveNote(x => x == keyword);
             destination.TopicInfo.RemoveRedundantResponses();
-            linkTopicInfo.Responses[^1].RemoveNote(x => LinkSimpleRegex().IsMatch(x));
+            linkTopicInfo.Responses[^1].RemoveNote(note);
             linkTopicInfo.RemoveRedundantResponses();
 
             linkTopicInfo.Links.Add(destination.Topic);
