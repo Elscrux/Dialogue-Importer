@@ -51,20 +51,4 @@ public sealed class TestResponseNoteExtractor {
         dialogueResponse.EndsNotes.Should().ContainSingle();
         dialogueResponse.EndsNotes[0].Text.Should().Be("back to options");
     }
-
-    [Fact]
-    public void TestMultiNotes() {
-        const string text = "Yes! [ back to options , unlock CONFIRM ]";
-        var dialogueResponse = new DialogueResponse { Response = text };
-
-        var noteExtractor = new ResponseNoteExtractor();
-        noteExtractor.Process(dialogueResponse, [new FormattedText(text, false, Color.Black)]);
-
-        // Check
-        dialogueResponse.Response.Should().Be("Yes!");
-        dialogueResponse.StartNotes.Should().BeEmpty();
-        dialogueResponse.EndsNotes.Should().HaveCount(2);
-        dialogueResponse.EndsNotes[0].Text.Should().Be("back to options");
-        dialogueResponse.EndsNotes[1].Text.Should().Be("unlock CONFIRM");
-    }
 }

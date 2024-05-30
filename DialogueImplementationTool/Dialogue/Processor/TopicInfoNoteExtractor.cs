@@ -36,12 +36,10 @@ public sealed class TopicInfoNoteExtractor : IDialogueTopicProcessor {
             topicInfo.Prompt.Text = newResponse;
 
             // Add notes
-            notes.AddRange(match.Groups[1].Value
-                .Split(',')
-                .Select(subNote => new Note {
-                    Text = subNote.Trim(),
-                    Colors = [Color.Black,],
-                }));
+            notes.Add(new Note {
+                Text = match.Groups[1].Value.Trim(),
+                Colors = [Color.Black,],
+            });
 
             match = regex.Match(topicInfo.Prompt.Text);
         }

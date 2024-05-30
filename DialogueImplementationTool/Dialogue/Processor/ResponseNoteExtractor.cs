@@ -58,12 +58,10 @@ public sealed partial class ResponseNoteExtractor : IDialogueResponseProcessor {
                 processedSnippets = newSnippets;
 
                 // Add notes
-                notes.AddRange(match.Groups[1].Value
-                    .Split(',')
-                    .Select(subNote => new Note {
-                        Text = subNote.Trim(),
-                        Colors = colors,
-                    }));
+                notes.Add(new Note {
+                    Text = match.Groups[1].Value.Trim(),
+                    Colors = colors,
+                });
 
                 match = regex.Match(response.Response);
             }
