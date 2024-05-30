@@ -19,7 +19,7 @@ public sealed class TestSuccessFailureSeparator {
         persuadeOption.TopicInfos[1].Responses.Should().HaveCount(3);
 
         // Process
-        var successFailureSeparator = new SuccessFailureSeparator();
+        var successFailureSeparator = new SuccessFailureSeparator(_testConstants.SkyrimDialogueContext);
         foreach (var link in dialogue.Topics.EnumerateLinks(true)) {
             successFailureSeparator.Process(link);
         }

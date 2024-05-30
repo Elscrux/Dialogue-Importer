@@ -10,15 +10,17 @@ public sealed class NpcSpeaker : ISpeaker, IEquatable<NpcSpeaker> {
 
         if (linkCache.TryResolve<INpcGetter>(FormKey, out var npc)) {
             EditorID = npc.EditorID;
-            Name = ISpeaker.GetSpeakerName(npc.Name?.String ?? string.Empty);
+            Name = npc.Name?.String ?? string.Empty;
+            NameNoSpaces = ISpeaker.GetSpeakerName(Name);
         } else {
-            Name = EditorID = string.Empty;
+            NameNoSpaces = EditorID = string.Empty;
         }
     }
 
     public FormKey FormKey { get; }
     public string? EditorID { get; }
     public string Name { get; }
+    public string NameNoSpaces { get; }
 
     public bool Equals(NpcSpeaker? other) {
         if (ReferenceEquals(null, other)) return false;
@@ -26,7 +28,7 @@ public sealed class NpcSpeaker : ISpeaker, IEquatable<NpcSpeaker> {
 
         return FormKey.Equals(other.FormKey)
          && EditorID == other.EditorID
-         && Name == other.Name;
+         && NameNoSpaces == other.NameNoSpaces;
     }
 
     public override bool Equals(object? obj) {
@@ -36,5 +38,5 @@ public sealed class NpcSpeaker : ISpeaker, IEquatable<NpcSpeaker> {
         return Equals(other);
     }
 
-    public override int GetHashCode() => HashCode.Combine(FormKey, EditorID, Name);
+    public override int GetHashCode() => HashCode.Combine(FormKey);
 }

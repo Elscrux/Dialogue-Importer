@@ -3,7 +3,7 @@ using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Parser;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
-public sealed class DialogueProcessor(EmotionChecker emotionChecker) : IDialogueProcessor {
+public sealed class DialogueProcessor(IDialogueContext context, EmotionChecker emotionChecker) : IDialogueProcessor {
     // Runs during document parsing
     public List<IDialogueResponseProcessor> ResponseProcessors { get; } = [
         new InvalidStringFixer(),
@@ -26,7 +26,7 @@ public sealed class DialogueProcessor(EmotionChecker emotionChecker) : IDialogue
     public List<IDialogueTopicProcessor> TopicProcessors { get; } = [
         new TopicInfoNoteExtractor(),
         new PlayerIsRaceChecker(),
-        new SuccessFailureSeparator(),
+        new SuccessFailureSeparator(context),
         new RandomChecker(),
     ];
 
@@ -47,7 +47,7 @@ public sealed class DialogueProcessor(EmotionChecker emotionChecker) : IDialogue
         emotionChecker,
     ];
 
-    public DialogueProcessor Clone() => new(emotionChecker);
+    public DialogueProcessor Clone() => new(context, emotionChecker);
 
     public void Process(DialogueResponse response, IReadOnlyList<FormattedText> textSnippets) {
         foreach (var processor in ResponseProcessors) {

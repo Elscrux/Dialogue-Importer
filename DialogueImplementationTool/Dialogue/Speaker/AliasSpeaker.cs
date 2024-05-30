@@ -5,7 +5,8 @@ namespace DialogueImplementationTool.Dialogue.Speaker;
 public sealed class AliasSpeaker(FormKey formKey, string name, int aliasIndex = -1, string? editorId = null)
     : ISpeaker, IEquatable<AliasSpeaker> {
     public int AliasIndex { get; set; } = aliasIndex;
-    public string Name { get; } = ISpeaker.GetSpeakerName(name);
+    public string Name { get; } = name;
+    public string NameNoSpaces { get; } = ISpeaker.GetSpeakerName(name);
     public FormKey FormKey { get; } = formKey;
     public string? EditorID { get; } = editorId;
 
@@ -14,7 +15,7 @@ public sealed class AliasSpeaker(FormKey formKey, string name, int aliasIndex = 
         if (ReferenceEquals(this, other)) return true;
 
         return AliasIndex == other.AliasIndex
-         && Name == other.Name
+         && NameNoSpaces == other.NameNoSpaces
          && FormKey.Equals(other.FormKey)
          && EditorID == other.EditorID;
     }
@@ -26,5 +27,5 @@ public sealed class AliasSpeaker(FormKey formKey, string name, int aliasIndex = 
         return Equals(other);
     }
 
-    public override int GetHashCode() => HashCode.Combine(AliasIndex, Name, FormKey, EditorID);
+    public override int GetHashCode() => HashCode.Combine(FormKey);
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
 using DialogueImplementationTool.Dialogue.Speaker;
+using DialogueImplementationTool.Services;
 using DialogueImplementationTool.UI.Models;
 using DialogueImplementationTool.UI.Views;
 using Mutagen.Bethesda.Plugins;

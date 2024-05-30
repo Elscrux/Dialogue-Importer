@@ -41,6 +41,7 @@ public sealed class MainWindowVM : ViewModel {
     [Reactive] public string PythonDllPath { get; set; } = string.Empty;
     [Reactive] public FormKey QuestFormKey { get; set; }
     [Reactive] public bool ValidQuest { get; set; }
+    [Reactive] public string Prefix { get; set; } = string.Empty;
     [Reactive] public LoadState PythonState { get; set; }
 
     public MainWindowVM(
@@ -76,12 +77,10 @@ public sealed class MainWindowVM : ViewModel {
 
     private string GetNewModName() {
         var index = 1;
-        var fileInfo = new FileInfo(
-            Path.Combine(OutputPathProvider.OutputPath, $"{ModName}{index}.esp"));
+        var fileInfo = new DirectoryInfo(Path.Combine(OutputPathProvider.OutputPath, $"{ModName}{index}"));
         while (fileInfo.Exists) {
             index++;
-            fileInfo = new FileInfo(
-                Path.Combine(OutputPathProvider.OutputPath, $"{ModName}{index}.esp"));
+            fileInfo = new DirectoryInfo(Path.Combine(OutputPathProvider.OutputPath, $"{ModName}{index}"));
         }
 
         return ModName + index;
@@ -131,6 +130,7 @@ public sealed class MainWindowVM : ViewModel {
         var emotionClassifier = (IEmotionClassifier?) _emotionClassifier ?? new NullEmotionClassifier();
         var emotionChecker = new EmotionChecker(emotionClassifier);
         var context = new SkyrimDialogueContext(
+            Prefix,
             Environment,
             _mod,
             LinkCache.ResolveContext<IQuest, IQuestGetter>(QuestFormKey).GetOrAddAsOverride(_mod),

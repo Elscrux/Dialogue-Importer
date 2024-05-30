@@ -23,6 +23,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
     public bool Random { get; set; }
     public float ResetHours { get; set; }
     public List<Condition> ExtraConditions { get; init; } = [];
+    public DialogueScript Script { get; set; } = new();
 
     public DialogueTopicInfo() {}
 
@@ -222,6 +223,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
          && InvisibleContinue == other.InvisibleContinue
          && Random == other.Random
          && ResetHours.Equals(other.ResetHours)
+         && Script.Equals(other.Script)
          && Responses.SequenceEqual(other.Responses)
          && ExtraConditions.SequenceEqual(other.ExtraConditions);
     }
@@ -254,6 +256,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
         hashCode.Add(InvisibleContinue);
         hashCode.Add(Random);
         hashCode.Add(ResetHours);
+        hashCode.Add(Script);
         hashCode.Add(ExtraConditions);
         return hashCode.ToHashCode();
     }

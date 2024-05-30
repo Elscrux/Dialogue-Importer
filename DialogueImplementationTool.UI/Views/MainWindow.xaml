@@ -26,6 +26,22 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Column="0"
+                   Target="PrefixTextBox"
+                   Content="Mod Prefix"/>
+
+            <TextBox x:Name="PrefixTextBox"
+                     Grid.Column="1"
+                     Margin="2"
+                     Text="{Binding Prefix}"/>
+        </Grid>
+        
+        <Grid DockPanel.Dock="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>

@@ -1,0 +1,21 @@
+﻿<Window x:Class="DialogueImplementationTool.UI.Views.FormKeySelectionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:DialogueImplementationTool.UI.Views"
+        xmlns:plugins="clr-namespace:Mutagen.Bethesda.WPF.Plugins;assembly=Mutagen.Bethesda.WPF"
+        mc:Ignorable="d" d:DataContext="{d:DesignInstance local:FormKeySelectionWindow}"
+        Height="200" Width="400">
+    <DockPanel>
+        <Button Content="Save and Close"
+                HorizontalAlignment="Left"
+                DockPanel.Dock="Top"
+                Click="Save_OnClick"/>
+
+        <plugins:FormKeyPicker
+            FormKey="{Binding FormKey, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            LinkCache="{Binding LinkCache, RelativeSource={RelativeSource FindAncestor, AncestorType=local:FormKeySelectionWindow}}"
+            ScopedTypes="{Binding ScopedTypes, RelativeSource={RelativeSource FindAncestor, AncestorType=local:FormKeySelectionWindow}}"/>
+    </DockPanel>
+</Window>

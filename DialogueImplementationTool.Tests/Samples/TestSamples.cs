@@ -1,6 +1,7 @@
 ﻿using DialogueImplementationTool.Dialogue;
 using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Parser;
+using DialogueImplementationTool.Services;
 namespace DialogueImplementationTool.Tests.Samples;
 
 public static class TestSamples {
@@ -67,6 +68,17 @@ public static class TestSamples {
         return (
             GetDialogue(testConstants, docXDocumentParser, DialogueType.Greeting, 0),
             GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 1));
+    }
+
+    public static (GeneratedDialogue Greeting, GeneratedDialogue Dialogue, GeneratedDialogue Farewell) GetIdonaVerusDialogue(
+        TestConstants testConstants) {
+        var docXDocumentParser = new DocXDocumentParser(
+            Path.GetFullPath("../../../Samples/Documents/Idona Verus.docx"));
+
+        return (
+            GetDialogue(testConstants, docXDocumentParser, DialogueType.Greeting, 0),
+            GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 1),
+            GetDialogue(testConstants, docXDocumentParser, DialogueType.Farewell, 2));
     }
 
     public static (GeneratedDialogue Greeting, GeneratedDialogue Farewell, GeneratedDialogue Dialogue, GeneratedDialogue Dialogue2)

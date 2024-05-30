@@ -55,7 +55,7 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
         scene.LastActionIndex ??= 1;
 
         foreach (var topic in topics) {
-            var aliasSpeaker = GetSpeaker(topic.TopicInfos[0].Speaker.Name);
+            var aliasSpeaker = GetSpeaker(topic.TopicInfos[0].Speaker.NameNoSpaces);
 
             var sceneTopic = new DialogTopic(Context.GetNextFormKey(), Context.Release) {
                 Quest = new FormLinkNullable<IQuestGetter>(Context.Quest),
@@ -146,7 +146,7 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
     protected static QuestAlias CreateAlias(AliasSpeaker aliasSpeaker) {
         return new QuestAlias {
             ID = Convert.ToUInt32(aliasSpeaker.AliasIndex),
-            Name = aliasSpeaker.Name,
+            Name = aliasSpeaker.NameNoSpaces,
             UniqueActor = new FormLinkNullable<INpcGetter>(aliasSpeaker.FormKey),
             VoiceTypes = new FormLinkNullable<IAliasVoiceTypeGetter>(FormKey.Null),
         };
@@ -306,7 +306,7 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
         name = ISpeaker.GetSpeakerName(name);
         foreach (var (_, speakers) in NameMappedSpeakers) {
             foreach (var speaker in speakers) {
-                if (speaker.Name == name) return speaker;
+                if (speaker.NameNoSpaces == name) return speaker;
             }
         }
 

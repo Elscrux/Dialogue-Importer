@@ -4,6 +4,7 @@ using System.Linq;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Dialogue.Processor;
 using DialogueImplementationTool.Dialogue.Speaker;
+using DialogueImplementationTool.Extension;
 using DialogueImplementationTool.Parser;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
@@ -117,12 +118,14 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
 
         var flags = new DialogResponseFlags();
 
+        // Handle flags
         if (topicInfo.SayOnce) flags.Flags |= DialogResponses.Flag.SayOnce;
         if (topicInfo.Goodbye) flags.Flags |= DialogResponses.Flag.Goodbye;
         if (topicInfo.InvisibleContinue) flags.Flags |= DialogResponses.Flag.InvisibleContinue;
         if (topicInfo.Random) flags.Flags |= DialogResponses.Flag.Random;
         if (topicInfo.ResetHours is > 0 and <= 24) flags.ResetHours = topicInfo.ResetHours;
 
+        // Handle shared info
         if (topicInfo.SharedInfo is not null) {
             var dialogResponses =
                 topicInfo.SharedInfo.GetResponseData(quest, Context, TopicInfos, GetConditions);
@@ -132,7 +135,8 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
             return dialogResponses;
         }
 
-        return new DialogResponses(Context.GetNextFormKey(), Context.Release) {
+        // Handle responses
+        var responses = new DialogResponses(Context.GetNextFormKey(), Context.Release) {
             Responses = TopicInfos(topicInfo).ToExtendedList(),
             Prompt = topicInfo.Prompt.FullText.IsNullOrWhitespace() ? null : topicInfo.Prompt.FullText,
             Conditions = GetConditions(topicInfo),
@@ -140,6 +144,49 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
             Flags = flags,
             PreviousDialog = previousDialog,
         };
+
+        // Handle scripts
+        if (topicInfo.Script.ScriptLines.Count > 0) {
+            var scriptName = $"{Context.Prefix}_TIF__{responses.FormKey.ToFormID(Context.Mod, Context.LinkCache)}";
+            var scriptText = $"""
+            ;BEGIN FRAGMENT CODE - Do not edit anything between this and the end comment
+            ;NEXT FRAGMENT INDEX 1
+            Scriptname {scriptName} Extends TopicInfo Hidden
+            
+            ;BEGIN FRAGMENT Fragment_0
+            Function Fragment_0(ObjectReference akSpeakerRef)
+            Actor akSpeaker = akSpeakerRef as Actor
+            ;BEGIN CODE
+            {string.Join("\r\n", topicInfo.Script.ScriptLines)}
+            ;END CODE
+            EndFunction
+            ;END FRAGMENT
+            
+            ;END FRAGMENT CODE - Do not edit anything between this and the begin comment
+            """;
+
+            Context.Scripts.Add(scriptName, scriptText);
+
+            responses.VirtualMachineAdapter = new DialogResponsesAdapter {
+                Scripts = [
+                    new ScriptEntry {
+                        Name = scriptName,
+                        Flags = ScriptEntry.Flag.Local,
+                        Properties = topicInfo.Script.Properties.ToExtendedList()
+                    }
+                ],
+                ScriptFragments = new ScriptFragments {
+                    FileName = scriptName,
+                    OnBegin = new ScriptFragment {
+                        ExtraBindDataVersion = 2,
+                        ScriptName = scriptName,
+                        FragmentName = "Fragment_0",
+                    },
+                },
+            };
+        }
+
+        return responses;
 
         static IEnumerable<DialogResponse> TopicInfos(DialogueTopicInfo info) {
             return info.Responses.Select((line, i) => new DialogResponse {

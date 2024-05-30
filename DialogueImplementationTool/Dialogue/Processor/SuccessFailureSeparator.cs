@@ -7,7 +7,7 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
-public sealed partial class SuccessFailureSeparator : IDialogueTopicProcessor {
+public sealed partial class SuccessFailureSeparator(IDialogueContext context) : IDialogueTopicProcessor {
     [GeneratedRegex("(success|succeeded)", RegexOptions.IgnoreCase)]
     private static partial Regex SuccessRegex();
 
@@ -74,6 +74,9 @@ public sealed partial class SuccessFailureSeparator : IDialogueTopicProcessor {
                     ComparisonValue = 1,
                 });
 
+                successInfo.Script.ScriptLines.Add("pFDS.Intimidate(akSpeaker)");
+                successInfo.Script.Properties.Add(FavorDialogueScriptProperty());
+
                 // Remove intimidate notes
                 foreach (var note in successInfo.Prompt.Notes()) {
                     if (!_levelMap.TryGetValue(note.Text, out _)) continue;
@@ -110,6 +113,9 @@ public sealed partial class SuccessFailureSeparator : IDialogueTopicProcessor {
                     CompareOperator = CompareOperator.GreaterThanOrEqualTo,
                     ComparisonValue = globalFormKey.ToLink<IGlobalGetter>(),
                 });
+
+                successInfo.Script.ScriptLines.Add(_actorValueScriptLines[actorValue]);
+                successInfo.Script.Properties.Add(FavorDialogueScriptProperty());
             }
         }
     }
@@ -138,6 +144,17 @@ public sealed partial class SuccessFailureSeparator : IDialogueTopicProcessor {
                 { 5, FormKey.Factory("001318:BSAssets.esm") },
             }
         },
+    };
+
+    private ScriptProperty FavorDialogueScriptProperty() => new ScriptObjectProperty {
+        Name = "pFDS",
+        Flags = ScriptProperty.Flag.Edited,
+        Object = context.GetFavorDialogueQuest(),
+    };
+
+    private readonly Dictionary<ActorValue, string> _actorValueScriptLines = new() {
+        { ActorValue.Speech, "pFDS.Persuade(akSpeaker)" },
+        { ActorValue.Illusion, "pFDS.Intimidate(akSpeaker)" },
     };
 
     private readonly Dictionary<string, int> _levelMap = new() {

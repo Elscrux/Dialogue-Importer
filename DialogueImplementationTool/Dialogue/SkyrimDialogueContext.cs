@@ -5,6 +5,7 @@ using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Services;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
+using Mutagen.Bethesda.FormKeys.SkyrimSE;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
@@ -12,16 +13,20 @@ using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue;
 
 public sealed class SkyrimDialogueContext(
+    string prefix,
     IGameEnvironment<ISkyrimMod, ISkyrimModGetter> environment,
     ISkyrimMod mod,
     IQuest quest,
-    ISpeakerSelection speakerSelection)
+    ISpeakerSelection speakerSelection,
+    IFormKeySelection formKeySelection)
     : IDialogueContext {
+    public string Prefix { get; } = prefix;
     public SkyrimRelease Release => SkyrimRelease.SkyrimSE;
     public IGameEnvironment Environment { get; } = environment;
     public ILinkCache LinkCache { get; } = environment.LinkCache;
     public IQuest Quest { get; } = quest;
     public IMod Mod { get; } = mod;
+    public Dictionary<string, string> Scripts { get; } = [];
 
     public FormKey GetNextFormKey() {
         return mod.GetNextFormKey();
@@ -107,5 +112,14 @@ public sealed class SkyrimDialogueContext(
 
     public IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IEnumerable<string> speakerNames) {
         return speakerSelection.GetAliasSpeakers(speakerNames);
+    }
+
+    public IFormLink<IQuestGetter> GetFavorDialogueQuest() {
+        var formKey = formKeySelection.GetFormKey(
+            "Select the favor dialogue quest",
+            [typeof(IQuestGetter)],
+            Skyrim.Quest.DialogueFavorGeneric.FormKey);
+
+        return formKey.ToLink<IQuestGetter>();
     }
 }

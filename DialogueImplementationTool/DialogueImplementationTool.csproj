@@ -65,9 +65,6 @@
       <Compile Update="Dialogue\SkyrimDialogueContext.cs">
         <DependentUpon>IDialogueContext.cs</DependentUpon>
       </Compile>
-      <Compile Update="Dialogue\Speaker\InjectedSpeakerSelection.cs">
-        <DependentUpon>ISpeakerSelection.cs</DependentUpon>
-      </Compile>
       <Compile Update="Dialogue\Processor\TopicInfoInvalidStringFixer.cs">
         <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
@@ -154,6 +151,15 @@
       </Compile>
       <Compile Update="Dialogue\Processor\TopicInfoNoteExtractor.cs">
         <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\NullEmotionClassifier.cs">
+        <DependentUpon>IEmotionClassifier.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\PythonEmotionClassifier.cs">
+        <DependentUpon>IEmotionClassifier.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\DialogueQuestLockUnlockProcessor.cs">
+        <DependentUpon>IConversationProcessor.cs</DependentUpon>
       </Compile>
     </ItemGroup>
 

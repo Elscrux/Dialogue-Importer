@@ -61,6 +61,7 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
             : _doc.Lists[index].Items.FirstOrDefault()?.Text ?? string.Empty;
     }
 
+    // Todo add support for parsing one non-empty line before the list, in case it contains a note
     public List<DialogueTopic> ParseDialogue(IDialogueProcessor processor, int index) {
         var branches = new List<DialogueTopic>();
         var list = _doc.Lists[index];

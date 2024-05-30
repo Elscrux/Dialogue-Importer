@@ -9,11 +9,13 @@ using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue;
 
 public interface IDialogueContext {
+    string Prefix { get; }
     SkyrimRelease Release { get; }
     IGameEnvironment Environment { get; }
     ILinkCache LinkCache { get; }
     IQuest Quest { get; }
     IMod Mod { get; }
+    Dictionary<string, string> Scripts { get; }
     FormKey GetNextFormKey();
     void AddScene(Scene scene);
     void AddQuest(Quest quest);
@@ -23,4 +25,5 @@ public interface IDialogueContext {
     DialogTopic GetTopic(FormKey formKey);
     IDialogTopicGetter? GetTopic(DialogueTopic topic);
     IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IEnumerable<string> speakerNames);
+    IFormLink<IQuestGetter> GetFavorDialogueQuest();
 }

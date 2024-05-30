@@ -140,6 +140,7 @@ public sealed class TestDialogueFactory {
         failureTopicInfo.Links.Should().HaveCount(3);
         failureTopicInfo.Links.Should().HaveElementAt(0, fishingGearTopic);
         failureTopicInfo.SharedInfo.Should().BeNull();
+        failureTopicInfo.Script.ScriptLines.Should().BeEmpty();
 
         var nestedIntimidateTopic = fishingGearTopic.TopicInfos[0].Links[1];
         nestedIntimidateTopic.TopicInfos.Should().HaveCount(2);
@@ -207,6 +208,37 @@ public sealed class TestDialogueFactory {
         foreach (var response in sharedInfo.Responses) {
             response.Conditions.Should().ContainSingle();
         }
+    }
+
+    [Fact]
+    public void TestIdonaVerusDialogue() {
+        // Import as dialogue quest
+        _testConstants.Quest.EditorID = "DialogueQuest";
+        var (_, dialogue, _) = TestSamples.GetIdonaVerusDialogue(_testConstants);
+
+        // Process
+        Conversation conversation = [dialogue];
+        dialogue.Factory.ConfigureProcessor(_testConstants.DialogueProcessor);
+        _testConstants.DialogueProcessor.Process(conversation);
+
+        // Check structure
+        conversation[0].Topics.Should().HaveCount(4);
+
+        conversation[0].Topics[0].TopicInfos[0].ExtraConditions.Should().ContainSingle();
+        var x = conversation[0].Topics[0].TopicInfos[0].ExtraConditions[0].Data.Should().BeOfType<GetStageDoneConditionData>();
+        x.Subject.Stage.Should().Be(12);
+
+        conversation[0].Topics[1].TopicInfos[0].ExtraConditions.Should().BeEmpty();
+        conversation[0].Topics[1].TopicInfos[0].Script.ScriptLines.Should().HaveCount(2);
+
+        conversation[0].Topics[2].TopicInfos[0].ExtraConditions.Should().ContainSingle();
+        x = conversation[0].Topics[2].TopicInfos[0].ExtraConditions[0].Data.Should().BeOfType<GetStageDoneConditionData>();
+        x.Subject.Stage.Should().Be(10);
+        conversation[0].Topics[2].TopicInfos[0].ExtraConditions.Should().ContainSingle();
+
+        conversation[0].Topics[3].TopicInfos[0].ExtraConditions.Should().ContainSingle();
+        x = conversation[0].Topics[3].TopicInfos[0].ExtraConditions[0].Data.Should().BeOfType<GetStageDoneConditionData>();
+        x.Subject.Stage.Should().Be(11);
     }
 
     [Fact]

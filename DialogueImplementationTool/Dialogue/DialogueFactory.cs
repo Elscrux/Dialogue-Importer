@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using DialogueImplementationTool.Dialogue.Model;
+using DialogueImplementationTool.Dialogue.Processor;
 using DialogueImplementationTool.Extension;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
@@ -9,12 +10,20 @@ using Noggog;
 namespace DialogueImplementationTool.Dialogue;
 
 public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFactory(context) {
+    public override IDialogueProcessor ConfigureProcessor(DialogueProcessor dialogueProcessor) {
+        if (IsDialogueQuest(Context.Quest)) {
+            dialogueProcessor.ConversationProcessors.Add(new DialogueQuestLockUnlockProcessor(Context));
+        }
+
+        return base.ConfigureProcessor(dialogueProcessor);
+    }
+
     public override void PreProcess(List<DialogueTopic> topics) {}
 
     public override void GenerateDialogue(List<DialogueTopic> topics) {
         foreach (var topic in topics) {
             // Use the first speaker for the editor id
-            var speakerName = topic.TopicInfos[0].Speaker.Name;
+            var speakerName = topic.TopicInfos[0].Speaker.NameNoSpaces;
             var baseName = Context.Quest.EditorID + speakerName;
             var branchEditorId = Naming.GetFirstFreeIndex(
                 i => baseName + i,
@@ -147,11 +156,13 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
             Quest.TypeEnum.Misc => 70,
             Quest.TypeEnum.Daedric => 85,
             Quest.TypeEnum.SideQuest => 85,
-            _ => quest.EditorID != null && quest.EditorID.Contains("Dialogue")
+            _ => IsDialogueQuest(quest)
                 ? Math.Clamp(50 - (dialogueIndex - 1) * 5, 0, 50)
                 : 50
         };
     }
+
+    private static bool IsDialogueQuest(IQuest quest) => quest.EditorID != null && quest.EditorID.Contains("Dialogue");
 
     private sealed record LinkedTopic(FormKey FormKey, DialogueTopic Topic, string Identifier) {
         public string Identifier { get; set; } = Identifier;

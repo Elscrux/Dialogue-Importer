@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-namespace DialogueImplementationTool.Dialogue.Speaker;
+using DialogueImplementationTool.Dialogue.Speaker;
+namespace DialogueImplementationTool.Services;
 
 public sealed class InjectedSpeakerSelection(IReadOnlyDictionary<string, AliasSpeaker> aliases) : ISpeakerSelection {
     public IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IEnumerable<string> speakerNames) {

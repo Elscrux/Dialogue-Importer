@@ -6,6 +6,7 @@ using DialogueImplementationTool.Dialogue;
 using DialogueImplementationTool.Dialogue.Processor;
 using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Parser;
+using DialogueImplementationTool.Script;
 using DialogueImplementationTool.UI.Models;
 using DialogueImplementationTool.UI.Services;
 using Mutagen.Bethesda.Json;
@@ -20,6 +21,7 @@ namespace DialogueImplementationTool.UI.ViewModels;
 
 public sealed partial class DialogueVM : ViewModel {
     private readonly IDocumentParser _documentParser;
+    private readonly PapyrusCompilerWrapper _compiler;
 
     public DialogueVM(
         IDialogueContext context,
@@ -30,6 +32,7 @@ public sealed partial class DialogueVM : ViewModel {
         SpeakerFavoritesSelection = speakerFavoritesSelection;
         _documentParser = documentParser;
         LinkCache = context.LinkCache;
+        _compiler = new PapyrusCompilerWrapper(context.Environment);
 
         Title = Path.GetFileName(documentParser.FilePath);
         SavedSession = false;
@@ -78,10 +81,20 @@ public sealed partial class DialogueVM : ViewModel {
 
             ImplementDialogue(context, dialogueProcessor);
 
-            var fileInfo = new FileInfo(Path.Combine(outputPathProvider.OutputPath, context.Mod.ModKey.FileName));
+            var directoryInfo = new DirectoryInfo(Path.Combine(outputPathProvider.OutputPath, context.Mod.ModKey.Name));
+            var fileInfo = new FileInfo(Path.Combine(directoryInfo.FullName, context.Mod.ModKey.FileName));
 
             if (fileInfo.Directory is { Exists: false }) fileInfo.Directory?.Create();
             context.Mod.WriteToBinaryParallel(fileInfo.FullName);
+            foreach (var (fileName, content) in context.Scripts) {
+                var scriptsDirectory = Path.Combine(directoryInfo.FullName, "Scripts");
+                var scriptsSourceDirectory = Path.Combine(scriptsDirectory, "Source");
+                Directory.CreateDirectory(scriptsSourceDirectory);
+                var sourcePath = Path.Combine(scriptsSourceDirectory, fileName + ".psc");
+                // var compiledPath = Path.Combine(scriptsDirectory, fileName + ".pex");
+                File.WriteAllText(sourcePath, content);
+                _compiler.Compile(sourcePath, scriptsDirectory, scriptsSourceDirectory);
+            }
 
             SavedSession = true;
         });
