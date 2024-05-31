@@ -4,6 +4,6 @@ namespace DialogueImplementationTool.Services;
 
 public sealed class NullEmotionClassifier : IEmotionClassifier {
     public EmotionValue Classify(string text) {
-        return (Emotion.Neutral, 50);
+        return new EmotionValue(Emotion.Neutral, 50);
     }
 }

@@ -21,9 +21,9 @@ public sealed class EmotionChecker(IEmotionClassifier emotionClassifier) : IConv
 
         void ProcessInternal(DialogueTopicInfo info) {
             foreach (var response in info.Responses) {
-                var (emotion, value) = emotionClassifier.Classify(response.Response);
-                response.Emotion = emotion;
-                response.EmotionValue = value;
+                var emotionValue = emotionClassifier.Classify(response.Response);
+                response.Emotion = emotionValue.Emotion;
+                response.EmotionValue = emotionValue.Value;
             }
         }
     }

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Mutagen.Bethesda.Skyrim;
+using Newtonsoft.Json;
 using Noggog;
 using Python.Runtime;
 using Classification = ((string Text, Mutagen.Bethesda.Skyrim.Emotion Actual) Emotion, float Score);
@@ -13,6 +15,8 @@ public sealed class PythonEmotionClassifier : IDisposable, IEmotionClassifier {
     private static readonly ConcurrentBag<(dynamic Pipeline, Dictionary<string, EmotionResult> Emotions)> Outliers = [];
     private readonly Py.GILState _gilState;
     private readonly List<dynamic> _pipelines;
+
+    private readonly Dictionary<string, EmotionValue> _speakerEmotions = LoadSpeakers();
 
     public PythonEmotionClassifier(string pythonDllPath) {
         PythonDllPath = pythonDllPath;
@@ -39,17 +43,43 @@ public sealed class PythonEmotionClassifier : IDisposable, IEmotionClassifier {
         PythonEngine.Shutdown();
     }
 
-    public (Emotion Emotion, uint Value) Classify(string text) {
-        if (text is null) return (Emotion.Neutral, 50);
+    public EmotionValue Classify(string text) {
+        if (_speakerEmotions.TryGetValue(text, out var emotionValue)) return emotionValue;
 
         var classification = GetAverageEmotion(_pipelines, text);
 
         var emotion = classification.Emotion.Actual;
-        if (emotion == Emotion.Neutral) return (Emotion.Neutral, 50);
+        if (emotion == Emotion.Neutral) return new EmotionValue(Emotion.Neutral, 50);
 
-        var emotionValue = (uint) classification.Score;
-        return (emotion, emotionValue);
+        emotionValue = new EmotionValue(emotion, (uint) classification.Score);
+        _speakerEmotions.Add(text, emotionValue);
+        SaveSpeakers();
+        return emotionValue;
     }
+
+    private static Dictionary<string, EmotionValue> LoadSpeakers() {
+        if (!File.Exists(EmotionsPath)) return new Dictionary<string, EmotionValue>();
+
+        var text = File.ReadAllText(EmotionsPath);
+        var emotions = JsonConvert.DeserializeObject<Dictionary<string, EmotionValue>>(text);
+        if (emotions is null) return new Dictionary<string, EmotionValue>();
+
+        return emotions;
+    }
+
+    private void SaveSpeakers() {
+        var text = JsonConvert.SerializeObject(_speakerEmotions);
+        var directoryName = Path.GetDirectoryName(EmotionsPath);
+        if (directoryName is null) return;
+
+        if (!Directory.Exists(directoryName)) {
+            Directory.CreateDirectory(directoryName);
+        }
+
+        File.WriteAllText(EmotionsPath, text);
+    }
+
+    private static string EmotionsPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Emotions", "emotions.cache");
 
     private static Classification GetAverageEmotion(IEnumerable<dynamic> pipelines, string text) {
         var classifications = pipelines
