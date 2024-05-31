@@ -11,6 +11,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Xceed.Document.NET;
 using Xceed.Words.NET;
+using Note = DialogueImplementationTool.Dialogue.Model.Note;
 namespace DialogueImplementationTool.Parser;
 
 public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
@@ -61,7 +62,6 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
             : _doc.Lists[index].Items.FirstOrDefault()?.Text ?? string.Empty;
     }
 
-    // Todo add support for parsing one non-empty line before the list, in case it contains a note
     public List<DialogueTopic> ParseDialogue(IDialogueProcessor processor, int index) {
         var branches = new List<DialogueTopic>();
         var list = _doc.Lists[index];
@@ -86,6 +86,18 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
                 var topic = GetTopic(processor, enumerator);
                 branches.Add(topic);
             }
+
+            // If the last paragraph before the list is a note, add it to the prompt
+            var firstListIndex = _doc.Paragraphs.IndexOf(list.Items[0]);
+            if (firstListIndex > 0) {
+                var previousParagraph = _doc.Paragraphs[firstListIndex - 1];
+                if (previousParagraph.Text.StartsWith('[')) {
+                    branches[0].TopicInfos[0].Prompt.StartNotes.Add(new Note {
+                        Text = previousParagraph.Text.Trim().TrimStart('[').TrimEnd(']').Trim(),
+                        Colors = [Color.Black],
+                    });
+                }
+            }
         } else {
             //One new branch, NPC starts to talk
             using var enumerator = paragraphs.GetEnumerator();
@@ -94,6 +106,18 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
             var topicInfos = GetTopicInfos(processor, enumerator).ToList();
             var currentBranch = new DialogueTopic { TopicInfos = topicInfos };
             branches.Add(currentBranch);
+
+            // If the last paragraph before the list is a note, add it to the first response
+            var firstListIndex = _doc.Paragraphs.IndexOf(list.Items[0]);
+            if (firstListIndex > 0) {
+                var previousParagraph = _doc.Paragraphs[firstListIndex - 1];
+                if (previousParagraph.Text.StartsWith('[')) {
+                    branches[0].TopicInfos[0].Responses[0].StartNotes.Add(new Note {
+                        Text = previousParagraph.Text.Trim().TrimStart('[').TrimEnd(']').Trim(),
+                        Colors = [Color.Black],
+                    });
+                }
+            }
         }
 
         return branches;
