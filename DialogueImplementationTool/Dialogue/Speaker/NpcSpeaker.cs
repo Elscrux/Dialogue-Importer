@@ -13,7 +13,7 @@ public sealed class NpcSpeaker : ISpeaker, IEquatable<NpcSpeaker> {
             Name = npc.Name?.String ?? string.Empty;
             NameNoSpaces = ISpeaker.GetSpeakerName(Name);
         } else {
-            NameNoSpaces = EditorID = string.Empty;
+            Name = NameNoSpaces = EditorID = string.Empty;
         }
     }
 
