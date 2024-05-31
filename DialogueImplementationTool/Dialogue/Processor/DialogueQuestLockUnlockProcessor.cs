@@ -91,7 +91,8 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
         foreach (var grouping in actionKeywords) {
             var isLocking = grouping.First().Lock;
             var keyword = grouping.Key;
-            var stage = CreateStage(keyword, grouping.First().Item1.TopicInfo.Speaker, isLocking);
+            var speaker = grouping.First().Item1.TopicInfo.Speaker;
+            var stage = CreateStage(speaker);
             var matchesFound = 0;
 
             if (isLocking) {
@@ -156,6 +157,21 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
                 continue;
             }
 
+            // Add stage
+            var locking = isLocking ? "Lock" : "Unlock";
+            var entry = $"{locking} {keyword} for {speaker.Name}";
+            var questStage = new QuestStage {
+                Index = stage,
+                LogEntries = [
+                    new QuestLogEntry {
+                        Entry = entry,
+                        Flags = 0,
+                    }
+                ]
+            };
+            context.Quest.Stages.Add(questStage);
+            speakerStages[speaker.FormKey] = (speakerStages[speaker.FormKey].StartStage, (ushort) (stage + 1));
+
             foreach (var (lockMatch, _) in grouping.Distinct()) {
                 // Check for any keywords in note, to catch something like [unlock HERE, NOW, MERGE]
                 // Remove [Lock HERE] or [Unlock HERE]
@@ -165,7 +181,7 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
             }
         }
 
-        ushort CreateStage(string keyword, ISpeaker speaker, bool isLocking) {
+        ushort CreateStage(ISpeaker speaker) {
             // Get stage for keyword to lock
             const ushort speakerRange = 10;
             if (!speakerStages.TryGetValue(speaker.FormKey, out var speakerStage)) {
@@ -177,7 +193,7 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
                     foreach (var stage in context.Quest.Stages.OrderBy(x => x.Index)) {
                         // Check if the current range is free
                         if (stage.Index >= currentIndex + speakerRange) {
-                            speakerStage = (currentIndex, (ushort) (currentIndex + 1));
+                            speakerStage = (currentIndex, currentIndex);
                             speakerStages[speaker.FormKey] = speakerStage;
                             break;
                         }
@@ -199,22 +215,7 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
                 }
             }
 
-            var locking = isLocking ? "Lock" : "Unlock";
-            var entry = $"{locking} {keyword} for {speaker.Name}";
-            var questStage = new QuestStage {
-                Index = speakerStage.NextStage,
-                LogEntries = [
-                    new QuestLogEntry {
-                        Entry = entry,
-                        Flags = 0,
-                    }
-                ]
-            };
-            context.Quest.Stages.Add(questStage);
-            speakerStages[speaker.FormKey] =
-                (speakerStage.StartStage, (ushort) (speakerStage.NextStage + 1));
-
-            return questStage.Index;
+            return speakerStage.NextStage;
         }
 
         ConditionFloat GetStageDoneCondition(bool isInitiallyLocked, int stage) {
