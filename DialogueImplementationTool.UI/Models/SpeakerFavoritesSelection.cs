@@ -27,12 +27,12 @@ public sealed class SpeakerFavoritesSelection : ReactiveObject, ISpeakerFavorite
     public ISpeaker? GetClosestSpeaker(string name) {
         var closestSpeaker = Speakers.MinBy(
             s => {
-                var index = s.EditorID?.IndexOf(name, StringComparison.OrdinalIgnoreCase);
+                var index = s.EditorID?.IndexOf(name, StringComparison.Ordinal);
                 return index is null or -1 ? int.MaxValue : index;
             });
 
         // Check if the closest speaker is a match
-        if (closestSpeaker?.EditorID?.IndexOf(name, StringComparison.OrdinalIgnoreCase) is null or -1) return null;
+        if (closestSpeaker?.EditorID?.IndexOf(name, StringComparison.Ordinal) is null or -1) return null;
 
         return closestSpeaker;
     }
