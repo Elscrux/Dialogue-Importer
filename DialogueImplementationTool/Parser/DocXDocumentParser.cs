@@ -177,7 +177,9 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
 
             //Add responses
             var currentIndentation = startingIndentation;
+            var count = 0;
             while (enumerator.Current.IndentLevel is null || IsValidResponse(enumerator.Current, currentIndentation)) {
+                count++;
                 if (enumerator.Current.Text != string.Empty) {
                     topicInfo.Responses.Add(processor.BuildResponse(GetFormattedText(enumerator.Current)));
                 }
@@ -187,6 +189,11 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
                     abort = true;
                     break;
                 }
+            }
+
+            if (count == 0) {
+                enumerator.MoveNext();
+                continue;
             }
 
             if (abort) {
