@@ -34,8 +34,9 @@ public sealed partial class ResponseNoteExtractor : IDialogueResponseProcessor {
             var match = regex.Match(response.Response);
             while (match.Success) {
                 // Trim text
-                var newResponse = trim(trim(response.Response, match.Value), " ");
-                var charsToRemove = response.Response.Length - newResponse.Length;
+                var withWhitespaces = trim(response.Response, match.Value);
+                var newResponse = trim(withWhitespaces, " ");
+                var charsToRemove = response.Response.Length - withWhitespaces.Length;
                 response.Response = newResponse;
 
                 // Check which colors are used in matched text
