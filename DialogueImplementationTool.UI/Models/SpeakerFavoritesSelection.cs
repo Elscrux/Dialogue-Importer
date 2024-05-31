@@ -25,10 +25,15 @@ public sealed class SpeakerFavoritesSelection : ReactiveObject, ISpeakerFavorite
     }
 
     public ISpeaker? GetClosestSpeaker(string name) {
-        return Speakers.MinBy(
+        var closestSpeaker = Speakers.MinBy(
             s => {
                 var index = s.EditorID?.IndexOf(name, StringComparison.OrdinalIgnoreCase);
                 return index is null or -1 ? int.MaxValue : index;
             });
+
+        // Check if the closest speaker is a match
+        if (closestSpeaker?.EditorID?.IndexOf(name, StringComparison.OrdinalIgnoreCase) is null or -1) return null;
+
+        return closestSpeaker;
     }
 }
