@@ -36,6 +36,10 @@
                       Click="Save_OnClick"
                       Margin="10,10,0,0"
                       HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <MenuItem Header="Open Document"
+                      Margin="10,10,0,0"
+                      Command="{Binding OpenDocument}"
+                      HorizontalAlignment="Left" VerticalAlignment="Top"/>
             <MenuItem Header="Apply type to all"
                       Margin="10,10,0,0"
                       HorizontalAlignment="Left" VerticalAlignment="Top">
@@ -66,8 +70,7 @@
                       Margin="10,10,0,0"
                       IsCheckable="True"
                       IsChecked="{Binding SkipSceneSpeakerSelection}"
-                      HorizontalAlignment="Left" VerticalAlignment="Top">
-            </MenuItem>
+                      HorizontalAlignment="Left" VerticalAlignment="Top"/>
         </Menu>
 
         <GroupBox DockPanel.Dock="Bottom"

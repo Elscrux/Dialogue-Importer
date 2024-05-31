@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
@@ -97,6 +98,16 @@ public sealed partial class DialogueVM : ViewModel {
             }
 
             SavedSession = true;
+        });
+
+        OpenDocument = ReactiveCommand.Create(() => {
+            using var process = new Process();
+            process.StartInfo = new ProcessStartInfo {
+                FileName = $"\"{_documentParser.FilePath}\"",
+                UseShellExecute = true,
+                Verb = "open",
+            };
+            process.Start();
         });
 
         ApplyAll = ReactiveCommand.Create<DialogueType>(type => {
@@ -343,6 +354,7 @@ public sealed partial class DialogueVM : ViewModel {
     public ICommand SetSpeaker { get; }
     public ICommand SelectIndex { get; }
     public ICommand Save { get; }
+    public ICommand OpenDocument { get; }
     public ICommand ApplyAll { get; }
 
     public ICommand BacktrackMany { get; }
