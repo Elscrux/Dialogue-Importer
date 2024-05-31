@@ -1,9 +1,42 @@
 ﻿using System.Collections.Generic;
 using DialogueImplementationTool.Dialogue.Model;
+using DialogueImplementationTool.Extension;
 using DialogueImplementationTool.Parser;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
-public sealed class DialogueProcessor(IDialogueContext context, EmotionChecker emotionChecker) : IDialogueProcessor {
+public sealed class DialogueProcessor : IDialogueProcessor {
+    private readonly IDialogueContext _context;
+    private readonly EmotionChecker _emotionChecker;
+
+    public DialogueProcessor(IDialogueContext context, EmotionChecker emotionChecker) {
+        _context = context;
+        _emotionChecker = emotionChecker;
+
+        TopicProcessors = [
+            new TopicInfoNoteExtractor(),
+            new PlayerIsRaceChecker(),
+            new SuccessFailureSeparator(context),
+            new RandomChecker(),
+        ];
+
+        ConversationProcessors = [
+            new BackToOptionsLinker(),
+            new KeywordLinker(),
+            new CollapseNoteOnlyResponse(),
+            new SameResponseChecker(),
+            new SharedInfoConverter(),
+            new CollapseEmptyInvisibleContinues(),
+            new BlockingChecker(),
+            new SetInvisibleContinuePrompt(),
+            new MergeIdenticalTopics(),
+            emotionChecker,
+        ];
+
+        if (context.Quest.IsDialogueQuest()) {
+            ConversationProcessors.Add(new DialogueQuestLockUnlockProcessor(context));
+        }
+    }
+
     // Runs during document parsing
     public List<IDialogueResponseProcessor> ResponseProcessors { get; } = [
         new InvalidStringFixer(),
@@ -23,31 +56,15 @@ public sealed class DialogueProcessor(IDialogueContext context, EmotionChecker e
     ];
 
     // Runs after document parsing
-    public List<IDialogueTopicProcessor> TopicProcessors { get; } = [
-        new TopicInfoNoteExtractor(),
-        new PlayerIsRaceChecker(),
-        new SuccessFailureSeparator(context),
-        new RandomChecker(),
-    ];
+    public List<IDialogueTopicProcessor> TopicProcessors { get; }
 
     // Runs after document parsing
     public List<IDialogueTopicListProcessor> TopicListProcessors { get; } = [];
 
     // Runs at the very end
-    public List<IConversationProcessor> ConversationProcessors { get; } = [
-        new BackToOptionsLinker(),
-        new KeywordLinker(),
-        new CollapseNoteOnlyResponse(),
-        new SameResponseChecker(),
-        new SharedInfoConverter(),
-        new CollapseEmptyInvisibleContinues(),
-        new BlockingChecker(),
-        new SetInvisibleContinuePrompt(),
-        new MergeIdenticalTopics(),
-        emotionChecker,
-    ];
+    public List<IConversationProcessor> ConversationProcessors { get; }
 
-    public DialogueProcessor Clone() => new(context, emotionChecker);
+    public DialogueProcessor Clone() => new(_context, _emotionChecker);
 
     public void Process(DialogueResponse response, IReadOnlyList<FormattedText> textSnippets) {
         foreach (var processor in ResponseProcessors) {

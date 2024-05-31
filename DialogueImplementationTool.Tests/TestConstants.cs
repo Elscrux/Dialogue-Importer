@@ -25,8 +25,6 @@ public class TestConstants {
         Mod.Npcs.AddNew(Speaker1.FormKey);
         Mod.Npcs.AddNew(Speaker2.FormKey);
         Mod.Npcs.AddNew(Speaker3.FormKey);
-
-        DialogueProcessor = new DialogueProcessor(SkyrimDialogueContext, new EmotionChecker(new NullEmotionClassifier()));
     }
 
     public SkyrimMod Mod { get; } = new(ModKey.FromName("TestMod.esp", ModType.Plugin), SkyrimRelease.SkyrimSE);
@@ -54,5 +52,5 @@ public class TestConstants {
     public NpcSpeaker Speaker1 { get; }
     public NpcSpeaker Speaker2 { get; }
     public NpcSpeaker Speaker3 { get; }
-    public DialogueProcessor DialogueProcessor { get; }
+    public DialogueProcessor DialogueProcessor => new(SkyrimDialogueContext, new EmotionChecker(new NullEmotionClassifier()));
 }

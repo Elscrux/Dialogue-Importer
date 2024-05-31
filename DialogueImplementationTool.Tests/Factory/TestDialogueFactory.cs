@@ -213,12 +213,11 @@ public sealed class TestDialogueFactory {
     [Fact]
     public void TestIdonaVerusDialogue() {
         // Import as dialogue quest
-        _testConstants.Quest.EditorID = "DialogueQuest";
         var (_, dialogue, _) = TestSamples.GetIdonaVerusDialogue(_testConstants);
 
         // Process
         Conversation conversation = [dialogue];
-        dialogue.Factory.ConfigureProcessor(_testConstants.DialogueProcessor);
+        _testConstants.Quest.EditorID = "DialogueQuest";
         _testConstants.DialogueProcessor.Process(conversation);
 
         // Check structure
