@@ -161,6 +161,9 @@
       <Compile Update="Dialogue\Processor\DialogueQuestLockUnlockProcessor.cs">
         <DependentUpon>IConversationProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\Processor\CustomTopicInfoTrimmer.cs">
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>
