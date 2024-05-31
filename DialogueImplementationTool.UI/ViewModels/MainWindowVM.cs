@@ -135,6 +135,7 @@ public sealed class MainWindowVM : ViewModel {
             _mod,
             LinkCache.ResolveContext<IQuest, IQuestGetter>(QuestFormKey).GetOrAddAsOverride(_mod),
             new UISpeakerSelection(LinkCache, _speakerFavoritesSelection, filePath),
+            _speakerFavoritesSelection,
             new UIFormKeySelection(LinkCache));
         var dialogueProcessor = _dialogueProcessorFactory(context, emotionChecker);
 

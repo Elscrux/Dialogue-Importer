@@ -1,4 +1,5 @@
 ﻿using DialogueImplementationTool.Dialogue.Speaker;
+using DialogueImplementationTool.Services;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using ReactiveUI;

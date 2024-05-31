@@ -36,7 +36,7 @@
                       Click="Save_OnClick"
                       Margin="10,10,0,0"
                       HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            <MenuItem Header="Apply to all"
+            <MenuItem Header="Apply type to all"
                       Margin="10,10,0,0"
                       HorizontalAlignment="Left" VerticalAlignment="Top">
                 <MenuItem Header="Greeting"
@@ -61,6 +61,12 @@
                 <MenuItem Header="Quest Scene"
                           Command="{Binding ApplyAll}"
                           CommandParameter="{x:Static dialogue:DialogueType.QuestScene}"/>
+            </MenuItem>
+            <MenuItem Header="Apply automatic scene speakers and skip manual selection"
+                      Margin="10,10,0,0"
+                      IsCheckable="True"
+                      IsChecked="{Binding SkipSceneSpeakerSelection}"
+                      HorizontalAlignment="Left" VerticalAlignment="Top">
             </MenuItem>
         </Menu>
 

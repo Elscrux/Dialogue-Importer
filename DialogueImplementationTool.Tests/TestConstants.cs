@@ -41,7 +41,15 @@ public class TestConstants {
     public IFormKeySelection FormKeySelection { get; set; } =
         new InjectedFormKeySelection();
 
-    public SkyrimDialogueContext SkyrimDialogueContext => new(string.Empty, Environment, Mod, Quest, SpeakerSelection, FormKeySelection);
+    public SkyrimDialogueContext SkyrimDialogueContext => new(
+        string.Empty,
+        Environment,
+        Mod,
+        Quest,
+        SpeakerSelection,
+        new SpeakerFavoritesSelection(),
+        FormKeySelection);
+
     public Quest Quest { get; } = new(FormKey.Factory("000000:Quest.esp"), Release);
     public NpcSpeaker Speaker1 { get; }
     public NpcSpeaker Speaker2 { get; }

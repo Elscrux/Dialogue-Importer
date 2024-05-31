@@ -6,11 +6,9 @@ using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Services;
 using DialogueImplementationTool.UI.Models;
 using DialogueImplementationTool.UI.Views;
-using Mutagen.Bethesda;
 using Mutagen.Bethesda.Json;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
-using Mutagen.Bethesda.Skyrim;
 using Newtonsoft.Json;
 namespace DialogueImplementationTool.UI.Services;
 
@@ -21,18 +19,29 @@ public sealed partial class UISpeakerSelection(
     ISpeakerFavoritesSelection speakerFavoritesSelection,
     string filePath)
     : ISpeakerSelection {
+    private readonly AutomaticSpeakerSelection _automaticSpeakerSelection = new(linkCache, speakerFavoritesSelection);
+
     public IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IReadOnlyList<string> speakerNames) {
         var speakers = new ObservableCollection<AliasSpeakerSelection>(speakerNames
             .Select(s => new AliasSpeakerSelection(linkCache, speakerFavoritesSelection, s))
             .ToList());
 
+        // Try load from file
         if (LoadSpeakers()) {
             return speakers
                 .Select(x => new AliasSpeaker(x.FormKey, x.Name, editorId: x.EditorID))
                 .ToList();
         }
 
-        TryMatchFromLoadOrder(speakers);
+        // Try set automatically
+        var automaticSpeakers = _automaticSpeakerSelection.GetAliasSpeakers(speakerNames);
+        foreach (var automaticSpeaker in automaticSpeakers) {
+            var speaker = speakers.FirstOrDefault(s => s.Name == automaticSpeaker.Name);
+            if (speaker is null) continue;
+
+            speaker.FormKey = automaticSpeaker.FormKey;
+            speaker.EditorID = automaticSpeaker.EditorID;
+        }
 
         new SceneSpeakerWindow(linkCache, speakerFavoritesSelection, speakers).ShowDialog();
 
@@ -89,29 +98,6 @@ public sealed partial class UISpeakerSelection(
             }
 
             File.WriteAllText(SelectionsPath, text);
-        }
-    }
-
-    private void TryMatchFromLoadOrder(ObservableCollection<AliasSpeakerSelection> speakers) {
-        foreach (var speaker in speakers) {
-            if (speaker.Name.Length < 4) continue;
-
-            var count = 0;
-            INpcGetter? currentNpc = null;
-            foreach (var npc in linkCache.PriorityOrder.WinningOverrides<INpcGetter>()) {
-                if (npc.EditorID is null) continue;
-                if (!npc.EditorID.Contains(speaker.Name, StringComparison.Ordinal)) continue;
-
-                count++;
-                if (count > 1) break;
-
-                currentNpc = npc;
-            }
-
-            if (count == 1 && currentNpc is not null) {
-                speaker.FormKey = currentNpc.FormKey;
-                speaker.EditorID = currentNpc.EditorID;
-            }
         }
     }
 

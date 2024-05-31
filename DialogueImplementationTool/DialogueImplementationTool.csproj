@@ -161,6 +161,15 @@
       <Compile Update="Dialogue\Processor\DialogueQuestLockUnlockProcessor.cs">
         <DependentUpon>IConversationProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Services\InjectedSpeakerSelection.cs">
+        <DependentUpon>ISpeakerSelection.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\AutomaticSpeakerSelection.cs">
+        <DependentUpon>ISpeakerSelection.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\SpeakerFavoritesSelection.cs">
+        <DependentUpon>ISpeakerFavoritesSelection.cs</DependentUpon>
+      </Compile>
       <Compile Update="Dialogue\Processor\CustomTopicInfoTrimmer.cs">
         <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>

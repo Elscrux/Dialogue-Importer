@@ -7,7 +7,7 @@ using DialogueImplementationTool.Dialogue.Processor;
 using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Parser;
 using DialogueImplementationTool.Script;
-using DialogueImplementationTool.UI.Models;
+using DialogueImplementationTool.Services;
 using DialogueImplementationTool.UI.Services;
 using Mutagen.Bethesda.Json;
 using Mutagen.Bethesda.Plugins;
@@ -190,6 +190,11 @@ public sealed partial class DialogueVM : ViewModel {
                 if (DialogueTypeList.Count > Index) DialogueTypeList[Index].UseGetIsAliasRef = x;
             });
 
+        this.WhenAnyValue(v => v.SkipSceneSpeakerSelection)
+            .Subscribe(skipSceneSpeakerSelection => {
+                context.SkipSceneSpeakerSelection = skipSceneSpeakerSelection;
+            });
+
         SetupSelectionSubscription(vm => vm.GreetingSelected, DialogueType.Greeting);
         SetupSelectionSubscription(vm => vm.FarewellSelected, DialogueType.Farewell);
         SetupSelectionSubscription(vm => vm.IdleSelected, DialogueType.Idle);
@@ -341,6 +346,7 @@ public sealed partial class DialogueVM : ViewModel {
     public ICommand SkipMany { get; }
     public string Title { get; }
     [Reactive] public bool UseGetIsAliasRef { get; set; }
+    [Reactive] public bool SkipSceneSpeakerSelection { get; set; } = true;
 
     public void RefreshPreview(bool forward) {
         var preview = string.Empty;

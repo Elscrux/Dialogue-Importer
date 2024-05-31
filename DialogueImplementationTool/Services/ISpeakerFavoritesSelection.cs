@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using DialogueImplementationTool.Dialogue.Speaker;
 using Mutagen.Bethesda.Plugins;
-namespace DialogueImplementationTool.UI.Models;
+namespace DialogueImplementationTool.Services;
 
 public interface ISpeakerFavoritesSelection {
     ReadOnlyObservableCollection<ISpeaker> Speakers { get; }

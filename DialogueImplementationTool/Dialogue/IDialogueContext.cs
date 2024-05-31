@@ -16,6 +16,7 @@ public interface IDialogueContext {
     IQuest Quest { get; }
     IMod Mod { get; }
     Dictionary<string, string> Scripts { get; }
+    bool SkipSceneSpeakerSelection { get; set; }
     FormKey GetNextFormKey();
     void AddScene(Scene scene);
     void AddQuest(Quest quest);

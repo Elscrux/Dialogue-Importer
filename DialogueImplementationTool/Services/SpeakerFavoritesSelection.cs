@@ -1,8 +1,10 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 using DialogueImplementationTool.Dialogue.Speaker;
 using Mutagen.Bethesda.Plugins;
 using ReactiveUI;
-namespace DialogueImplementationTool.UI.Models;
+namespace DialogueImplementationTool.Services;
 
 public sealed class SpeakerFavoritesSelection : ReactiveObject, ISpeakerFavoritesSelection {
     private readonly ObservableCollection<ISpeaker> _speakers = [];
