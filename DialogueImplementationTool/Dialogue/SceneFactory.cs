@@ -38,16 +38,17 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
     }
 
     public override void GenerateDialogue(List<DialogueTopic> topics) {
-        var scene = GetCurrentScene();
-        if (scene is null) return;
+        var (scene, quest) = GetCurrentScene();
+        if (scene is null || quest is null) return;
 
         //Add lines
-        AddLines(scene, topics.ToList());
+        AddLines(quest.FormKey, scene, topics.ToList());
     }
 
-    protected abstract Scene? GetCurrentScene();
+    protected abstract (Scene? Scene, IQuest? QuestForDialogue) GetCurrentScene();
 
     private void AddLines(
+        FormKey questOwner,
         Scene scene,
         List<DialogueTopic> topics) {
         uint currentPhaseIndex = 0;
@@ -58,7 +59,7 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
             var aliasSpeaker = GetSpeaker(topic.TopicInfos[0].Speaker.NameNoSpaces);
 
             var sceneTopic = new DialogTopic(Context.GetNextFormKey(), Context.Release) {
-                Quest = new FormLinkNullable<IQuestGetter>(Context.Quest),
+                Quest = new FormLinkNullable<IQuestGetter>(questOwner),
                 Category = DialogTopic.CategoryEnum.Scene,
                 Subtype = DialogTopic.SubtypeEnum.Scene,
                 SubtypeName = "SCEN",

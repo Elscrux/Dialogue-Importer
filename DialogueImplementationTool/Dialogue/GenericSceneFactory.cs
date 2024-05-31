@@ -21,8 +21,8 @@ public class GenericGenericSceneFactory(IDialogueContext context) : SceneFactory
         if (NameMappedSpeakers.Count != 2) MessageBox.Show("Error, there can only be 2 NPCs");
     }
 
-    protected override Scene? GetCurrentScene() {
-        if (AliasSpeakers is not [{} speaker1, {} speaker2]) return null;
+    protected override (Scene? Scene, IQuest? QuestForDialogue) GetCurrentScene() {
+        if (AliasSpeakers is not [{} speaker1, {} speaker2]) return (null, null);
 
         //Assign alias indices
         speaker1.AliasIndex = 2;
@@ -70,6 +70,6 @@ public class GenericGenericSceneFactory(IDialogueContext context) : SceneFactory
         scene.Flags |= Scene.Flag.BeginOnQuestStart | Scene.Flag.StopQuestOnEnd | Scene.Flag.Interruptable;
         Context.AddScene(scene);
 
-        return scene;
+        return (scene, sceneQuest);
     }
 }

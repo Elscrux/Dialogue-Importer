@@ -8,7 +8,7 @@ using Noggog;
 namespace DialogueImplementationTool.Dialogue;
 
 public sealed class QuestSceneFactory(IDialogueContext context) : SceneFactory(context) {
-    protected override Scene GetCurrentScene() {
+    protected override (Scene? Scene, IQuest? QuestForDialogue) GetCurrentScene() {
         // Set alias indices
         foreach (var aliasSpeaker in AliasSpeakers) {
             var alias = Context.Quest.GetAlias(aliasSpeaker.FormKey);
@@ -32,7 +32,7 @@ public sealed class QuestSceneFactory(IDialogueContext context) : SceneFactory(c
             Context.Quest.FormKey);
         Context.AddScene(scene);
 
-        return scene;
+        return (scene, Context.Quest);
     }
 
     public override void PreProcessSpeakers() {}
