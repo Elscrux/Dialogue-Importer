@@ -19,6 +19,8 @@ public sealed partial class UISpeakerSelection(
     ISpeakerFavoritesSelection speakerFavoritesSelection,
     string filePath)
     : ISpeakerSelection {
+
+    private Dictionary<string, Dictionary<string, AliasSelectionDto>>? _savedSceneSelections;
     private readonly AutomaticSpeakerSelection _automaticSpeakerSelection = new(linkCache, speakerFavoritesSelection);
 
     public IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IReadOnlyList<string> speakerNames) {
@@ -57,39 +59,43 @@ public sealed partial class UISpeakerSelection(
             .ToList();
 
         bool LoadSpeakers() {
-            if (!File.Exists(SelectionsPath)) return false;
+            _savedSceneSelections ??= LoadFromFile();
+            if (_savedSceneSelections is null) return false;
+
+            if (!_savedSceneSelections.TryGetValue(string.Join('|', speakerNames), out var savedSelections)) return false;
+
+            foreach (var selection in speakers) {
+                if (!savedSelections.TryGetValue(selection.Name, out var aliasSelectionDto)) return false;
+
+                selection.FormKey = aliasSelectionDto.FormKey;
+                selection.EditorID = aliasSelectionDto.EditorID;
+            }
+
+            return true;
+        }
+
+        Dictionary<string, Dictionary<string, AliasSelectionDto>>? LoadFromFile() {
+            if (!File.Exists(SelectionsPath)) return null;
 
             var text = File.ReadAllText(SelectionsPath);
             var sceneSelections =
                 JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, AliasSelectionDto>>>(text,
                     _serializerSettings);
-            if (sceneSelections is null) return false;
 
-            foreach (var (namesString, selections) in sceneSelections) {
-                var names = namesString.Split('|');
-                if (!speakers.Select(x => x.Name).SequenceEqual(names)) continue;
-
-                foreach (var selection in speakers) {
-                    selection.FormKey = selections[selection.Name].FormKey;
-                    selection.EditorID = selections[selection.Name].EditorID;
-                }
-
-                return true;
-            }
-
-            return false;
+            return sceneSelections;
         }
 
         void SaveSpeakers(ObservableCollection<AliasSpeakerSelection> aliasSpeakers) {
             var selections = new Dictionary<string, AliasSelectionDto>();
-            var sceneSelections = new Dictionary<string, Dictionary<string, AliasSelectionDto>> {
-                [string.Join('|', speakerNames)] = selections,
-            };
             foreach (var selection in aliasSpeakers) {
                 selections[selection.Name] = new AliasSelectionDto(selection.FormKey, selection.EditorID);
             }
 
-            var text = JsonConvert.SerializeObject(sceneSelections, _serializerSettings);
+            _savedSceneSelections ??= LoadFromFile();
+            _savedSceneSelections ??= new Dictionary<string, Dictionary<string, AliasSelectionDto>>();
+            _savedSceneSelections.Add(string.Join('|', speakerNames), selections);
+
+            var text = JsonConvert.SerializeObject(_savedSceneSelections, _serializerSettings);
             var directoryName = Path.GetDirectoryName(SelectionsPath);
             if (directoryName is null) return;
 
