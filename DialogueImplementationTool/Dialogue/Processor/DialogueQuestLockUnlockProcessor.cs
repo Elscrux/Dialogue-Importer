@@ -9,7 +9,6 @@ using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) : IConversationProcessor {
-    private const string KeywordRegexPart = @"([A-Z_\d]+)";
     private const string LockFillerPart = "(?:(?:-|all) )";
 
     // [DONE], [HERE]

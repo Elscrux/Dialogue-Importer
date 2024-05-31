@@ -7,19 +7,18 @@ public sealed partial class KeywordLinker : IConversationProcessor {
     private const string FillerRegexPart = @"[^\]]*";
     private const string MergeRegexPart = "(?:merge|go|back) ";
     private const string OptionsAfterRegexPart = "(?:options after )";
-    private const string KeywordRegexPart = @"([A-Z_\d]+)";
 
     // [DONE], [HERE]
-    [GeneratedRegex($"^{KeywordRegexPart}$")]
+    [GeneratedRegex($"^{KeywordUtils.KeywordRegexPart}$")]
     private static partial Regex SimpleKeywordRegex();
 
     // [merge to DONE above]
-    [GeneratedRegex($"{FillerRegexPart}(?:{MergeRegexPart})?to {KeywordRegexPart}{FillerRegexPart}")]
+    [GeneratedRegex($"{FillerRegexPart}(?:{MergeRegexPart})?to {KeywordUtils.KeywordRegexPart}{FillerRegexPart}")]
     private static partial Regex LinkSimpleRegex();
 
     // [merge to options after HERE above]
     [GeneratedRegex($"{FillerRegexPart}(?:{MergeRegexPart})?to "
-      + $"{OptionsAfterRegexPart}?{KeywordRegexPart}{FillerRegexPart}")]
+      + $"{OptionsAfterRegexPart}?{KeywordUtils.KeywordRegexPart}{FillerRegexPart}")]
     private static partial Regex LinkOptionsRegex();
 
     public void Process(Conversation conversation) {
