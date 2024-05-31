@@ -6,6 +6,7 @@
         xmlns:plugins="clr-namespace:Mutagen.Bethesda.WPF.Plugins;assembly=Mutagen.Bethesda.WPF"
         xmlns:viewModels="clr-namespace:DialogueImplementationTool.UI.ViewModels"
         xmlns:dialogue="clr-namespace:DialogueImplementationTool.Dialogue;assembly=DialogueImplementationTool"
+        xmlns:converters="clr-namespace:DialogueImplementationTool.UI.Converters"
         mc:Ignorable="d"
         Title="{Binding Title, StringFormat='Dialogue Implementation Tool - {0}'}"
         Height="720" Width="1280"
@@ -142,9 +143,13 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
+                    <Grid.Resources>
+                        <converters:IntPlusOneConverter x:Key="IntPlusOneConverter"/>
+                    </Grid.Resources>
+
                     <TextBlock Grid.Column="0"
                                Foreground="Black"
-                               Text="{Binding Index}"
+                               Text="{Binding Index, Converter={StaticResource IntPlusOneConverter}}"
                                FontSize="36"/>
 
                     <TextBlock Grid.Column="1"
@@ -154,7 +159,7 @@
 
                     <TextBlock Grid.Column="2"
                                Foreground="Black"
-                               Text="{Binding LastIndex}"
+                               Text="{Binding LastIndex, Converter={StaticResource IntPlusOneConverter}}"
                                FontSize="36"/>
                 </Grid>
 
