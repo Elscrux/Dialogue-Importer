@@ -93,6 +93,18 @@ public static class TestSamples {
             GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 3));
     }
 
+    public static (GeneratedDialogue Greeting, GeneratedDialogue Dialogue, GeneratedDialogue Dialogue2, GeneratedDialogue Farewell)
+        GetAdilaNadeDialogue(TestConstants testConstants) {
+        var docXDocumentParser = new DocXDocumentParser(
+            Path.GetFullPath("../../../Samples/Documents/Adila Nade.docx"));
+
+        return (
+            GetDialogue(testConstants, docXDocumentParser, DialogueType.Greeting, 0),
+            GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 1),
+            GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 2),
+            GetDialogue(testConstants, docXDocumentParser, DialogueType.Farewell, 3));
+    }
+
     public static GeneratedDialogue GetMultiLevelConditionDialogue(TestConstants testConstants) {
         var docXDocumentParser = new DocXDocumentParser(
             Path.GetFullPath("../../../Samples/Documents/MultiLevelCondition.docx"));

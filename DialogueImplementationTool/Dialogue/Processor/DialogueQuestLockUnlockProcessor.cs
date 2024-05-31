@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using DialogueImplementationTool.Dialogue.Model;
+using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Extension;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
@@ -12,11 +12,11 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
     private const string LockFillerPart = "(?:(?:-|all) )";
 
     // [DONE], [HERE]
-    [GeneratedRegex(KeywordRegexPart)]
+    [GeneratedRegex(KeywordUtils.KeywordRegexPart)]
     private static partial Regex KeywordRegex();
 
     // [DONE], [HERE]
-    [GeneratedRegex($"^{KeywordRegexPart}$")]
+    [GeneratedRegex($"^{KeywordUtils.KeywordRegexPart}$")]
     private static partial Regex OnlyKeywordRegex();
 
     // [Locked]
@@ -24,31 +24,37 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
     [GeneratedRegex("^[Ll]ocked$")]
     private static partial Regex LockedRegex();
 
+    // [Locked]
+    // In combination with a SimpleKeywordRegex this creates an unlocked keyword
+    [GeneratedRegex("^[Uu]nlocked")]
+    private static partial Regex UnlockedRegex();
+
     // [unlocked HERE]
-    [GeneratedRegex($"^[Ll]ocked {LockFillerPart}?{KeywordRegexPart}")]
+    [GeneratedRegex($"^[Ll]ocked {LockFillerPart}?{KeywordUtils.KeywordRegexPart}")]
     private static partial Regex StatusLockedRegex();
 
     // [locked HERE]
-    [GeneratedRegex($"^[Ll]ocked {LockFillerPart}?{KeywordRegexPart}")]
+    [GeneratedRegex($"^[Ll]ocked {LockFillerPart}?{KeywordUtils.KeywordRegexPart}")]
     private static partial Regex StatusUnlockedRegex();
 
     // [lock all HERE] [remove HERE]
-    [GeneratedRegex($"^(?:[Ll]ock(?:s)?|[Rr]emove(?:s)?) {LockFillerPart}?{KeywordRegexPart}")]
+    [GeneratedRegex($"^(?:[Ll]ock(?:s)?|[Rr]emove(?:s)?) {LockFillerPart}?{KeywordUtils.KeywordRegexPart}")]
     private static partial Regex ActionLockRegex();
 
     // [unlock HERE] [add HERE]
-    [GeneratedRegex($"^(?:[Uu]nlock(?:s)?|[Aa]dd(?:s)?) {LockFillerPart}?{KeywordRegexPart}")]
+    [GeneratedRegex($"^(?:[Uu]nlock(?:s)?|[Aa]dd(?:s)?) {LockFillerPart}?{KeywordUtils.KeywordRegexPart}")]
     private static partial Regex ActionUnlockRegex();
 
     public void Process(Conversation conversation) {
         var speakerStages = new Dictionary<FormKey, (ushort StartStage, ushort NextStage)>();
 
-        var simpleLockedKeywords = conversation.GetAllKeywordTopicInfos(
-                OnlyKeywordRegex(),
-                info => info.Prompt.StartNotes)
-            // Only mind locked keywords
-            .Where(x => x.TopicInfo.Prompt.StartNotes.Any(n => LockedRegex().IsMatch(n.Text)))
-            .ToList();
+        var simplePromptKeywords = conversation.GetAllKeywordTopicInfos(
+            OnlyKeywordRegex(),
+            info => info.Prompt.StartNotes);
+
+        var simpleResponseKeywords = conversation.GetAllKeywordTopicInfos(
+            OnlyKeywordRegex(),
+            info => info.Responses[0].StartNotes);
 
         var statusLockedKeywords = conversation.GetAllKeywordTopicInfos(
             StatusLockedRegex(),
@@ -67,76 +73,112 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
 
         var actionKeywords = actionLockKeywords.Select(x => (Match: x, Lock: true))
             .Concat(actionUnlockKeywords.Select(x => (Match: x, Lock: false)))
+            .SelectMany(x => {
+                // Check for any keywords in note, to catch something like [unlock HERE, NOW, MERGE]
+                return KeywordRegex().Matches(x.Match.Note.Text)
+                    .Select(match => match.Groups[1].Value)
+                    .Select(keyword => (x.Match with { Keyword = keyword }, x.Lock))
+                    .ToList();
+            })
+            .GroupBy(x => x.Item1.Keyword)
             .ToList();
 
-        if (actionKeywords.Any(x => actionKeywords.Any(y => y.Lock != x.Lock && y.Match.Keyword == x.Match.Keyword))) {
-            Console.WriteLine("A keyword is locked an unlocked, this is not currently supported.");
+        if (actionKeywords.Any(x => x.Any(y => y.Lock != x.First().Lock))) {
+            Console.WriteLine("A keyword is locked and unlocked, this is not currently supported.");
             return;
         }
 
-        foreach (var (lockMatch, isLocking) in actionKeywords) {
+        foreach (var grouping in actionKeywords) {
+            var isLocking = grouping.First().Lock;
+            var keyword = grouping.Key;
+            var stage = CreateStage(keyword, grouping.First().Item1.TopicInfo.Speaker, isLocking);
             var matchesFound = 0;
-            var stage = CreateStage(lockMatch, isLocking);
 
-            // Check for any keywords in note, to catch something like [unlock HERE, NOW, MERGE]
-            var matches = KeywordRegex().Matches(lockMatch.Note.Text).ToList();
-            foreach (var keyword in matches.Select(match => match.Groups[1].Value)) {
-                if (isLocking) {
-                    foreach (var initiallyUnlockedMatch in statusUnlockedKeywords.Where(x => x.Keyword == keyword)) {
-                        matchesFound++;
+            if (isLocking) {
+                foreach (var initiallyUnlockedMatch in statusUnlockedKeywords.Where(x => x.Keyword == keyword)) {
+                    matchesFound++;
 
-                        // Remove [Unlocked HERE]
-                        initiallyUnlockedMatch.TopicInfo.Prompt.StartNotes.Remove(initiallyUnlockedMatch.Note);
-                        initiallyUnlockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(false, stage));
-                    }
-                } else {
-                    foreach (var initiallyLockedMatch in statusLockedKeywords.Where(x => x.Keyword == keyword)) {
-                        matchesFound++;
+                    // Remove [Unlocked HERE]
+                    initiallyUnlockedMatch.TopicInfo.Prompt.StartNotes.Remove(initiallyUnlockedMatch.Note);
+                    initiallyUnlockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(false, stage));
+                }
 
-                        // Remove [Locked HERE]
-                        initiallyLockedMatch.TopicInfo.Prompt.StartNotes.Remove(initiallyLockedMatch.Note);
-                        initiallyLockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(true, stage));
-                    }
+                foreach (var initiallyUnlockedMatch in simplePromptKeywords.Where(x => x.Keyword == keyword)) {
+                    matchesFound++;
 
-                    foreach (var initiallyLockedMatch in simpleLockedKeywords.Where(x => x.Keyword == keyword)) {
-                        matchesFound++;
+                    // Remove [Locked] [HERE]
+                    initiallyUnlockedMatch.TopicInfo.Prompt.StartNotes.Remove(initiallyUnlockedMatch.Note);
+                    initiallyUnlockedMatch.TopicInfo.Prompt.StartNotes.RemoveAll(x => UnlockedRegex().IsMatch(x.Text));
+                    initiallyUnlockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(false, stage));
+                }
 
-                        // Remove [Locked] [HERE]
-                        initiallyLockedMatch.TopicInfo.Prompt.StartNotes.Remove(initiallyLockedMatch.Note);
-                        initiallyLockedMatch.TopicInfo.Prompt.StartNotes.RemoveAll(x => LockedRegex().IsMatch(x.Text));
-                        initiallyLockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(true, stage));
-                    }
+                foreach (var initiallyUnlockedMatch in simpleResponseKeywords.Where(x => x.Keyword == keyword)) {
+                    matchesFound++;
+
+                    // Remove [Locked] [HERE]
+                    initiallyUnlockedMatch.TopicInfo.Responses[0].StartNotes.Remove(initiallyUnlockedMatch.Note);
+                    initiallyUnlockedMatch.TopicInfo.Responses[0].StartNotes
+                        .RemoveAll(x => UnlockedRegex().IsMatch(x.Text));
+                    initiallyUnlockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(false, stage));
+                }
+            } else {
+                foreach (var initiallyLockedMatch in statusLockedKeywords.Where(x => x.Keyword == keyword)) {
+                    matchesFound++;
+
+                    // Remove [Locked HERE]
+                    initiallyLockedMatch.TopicInfo.Prompt.StartNotes.Remove(initiallyLockedMatch.Note);
+                    initiallyLockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(true, stage));
+                }
+
+                foreach (var initiallyLockedMatch in simplePromptKeywords.Where(x => x.Keyword == keyword)) {
+                    matchesFound++;
+
+                    // Remove [Locked] [HERE]
+                    initiallyLockedMatch.TopicInfo.Prompt.StartNotes.Remove(initiallyLockedMatch.Note);
+                    initiallyLockedMatch.TopicInfo.Prompt.StartNotes.RemoveAll(x => LockedRegex().IsMatch(x.Text));
+                    initiallyLockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(true, stage));
+                }
+
+                foreach (var initiallyLockedMatch in simpleResponseKeywords.Where(x => x.Keyword == keyword)) {
+                    matchesFound++;
+
+                    // Remove [Locked] [HERE]
+                    initiallyLockedMatch.TopicInfo.Responses[0].StartNotes.Remove(initiallyLockedMatch.Note);
+                    initiallyLockedMatch.TopicInfo.Responses[0].StartNotes
+                        .RemoveAll(x => LockedRegex().IsMatch(x.Text));
+                    initiallyLockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(true, stage));
                 }
             }
 
             if (matchesFound == 0) {
                 var lockText = isLocking ? "lock" : "unlock";
-                Console.WriteLine($"Keyword {lockMatch.Keyword} is not used to {lockText} any dialogue");
+                Console.WriteLine($"Keyword {keyword} is not used to {lockText} any dialogue");
                 continue;
             }
 
-            // Remove [Lock HERE] or [Unlock HERE]
-            lockMatch.TopicInfo.Responses[^1].RemoveNote(lockMatch.Note);
-            lockMatch.TopicInfo.RemoveRedundantResponses();
-            lockMatch.TopicInfo.Script.ScriptLines.Add($"GetOwningQuest().SetStage({stage})");
+            foreach (var (lockMatch, _) in grouping.Distinct()) {
+                // Check for any keywords in note, to catch something like [unlock HERE, NOW, MERGE]
+                // Remove [Lock HERE] or [Unlock HERE]
+                lockMatch.TopicInfo.Responses[^1].RemoveNote(lockMatch.Note);
+                lockMatch.TopicInfo.RemoveRedundantResponses();
+                lockMatch.TopicInfo.Script.ScriptLines.Add($"GetOwningQuest().SetStage({stage})");
+            }
         }
 
-        ushort CreateStage(
-            (Note Note, string Keyword, DialogueTopic Topic, DialogueTopicInfo TopicInfo) lockMatch,
-            bool isLocking) {
+        ushort CreateStage(string keyword, ISpeaker speaker, bool isLocking) {
             // Get stage for keyword to lock
             const ushort speakerRange = 10;
-            if (!speakerStages.TryGetValue(lockMatch.TopicInfo.Speaker.FormKey, out var speakerStage)) {
+            if (!speakerStages.TryGetValue(speaker.FormKey, out var speakerStage)) {
                 ushort currentIndex = 10;
                 if (context.Quest.Stages.Count == 0) {
                     speakerStage = (currentIndex, currentIndex);
-                    speakerStages[lockMatch.TopicInfo.Speaker.FormKey] = speakerStage;
+                    speakerStages[speaker.FormKey] = speakerStage;
                 } else {
                     foreach (var stage in context.Quest.Stages.OrderBy(x => x.Index)) {
                         // Check if the current range is free
                         if (stage.Index >= currentIndex + speakerRange) {
                             speakerStage = (currentIndex, (ushort) (currentIndex + 1));
-                            speakerStages[lockMatch.TopicInfo.Speaker.FormKey] = speakerStage;
+                            speakerStages[speaker.FormKey] = speakerStage;
                             break;
                         }
 
@@ -152,13 +194,13 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
                         nextStage -= (ushort) (nextStage % speakerRange);
 
                         speakerStage = (nextStage, nextStage);
-                        speakerStages[lockMatch.TopicInfo.Speaker.FormKey] = speakerStage;
+                        speakerStages[speaker.FormKey] = speakerStage;
                     }
                 }
             }
 
             var locking = isLocking ? "Lock" : "Unlock";
-            var entry = $"{locking} {lockMatch.Keyword} for {lockMatch.TopicInfo.Speaker.Name}";
+            var entry = $"{locking} {keyword} for {speaker.Name}";
             var questStage = new QuestStage {
                 Index = speakerStage.NextStage,
                 LogEntries = [
@@ -169,7 +211,7 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
                 ]
             };
             context.Quest.Stages.Add(questStage);
-            speakerStages[lockMatch.TopicInfo.Speaker.FormKey] =
+            speakerStages[speaker.FormKey] =
                 (speakerStage.StartStage, (ushort) (speakerStage.NextStage + 1));
 
             return questStage.Index;

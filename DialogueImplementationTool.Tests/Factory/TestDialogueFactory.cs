@@ -241,6 +241,62 @@ public sealed class TestDialogueFactory {
     }
 
     [Fact]
+    public void TestAdilaNadeDialogue() {
+        // Import as dialogue quest
+        var (greeting, dialogue1, dialogue2, farewell) = TestSamples.GetAdilaNadeDialogue(_testConstants);
+
+        // Process
+        Conversation conversation = [greeting, dialogue1, dialogue2, farewell];
+        _testConstants.Quest.EditorID = "DialogueQuest";
+        _testConstants.DialogueProcessor.Process(conversation);
+
+        // Check structure
+        conversation[0].Topics[0].TopicInfos.Should().HaveCount(7);
+        conversation[0].Topics[0].TopicInfos[0].ExtraConditions.Should().BeEmpty();
+        conversation[0].Topics[0].TopicInfos[1].ExtraConditions.Should().ContainSingle();
+        conversation[0].Topics[0].TopicInfos[2].ExtraConditions.Should().ContainSingle();
+        conversation[0].Topics[0].TopicInfos[3].ExtraConditions.Should().ContainSingle();
+        conversation[0].Topics[0].TopicInfos[4].ExtraConditions.Should().ContainSingle();
+        conversation[0].Topics[0].TopicInfos[5].ExtraConditions.Should().ContainSingle();
+        conversation[0].Topics[0].TopicInfos[6].ExtraConditions.Should().ContainSingle();
+
+        conversation[1].Topics.Should().HaveCount(2);
+
+        // [FEAR]
+        conversation[1].Topics[0].TopicInfos[0].ExtraConditions.Should().ContainSingle();
+        var stageCondition = conversation[1].Topics[0].TopicInfos[0].ExtraConditions[0].Data.Should()
+            .BeOfType<GetStageDoneConditionData>();
+        stageCondition.Subject.Stage.Should().Be(11);
+
+        // [unlock KID]
+        conversation[1].Topics[0].TopicInfos[0].Links[1].TopicInfos[0].Script.ScriptLines.Should().BeEmpty();
+
+        // [REASON]
+        conversation[1].Topics[1].TopicInfos[0].ExtraConditions.Should().ContainSingle();
+
+        // Persuade
+        conversation[1].Topics[1].TopicInfos[0].Links[1].TopicInfos.Should().HaveCount(2);
+        var successInfo = conversation[1].Topics[1].TopicInfos[0].Links[1].TopicInfos[0];
+        successInfo.Script.ScriptLines.Should().ContainSingle();
+        successInfo.Script.ScriptLines[0].Should().Be("pFDS.Persuade(akSpeaker)");
+        successInfo.ExtraConditions.Should().ContainSingle();
+        var actorValueCondition = successInfo.ExtraConditions[0].Data.Should().BeOfType<GetActorValueConditionData>();
+        actorValueCondition.Subject.ActorValue.Should().Be(ActorValue.Speech);
+        successInfo.Links.Should().ContainSingle();
+
+        // [LEARN] <- this is a keyword link, not unlock
+        conversation[2].Topics[0].TopicInfos[0].ExtraConditions.Should().BeEmpty();
+
+        // [unlock all BRAVE] [lock all FEAR] [lock REASON]
+        var links = conversation[2].Topics[0].TopicInfos[0].Links[0].TopicInfos[0].Links;
+        links.Should().HaveCount(2);
+        links[0].TopicInfos[0].Links[0].TopicInfos[0].Links[0].TopicInfos[0].Script.ScriptLines.Should().HaveCount(3);
+
+        // [unlock all BRAVE in Adila and Marille's dialogue] [lock all FEAR] [lock REASON]
+        links[1].TopicInfos[0].Links[0].TopicInfos[0].Links[0].TopicInfos[0].Script.ScriptLines.Should().HaveCount(3);
+    }
+
+    [Fact]
     public void TestMultiLevelConditionDialogue() {
         // Import
         var dialogue = TestSamples.GetMultiLevelConditionDialogue(_testConstants);
