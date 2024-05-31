@@ -220,7 +220,8 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
     }
 
     private static bool IsPlayerLine(Paragraph paragraph) {
-        return paragraph.MagicText.NotNull().All(magicText => magicText.formatting?.Bold is not (null or false));
+        return paragraph.MagicText.Count > 0
+         && paragraph.MagicText.NotNull().All(magicText => magicText.formatting?.Bold is not (null or false));
     }
 
     private static List<FormattedText> GetFormattedText(Paragraph paragraph) {
