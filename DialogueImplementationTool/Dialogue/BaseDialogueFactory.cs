@@ -192,6 +192,14 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
             };
         }
 
+        // Report remaining notes
+        if (topicInfo.Prompt.Notes().Any()) {
+            Console.WriteLine($"{topicInfo.Speaker.NameNoSpaces}: Prompt \"{topicInfo.Prompt}\" has notes.");
+        }
+        foreach (var response in topicInfo.Responses.Where(response => response.Notes().Any())) {
+            Console.WriteLine($"{topicInfo.Speaker.NameNoSpaces}: Response \"{response.FullResponse}\" has notes.");
+        }
+
         return responses;
 
         static IEnumerable<DialogResponse> TopicInfos(DialogueTopicInfo info) {
