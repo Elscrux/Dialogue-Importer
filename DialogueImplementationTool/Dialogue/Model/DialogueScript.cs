@@ -4,9 +4,11 @@ using System.Linq;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Model;
 
+public sealed record ScriptPropertyName(ScriptProperty ScriptProperty, string ScriptName);
+
 public sealed class DialogueScript : IEquatable<DialogueScript> {
     public List<string> ScriptLines { get; init; } = [];
-    public List<ScriptProperty> Properties { get; init; } = [];
+    public List<ScriptPropertyName> Properties { get; init; } = [];
 
     public bool Equals(DialogueScript? other) {
         if (ReferenceEquals(null, other)) return false;

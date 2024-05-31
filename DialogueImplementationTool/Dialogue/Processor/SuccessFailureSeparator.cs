@@ -75,7 +75,7 @@ public sealed partial class SuccessFailureSeparator(IDialogueContext context) : 
                 });
 
                 successInfo.Script.ScriptLines.Add("pFDS.Intimidate(akSpeaker)");
-                successInfo.Script.Properties.Add(FavorDialogueScriptProperty());
+                successInfo.Script.Properties.Add(new ScriptPropertyName(FavorDialogueScriptProperty(), "FavorDialogueScript"));
 
                 // Remove intimidate notes
                 foreach (var note in successInfo.Prompt.Notes()) {
@@ -114,8 +114,9 @@ public sealed partial class SuccessFailureSeparator(IDialogueContext context) : 
                     ComparisonValue = globalFormKey.ToLink<IGlobalGetter>(),
                 });
 
-                successInfo.Script.ScriptLines.Add(_actorValueScriptLines[actorValue]);
-                successInfo.Script.Properties.Add(FavorDialogueScriptProperty());
+                var (line, scriptName) = _actorValueScriptLines[actorValue];
+                successInfo.Script.ScriptLines.Add(line);
+                successInfo.Script.Properties.Add(new ScriptPropertyName(FavorDialogueScriptProperty(), scriptName));
             }
         }
     }
@@ -152,9 +153,9 @@ public sealed partial class SuccessFailureSeparator(IDialogueContext context) : 
         Object = context.GetFavorDialogueQuest(),
     };
 
-    private readonly Dictionary<ActorValue, string> _actorValueScriptLines = new() {
-        { ActorValue.Speech, "pFDS.Persuade(akSpeaker)" },
-        { ActorValue.Illusion, "pFDS.Intimidate(akSpeaker)" },
+    private readonly Dictionary<ActorValue, (string Line, string ScriptName)> _actorValueScriptLines = new() {
+        { ActorValue.Speech, ("pFDS.Persuade(akSpeaker)", "FavorDialogueScript") },
+        { ActorValue.Illusion, ("pFDS.Charm(akSpeaker)", "BSKFavorDialogueScript") },
     };
 
     private readonly Dictionary<string, int> _levelMap = new() {

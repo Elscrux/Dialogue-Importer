@@ -48,7 +48,7 @@ public sealed class PapyrusCompilerWrapper {
         var error = process.StandardError.ReadToEnd();
 
         if (process.ExitCode != 0) {
-            throw new Exception($"PapyrusCompiler exited with code {process.ExitCode}\n{output}\n{error}");
+            Console.WriteLine($"PapyrusCompiler exited with code {process.ExitCode}:\n{output}\n{error}");
         }
     }
 }
