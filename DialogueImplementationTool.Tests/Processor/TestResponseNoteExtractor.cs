@@ -8,7 +8,7 @@ namespace DialogueImplementationTool.Tests.Processor;
 public sealed class TestResponseNoteExtractor {
     [Fact]
     public void TestStartNotes() {
-        const string text = "[excited] Yes!";
+        const string text = "   [excited] Yes!";
         var dialogueResponse = new DialogueResponse { Response = text };
 
         var noteExtractor = new ResponseNoteExtractor();
@@ -23,7 +23,7 @@ public sealed class TestResponseNoteExtractor {
 
     [Fact]
     public void TestEndNotes() {
-        const string text = "Yes! [back to options]";
+        const string text = "Yes! [back to options] ";
         var dialogueResponse = new DialogueResponse { Response = text };
 
         var noteExtractor = new ResponseNoteExtractor();
@@ -38,7 +38,7 @@ public sealed class TestResponseNoteExtractor {
 
     [Fact]
     public void TestStartAndEndNotes() {
-        const string text = "[excited] Yes! [back to options]";
+        const string text = " [excited] Yes! [back to options] ";
         var dialogueResponse = new DialogueResponse { Response = text };
 
         var noteExtractor = new ResponseNoteExtractor();

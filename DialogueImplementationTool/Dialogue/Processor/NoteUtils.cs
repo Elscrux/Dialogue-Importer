@@ -4,10 +4,10 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 public static partial class NoteUtils {
     private const string NotePattern = @"\[([^\]]*)\]";
 
-    [GeneratedRegex($"^{NotePattern}")]
+    [GeneratedRegex(@$"^\s*{NotePattern}")]
     public static partial Regex StartNoteRegex();
 
-    [GeneratedRegex($"{NotePattern}$")]
+    [GeneratedRegex(@$"{NotePattern}\s*$")]
     public static partial Regex EndNoteRegex();
 
 }
