@@ -132,6 +132,30 @@
                            VerticalAlignment="Center"/>
 
                 <Grid Height="70" Width="275"
+                      HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Foreground="Black"
+                               Text="{Binding Index}"
+                               FontSize="36"/>
+
+                    <TextBlock Grid.Column="1"
+                               Foreground="Black"
+                               Text="/"
+                               FontSize="36"/>
+
+                    <TextBlock Grid.Column="2"
+                               Foreground="Black"
+                               Text="{Binding LastIndex}"
+                               FontSize="36"/>
+                </Grid>
+
+                <Grid Height="70" Width="275"
                       HorizontalAlignment="Right" VerticalAlignment="Top">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>

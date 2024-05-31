@@ -21,7 +21,6 @@ namespace DialogueImplementationTool.UI.ViewModels;
 
 public sealed partial class DialogueVM : ViewModel {
     private readonly IDocumentParser _documentParser;
-    private readonly PapyrusCompilerWrapper _compiler;
 
     public DialogueVM(
         IDialogueContext context,
@@ -31,8 +30,9 @@ public sealed partial class DialogueVM : ViewModel {
         OutputPathProvider outputPathProvider) {
         SpeakerFavoritesSelection = speakerFavoritesSelection;
         _documentParser = documentParser;
+        Index = _documentParser.Index;
         LinkCache = context.LinkCache;
-        _compiler = new PapyrusCompilerWrapper(context.Environment);
+        var compiler = new PapyrusCompilerWrapper(context.Environment);
 
         Title = Path.GetFileName(documentParser.FilePath);
         SavedSession = false;
@@ -93,7 +93,7 @@ public sealed partial class DialogueVM : ViewModel {
                 var sourcePath = Path.Combine(scriptsSourceDirectory, fileName + ".psc");
                 // var compiledPath = Path.Combine(scriptsDirectory, fileName + ".pex");
                 File.WriteAllText(sourcePath, content);
-                _compiler.Compile(sourcePath, scriptsDirectory, scriptsSourceDirectory);
+                compiler.Compile(sourcePath, scriptsDirectory, scriptsSourceDirectory);
             }
 
             SavedSession = true;
@@ -136,25 +136,29 @@ public sealed partial class DialogueVM : ViewModel {
 
         BacktrackMany = ReactiveCommand.Create(() => {
             _documentParser.BacktrackMany();
+            Index = _documentParser.Index;
             RefreshPreview(false);
         });
 
         Previous = ReactiveCommand.Create(() => {
             _documentParser.Previous();
+            Index = _documentParser.Index;
             RefreshPreview(false);
         });
 
         Next = ReactiveCommand.Create(() => {
             _documentParser.Next();
+            Index = _documentParser.Index;
             RefreshPreview(true);
         });
 
         SkipMany = ReactiveCommand.Create(() => {
             _documentParser.SkipMany();
+            Index = _documentParser.Index;
             RefreshPreview(true);
         });
 
-        this.WhenAnyValue(v => v._documentParser.Index)
+        this.WhenAnyValue(v => v.Index)
             .Subscribe(_ => {
                 IsNotFirstIndex = Index > 0;
                 IsNotLastIndex = Index < _documentParser.LastIndex;
@@ -292,7 +296,8 @@ public sealed partial class DialogueVM : ViewModel {
     [Reactive]
     public string PreviewText { get; set; } = string.Empty;
 
-    public int Index => _documentParser.Index;
+    [Reactive] public int Index { get; set; }
+    public int LastIndex => _documentParser.LastIndex;
 
     [Reactive]
     public bool IsNotFirstIndex { get; set; }
@@ -354,10 +359,12 @@ public sealed partial class DialogueVM : ViewModel {
         while (string.IsNullOrWhiteSpace(preview) && tries < 10) {
             preview = _documentParser.PreviewCurrent();
             if (string.IsNullOrEmpty(preview)) {
-                if (forward)
+                if (forward) {
                     _documentParser.Next();
-                else
+                } else {
                     _documentParser.Previous();
+                }
+                Index = _documentParser.Index;
             } else {
                 PreviewText = preview;
             }
