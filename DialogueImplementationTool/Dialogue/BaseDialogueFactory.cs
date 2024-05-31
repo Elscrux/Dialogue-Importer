@@ -147,6 +147,10 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
 
         // Handle scripts
         if (topicInfo.Script.ScriptLines.Count > 0) {
+            var propertyLine = topicInfo.Script.Properties
+                .Select(property => $"{property.ScriptName} Property {property.ScriptProperty.Name} Auto")
+                .ToList();
+
             var scriptName = $"{Context.Prefix}_TIF__{responses.FormKey.ToFormID(Context.Mod, Context.LinkCache)}";
             var scriptText = $"""
             ;BEGIN FRAGMENT CODE - Do not edit anything between this and the end comment
@@ -163,6 +167,8 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
             ;END FRAGMENT
             
             ;END FRAGMENT CODE - Do not edit anything between this and the begin comment
+            
+            {string.Join("\r\n", propertyLine)}
             """;
 
             Context.Scripts.Add(scriptName, scriptText);
@@ -172,7 +178,7 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
                     new ScriptEntry {
                         Name = scriptName,
                         Flags = ScriptEntry.Flag.Local,
-                        Properties = topicInfo.Script.Properties.ToExtendedList()
+                        Properties = topicInfo.Script.Properties.Select(x => x.ScriptProperty).ToExtendedList()
                     }
                 ],
                 ScriptFragments = new ScriptFragments {
