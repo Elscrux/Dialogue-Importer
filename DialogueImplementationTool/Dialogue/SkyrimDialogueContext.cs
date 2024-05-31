@@ -23,6 +23,7 @@ public sealed class SkyrimDialogueContext(
     : IDialogueContext {
     private readonly AutomaticSpeakerSelection _automaticSpeakerSelection =
         new(environment.LinkCache, speakerFavoritesSelection);
+    private FormLink<IQuestGetter>? _favorDialogueQuest;
 
     public string Prefix { get; } = prefix;
     public SkyrimRelease Release => SkyrimRelease.SkyrimSE;
@@ -125,11 +126,14 @@ public sealed class SkyrimDialogueContext(
     }
 
     public IFormLink<IQuestGetter> GetFavorDialogueQuest() {
+        if (_favorDialogueQuest is not null) return _favorDialogueQuest;
+
         var formKey = formKeySelection.GetFormKey(
             "Select the favor dialogue quest",
             [typeof(IQuestGetter)],
             Skyrim.Quest.DialogueFavorGeneric.FormKey);
 
-        return formKey.ToLink<IQuestGetter>();
+        _favorDialogueQuest = formKey.ToLink<IQuestGetter>();
+        return _favorDialogueQuest;
     }
 }
