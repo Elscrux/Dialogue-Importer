@@ -10,6 +10,7 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 
 public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) : IConversationProcessor {
     private const string KeywordRegexPart = @"([A-Z_\d]+)";
+    private const string LockFillerPart = "(?:(?:-|all) )";
 
     // [DONE], [HERE]
     [GeneratedRegex(KeywordRegexPart)]
@@ -25,19 +26,19 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
     private static partial Regex LockedRegex();
 
     // [unlocked HERE]
-    [GeneratedRegex($"^[Ll]ocked (?:- )?{KeywordRegexPart}")]
+    [GeneratedRegex($"^[Ll]ocked {LockFillerPart}?{KeywordRegexPart}")]
     private static partial Regex StatusLockedRegex();
 
     // [locked HERE]
-    [GeneratedRegex($"^[Ll]ocked (?:- )?{KeywordRegexPart}")]
+    [GeneratedRegex($"^[Ll]ocked {LockFillerPart}?{KeywordRegexPart}")]
     private static partial Regex StatusUnlockedRegex();
 
-    // [lock HERE] [remove HERE]
-    [GeneratedRegex($"^(?:[Ll]ock(?:s)?|[Rr]emove(?:s)?) (?:- )?{KeywordRegexPart}")]
+    // [lock all HERE] [remove HERE]
+    [GeneratedRegex($"^(?:[Ll]ock(?:s)?|[Rr]emove(?:s)?) {LockFillerPart}?{KeywordRegexPart}")]
     private static partial Regex ActionLockRegex();
 
     // [unlock HERE] [add HERE]
-    [GeneratedRegex($"^(?:[Uu]nlock(?:s)?|[Aa]dd(?:s)?) (?:- )?{KeywordRegexPart}")]
+    [GeneratedRegex($"^(?:[Uu]nlock(?:s)?|[Aa]dd(?:s)?) {LockFillerPart}?{KeywordRegexPart}")]
     private static partial Regex ActionUnlockRegex();
 
     public void Process(Conversation conversation) {
