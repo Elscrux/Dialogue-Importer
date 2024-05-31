@@ -162,18 +162,23 @@ public sealed partial class SuccessFailureSeparator(IDialogueContext context) : 
         // very easy
         { "very easy", 1 },
         { "Novice", 1 },
+        { "10", 1 },
         // easy
         { "easy", 2 },
         { "Apprentice", 2 },
+        { "25", 2 },
         // average
         { "average", 3 },
         { "medium", 3 },
         { "Adept", 3 },
+        { "50", 3 },
         // hard
         { "hard", 4 },
         { "Expert", 4 },
+        { "75", 4 },
         // very hard
         { "very hard", 5 },
         { "Master", 5 },
+        { "100", 5 },
     };
 }
