@@ -99,6 +99,41 @@ public sealed partial class DialogueVM : ViewModel {
             SavedSession = true;
         });
 
+        ApplyAll = ReactiveCommand.Create<DialogueType>(type => {
+            foreach (var dialogueSelection in DialogueTypeList) {
+                dialogueSelection.SelectedTypes.Clear();
+                dialogueSelection.SelectedTypes.Add(type);
+            }
+
+            GreetingSelected = false;
+            FarewellSelected = false;
+            IdleSelected = false;
+            DialogueSelected = false;
+            GenericSceneSelected = false;
+            QuestSceneSelected = false;
+
+            switch (type) {
+                case DialogueType.Greeting:
+                    GreetingSelected = true;
+                    break;
+                case DialogueType.Farewell:
+                    FarewellSelected = true;
+                    break;
+                case DialogueType.Idle:
+                    IdleSelected = true;
+                    break;
+                case DialogueType.Dialogue:
+                    DialogueSelected = true;
+                    break;
+                case DialogueType.GenericScene:
+                    GenericSceneSelected = true;
+                    break;
+                case DialogueType.QuestScene:
+                    QuestSceneSelected = true;
+                    break;
+            }
+        });
+
         BacktrackMany = ReactiveCommand.Create(() => {
             _documentParser.BacktrackMany();
             RefreshPreview(false);
@@ -298,6 +333,7 @@ public sealed partial class DialogueVM : ViewModel {
     public ICommand SetSpeaker { get; }
     public ICommand SelectIndex { get; }
     public ICommand Save { get; }
+    public ICommand ApplyAll { get; }
 
     public ICommand BacktrackMany { get; }
     public ICommand Previous { get; }

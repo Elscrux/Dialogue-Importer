@@ -5,6 +5,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:plugins="clr-namespace:Mutagen.Bethesda.WPF.Plugins;assembly=Mutagen.Bethesda.WPF"
         xmlns:viewModels="clr-namespace:DialogueImplementationTool.UI.ViewModels"
+        xmlns:dialogue="clr-namespace:DialogueImplementationTool.Dialogue;assembly=DialogueImplementationTool"
         mc:Ignorable="d"
         Title="{Binding Title, StringFormat='Dialogue Implementation Tool - {0}'}"
         Height="720" Width="1280"
@@ -35,6 +36,32 @@
                       Click="Save_OnClick"
                       Margin="10,10,0,0"
                       HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <MenuItem Header="Apply to all"
+                      Margin="10,10,0,0"
+                      HorizontalAlignment="Left" VerticalAlignment="Top">
+                <MenuItem Header="Greeting"
+                          IsEnabled="{Binding ValidSpeaker}"
+                          Command="{Binding ApplyAll}"
+                          CommandParameter="{x:Static dialogue:DialogueType.Greeting}"/>
+                <MenuItem Header="Farewell"
+                          IsEnabled="{Binding ValidSpeaker}"
+                          Command="{Binding ApplyAll}"
+                          CommandParameter="{x:Static dialogue:DialogueType.Farewell}"/>
+                <MenuItem Header="Idle"
+                          IsEnabled="{Binding ValidSpeaker}"
+                          Command="{Binding ApplyAll}"
+                          CommandParameter="{x:Static dialogue:DialogueType.Idle}"/>
+                <MenuItem Header="Branching Dialogue"
+                          IsEnabled="{Binding ValidSpeaker}"
+                          Command="{Binding ApplyAll}"
+                          CommandParameter="{x:Static dialogue:DialogueType.Dialogue}"/>
+                <MenuItem Header="Generic Scene"
+                          Command="{Binding ApplyAll}"
+                          CommandParameter="{x:Static dialogue:DialogueType.GenericScene}"/>
+                <MenuItem Header="Quest Scene"
+                          Command="{Binding ApplyAll}"
+                          CommandParameter="{x:Static dialogue:DialogueType.QuestScene}"/>
+            </MenuItem>
         </Menu>
 
         <GroupBox DockPanel.Dock="Bottom"
