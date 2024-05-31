@@ -24,6 +24,6 @@ public interface IDialogueContext {
     DialogTopic? GetTopic(string editorId);
     DialogTopic GetTopic(FormKey formKey);
     IDialogTopicGetter? GetTopic(DialogueTopic topic);
-    IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IEnumerable<string> speakerNames);
+    IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IReadOnlyList<string> speakerNames);
     IFormLink<IQuestGetter> GetFavorDialogueQuest();
 }

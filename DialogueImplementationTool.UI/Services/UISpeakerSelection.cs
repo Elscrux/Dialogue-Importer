@@ -6,21 +6,23 @@ using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Services;
 using DialogueImplementationTool.UI.Models;
 using DialogueImplementationTool.UI.Views;
+using Mutagen.Bethesda;
 using Mutagen.Bethesda.Json;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
+using Mutagen.Bethesda.Skyrim;
 using Newtonsoft.Json;
 namespace DialogueImplementationTool.UI.Services;
 
 sealed record AliasSelectionDto(FormKey FormKey, string? EditorID);
 
-public sealed partial class UISpeakerSelection(ILinkCache linkCache,
+public sealed partial class UISpeakerSelection(
+    ILinkCache linkCache,
     ISpeakerFavoritesSelection speakerFavoritesSelection,
     string filePath)
     : ISpeakerSelection {
-    public IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IEnumerable<string> speakerNames) {
-        var speakerNamesList = speakerNames.ToList();
-        var speakers = new ObservableCollection<AliasSpeakerSelection>(speakerNamesList
+    public IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IReadOnlyList<string> speakerNames) {
+        var speakers = new ObservableCollection<AliasSpeakerSelection>(speakerNames
             .Select(s => new AliasSpeakerSelection(linkCache, speakerFavoritesSelection, s))
             .ToList());
 
@@ -29,6 +31,8 @@ public sealed partial class UISpeakerSelection(ILinkCache linkCache,
                 .Select(x => new AliasSpeaker(x.FormKey, x.Name, editorId: x.EditorID))
                 .ToList();
         }
+
+        TryMatchFromLoadOrder(speakers);
 
         new SceneSpeakerWindow(linkCache, speakerFavoritesSelection, speakers).ShowDialog();
 
@@ -70,7 +74,7 @@ public sealed partial class UISpeakerSelection(ILinkCache linkCache,
         void SaveSpeakers(ObservableCollection<AliasSpeakerSelection> aliasSpeakers) {
             var selections = new Dictionary<string, AliasSelectionDto>();
             var sceneSelections = new Dictionary<string, Dictionary<string, AliasSelectionDto>> {
-                [string.Join('|', speakerNamesList)] = selections,
+                [string.Join('|', speakerNames)] = selections,
             };
             foreach (var selection in aliasSpeakers) {
                 selections[selection.Name] = new AliasSelectionDto(selection.FormKey, selection.EditorID);
@@ -85,6 +89,29 @@ public sealed partial class UISpeakerSelection(ILinkCache linkCache,
             }
 
             File.WriteAllText(SelectionsPath, text);
+        }
+    }
+
+    private void TryMatchFromLoadOrder(ObservableCollection<AliasSpeakerSelection> speakers) {
+        foreach (var speaker in speakers) {
+            if (speaker.Name.Length < 4) continue;
+
+            var count = 0;
+            INpcGetter? currentNpc = null;
+            foreach (var npc in linkCache.PriorityOrder.WinningOverrides<INpcGetter>()) {
+                if (npc.EditorID is null) continue;
+                if (!npc.EditorID.Contains(speaker.Name, StringComparison.Ordinal)) continue;
+
+                count++;
+                if (count > 1) break;
+
+                currentNpc = npc;
+            }
+
+            if (count == 1 && currentNpc is not null) {
+                speaker.FormKey = currentNpc.FormKey;
+                speaker.EditorID = currentNpc.EditorID;
+            }
         }
     }
 

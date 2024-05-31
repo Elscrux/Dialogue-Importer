@@ -110,7 +110,7 @@ public sealed class SkyrimDialogueContext(
         }
     }
 
-    public IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IEnumerable<string> speakerNames) {
+    public IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IReadOnlyList<string> speakerNames) {
         return speakerSelection.GetAliasSpeakers(speakerNames);
     }
 

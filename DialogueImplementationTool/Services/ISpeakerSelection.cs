@@ -3,5 +3,5 @@ using DialogueImplementationTool.Dialogue.Speaker;
 namespace DialogueImplementationTool.Services;
 
 public interface ISpeakerSelection {
-    IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IEnumerable<string> speakerNames);
+    IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IReadOnlyList<string> speakerNames);
 }
