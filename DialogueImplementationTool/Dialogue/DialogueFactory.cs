@@ -50,44 +50,58 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
 
                 var editorId = GetTopicEditorID(branchEditorId, rawTopic.Identifier);
 
-                var dialogTopic = new DialogTopic(rawTopic.FormKey, Context.Release) {
-                    EditorID = editorId,
-                    Priority = GetDialoguePriority(Context.Quest, int.Parse(branchEditorId[baseName.Length..])),
-                    Name = dontUsePrompt ? playerText : null,
-                    Branch = new FormLinkNullable<IDialogBranchGetter>(branch),
-                    Quest = new FormLinkNullable<IQuestGetter>(Context.Quest.FormKey),
-                    Subtype = DialogTopic.SubtypeEnum.Custom,
-                    Category = DialogTopic.CategoryEnum.Topic,
-                    SubtypeName = "CUST",
-                    Responses = responses,
-                };
-                Context.AddDialogTopic(dialogTopic);
+                var implementedDialogueTopicGetter = Context.GetTopic(rawTopic.Topic);
+                if (implementedDialogueTopicGetter is null) {
+                    var dialogTopic = new DialogTopic(rawTopic.FormKey, Context.Release) {
+                        EditorID = editorId,
+                        Priority = GetDialoguePriority(Context.Quest, int.Parse(branchEditorId[baseName.Length..])),
+                        Name = dontUsePrompt ? playerText : null,
+                        Branch = new FormLinkNullable<IDialogBranchGetter>(branch),
+                        Quest = new FormLinkNullable<IQuestGetter>(Context.Quest.FormKey),
+                        Subtype = DialogTopic.SubtypeEnum.Custom,
+                        Category = DialogTopic.CategoryEnum.Topic,
+                        SubtypeName = "CUST",
+                        Responses = responses,
+                    };
+                    Context.AddDialogTopic(dialogTopic);
+                } else {
+                    if (editorId.Length < implementedDialogueTopicGetter.EditorID?.Length) {
+                        var implementedTopicSetter = Context.GetTopic(implementedDialogueTopicGetter.FormKey);
+                        implementedTopicSetter.EditorID = editorId;
+                        implementedTopicSetter.Branch.SetTo(branch.FormKey);
+                    }
+                }
 
                 // Add links
                 for (var topicInfoIndex = 0; topicInfoIndex < rawTopic.Topic.TopicInfos.Count; topicInfoIndex++) {
                     var topicInfo = rawTopic.Topic.TopicInfos[topicInfoIndex];
                     for (var linkIndex = 0; linkIndex < topicInfo.Links.Count; linkIndex++) {
-                        var nextIdentifier = GetIndex(linkIndex + 1);
+                        var nextIdentifier = GetIndex(topicInfo, rawTopic.Identifier, linkIndex + 1);
 
-                        var implementedLinkedTopic = Context.GetTopic(topicInfo.Links[linkIndex]);
+                        var currentLink = topicInfo.Links[linkIndex];
+                        var implementedLinkedTopic = Context.GetTopic(currentLink);
                         if (implementedLinkedTopic is null) {
+                            Console.WriteLine($"{nextIdentifier} {currentLink}: not implemented yet");
                             // Topic not implemented yet
                             var linkedTopic = topicQueue
-                                .FirstOrDefault(x => x.Topic == topicInfo.Links[linkIndex]);
+                                .FirstOrDefault(x => ReferenceEquals(x.Topic, currentLink));
 
                             if (linkedTopic is null) {
+                                Console.WriteLine($"{nextIdentifier} {currentLink}: Queueing topic");
                                 // Queue up the linked topic for implementation
                                 linkedTopic = new LinkedTopic(
                                     Context.GetNextFormKey(),
-                                    topicInfo.Links[linkIndex],
+                                    currentLink,
                                     nextIdentifier);
 
                                 topicQueue.Enqueue(linkedTopic);
                             } else {
+                                Console.WriteLine($"{nextIdentifier} {currentLink}: Check existing queued topic");
                                 // Use existing queued linked topic
                                 // In case our identifier is shorter than the existing one,
                                 // we need update it to keep the tree structure flat
                                 if (nextIdentifier.Length < linkedTopic.Identifier.Length) {
+                                    Console.WriteLine($"{nextIdentifier} {currentLink}: Updating identifier from {linkedTopic.Identifier} to {nextIdentifier}");
                                     linkedTopic.Identifier = nextIdentifier;
                                 }
                             }
@@ -95,27 +109,43 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                             responses[topicInfoIndex].LinkTo.Add(new FormLink<IDialogGetter>(linkedTopic.FormKey));
                         } else {
                             // Use existing implemented topic
+                            Console.WriteLine($"{nextIdentifier} {currentLink}: Using existing topic");
                             responses[topicInfoIndex].LinkTo.Add(new FormLink<IDialogGetter>(implementedLinkedTopic.FormKey));
 
                             // In case our identifier is shorter than the existing one,
                             // we need update it to keep the tree structure flat
                             var topicEditorID = GetTopicEditorID(branchEditorId, nextIdentifier);
                             if (topicEditorID.Length < implementedLinkedTopic.EditorID?.Length) {
-                                var implementedTopic = Context.GetTopic(implementedLinkedTopic.FormKey);
-                                implementedTopic.EditorID = topicEditorID;
-                                implementedTopic.Branch.SetTo(branch.FormKey);
+                                Console.WriteLine($"{nextIdentifier} {currentLink}: Updating editor id from {implementedLinkedTopic.EditorID} to {topicEditorID}");
+                                var implementedLinkedTopicSetter = Context.GetTopic(implementedLinkedTopic.FormKey);
+                                implementedLinkedTopicSetter.EditorID = topicEditorID;
+                                implementedLinkedTopicSetter.Branch.SetTo(branch.FormKey);
+
+                                // Add all links again to ensure they have the proper naming
+                                foreach (var info in currentLink.TopicInfos) {
+                                    for (var i = 0; i < info.Links.Count; i++) {
+                                        var linkTopic = info.Links[i];
+                                        var linkIdentifier = GetIndex(info, nextIdentifier, linkIndex + 1 + i);
+                                        var linkedTopic = new LinkedTopic(
+                                            Context.GetNextFormKey(),
+                                            linkTopic,
+                                            linkIdentifier);
+
+                                        topicQueue.Enqueue(linkedTopic);
+                                    }
+                                }
                             }
                         }
                     }
 
-                    string GetIndex(int index) {
-                        // Invisible continues add an underscore to the identifier
-                        if (topicInfo.InvisibleContinue) {
-                            return rawTopic.Identifier + '_';
+                    string GetIndex(DialogueTopicInfo info, string currentIdentifier, int index) {
+                        // Invisible-continues add an underscore to the identifier
+                        if (info.InvisibleContinue) {
+                            return currentIdentifier + '_';
                         }
 
                         // Non-invisible continues don't have an underscore 
-                        var lastIdentifier = rawTopic.Identifier.TrimEnd('_');
+                        var lastIdentifier = currentIdentifier.TrimEnd('_');
 
                         // If this is the first link, return the first identifier
                         if (lastIdentifier.Length == 0) {
