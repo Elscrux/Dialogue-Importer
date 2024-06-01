@@ -31,7 +31,6 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
             Context.AddDialogBranch(branch);
 
             var startingFormKey = Context.GetNextFormKey();
-            branch.StartingTopic = new FormLinkNullable<IDialogTopicGetter>(startingFormKey);
 
             var topicQueue = new Queue<LinkedTopic>();
             topicQueue.Enqueue(new LinkedTopic(startingFormKey, topic, string.Empty));
@@ -64,11 +63,21 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                         Responses = responses,
                     };
                     Context.AddDialogTopic(dialogTopic);
+
+                    // Set the starting topic
+                    if (rawTopic.Identifier == string.Empty) {
+                        branch.StartingTopic = new FormLinkNullable<IDialogTopicGetter>(rawTopic.FormKey);
+                    }
                 } else {
                     if (editorId.Length < implementedDialogueTopicGetter.EditorID?.Length) {
                         var implementedTopicSetter = Context.GetTopic(implementedDialogueTopicGetter.FormKey);
                         implementedTopicSetter.EditorID = editorId;
                         implementedTopicSetter.Branch.SetTo(branch.FormKey);
+                    }
+
+                    // Set the starting topic
+                    if (rawTopic.Identifier == string.Empty) {
+                        branch.StartingTopic = new FormLinkNullable<IDialogTopicGetter>(implementedDialogueTopicGetter.FormKey);
                     }
                 }
 
