@@ -17,6 +17,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new PlayerIsRaceChecker(),
             new SuccessFailureSeparator(context),
             new RandomChecker(),
+            new RemoveEmptyTopicInfos(),
         ];
 
         ConversationProcessors = [
