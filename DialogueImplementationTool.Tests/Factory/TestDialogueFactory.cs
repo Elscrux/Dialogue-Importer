@@ -266,7 +266,7 @@ public sealed class TestDialogueFactory {
         conversation[1].Topics[0].TopicInfos[0].ExtraConditions.Should().ContainSingle();
         var stageCondition = conversation[1].Topics[0].TopicInfos[0].ExtraConditions[0].Data.Should()
             .BeOfType<GetStageDoneConditionData>();
-        stageCondition.Subject.Stage.Should().Be(11);
+        stageCondition.Subject.Stage.Should().Be(10);
 
         // [unlock KID]
         conversation[1].Topics[0].TopicInfos[0].Links[1].TopicInfos[0].Script.ScriptLines.Should().BeEmpty();
@@ -287,12 +287,12 @@ public sealed class TestDialogueFactory {
         // [LEARN] <- this is a keyword link, not unlock
         conversation[2].Topics[0].TopicInfos[0].ExtraConditions.Should().BeEmpty();
 
-        // [unlock all BRAVE] [lock all FEAR] [lock REASON]
+        // [unlock all BRAVE] [lock all FEAR, REASON]
         var links = conversation[2].Topics[0].TopicInfos[0].Links[0].TopicInfos[0].Links;
         links.Should().HaveCount(2);
         links[0].TopicInfos[0].Links[0].TopicInfos[0].Links[0].TopicInfos[0].Script.ScriptLines.Should().HaveCount(3);
 
-        // [unlock all BRAVE in Adila and Marille's dialogue] [lock all FEAR] [lock REASON]
+        // [unlock all BRAVE in Adila and Marille's dialogue] [lock all FEAR, REASON]
         links[1].TopicInfos[0].Links[0].TopicInfos[0].Links[0].TopicInfos[0].Script.ScriptLines.Should().HaveCount(3);
     }
 
