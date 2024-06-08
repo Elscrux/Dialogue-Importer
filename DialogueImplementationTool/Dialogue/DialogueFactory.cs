@@ -70,7 +70,6 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
             if (implementedDialogueTopicGetter is null) {
                 var dialogTopic = new DialogTopic(rawTopic.FormKey, Context.Release) {
                     EditorID = editorId,
-                    Priority = GetDialoguePriority(quest, branchIndex),
                     Name = dontUsePrompt ? playerText : null,
                     Branch = new FormLinkNullable<IDialogBranchGetter>(branch),
                     Quest = new FormLinkNullable<IQuestGetter>(branch.Quest.FormKey),
@@ -84,6 +83,7 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                 // Set the starting topic
                 if (rawTopic.Identifier == string.Empty) {
                     branch.StartingTopic = new FormLinkNullable<IDialogTopicGetter>(rawTopic.FormKey);
+                    dialogTopic.Priority = GetDialoguePriority(quest, branchIndex);
                 }
             } else {
                 if (editorId.Length < implementedDialogueTopicGetter.EditorID?.Length) {
