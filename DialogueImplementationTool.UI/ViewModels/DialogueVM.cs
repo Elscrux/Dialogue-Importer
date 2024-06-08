@@ -92,7 +92,6 @@ public sealed partial class DialogueVM : ViewModel {
                 var scriptsSourceDirectory = Path.Combine(scriptsDirectory, "Source");
                 Directory.CreateDirectory(scriptsSourceDirectory);
                 var sourcePath = Path.Combine(scriptsSourceDirectory, fileName + ".psc");
-                // var compiledPath = Path.Combine(scriptsDirectory, fileName + ".pex");
                 File.WriteAllText(sourcePath, content);
                 compiler.Compile(sourcePath, scriptsDirectory, scriptsSourceDirectory);
             }
@@ -271,12 +270,8 @@ public sealed partial class DialogueVM : ViewModel {
         var selections = JsonConvert.DeserializeObject<List<DialogueSelection>>(text, _serializerSettings);
         if (selections is null) return;
 
-        for (var i = 0; i < selections.Count; i++) {
-            if (DialogueTypeList.Count <= i) {
-                DialogueTypeList.Add(selections[i]);
-            } else {
-                DialogueTypeList[i] = selections[i];
-            }
+        for (var i = 0; i < DialogueTypeList.Count && i < selections.Count; i++) {
+            DialogueTypeList[i] = selections[i];
         }
     }
 
