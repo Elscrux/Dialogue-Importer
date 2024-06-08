@@ -87,7 +87,7 @@ public sealed class SkyrimDialogueContext(
 
         bool Matches(IDialogTopicGetter implementedTopic) {
             var playerText = topic.GetPlayerFullText();
-            if (playerText != string.Empty && playerText != implementedTopic.Name?.String) return false;
+            if (playerText != string.Empty && playerText != "(invis cont)" && playerText != implementedTopic.Name?.String) return false;
 
             if (topic.TopicInfos.Count != implementedTopic.Responses.Count) return false;
 
