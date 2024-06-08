@@ -151,7 +151,8 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
                 .Select(property => $"{property.ScriptName} Property {property.ScriptProperty.Name} Auto")
                 .ToList();
 
-            var scriptName = $"{Context.Prefix}_TIF__{responses.FormKey.ToFormID(Context.Mod, Context.LinkCache)}";
+            var start = Context.Prefix.IsNullOrEmpty() ? string.Empty : Context.Prefix + '_';
+            var scriptName = $"{start}TIF__{responses.FormKey.ToFormID(Context.Mod, Context.LinkCache)}";
             var scriptText = $"""
             ;BEGIN FRAGMENT CODE - Do not edit anything between this and the end comment
             ;NEXT FRAGMENT INDEX 1
