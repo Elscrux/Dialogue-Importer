@@ -22,6 +22,9 @@ public class TestConstants {
         Speaker2 = new NpcSpeaker(LinkCache, FormKey.Factory("222222:TestMod.esp"));
         Speaker3 = new NpcSpeaker(LinkCache, FormKey.Factory("333333:TestMod.esp"));
 
+        Quest = new Quest(FormKey.Factory("999999:TestMod.esp"), Release) { EditorID = "TestQuest" };
+
+        Mod.Quests.Add(Quest);
         Mod.Npcs.AddNew(Speaker1.FormKey);
         Mod.Npcs.AddNew(Speaker2.FormKey);
         Mod.Npcs.AddNew(Speaker3.FormKey);
@@ -48,7 +51,7 @@ public class TestConstants {
         new SpeakerFavoritesSelection(),
         FormKeySelection);
 
-    public Quest Quest { get; } = new(FormKey.Factory("000000:Quest.esp"), Release);
+    public Quest Quest { get; }
     public NpcSpeaker Speaker1 { get; }
     public NpcSpeaker Speaker2 { get; }
     public NpcSpeaker Speaker3 { get; }
