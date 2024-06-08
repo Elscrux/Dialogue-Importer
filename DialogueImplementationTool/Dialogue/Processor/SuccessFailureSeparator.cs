@@ -74,7 +74,7 @@ public sealed partial class SuccessFailureSeparator(IDialogueContext context) : 
                     ComparisonValue = 1,
                 });
 
-                successInfo.Script.ScriptLines.Add("pFDS.Intimidate(akSpeaker)");
+                successInfo.Script.StartScriptLines.Add("pFDS.Intimidate(akSpeaker)");
                 successInfo.Script.Properties.Add(new ScriptPropertyName(FavorDialogueScriptProperty(), "FavorDialogueScript"));
 
                 // Remove intimidate notes
@@ -115,7 +115,7 @@ public sealed partial class SuccessFailureSeparator(IDialogueContext context) : 
                 });
 
                 var (line, scriptName) = _actorValueScriptLines[actorValue];
-                successInfo.Script.ScriptLines.Add(line);
+                successInfo.Script.StartScriptLines.Add(line);
                 successInfo.Script.Properties.Add(new ScriptPropertyName(FavorDialogueScriptProperty(), scriptName));
             }
         }

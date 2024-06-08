@@ -146,52 +146,7 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
         };
 
         // Handle scripts
-        if (topicInfo.Script.ScriptLines.Count > 0) {
-            var propertyLine = topicInfo.Script.Properties
-                .Select(property => $"{property.ScriptName} Property {property.ScriptProperty.Name} Auto")
-                .ToList();
-
-            var start = Context.Prefix.IsNullOrEmpty() ? string.Empty : Context.Prefix + '_';
-            var scriptName = $"{start}TIF__{responses.FormKey.ToFormID(Context.Mod, Context.LinkCache)}";
-            var scriptText = $"""
-            ;BEGIN FRAGMENT CODE - Do not edit anything between this and the end comment
-            ;NEXT FRAGMENT INDEX 1
-            Scriptname {scriptName} Extends TopicInfo Hidden
-            
-            ;BEGIN FRAGMENT Fragment_0
-            Function Fragment_0(ObjectReference akSpeakerRef)
-            Actor akSpeaker = akSpeakerRef as Actor
-            ;BEGIN CODE
-            {string.Join("\r\n", topicInfo.Script.ScriptLines)}
-            ;END CODE
-            EndFunction
-            ;END FRAGMENT
-            
-            ;END FRAGMENT CODE - Do not edit anything between this and the begin comment
-            
-            {string.Join("\r\n", propertyLine)}
-            """;
-
-            Context.Scripts.Add(scriptName, scriptText);
-
-            responses.VirtualMachineAdapter = new DialogResponsesAdapter {
-                Scripts = [
-                    new ScriptEntry {
-                        Name = scriptName,
-                        Flags = ScriptEntry.Flag.Local,
-                        Properties = topicInfo.Script.Properties.Select(x => x.ScriptProperty).ToExtendedList()
-                    }
-                ],
-                ScriptFragments = new ScriptFragments {
-                    FileName = scriptName,
-                    OnBegin = new ScriptFragment {
-                        ExtraBindDataVersion = 2,
-                        ScriptName = scriptName,
-                        FragmentName = "Fragment_0",
-                    },
-                },
-            };
-        }
+        BuildFragment(topicInfo.Script, responses);
 
         // Report remaining notes
         if (topicInfo.Prompt.Notes().Any()) {
@@ -213,6 +168,76 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
                 EmotionValue = line.EmotionValue,
             });
         }
+    }
+
+    private void BuildFragment(DialogueScript script, DialogResponses responses) {
+        var hasStart = script.StartScriptLines.Count > 0;
+        var hasEnd = script.EndScriptLines.Count > 0;
+        if (!hasStart && !hasEnd) return;
+
+        var propertyLines = script.Properties
+            .Select(property => $"{property.ScriptName} Property {property.ScriptProperty.Name} Auto")
+            .ToList();
+
+        var middlePart = string.Empty;
+        if (hasStart) middlePart += GetFragmentCode(script.StartScriptLines, 0) + "\n";
+        if (hasEnd) middlePart += GetFragmentCode(script.EndScriptLines, 1) + "\n";
+
+        var nameStart = Context.Prefix.IsNullOrEmpty() ? string.Empty : Context.Prefix + '_';
+        var scriptName = $"{nameStart}TIF__{responses.FormKey.ToFormID(Context.Mod, Context.LinkCache)}";
+        var nextFragment = hasEnd ? 2 : 1;
+        var scriptText = $"""
+            ;BEGIN FRAGMENT CODE - Do not edit anything between this and the end comment
+            ;NEXT FRAGMENT INDEX {nextFragment}
+            Scriptname {scriptName} Extends TopicInfo Hidden
+
+            {middlePart}
+
+            ;END FRAGMENT CODE - Do not edit anything between this and the begin comment
+
+            {string.Join("\r\n", propertyLines)}
+            """;
+
+        Context.Scripts.Add(scriptName, scriptText);
+
+        var scriptFragments = new ScriptFragments { FileName = scriptName };
+        if (hasStart) {
+            scriptFragments.OnBegin = new ScriptFragment {
+                ExtraBindDataVersion = 2,
+                ScriptName = scriptName,
+                FragmentName = "Fragment_0",
+            };
+        }
+        
+        if (hasEnd) {
+            scriptFragments.OnEnd = new ScriptFragment {
+                ExtraBindDataVersion = 2,
+                ScriptName = scriptName,
+                FragmentName = "Fragment_1",
+            };
+        }
+        
+        responses.VirtualMachineAdapter = new DialogResponsesAdapter {
+            Scripts = [
+                new ScriptEntry {
+                    Name = scriptName,
+                    Flags = ScriptEntry.Flag.Local,
+                    Properties = script.Properties.Select(x => x.ScriptProperty).ToExtendedList()
+                }
+            ],
+            ScriptFragments = scriptFragments,
+        };
+
+        string GetFragmentCode(IEnumerable<string> lines, int index) => $"""
+            ;BEGIN FRAGMENT Fragment_{index}
+            Function Fragment_{index}(ObjectReference akSpeakerRef)
+            Actor akSpeaker = akSpeakerRef as Actor
+            ;BEGIN CODE
+            {string.Join("\r\n", lines)}
+            ;END CODE
+            EndFunction
+            ;END FRAGMENT
+            """;
     }
 
     public ExtendedList<Condition> GetConditions(DialogueTopicInfo topicInfo) {
