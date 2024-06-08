@@ -31,7 +31,7 @@ public static class QuestExtension {
         return alias;
     }
 
-    public static bool IsDialogueQuest(this IQuest quest) {
+    public static bool IsDialogueQuest(this IQuestGetter quest) {
         return quest.EditorID != null && quest.EditorID.Contains("Dialogue");
     }
 }

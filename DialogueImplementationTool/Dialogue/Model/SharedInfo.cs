@@ -24,7 +24,7 @@ public sealed class SharedInfo {
     public DialogueTopicInfo ResponseDataTopicInfo { get; }
 
     public DialogResponses GetResponseData(
-        IQuest quest,
+        IQuestGetter quest,
         IDialogueContext modContext,
         Func<DialogueTopicInfo, IEnumerable<DialogResponse>> getResponses,
         Func<DialogueTopicInfo, ExtendedList<Condition>> getConditions) {
