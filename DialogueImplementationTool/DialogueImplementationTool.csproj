@@ -176,6 +176,21 @@
       <Compile Update="Dialogue\Processor\RemoveEmptyTopicInfos.cs">
         <DependentUpon>IDialogueTopicProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\Processor\BeggarServiceChecker.cs">
+        <DependentUpon>IConversationProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\RentRoomServiceChecker.cs">
+        <DependentUpon>IConversationProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\RumorServiceChecker.cs">
+        <DependentUpon>IConversationProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\TrainServiceChecker.cs">
+        <DependentUpon>IConversationProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\VendorServiceChecker.cs">
+        <DependentUpon>IConversationProcessor.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

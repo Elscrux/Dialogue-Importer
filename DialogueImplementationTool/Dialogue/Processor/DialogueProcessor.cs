@@ -29,7 +29,12 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new CollapseEmptyInvisibleContinues(),
             new BlockingChecker(),
             new SetInvisibleContinuePrompt(),
-            new MergeIdenticalTopics(),
+            new BeggarServiceChecker(),
+            new RumorServiceChecker(),
+            new TrainServiceChecker(),
+            new RumorServiceChecker(),
+            new VendorServiceChecker(),
+            new RentRoomServiceChecker(),
             emotionChecker,
         ];
 

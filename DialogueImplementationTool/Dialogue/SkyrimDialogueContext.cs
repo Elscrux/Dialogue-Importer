@@ -145,4 +145,14 @@ public sealed class SkyrimDialogueContext(
         _favorDialogueQuest = formKey.ToLink<IQuestGetter>();
         return _favorDialogueQuest;
     }
+
+    public DialogBranch GetServiceBranch(ServiceType serviceType, FormKey defaultBranchFormKey) {
+        var formKey = formKeySelection.GetFormKey(
+            $"Select the {serviceType} branch",
+            [typeof(IDialogBranchGetter)],
+            defaultBranchFormKey);
+
+        var context = environment.LinkCache.ResolveContext<DialogBranch, IDialogBranchGetter>(formKey);
+        return context.GetOrAddAsOverride(mod);
+    }
 }

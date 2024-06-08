@@ -27,4 +27,5 @@ public interface IDialogueContext {
     IDialogTopicGetter? GetTopic(DialogueTopic topic);
     IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IReadOnlyList<string> speakerNames);
     IFormLink<IQuestGetter> GetFavorDialogueQuest();
+    DialogBranch? GetServiceBranch(ServiceType serviceType, FormKey defaultBranchFormKey);
 }

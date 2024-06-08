@@ -9,6 +9,7 @@ namespace DialogueImplementationTool.Dialogue.Model;
 public sealed class DialogueTopic : IEquatable<DialogueTopic> {
     public List<DialogueTopicInfo> TopicInfos { get; init; } = [];
     public bool Blocking { get; set; }
+    public ServiceType ServiceType { get; set; } = ServiceType.Default;
 
     public IEnumerable<DialogueTopic> EnumerateLinks(bool includeSelf) {
         if (includeSelf) yield return this;
