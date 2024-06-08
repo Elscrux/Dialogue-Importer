@@ -4,7 +4,7 @@ using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public partial class VendorServiceChecker : IConversationProcessor {
-    [GeneratedRegex(@"What do you have for sale\?|What have you got for sale\?|I'd like some food and drink\.")]
+    [GeneratedRegex(@"What do you have for sale\?|What have you got for sale\?|I'd like some food and drink\.|Show me what you have for sale\.|Show me what you've got for sale\.")]
     public static partial Regex VendorRegex();
 
     public void Process(Conversation conversation) {
