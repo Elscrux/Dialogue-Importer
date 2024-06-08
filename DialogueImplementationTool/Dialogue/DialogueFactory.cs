@@ -108,7 +108,7 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                     var implementedLinkedTopic = Context.GetTopic(currentLink);
                     if (implementedLinkedTopic is null) {
                         // Topic not implemented yet
-                        var linkedTopic = topicQueue.FirstOrDefault(x => ReferenceEquals(x.Topic, currentLink));
+                        var linkedTopic = topicQueue.FirstOrDefault(x => currentLink.Equals(x.Topic));
 
                         if (linkedTopic is null) {
                             // Queue up the linked topic for implementation
