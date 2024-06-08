@@ -4,7 +4,7 @@ using DialogueImplementationTool.Dialogue.Model;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed partial class RandomChecker : IDialogueTopicProcessor {
-    [GeneratedRegex("(random)(ized)?", RegexOptions.IgnoreCase, "en-DE")]
+    [GeneratedRegex("(random)(ized)?", RegexOptions.IgnoreCase)]
     private static partial Regex RandomRegex();
 
     public void Process(DialogueTopic topic) {
