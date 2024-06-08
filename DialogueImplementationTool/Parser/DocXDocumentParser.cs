@@ -91,7 +91,7 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
             var firstListIndex = _doc.Paragraphs.IndexOf(list.Items[0]);
             if (firstListIndex > 0) {
                 var previousParagraph = _doc.Paragraphs[firstListIndex - 1];
-                if (previousParagraph.Text.StartsWith('[')) {
+                if (!previousParagraph.IsListItem && previousParagraph.Text.StartsWith('[')) {
                     branches[0].TopicInfos[0].Prompt.StartNotes.Add(new Note {
                         Text = previousParagraph.Text.Trim().TrimStart('[').TrimEnd(']').Trim(),
                         Colors = [Color.Black],
