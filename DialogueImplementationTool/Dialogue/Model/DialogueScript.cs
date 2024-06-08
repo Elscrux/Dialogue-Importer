@@ -17,7 +17,7 @@ public sealed class DialogueScript : IEquatable<DialogueScript> {
 
         return StartScriptLines.SequenceEqual(other.StartScriptLines)
          && EndScriptLines.SequenceEqual(other.EndScriptLines)
-         && Properties.Equals(other.Properties);
+         && Properties.SequenceEqual(other.Properties);
     }
 
     public override bool Equals(object? obj) {
