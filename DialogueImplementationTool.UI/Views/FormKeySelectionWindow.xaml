@@ -13,9 +13,6 @@
                 DockPanel.Dock="Top"
                 Click="Save_OnClick"/>
 
-        <plugins:FormKeyPicker
-            FormKey="{Binding FormKey, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-            LinkCache="{Binding LinkCache, RelativeSource={RelativeSource FindAncestor, AncestorType=local:FormKeySelectionWindow}}"
-            ScopedTypes="{Binding ScopedTypes, RelativeSource={RelativeSource FindAncestor, AncestorType=local:FormKeySelectionWindow}}"/>
+        <plugins:FormKeyPicker x:Name="FormKeyPicker"/>
     </DockPanel>
 </Window>

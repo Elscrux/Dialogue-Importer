@@ -3,20 +3,26 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 namespace DialogueImplementationTool.UI.Views;
 
-public partial class FormKeySelectionWindow : Window {
-    public FormKeySelectionWindow(string title, ILinkCache linkCache, IEnumerable<Type> types) {
+public partial class FormKeySelectionWindow {
+    public FormKeySelectionWindow(string title, ILinkCache linkCache, IEnumerable<Type> types) : this(title,
+        linkCache,
+        types,
+        FormKey.Null) {}
+
+    public FormKeySelectionWindow(string title, ILinkCache linkCache, IEnumerable<Type> types, FormKey defaultFormKey) {
         Title = title;
-        LinkCache = linkCache;
-        ScopedTypes = types;
 
         InitializeComponent();
+
+        FormKeyPicker.LinkCache = linkCache;
+        FormKeyPicker.ScopedTypes = types;
+        FormKeyPicker.FormKey = FormKey = defaultFormKey;
     }
 
-    public ILinkCache LinkCache { get; }
-    public IEnumerable<Type> ScopedTypes { get; set; }
     public FormKey FormKey { get; set; }
 
     private void Save_OnClick(object sender, RoutedEventArgs e) {
+        FormKey = FormKeyPicker.FormKey;
         Close();
     }
 }
