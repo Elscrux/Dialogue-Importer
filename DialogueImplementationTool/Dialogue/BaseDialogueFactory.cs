@@ -110,7 +110,11 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
     }
 
     protected ExtendedList<DialogResponses> GetTopicInfos(IQuestGetter quest, DialogueTopic topic) {
-        return topic.TopicInfos.Select(info => GetResponses(quest, info)).ToExtendedList();
+        var responses = topic.TopicInfos.Select(info => GetResponses(quest, info)).ToExtendedList();
+        for (var i = 1; i < responses.Count; i++) {
+            responses[i].PreviousDialog.SetTo(responses[i - 1].FormKey);
+        }
+        return responses;
     }
 
     public DialogResponses GetResponses(IQuestGetter quest, DialogueTopicInfo topicInfo, FormKey? previousDialogue = null) {
