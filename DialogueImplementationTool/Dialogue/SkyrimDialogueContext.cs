@@ -62,7 +62,16 @@ public sealed class SkyrimDialogueContext(
 
     public DialogTopic GetTopic(FormKey formKey) {
         var topic = environment.LinkCache.ResolveContext<DialogTopic, IDialogTopicGetter>(formKey);
-        return topic.GetOrAddAsOverride(mod);
+
+        var overrideTopic = topic.GetOrAddAsOverride(mod);
+
+        // Add responses
+        foreach (var response in topic.Record.Responses) {
+            var responseContext = environment.LinkCache.ResolveContext<IDialogResponses, IDialogResponsesGetter>(response.FormKey);
+            responseContext.GetOrAddAsOverride(mod);
+        }
+
+        return overrideTopic;
     }
 
     public IDialogTopicGetter? GetTopic(DialogueTopic topic) {
