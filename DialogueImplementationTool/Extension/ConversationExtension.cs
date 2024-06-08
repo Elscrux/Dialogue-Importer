@@ -47,8 +47,6 @@ public static class ConversationExtension {
         foreach (var dialogue in conversation) {
             foreach (var topic in dialogue.Topics.SelectMany(x => x.EnumerateLinks(true))) {
                 foreach (var info in topic.TopicInfos) {
-                    if (info.Responses.Count == 0) continue;
-
                     foreach (var (note, keyword) in getKeyword(info)) {
                         list.Add((note, keyword, topic, info));
                     }

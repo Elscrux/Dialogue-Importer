@@ -21,28 +21,28 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
 
     // [Locked]
     // In combination with a SimpleKeywordRegex this creates a locked keyword
-    [GeneratedRegex("^[Ll]ocked$")]
+    [GeneratedRegex("(?i)^locked$")]
     private static partial Regex LockedRegex();
 
     // [Locked]
     // In combination with a SimpleKeywordRegex this creates an unlocked keyword
-    [GeneratedRegex("^[Uu]nlocked")]
+    [GeneratedRegex("(?i)^unlocked")]
     private static partial Regex UnlockedRegex();
 
     // [unlocked HERE]
-    [GeneratedRegex($"^[Ll]ocked {LockFillerPart}?{KeywordUtils.KeywordRegexPart}")]
+    [GeneratedRegex($"(?i)^locked {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
     private static partial Regex StatusLockedRegex();
 
     // [locked HERE]
-    [GeneratedRegex($"^[Ll]ocked {LockFillerPart}?{KeywordUtils.KeywordRegexPart}")]
+    [GeneratedRegex($"(?i)^locked {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
     private static partial Regex StatusUnlockedRegex();
 
     // [lock all HERE] [remove HERE]
-    [GeneratedRegex($"^(?:[Ll]ock(?:s)?|[Rr]emove(?:s)?) {LockFillerPart}?{KeywordUtils.KeywordRegexPart}")]
+    [GeneratedRegex($"(?i)^(?:lock(?:s)?|remove(?:s)?) {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
     private static partial Regex ActionLockRegex();
 
     // [unlock HERE] [add HERE]
-    [GeneratedRegex($"^(?:[Uu]nlock(?:s)?|[Aa]dd(?:s)?) {LockFillerPart}?{KeywordUtils.KeywordRegexPart}")]
+    [GeneratedRegex($"(?i)^(?:unlock(?:s)?|add(?:s)?) {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
     private static partial Regex ActionUnlockRegex();
 
     public void Process(Conversation conversation) {
@@ -54,7 +54,7 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
 
         var simpleResponseKeywords = conversation.GetAllKeywordTopicInfos(
             OnlyKeywordRegex(),
-            info => info.Responses[0].StartNotes);
+            info => info.Responses.Count == 0 ? [] : info.Responses[0].StartNotes);
 
         var statusLockedKeywords = conversation.GetAllKeywordTopicInfos(
             StatusLockedRegex(),
@@ -66,10 +66,10 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
 
         var actionLockKeywords = conversation.GetAllKeywordTopicInfos(
             ActionLockRegex(),
-            info => info.Responses[^1].EndNotesAndStartIfResponseEmpty());
+            info => info.Responses.Count == 0 ? [] : info.Responses[^1].EndNotesAndStartIfResponseEmpty());
         var actionUnlockKeywords = conversation.GetAllKeywordTopicInfos(
             ActionUnlockRegex(),
-            info => info.Responses[^1].EndNotesAndStartIfResponseEmpty());
+            info => info.Responses.Count == 0 ? [] : info.Responses[^1].EndNotesAndStartIfResponseEmpty());
 
         var actionKeywords = actionLockKeywords.Select(x => (Match: x, Lock: true))
             .Concat(actionUnlockKeywords.Select(x => (Match: x, Lock: false)))
@@ -83,7 +83,7 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
             .GroupBy(x => x.Item1.Keyword)
             .ToList();
 
-        if (actionKeywords.Any(x => x.Any(y => y.Lock != x.First().Lock))) {
+        if (actionKeywords.Exists(x => x.Any(y => y.Lock != x.First().Lock))) {
             Console.WriteLine("A keyword is locked and unlocked, this is not currently supported.");
             return;
         }
