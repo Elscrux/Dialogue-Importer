@@ -3,7 +3,7 @@ using DialogueImplementationTool.Dialogue.Model;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed partial class GoodbyeChecker : IDialogueTopicInfoProcessor {
-    [GeneratedRegex("(exit|end) (dialog|dialogue|conversation|convo)", RegexOptions.IgnoreCase, "en-DE")]
+    [GeneratedRegex("(exit|end) (dialog|dialogue|conversation|convo)", RegexOptions.IgnoreCase)]
     private static partial Regex GoodbyeRegex();
 
     public void Process(DialogueTopicInfo topicInfo) {

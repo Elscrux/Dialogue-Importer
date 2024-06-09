@@ -11,6 +11,6 @@ public sealed partial class SayOnceChecker : IDialogueTopicInfoProcessor {
         }
     }
 
-    [GeneratedRegex("(initial)( (greeting))?", RegexOptions.IgnoreCase, "en-DE")]
+    [GeneratedRegex("(initial)( (greeting))?", RegexOptions.IgnoreCase)]
     private static partial Regex InitialRegex();
 }
