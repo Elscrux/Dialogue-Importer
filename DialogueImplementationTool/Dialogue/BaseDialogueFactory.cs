@@ -173,6 +173,7 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
                 Flags = DialogResponse.Flag.UseEmotionAnimation,
                 Emotion = line.Emotion,
                 EmotionValue = line.EmotionValue,
+                SpeakerIdleAnimation = new FormLinkNullable<IIdleAnimationGetter>(line.SpeakerIdle),
             });
         }
     }

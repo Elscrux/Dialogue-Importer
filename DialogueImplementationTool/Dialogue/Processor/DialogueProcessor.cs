@@ -12,6 +12,16 @@ public sealed class DialogueProcessor : IDialogueProcessor {
         _context = context;
         _emotionChecker = emotionChecker;
 
+        ResponseProcessors = [
+            new InvalidStringFixer(),
+            new ResponseNoteExtractor(),
+            new EmptyBracesRemover(),
+            new BackToDialogueRemover(),
+            new ScriptNotesParser(),
+            new IdleChecker(_context),
+            new Trimmer(),
+        ];
+
         TopicProcessors = [
             new TopicInfoNoteExtractor(),
             new PlayerIsRaceChecker(),
@@ -45,14 +55,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
     }
 
     // Runs during document parsing
-    public List<IDialogueResponseProcessor> ResponseProcessors { get; } = [
-        new InvalidStringFixer(),
-        new ResponseNoteExtractor(),
-        new EmptyBracesRemover(),
-        new BackToDialogueRemover(),
-        new ScriptNotesParser(),
-        new Trimmer(),
-    ];
+    public List<IDialogueResponseProcessor> ResponseProcessors { get; }
 
     // Runs during document parsing
     public List<IDialogueTopicInfoProcessor> TopicInfoProcessors { get; } = [

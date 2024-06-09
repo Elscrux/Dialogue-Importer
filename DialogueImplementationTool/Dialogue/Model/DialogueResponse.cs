@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Model;
 
@@ -16,6 +17,7 @@ public class DialogueResponse : DialogueText, IEqualityComparer<DialogueResponse
     public string ScriptNote { get; set; } = string.Empty;
     public Emotion Emotion { get; set; } = Emotion.Neutral;
     public uint EmotionValue { get; set; } = 50;
+    public FormKey SpeakerIdle { get; set; } = FormKey.Null;
 
     public override bool Equals(object? obj) => Equals(obj as DialogueResponse, this);
 
