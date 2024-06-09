@@ -22,6 +22,9 @@ public partial class TrainServiceChecker : IConversationProcessor {
         topic.ServiceType = ServiceType.Train;
         foreach (var topicInfo in topic.TopicInfos) {
             topicInfo.Script.EndScriptLines.Add("Game.ShowTrainingMenu(akSpeaker)");
+            foreach (var response in topicInfo.Responses) {
+                response.RemoveNote(note => note.Contains("train"));
+            }
         }
     }
 }
