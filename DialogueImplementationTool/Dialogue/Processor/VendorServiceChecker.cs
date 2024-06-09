@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 using DialogueImplementationTool.Dialogue.Model;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
@@ -22,6 +23,10 @@ public partial class VendorServiceChecker : IConversationProcessor {
         topic.ConvertResponsesToTopicInfos();
         topic.ServiceType = ServiceType.Vendor;
         foreach (var topicInfo in topic.TopicInfos) {
+            foreach (var response in topicInfo.Responses) {
+                response.RemoveNote(note => note.Contains("vendor", StringComparison.OrdinalIgnoreCase));
+            }
+
             topicInfo.Script.EndScriptLines.Add("akSpeaker.ShowBarterMenu()");
             topicInfo.ExtraConditions.Add(new ConditionFloat {
                 Data = new GetOffersServicesNowConditionData(),
