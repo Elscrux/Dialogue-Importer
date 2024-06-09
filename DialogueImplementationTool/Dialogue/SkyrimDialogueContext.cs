@@ -87,7 +87,8 @@ public sealed class SkyrimDialogueContext(
 
         bool Matches(IDialogTopicGetter implementedTopic) {
             var playerText = topic.GetPlayerFullText();
-            if (playerText != string.Empty && playerText != "(invis cont)" && playerText != implementedTopic.Name?.String) return false;
+            if (playerText != string.Empty && playerText != "(invis cont)"
+             && playerText != implementedTopic.Name?.String) return false;
 
             if (topic.TopicInfos.Count != implementedTopic.Responses.Count) return false;
 
@@ -110,14 +111,23 @@ public sealed class SkyrimDialogueContext(
                 if (topicInfo.SayOnce != implementedTopicInfo.Flags?.Flags.HasFlag(DialogResponses.Flag.SayOnce)) return false;
 
                 // Check responses
-                if (topicInfo.Responses.Count != implementedTopicInfo.Responses.Count) return false;
+                if (implementedTopicInfo.ResponseData.IsNull != topicInfo.SharedInfo is null) return false;
 
-                for (var responseIndex = 0; responseIndex < topicInfo.Responses.Count; responseIndex++) {
-                    var response = topicInfo.Responses[responseIndex];
-                    var implementedResponse = implementedTopicInfo.Responses[responseIndex];
+                if (topicInfo.SharedInfo is null) {
+                    if (topicInfo.Responses.Count != implementedTopicInfo.Responses.Count) return false;
 
-                    if (!string.Equals(response.FullResponse, implementedResponse.Text.String, StringComparison.Ordinal))
-                        return false;
+                    for (var responseIndex = 0; responseIndex < topicInfo.Responses.Count; responseIndex++) {
+                        var response = topicInfo.Responses[responseIndex];
+                        var implementedResponse = implementedTopicInfo.Responses[responseIndex];
+
+                        if (!string.Equals(response.FullResponse, implementedResponse.Text.String, StringComparison.Ordinal))
+                            return false;
+                    }
+                } else if (LinkCache.TryResolve<IDialogResponsesGetter>(
+                        implementedTopicInfo.ResponseData.FormKey,
+                        out var sharedInfo)
+                 && sharedInfo.Responses.Count != topicInfo.SharedInfo.ResponseDataTopicInfo.Responses.Count) {
+                    return false;
                 }
             }
 

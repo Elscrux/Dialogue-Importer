@@ -54,7 +54,7 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
 
         var simpleResponseKeywords = conversation.GetAllKeywordTopicInfos(
             OnlyKeywordRegex(),
-            info => info.Responses.Count == 0 ? [] : info.Responses[0].StartNotes);
+            info => info.Responses is [] ? [] : info.Responses[0].StartNotes);
 
         var statusLockedKeywords = conversation.GetAllKeywordTopicInfos(
             StatusLockedRegex(),

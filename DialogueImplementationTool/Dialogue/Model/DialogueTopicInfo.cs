@@ -10,12 +10,35 @@ namespace DialogueImplementationTool.Dialogue.Model;
 
 [DebuggerDisplay("{ToString()}")]
 public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
+    private ISpeaker _speaker = null!;
+    private readonly List<DialogueResponse> _responses = [];
+
     public SharedInfo? SharedInfo { get; private set; }
 
-    public ISpeaker Speaker { get; set; } = null!;
+    public ISpeaker Speaker {
+        get {
+            if (SharedInfo is null) return _speaker;
+
+            return SharedInfo.ResponseDataTopicInfo.Speaker;
+        }
+        set {
+            if (SharedInfo is null) {
+                _speaker = value;
+            } else {
+                SharedInfo.ResponseDataTopicInfo.Speaker = value;
+            }
+        }
+    }
 
     public DialogueText Prompt { get; set; } = new();
-    public List<DialogueResponse> Responses { get; init; } = [];
+    public List<DialogueResponse> Responses {
+        get {
+            if (SharedInfo is null) return _responses;
+
+            return SharedInfo.ResponseDataTopicInfo.Responses;
+        }
+        init => _responses = value;
+    }
     public List<DialogueTopic> Links { get; init; } = [];
     public bool SayOnce { get; set; }
     public bool Goodbye { get; set; }
@@ -39,6 +62,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
         Responses = other.Responses.ToList();
         Links = other.Links.ToList();
         ExtraConditions = other.ExtraConditions.ToList();
+        Script = new DialogueScript(other.Script);
     }
 
     public IEnumerable<Note> AllNotes() => Responses.SelectMany(r => r.Notes());
@@ -56,6 +80,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
             Responses = newResponses.ToList(),
             Links = Links.ToList(),
             ExtraConditions = ExtraConditions.ToList(),
+            Script = new DialogueScript(Script),
         };
     }
 
@@ -178,13 +203,11 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
 
     public SharedInfo MakeSharedInfo() {
         SharedInfo ??= new SharedInfo(this);
-        Responses.Clear();
+        _responses.Clear();
         return SharedInfo;
     }
 
     public void ApplySharedInfo(SharedInfo sharedInfo) {
-        SharedInfo = sharedInfo;
-
         var topicInfo = sharedInfo.ResponseDataTopicInfo;
         Speaker = topicInfo.Speaker;
         Responses.Clear();
@@ -193,6 +216,8 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
         InvisibleContinue = topicInfo.InvisibleContinue;
         Random = topicInfo.Random;
         ResetHours = topicInfo.ResetHours;
+
+        SharedInfo = sharedInfo;
     }
 
     public override string ToString() {

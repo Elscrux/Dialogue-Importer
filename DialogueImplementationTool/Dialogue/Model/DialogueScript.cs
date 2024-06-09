@@ -7,6 +7,14 @@ namespace DialogueImplementationTool.Dialogue.Model;
 public sealed record ScriptPropertyName(ScriptProperty ScriptProperty, string ScriptName);
 
 public sealed class DialogueScript : IEquatable<DialogueScript> {
+    public DialogueScript() { }
+
+    public DialogueScript(DialogueScript otherScript) {
+        StartScriptLines = otherScript.StartScriptLines.ToList();
+        EndScriptLines = otherScript.EndScriptLines.ToList();
+        Properties = otherScript.Properties.ToList();
+    }
+
     public List<string> StartScriptLines { get; init; } = [];
     public List<string> EndScriptLines { get; init; } = [];
     public List<ScriptPropertyName> Properties { get; init; } = [];
