@@ -154,10 +154,13 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
 
         // Report remaining notes
         if (topicInfo.Prompt.Notes().Any()) {
-            Console.WriteLine($"{topicInfo.Speaker.NameNoSpaces}: Prompt \"{topicInfo.Prompt}\" has notes.");
+            Console.WriteLine($"{topicInfo.Speaker.NameNoSpaces}: Prompt \"{topicInfo.Prompt.FullText}\" has notes.");
         }
         foreach (var response in topicInfo.Responses.Where(response => response.Notes().Any())) {
             Console.WriteLine($"{topicInfo.Speaker.NameNoSpaces}: Response \"{response.FullResponse}\" has notes.");
+        }
+        foreach (var note in topicInfo.Prompt.Notes().Concat(topicInfo.Responses.SelectMany(r => r.Notes()))) {
+            Console.WriteLine($"Note: {note}");
         }
 
         return responses;
