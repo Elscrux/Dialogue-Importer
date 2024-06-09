@@ -48,7 +48,7 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
     public void Process(Conversation conversation) {
         var speakerStages = new Dictionary<FormKey, (ushort StartStage, ushort NextStage)>();
 
-        var simplePromptKeywords = conversation.GetAllKeywordTopicInfos(
+         var simplePromptKeywords = conversation.GetAllKeywordTopicInfos(
             OnlyKeywordRegex(),
             info => info.Prompt.StartNotes);
 
@@ -83,101 +83,97 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
             .GroupBy(x => x.Item1.Keyword)
             .ToList();
 
-        if (actionKeywords.Exists(x => x.Any(y => y.Lock != x.First().Lock))) {
-            Console.WriteLine("A keyword is locked and unlocked, this is not currently supported.");
-            return;
-        }
-
         foreach (var grouping in actionKeywords) {
-            var isLocking = grouping.First().Lock;
-            var keyword = grouping.Key;
-            var speaker = grouping.First().Item1.TopicInfo.Speaker;
-            var stage = CreateStage(speaker);
-            var matchesFound = 0;
+            foreach (var isLocking in grouping.Select(x => x.Lock).Distinct()) {
+                var keyword = grouping.Key;
+                var speaker = grouping.First().Item1.TopicInfo.Speaker;
+                var stage = CreateStage(speaker);
+                var matchesFound = 0;
 
-            if (isLocking) {
-                foreach (var initiallyUnlockedMatch in statusUnlockedKeywords.Where(x => x.Keyword == keyword)) {
-                    matchesFound++;
+                if (isLocking) {
+                    foreach (var initiallyUnlockedMatch in statusUnlockedKeywords.Where(x => x.Keyword == keyword)) {
+                        matchesFound++;
 
-                    // Remove [Unlocked HERE]
-                    initiallyUnlockedMatch.TopicInfo.Prompt.StartNotes.Remove(initiallyUnlockedMatch.Note);
-                    initiallyUnlockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(false, stage));
-                }
-
-                foreach (var initiallyUnlockedMatch in simplePromptKeywords.Where(x => x.Keyword == keyword)) {
-                    matchesFound++;
-
-                    // Remove [Locked] [HERE]
-                    initiallyUnlockedMatch.TopicInfo.Prompt.StartNotes.Remove(initiallyUnlockedMatch.Note);
-                    initiallyUnlockedMatch.TopicInfo.Prompt.StartNotes.RemoveAll(x => UnlockedRegex().IsMatch(x.Text));
-                    initiallyUnlockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(false, stage));
-                }
-
-                foreach (var initiallyUnlockedMatch in simpleResponseKeywords.Where(x => x.Keyword == keyword)) {
-                    matchesFound++;
-
-                    // Remove [Locked] [HERE]
-                    initiallyUnlockedMatch.TopicInfo.Responses[0].StartNotes.Remove(initiallyUnlockedMatch.Note);
-                    initiallyUnlockedMatch.TopicInfo.Responses[0].StartNotes
-                        .RemoveAll(x => UnlockedRegex().IsMatch(x.Text));
-                    initiallyUnlockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(false, stage));
-                }
-            } else {
-                foreach (var initiallyLockedMatch in statusLockedKeywords.Where(x => x.Keyword == keyword)) {
-                    matchesFound++;
-
-                    // Remove [Locked HERE]
-                    initiallyLockedMatch.TopicInfo.Prompt.StartNotes.Remove(initiallyLockedMatch.Note);
-                    initiallyLockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(true, stage));
-                }
-
-                foreach (var initiallyLockedMatch in simplePromptKeywords.Where(x => x.Keyword == keyword)) {
-                    matchesFound++;
-
-                    // Remove [Locked] [HERE]
-                    initiallyLockedMatch.TopicInfo.Prompt.StartNotes.Remove(initiallyLockedMatch.Note);
-                    initiallyLockedMatch.TopicInfo.Prompt.StartNotes.RemoveAll(x => LockedRegex().IsMatch(x.Text));
-                    initiallyLockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(true, stage));
-                }
-
-                foreach (var initiallyLockedMatch in simpleResponseKeywords.Where(x => x.Keyword == keyword)) {
-                    matchesFound++;
-
-                    // Remove [Locked] [HERE]
-                    initiallyLockedMatch.TopicInfo.Responses[0].StartNotes.Remove(initiallyLockedMatch.Note);
-                    initiallyLockedMatch.TopicInfo.Responses[0].StartNotes
-                        .RemoveAll(x => LockedRegex().IsMatch(x.Text));
-                    initiallyLockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(true, stage));
-                }
-            }
-
-            if (matchesFound == 0) {
-                var lockText = isLocking ? "lock" : "unlock";
-                Console.WriteLine($"Keyword {keyword} is not used to {lockText} any dialogue");
-                continue;
-            }
-
-            // Add stage
-            var locking = isLocking ? "Lock" : "Unlock";
-            var entry = $"{locking} {keyword} for {speaker.Name}";
-            var questStage = new QuestStage {
-                Index = stage,
-                LogEntries = [
-                    new QuestLogEntry {
-                        Entry = entry,
-                        Flags = 0,
+                        // Remove [Unlocked HERE]
+                        initiallyUnlockedMatch.TopicInfo.Prompt.StartNotes.Remove(initiallyUnlockedMatch.Note);
+                        initiallyUnlockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(false, stage));
                     }
-                ]
-            };
-            context.Quest.Stages.Add(questStage);
-            speakerStages[speaker.FormKey] = (speakerStages[speaker.FormKey].StartStage, (ushort) (stage + 1));
 
-            foreach (var (lockMatch, _) in grouping.Distinct()) {
-                // Check for any keywords in note, to catch something like [unlock HERE, NOW, MERGE]
-                // Remove [Lock HERE] or [Unlock HERE]
-                lockMatch.TopicInfo.Responses[^1].RemoveNote(lockMatch.Note);
-                lockMatch.TopicInfo.RemoveRedundantResponses();
-                lockMatch.TopicInfo.Script.StartScriptLines.Add($"GetOwningQuest().SetStage({stage})");
+                    foreach (var initiallyUnlockedMatch in simplePromptKeywords.Where(x => x.Keyword == keyword)) {
+                        matchesFound++;
+
+                        // Remove [Locked] [HERE]
+                        initiallyUnlockedMatch.TopicInfo.Prompt.StartNotes.Remove(initiallyUnlockedMatch.Note);
+                        initiallyUnlockedMatch.TopicInfo.Prompt.StartNotes.RemoveAll(x => UnlockedRegex().IsMatch(x.Text));
+                        initiallyUnlockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(false, stage));
+                    }
+
+                    foreach (var initiallyUnlockedMatch in simpleResponseKeywords.Where(x => x.Keyword == keyword)) {
+                        matchesFound++;
+
+                        // Remove [Locked] [HERE]
+                        initiallyUnlockedMatch.TopicInfo.Responses[0].StartNotes.Remove(initiallyUnlockedMatch.Note);
+                        initiallyUnlockedMatch.TopicInfo.Responses[0].StartNotes
+                            .RemoveAll(x => UnlockedRegex().IsMatch(x.Text));
+                        initiallyUnlockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(false, stage));
+                    }
+                } else {
+                    foreach (var initiallyLockedMatch in statusLockedKeywords.Where(x => x.Keyword == keyword)) {
+                        matchesFound++;
+
+                        // Remove [Locked HERE]
+                        initiallyLockedMatch.TopicInfo.Prompt.StartNotes.Remove(initiallyLockedMatch.Note);
+                        initiallyLockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(true, stage));
+                    }
+
+                    foreach (var initiallyLockedMatch in simplePromptKeywords.Where(x => x.Keyword == keyword)) {
+                        matchesFound++;
+
+                        // Remove [Locked] [HERE]
+                        initiallyLockedMatch.TopicInfo.Prompt.StartNotes.Remove(initiallyLockedMatch.Note);
+                        initiallyLockedMatch.TopicInfo.Prompt.StartNotes.RemoveAll(x => LockedRegex().IsMatch(x.Text));
+                        initiallyLockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(true, stage));
+                    }
+
+                    foreach (var initiallyLockedMatch in simpleResponseKeywords.Where(x => x.Keyword == keyword)) {
+                        matchesFound++;
+
+                        // Remove [Locked] [HERE]
+                        initiallyLockedMatch.TopicInfo.Responses[0].StartNotes.Remove(initiallyLockedMatch.Note);
+                        initiallyLockedMatch.TopicInfo.Responses[0].StartNotes
+                            .RemoveAll(x => LockedRegex().IsMatch(x.Text));
+                        initiallyLockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(true, stage));
+                    }
+                }
+
+                if (matchesFound == 0) {
+                    var lockText = isLocking ? "lock" : "unlock";
+                    Console.WriteLine($"Keyword {keyword} is not used to {lockText} any dialogue");
+                    continue;
+                }
+
+                // Add stage
+                var locking = isLocking ? "Lock" : "Unlock";
+                var entry = $"{locking} {keyword} for {speaker.Name}";
+                var questStage = new QuestStage {
+                    Index = stage,
+                    LogEntries = [
+                        new QuestLogEntry {
+                            Entry = entry,
+                            Flags = 0,
+                        }
+                    ]
+                };
+                context.Quest.Stages.Add(questStage);
+                speakerStages[speaker.FormKey] = (speakerStages[speaker.FormKey].StartStage, (ushort) (stage + 1));
+
+                foreach (var (lockMatch, _) in grouping.Distinct()) {
+                    // Check for any keywords in note, to catch something like [unlock HERE, NOW, MERGE]
+                    // Remove [Lock HERE] or [Unlock HERE]
+                    lockMatch.TopicInfo.Responses[^1].RemoveNote(lockMatch.Note);
+                    lockMatch.TopicInfo.RemoveRedundantResponses();
+                    lockMatch.TopicInfo.Script.StartScriptLines.Add($"GetOwningQuest().SetStage({stage})");
+                }
             }
         }
 
@@ -204,7 +200,7 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
                         }
                     }
 
-                    // If no free range was found, take first free stage after the last stage
+                    // If no free-range was found, take first free stage after the last stage
                     if (speakerStage.StartStage == 0) {
                         var nextStage = (ushort) (context.Quest.Stages[^1].Index + speakerRange);
                         nextStage -= (ushort) (nextStage % speakerRange);
