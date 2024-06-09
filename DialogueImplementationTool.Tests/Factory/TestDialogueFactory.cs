@@ -49,6 +49,7 @@ public sealed class TestDialogueFactory {
 
         // Process
         Conversation conversation = [dialogue];
+        _testConstants.Quest.EditorID = "DialogueQuest";
         _testConstants.DialogueProcessor.Process(conversation);
 
         // Implement

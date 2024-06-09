@@ -35,6 +35,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new RumorServiceChecker(),
             new VendorServiceChecker(),
             new RentRoomServiceChecker(),
+            new RemoveRootOptionChecker(), // Needs to be before dialogue quest lock unlock processor
             emotionChecker,
         ];
 

@@ -191,6 +191,9 @@
       <Compile Update="Dialogue\Processor\VendorServiceChecker.cs">
         <DependentUpon>IConversationProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\Processor\RemoveRootOptionChecker.cs">
+        <DependentUpon>IConversationProcessor.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>
