@@ -30,10 +30,12 @@ public sealed partial class RemoveRootOptionChecker : IConversationProcessor {
 
     public void Process(Conversation conversation) {
         foreach (var dialogue in conversation) {
-            foreach (var rootTopic in dialogue.Topics) {
+            for (var topicIndex = 0; topicIndex < dialogue.Topics.Count; topicIndex++) {
+                var rootTopic = dialogue.Topics[topicIndex];
                 if (rootTopic.TopicInfos.Count == 0) continue;
-                var lockedKeyword = GetLockedKeyword(rootTopic);
-                
+
+                var lockedKeyword = GetLockedKeyword(rootTopic, topicIndex);
+
                 var hasNotes = false;
 
                 foreach (var linkedTopic in rootTopic.EnumerateLinks(true)) {
@@ -55,7 +57,7 @@ public sealed partial class RemoveRootOptionChecker : IConversationProcessor {
         }
     }
 
-    private static string GetLockedKeyword(DialogueTopic rootTopic) {
+    private static string GetLockedKeyword(DialogueTopic rootTopic, int topicIndex) {
         // Use existing keyword note if it exists
         if (rootTopic.TopicInfos is [var topicInfo]) {
             var keywordNote = topicInfo.Prompt.StartNotes.Find(note => OnlyKeywordRegex().IsMatch(note.Text));
@@ -64,10 +66,7 @@ public sealed partial class RemoveRootOptionChecker : IConversationProcessor {
             }
         }
 
-        // Otherwise generate non-conflicting keyword
-        return Guid.NewGuid()
-            .ToString()
-            .ToUpper()
-            .Replace("-", "_");
+        // Otherwise use default
+        return $"ROOT_OPTION_{topicIndex}";
     }
 }
