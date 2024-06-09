@@ -21,6 +21,7 @@ public partial class RumorServiceChecker : IConversationProcessor {
         topic.ConvertResponsesToTopicInfos();
         topic.ServiceType = ServiceType.Rumor;
         foreach (var topicInfo in topic.TopicInfos) {
+            topicInfo.ResetHours = 24;
             topicInfo.Random = true;
         }
     }
