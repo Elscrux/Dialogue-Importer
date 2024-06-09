@@ -67,7 +67,8 @@ public sealed class SkyrimDialogueContext(
 
         // Add responses
         foreach (var response in topic.Record.Responses) {
-            var responseContext = environment.LinkCache.ResolveContext<IDialogResponses, IDialogResponsesGetter>(response.FormKey);
+            var responseContext =
+                environment.LinkCache.ResolveContext<IDialogResponses, IDialogResponsesGetter>(response.FormKey);
             responseContext.GetOrAddAsOverride(mod);
         }
 
@@ -163,6 +164,16 @@ public sealed class SkyrimDialogueContext(
             defaultBranchFormKey);
 
         var context = environment.LinkCache.ResolveContext<DialogBranch, IDialogBranchGetter>(formKey);
+        return context.GetOrAddAsOverride(mod);
+    }
+
+    public Npc SelectNpc(string prompt) {
+        var formKey = formKeySelection.GetFormKey(
+            $"Select npc: {prompt}",
+            [typeof(INpcGetter)],
+            FormKey.Null);
+
+        var context = environment.LinkCache.ResolveContext<Npc, INpcGetter>(formKey);
         return context.GetOrAddAsOverride(mod);
     }
 }

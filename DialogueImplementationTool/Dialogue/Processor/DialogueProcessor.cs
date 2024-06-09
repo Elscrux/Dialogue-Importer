@@ -22,6 +22,14 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new Trimmer(),
         ];
 
+        TopicInfoProcessors = [
+            new DeadAliveChecker(_context),
+            new SayOnceChecker(),
+            new GoodbyeChecker(),
+            new TopicInfoTrimmer(),
+            new TopicInfoInvalidStringFixer(),
+        ];
+
         TopicProcessors = [
             new TopicInfoNoteExtractor(),
             new PlayerIsRaceChecker(),
@@ -58,12 +66,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
     public List<IDialogueResponseProcessor> ResponseProcessors { get; }
 
     // Runs during document parsing
-    public List<IDialogueTopicInfoProcessor> TopicInfoProcessors { get; } = [
-        new SayOnceChecker(),
-        new GoodbyeChecker(),
-        new TopicInfoTrimmer(),
-        new TopicInfoInvalidStringFixer(),
-    ];
+    public List<IDialogueTopicInfoProcessor> TopicInfoProcessors { get; }
 
     // Runs after document parsing
     public List<IDialogueTopicProcessor> TopicProcessors { get; }

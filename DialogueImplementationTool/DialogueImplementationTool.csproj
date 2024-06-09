@@ -197,6 +197,9 @@
       <Compile Update="Dialogue\Processor\IdleChecker.cs">
         <DependentUpon>IDialogueResponseProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\Processor\DeadAliveChecker.cs">
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>
