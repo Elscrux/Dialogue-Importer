@@ -3,7 +3,7 @@ using DialogueImplementationTool.Dialogue.Model;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public partial class RumorServiceChecker : IConversationProcessor {
-    [GeneratedRegex(@"Heard any rumors lately\?")]
+    [GeneratedRegex(@"Heard any (good )?rumors lately\?")]
     public static partial Regex RumorRegex();
 
     public void Process(Conversation conversation) {
