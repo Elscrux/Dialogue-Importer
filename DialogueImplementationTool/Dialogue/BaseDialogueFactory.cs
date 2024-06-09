@@ -160,7 +160,7 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
             Console.WriteLine($"{topicInfo.Speaker.NameNoSpaces}: Response \"{response.FullResponse}\" has notes.");
         }
         foreach (var note in topicInfo.Prompt.Notes().Concat(topicInfo.Responses.SelectMany(r => r.Notes()))) {
-            Console.WriteLine($"Note: {note}");
+            Console.WriteLine($"Note: {note.Text} ({string.Join(", ", note.Colors)})");
         }
 
         return responses;
