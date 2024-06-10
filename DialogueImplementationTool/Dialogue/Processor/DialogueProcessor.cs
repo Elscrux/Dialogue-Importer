@@ -24,6 +24,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
 
         TopicInfoProcessors = [
             new DeadAliveChecker(_context),
+            new TimeChecker(),
             new SayOnceChecker(),
             new GoodbyeChecker(),
             new TopicInfoTrimmer(),
