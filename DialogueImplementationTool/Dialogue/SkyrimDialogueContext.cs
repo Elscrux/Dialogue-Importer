@@ -167,13 +167,15 @@ public sealed class SkyrimDialogueContext(
         return context.GetOrAddAsOverride(mod);
     }
 
-    public Npc SelectNpc(string prompt) {
+    public TMajor SelectRecord<TMajor, TMajorGetter>(string prompt)
+        where TMajor : class, TMajorGetter, IMajorRecordQueryable
+        where TMajorGetter : class, IMajorRecordQueryableGetter {
         var formKey = formKeySelection.GetFormKey(
-            $"Select npc: {prompt}",
-            [typeof(INpcGetter)],
+            $"Select: {prompt}",
+            [typeof(TMajorGetter)],
             FormKey.Null);
 
-        var context = environment.LinkCache.ResolveContext<Npc, INpcGetter>(formKey);
+        var context = environment.LinkCache.ResolveContext<TMajor, TMajorGetter>(formKey);
         return context.GetOrAddAsOverride(mod);
     }
 }

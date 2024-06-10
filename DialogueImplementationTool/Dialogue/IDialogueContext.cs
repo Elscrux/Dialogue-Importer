@@ -28,5 +28,7 @@ public interface IDialogueContext {
     IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IReadOnlyList<string> speakerNames);
     IFormLink<IQuestGetter> GetFavorDialogueQuest();
     DialogBranch? GetServiceBranch(ServiceType serviceType, FormKey defaultBranchFormKey);
-    Npc SelectNpc(string prompt);
+    TMajor SelectRecord<TMajor, TMajorGetter>(string prompt)
+        where TMajor : class, TMajorGetter, IMajorRecordQueryable
+        where TMajorGetter : class, IMajorRecordQueryableGetter;
 }

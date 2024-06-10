@@ -4,10 +4,10 @@ using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed partial class DeadAliveChecker(IDialogueContext context) : IDialogueTopicInfoProcessor {
-    [GeneratedRegex(@"(?:if )?(.+) is (?:still )?alive")]
+    [GeneratedRegex("(?:if )?(.+) is (?:still )?alive")]
     private static partial Regex AliveRegex();
 
-    [GeneratedRegex(@"(?:if )?(.+) is dead")]
+    [GeneratedRegex("(?:if )?(.+) is dead")]
     private static partial Regex DeadRegex();
 
     public void Process(DialogueTopicInfo topicInfo) {
@@ -24,13 +24,9 @@ public sealed partial class DeadAliveChecker(IDialogueContext context) : IDialog
                 }
 
                 void HandleMatch(Match match, CompareOperator compareOperator, float comparisonValue) {
-                    var npc = context.SelectNpc(match.Groups[1].Value + " for line " + response.Response);
+                    var npc = context.SelectRecord<Npc, INpcGetter>(match.Groups[1].Value + " for line " + response.Response);
 
-                    var data = new GetDeadCountConditionData {
-                        FirstUnusedStringParameter = null,
-                        SecondUnusedIntParameter = 0,
-                        SecondUnusedStringParameter = null
-                    };
+                    var data = new GetDeadCountConditionData();
                     data.Npc.Link.SetTo(npc.FormKey);
                     var getDeadCount = new ConditionFloat {
                         Data = data,
