@@ -24,7 +24,7 @@ public sealed partial class DeadAliveChecker(IDialogueContext context) : IDialog
                 }
 
                 void HandleMatch(Match match, CompareOperator compareOperator, float comparisonValue) {
-                    var npc = context.SelectRecord<Npc, INpcGetter>(match.Groups[1].Value + " for line " + response.Response);
+                    var npc = context.SelectRecord<Npc, INpcGetter>(match.Groups[1].Value);
 
                     var data = new GetDeadCountConditionData();
                     data.Npc.Link.SetTo(npc.FormKey);
