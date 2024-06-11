@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Services;
+using Noggog;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed class EmotionChecker(IEmotionClassifier emotionClassifier) : IConversationProcessor {
@@ -21,7 +22,11 @@ public sealed class EmotionChecker(IEmotionClassifier emotionClassifier) : IConv
 
         void ProcessInternal(DialogueTopicInfo info) {
             foreach (var response in info.Responses) {
-                var emotionValue = emotionClassifier.Classify(response.Response);
+                var line = response.ScriptNote.IsNullOrEmpty()
+                    ? response.Response
+                    : $"[{response.ScriptNote}] {response.Response}";
+
+                var emotionValue = emotionClassifier.Classify(line);
                 response.Emotion = emotionValue.Emotion;
                 response.EmotionValue = emotionValue.Value;
             }
