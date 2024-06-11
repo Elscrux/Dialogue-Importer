@@ -48,6 +48,7 @@ public class TestConstants {
         Mod,
         Quest,
         SpeakerSelection,
+        new AutoApplyProvider(),
         new SpeakerFavoritesSelection(),
         FormKeySelection);
 

@@ -18,6 +18,7 @@ public sealed class SkyrimDialogueContext(
     ISkyrimMod mod,
     IQuest quest,
     ISpeakerSelection speakerSelection,
+    AutoApplyProvider autoApplyProvider,
     ISpeakerFavoritesSelection speakerFavoritesSelection,
     IFormKeySelection formKeySelection)
     : IDialogueContext {
@@ -32,7 +33,7 @@ public sealed class SkyrimDialogueContext(
     public IQuest Quest { get; } = quest;
     public IMod Mod { get; } = mod;
     public Dictionary<string, string> Scripts { get; } = [];
-    public bool SkipSceneSpeakerSelection { get; set; } = true;
+    public AutoApplyProvider AutoApplyProvider { get; } = autoApplyProvider;
 
     public FormKey GetNextFormKey() {
         return mod.GetNextFormKey();
@@ -137,7 +138,7 @@ public sealed class SkyrimDialogueContext(
     }
 
     public IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IReadOnlyList<string> speakerNames) {
-        if (SkipSceneSpeakerSelection) {
+        if (AutoApplyProvider.AutoApply) {
             var automaticSpeakers = _automaticSpeakerSelection.GetAliasSpeakers(speakerNames);
             if (automaticSpeakers.Count == speakerNames.Count) return automaticSpeakers;
         }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Dialogue.Speaker;
+using DialogueImplementationTool.Services;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
@@ -16,7 +17,7 @@ public interface IDialogueContext {
     IQuest Quest { get; }
     IMod Mod { get; }
     Dictionary<string, string> Scripts { get; }
-    bool SkipSceneSpeakerSelection { get; set; }
+    AutoApplyProvider AutoApplyProvider { get; }
     FormKey GetNextFormKey();
     void AddScene(Scene scene);
     void AddQuest(Quest quest);

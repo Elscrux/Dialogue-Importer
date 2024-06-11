@@ -67,10 +67,10 @@
                           Command="{Binding ApplyAll}"
                           CommandParameter="{x:Static dialogue:DialogueType.QuestScene}"/>
             </MenuItem>
-            <MenuItem Header="Apply automatic scene speakers and skip manual selection"
+            <MenuItem Header="Auto apply cached selections"
                       Margin="10,10,0,0"
                       IsCheckable="True"
-                      IsChecked="{Binding SkipSceneSpeakerSelection}"
+                      IsChecked="{Binding AutoApplyCachedSelections}"
                       HorizontalAlignment="Left" VerticalAlignment="Top"/>
         </Menu>
 

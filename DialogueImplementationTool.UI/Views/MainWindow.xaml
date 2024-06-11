@@ -20,6 +20,10 @@
             <MenuItem Header="Open Output Folder"
                       Click="OpenFolder_OnClick"
                       HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <MenuItem Header="Auto apply cached selections"
+                      IsCheckable="True"
+                      IsChecked="{Binding AutoApplyCachedSelection}"
+                      HorizontalAlignment="Left" VerticalAlignment="Top"/>
         </Menu>
 
         <Grid DockPanel.Dock="Top">

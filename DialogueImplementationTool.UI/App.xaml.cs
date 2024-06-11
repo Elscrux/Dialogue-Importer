@@ -38,6 +38,9 @@ public partial class App {
         builder.RegisterType<OutputPathProvider>()
             .SingleInstance();
 
+        builder.RegisterType<AutoApplyProvider>()
+            .SingleInstance();
+
         builder.RegisterType<SpeakerFavoritesSelection>()
             .As<ISpeakerFavoritesSelection>();
 

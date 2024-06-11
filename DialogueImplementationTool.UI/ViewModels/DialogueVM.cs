@@ -33,6 +33,7 @@ public sealed partial class DialogueVM : ViewModel {
         _documentParser = documentParser;
         Index = _documentParser.Index;
         LinkCache = context.LinkCache;
+        AutoApplyCachedSelections = context.AutoApplyProvider.AutoApply;
         var compiler = new PapyrusCompilerWrapper(context.Environment);
 
         Title = Path.GetFileName(documentParser.FilePath);
@@ -204,9 +205,9 @@ public sealed partial class DialogueVM : ViewModel {
                 if (DialogueTypeList.Count > Index) DialogueTypeList[Index].UseGetIsAliasRef = x;
             });
 
-        this.WhenAnyValue(v => v.SkipSceneSpeakerSelection)
+        this.WhenAnyValue(v => v.AutoApplyCachedSelections)
             .Subscribe(skipSceneSpeakerSelection => {
-                context.SkipSceneSpeakerSelection = skipSceneSpeakerSelection;
+                context.AutoApplyProvider.AutoApply = skipSceneSpeakerSelection;
             });
 
         SetupSelectionSubscription(vm => vm.GreetingSelected, DialogueType.Greeting);
