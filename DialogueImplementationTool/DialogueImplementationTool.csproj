@@ -80,13 +80,13 @@
       <Compile Update="Dialogue\Processor\GoodbyeChecker.cs">
         <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
-      <Compile Update="Dialogue\Processor\EmptyBracesRemover.cs">
+      <Compile Update="Dialogue\Processor\BracesRemover.cs">
         <DependentUpon>IDialogueResponseProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\BlockingChecker.cs">
         <DependentUpon>IConversationProcessor.cs</DependentUpon>
       </Compile>
-      <Compile Update="Dialogue\Processor\EmptyBackToDialogueRemover.cs">
+      <Compile Update="Dialogue\Processor\BackToDialogueRemover.cs">
         <DependentUpon>IDialogueResponseProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\BackToOptionsLinker.cs">
