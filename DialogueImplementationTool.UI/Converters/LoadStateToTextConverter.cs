@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 using System.Windows.Data;
-using DialogueImplementationTool.UI.ViewModels;
+using DialogueImplementationTool.Services;
 namespace DialogueImplementationTool.UI.Converters;
 
 public class LoadStateToTextConverter : IValueConverter {

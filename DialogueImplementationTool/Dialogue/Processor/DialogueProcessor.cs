@@ -2,15 +2,16 @@
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Extension;
 using DialogueImplementationTool.Parser;
+using DialogueImplementationTool.Services;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed class DialogueProcessor : IDialogueProcessor {
     private readonly IDialogueContext _context;
-    private readonly EmotionChecker _emotionChecker;
+    private readonly IEmotionClassifierProvider _emotionClassifierProvider;
 
-    public DialogueProcessor(IDialogueContext context, EmotionChecker emotionChecker) {
+    public DialogueProcessor(IDialogueContext context, IEmotionClassifierProvider emotionClassifierProvider) {
         _context = context;
-        _emotionChecker = emotionChecker;
+        _emotionClassifierProvider = emotionClassifierProvider;
 
         ResponseProcessors = [
             new InvalidStringFixer(),
@@ -41,6 +42,8 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new RemoveEmptyTopicInfos(),
         ];
 
+        TopicListProcessors = [];
+
         ConversationProcessors = [
             new BackToOptionsLinker(),
             new KeywordLinker(),
@@ -57,7 +60,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new VendorServiceChecker(),
             new RentRoomServiceChecker(),
             new RemoveRootOptionChecker(), // Needs to be before dialogue quest lock unlock processor
-            emotionChecker,
+            new EmotionChecker(_emotionClassifierProvider.EmotionClassifier),
         ];
 
         if (context.Quest.IsDialogueQuest()) {
@@ -75,12 +78,12 @@ public sealed class DialogueProcessor : IDialogueProcessor {
     public List<IDialogueTopicProcessor> TopicProcessors { get; }
 
     // Runs after document parsing
-    public List<IDialogueTopicListProcessor> TopicListProcessors { get; } = [];
+    public List<IDialogueTopicListProcessor> TopicListProcessors { get; }
 
     // Runs at the very end
     public List<IConversationProcessor> ConversationProcessors { get; }
 
-    public DialogueProcessor Clone() => new(_context, _emotionChecker);
+    public DialogueProcessor Clone() => new(_context, _emotionClassifierProvider);
 
     public void Process(DialogueResponse response, IReadOnlyList<FormattedText> textSnippets) {
         foreach (var processor in ResponseProcessors) {

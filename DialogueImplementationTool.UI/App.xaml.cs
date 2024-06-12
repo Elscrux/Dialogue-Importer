@@ -3,8 +3,8 @@ using System.Windows;
 using Autofac;
 using DialogueImplementationTool.Dialogue.Processor;
 using DialogueImplementationTool.Parser;
+using DialogueImplementationTool.Script;
 using DialogueImplementationTool.Services;
-using DialogueImplementationTool.UI.Models;
 using DialogueImplementationTool.UI.Services;
 using DialogueImplementationTool.UI.ViewModels;
 using DialogueImplementationTool.UI.Views;
@@ -35,10 +35,25 @@ public partial class App {
         builder.RegisterType<DialogueProcessor>()
             .AsSelf();
 
+        builder.RegisterType<DocumentVM>()
+            .AsSelf();
+
         builder.RegisterType<OutputPathProvider>()
             .SingleInstance();
 
+        builder.RegisterType<PythonEmotionClassifierProvider>()
+            .As<IEmotionClassifierProvider>()
+            .AsSelf()
+            .SingleInstance();
+
         builder.RegisterType<AutoApplyProvider>()
+            .SingleInstance();
+
+        builder.RegisterType<PapyrusCompilerWrapper>()
+            .SingleInstance();
+
+        builder.RegisterType<UIFormKeySelection>()
+            .As<IFormKeySelection>()
             .SingleInstance();
 
         builder.RegisterType<SpeakerFavoritesSelection>()
@@ -50,6 +65,9 @@ public partial class App {
 
         builder.RegisterType<MainWindow>()
             .SingleInstance();
+
+        builder.RegisterType<EnvironmentContext>()
+            .As<EnvironmentContext>();
 
         var container = builder.Build();
 

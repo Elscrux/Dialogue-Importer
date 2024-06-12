@@ -200,6 +200,18 @@
       <Compile Update="Dialogue\Processor\DeadAliveChecker.cs">
         <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\Processor\LocationChecker.cs">
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\PythonEmotionClassifierProvider.cs">
+        <DependentUpon>IEmotionClassifierProvider.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\InjectedEmotionClassifier.cs">
+        <DependentUpon>IEmotionClassifierProvider.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\EmptyBracesRemover.cs">
+        <DependentUpon>IDialogueResponseProcessor.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

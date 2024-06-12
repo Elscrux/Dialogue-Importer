@@ -8,6 +8,7 @@
         xmlns:dialogue="clr-namespace:DialogueImplementationTool.Dialogue;assembly=DialogueImplementationTool"
         xmlns:converters="clr-namespace:DialogueImplementationTool.UI.Converters"
         mc:Ignorable="d"
+        x:Name="DialogueWindow"
         Title="{Binding Title, StringFormat='Dialogue Implementation Tool - {0}'}"
         Height="720" Width="1280"
         MinHeight="360" MinWidth="640" d:DataContext="{d:DesignInstance viewModels:DialogueVM}">
@@ -27,8 +28,6 @@
 
         <KeyBinding Key="Left" Command="{Binding BacktrackMany}"/>
         <KeyBinding Key="Right" Command="{Binding SkipMany}"/>
-
-        <KeyBinding Modifiers="Control" Key="S" Command="{Binding Save}"/>
     </Window.InputBindings>
 
     <DockPanel>
@@ -67,11 +66,6 @@
                           Command="{Binding ApplyAll}"
                           CommandParameter="{x:Static dialogue:DialogueType.QuestScene}"/>
             </MenuItem>
-            <MenuItem Header="Auto apply cached selections"
-                      Margin="10,10,0,0"
-                      IsCheckable="True"
-                      IsChecked="{Binding AutoApplyCachedSelections}"
-                      HorizontalAlignment="Left" VerticalAlignment="Top"/>
         </Menu>
 
         <GroupBox DockPanel.Dock="Bottom"
@@ -115,7 +109,7 @@
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <Button Content="{Binding EditorID}"
-                                            Click="SpeakerFavouriteSelect_OnClick"
+                                            Command="{Binding ElementName=DialogueWindow, Path=DataContext.SetSpeaker}"
                                             CommandParameter="{Binding}"/>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>

@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Dialogue.Processor;
 using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Extension;
 using DialogueImplementationTool.Parser;
+using DialogueImplementationTool.Script;
+using DialogueImplementationTool.Services;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
@@ -27,6 +30,37 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
             DialogueType.QuestScene => new QuestSceneFactory(context),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
         };
+    }
+
+    public static void ImplementDialogue(
+        IDialogueContext context,
+        IDocumentParser documentParser,
+        OutputPathProvider outputPathProvider,
+        PapyrusCompilerWrapper compiler,
+        DialogueProcessor dialogueProcessor,
+        List<DialogueSelection> selections) {
+        var conversation = PrepareDialogue(context, dialogueProcessor, documentParser, selections);
+
+        // Conversation wide processing
+        dialogueProcessor.Process(conversation);
+
+        // Actually create the dialogues
+        foreach (var dialogue in conversation) {
+            dialogue.Factory.Create(dialogue);
+        }
+
+        var directoryInfo = new DirectoryInfo(Path.Combine(outputPathProvider.OutputPath, context.Mod.ModKey.Name));
+        var fileInfo = new FileInfo(Path.Combine(directoryInfo.FullName, context.Mod.ModKey.FileName));
+
+        if (fileInfo.Directory is { Exists: false }) fileInfo.Directory?.Create();
+        foreach (var (fileName, content) in context.Scripts) {
+            var scriptsDirectory = Path.Combine(directoryInfo.FullName, "Scripts");
+            var scriptsSourceDirectory = Path.Combine(scriptsDirectory, "Source");
+            Directory.CreateDirectory(scriptsSourceDirectory);
+            var sourcePath = Path.Combine(scriptsSourceDirectory, fileName + ".psc");
+            File.WriteAllText(sourcePath, content);
+            compiler.Compile(sourcePath, scriptsDirectory, scriptsSourceDirectory);
+        }
     }
 
     public static IEnumerable<GeneratedDialogue> PrepareDialogue(

@@ -1,5 +1,6 @@
-﻿using System.IO;
-namespace DialogueImplementationTool.UI.Services;
+﻿using System;
+using System.IO;
+namespace DialogueImplementationTool.Services;
 
 public sealed class OutputPathProvider {
     public string OutputPath { get; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Output");

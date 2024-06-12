@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Mutagen.Bethesda.Environments;
+using DialogueImplementationTool.Services;
 namespace DialogueImplementationTool.Script;
 
 public sealed class PapyrusCompilerWrapper {
@@ -10,8 +10,8 @@ public sealed class PapyrusCompilerWrapper {
     public string FlagsFilePath { get; }
     public string SourceDirectoryPath { get; }
 
-    public PapyrusCompilerWrapper(IGameEnvironment gameEnvironment) {
-        var gameDirectory = gameEnvironment.DataFolderPath.Directory;
+    public PapyrusCompilerWrapper(EnvironmentContext environmentContext) {
+        var gameDirectory = environmentContext.Environment.DataFolderPath.Directory;
         if (!gameDirectory.HasValue) throw new DirectoryNotFoundException("Game directory not found");
 
         var papyrusCompilerPath = Path.Combine(gameDirectory.Value, @"Papyrus Compiler\PapyrusCompiler.exe");
@@ -20,11 +20,14 @@ public sealed class PapyrusCompilerWrapper {
 
         PapyrusCompilerPath = papyrusCompilerPath;
 
-        SourceDirectoryPath = Path.Combine(gameEnvironment.DataFolderPath, "Scripts", "Source");
+        SourceDirectoryPath = Path.Combine(environmentContext.Environment.DataFolderPath, "Scripts", "Source");
         if (!Directory.Exists(SourceDirectoryPath))
             throw new DirectoryNotFoundException($"Scripts\\Source directory not found at {SourceDirectoryPath}");
 
-        FlagsFilePath = Path.Combine(gameEnvironment.DataFolderPath, "Scripts", "Source", "TESV_Papyrus_Flags.flg");
+        FlagsFilePath = Path.Combine(environmentContext.Environment.DataFolderPath,
+            "Scripts",
+            "Source",
+            "TESV_Papyrus_Flags.flg");
         if (!File.Exists(FlagsFilePath))
             throw new FileNotFoundException($"TESV_Papyrus_Flags.flg not found at {FlagsFilePath}");
     }
@@ -33,7 +36,8 @@ public sealed class PapyrusCompilerWrapper {
         var process = new Process {
             StartInfo = {
                 FileName = PapyrusCompilerPath,
-                Arguments = $"\"{sourcePath}\" -f=\"{FlagsFilePath}\" -i=\"{string.Join(';', scriptLibraries.Append(SourceDirectoryPath))}\" -o=\"{outputPath}\"",
+                Arguments =
+                    $"\"{sourcePath}\" -f=\"{FlagsFilePath}\" -i=\"{string.Join(';', scriptLibraries.Append(SourceDirectoryPath))}\" -o=\"{outputPath}\"",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,

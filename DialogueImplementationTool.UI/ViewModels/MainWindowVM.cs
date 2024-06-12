@@ -1,15 +1,14 @@
-﻿using System.IO;
-using System.Reactive.Linq;
+﻿using System.Collections;
+using System.IO;
+using System.Reactive;
 using DialogueImplementationTool.Dialogue;
-using DialogueImplementationTool.Dialogue.Processor;
+using DialogueImplementationTool.Extension;
 using DialogueImplementationTool.Parser;
 using DialogueImplementationTool.Services;
-using DialogueImplementationTool.UI.Models;
 using DialogueImplementationTool.UI.Services;
-using Mutagen.Bethesda;
-using Mutagen.Bethesda.Environments;
+using DynamicData;
+using DynamicData.Binding;
 using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using Noggog.WPF;
@@ -17,128 +16,101 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace DialogueImplementationTool.UI.ViewModels;
 
-public enum LoadState {
-    NotLoaded,
-    InProgress,
-    Loaded,
-}
-
 public sealed class MainWindowVM : ViewModel {
-    private const string ModName = "DialogueOutput";
-    private readonly Func<IDialogueContext, EmotionChecker, DialogueProcessor> _dialogueProcessorFactory;
-    private readonly Func<IDialogueContext, DialogueProcessor, IDocumentParser, DialogueVM> _dialogueVMFactory;
+    private readonly AutoApplyProvider _autoApplyProvider;
     private readonly Dictionary<string, Func<string, IDocumentParser>> _documentIterators;
-    private readonly Func<string, PythonEmotionClassifier> _emotionClassifierFactory;
-    private readonly SkyrimMod _mod;
+    private readonly IFormKeySelection _formKeySelection;
     private readonly ISpeakerFavoritesSelection _speakerFavoritesSelection;
-    private PythonEmotionClassifier? _emotionClassifier;
+    private readonly Func<IDocumentParser, IDialogueContext, Action<DocumentVM>, DocumentVM> _documentVMFactory;
 
     public OutputPathProvider OutputPathProvider { get; }
+    public EnvironmentContext EnvironmentContext { get; }
+    public PythonEmotionClassifierProvider PythonEmotionClassifierProvider { get; }
     public List<string> Extensions { get; }
     public IEnumerable<Type> QuestTypes { get; } = typeof(IQuestGetter).AsEnumerable();
-    public IGameEnvironment<ISkyrimMod, ISkyrimModGetter> Environment { get; }
-    public ILinkCache<ISkyrimMod, ISkyrimModGetter> LinkCache { get; }
-    [Reactive] public string PythonDllPath { get; set; } = string.Empty;
     [Reactive] public FormKey QuestFormKey { get; set; }
     [Reactive] public bool ValidQuest { get; set; }
     [Reactive] public string Prefix { get; set; } = string.Empty;
-    [Reactive] public LoadState PythonState { get; set; }
+    public IObservableCollection<DocumentVM> Documents { get; } = new ObservableCollectionExtended<DocumentVM>();
+    public ReactiveCommand<IList, Unit> DeleteDocuments { get; }
+    public ReactiveCommand<Unit, Unit> ParseAll { get; }
+    public ReactiveCommand<Unit, Unit> AutoParseAll { get; }
 
     public MainWindowVM(
-        OutputPathProvider outputPathProvider,
+        AutoApplyProvider autoApplyProvider,
+        IFormKeySelection formKeySelection,
+        EnvironmentContext environmentContext,
+        PythonEmotionClassifierProvider pythonEmotionClassifierProvider,
         ISpeakerFavoritesSelection speakerFavoritesSelection,
-        Func<IDialogueContext, DialogueProcessor, IDocumentParser, DialogueVM> dialogueVMFactory,
-        Func<IDialogueContext, EmotionChecker, DialogueProcessor> dialogueProcessorFactory,
-        Func<string, PythonEmotionClassifier> emotionClassifierFactory,
+        Func<IDocumentParser, IDialogueContext, Action<DocumentVM>, DocumentVM> documentVMFactory,
         Func<string, OpenDocumentTextParser> openDocumentTextIteratorFactory,
-        Func<string, DocXDocumentParser> docXIteratorFactory) {
-        OutputPathProvider = outputPathProvider;
+        Func<string, DocXDocumentParser> docXIteratorFactory,
+        OutputPathProvider outputPathProvider) {
+        _autoApplyProvider = autoApplyProvider;
+        EnvironmentContext = environmentContext;
+        PythonEmotionClassifierProvider = pythonEmotionClassifierProvider;
+        _formKeySelection = formKeySelection;
         _speakerFavoritesSelection = speakerFavoritesSelection;
-        _dialogueVMFactory = dialogueVMFactory;
-        _dialogueProcessorFactory = dialogueProcessorFactory;
-        _emotionClassifierFactory = emotionClassifierFactory;
+        _documentVMFactory = documentVMFactory;
+        OutputPathProvider = outputPathProvider;
         _documentIterators = new Dictionary<string, Func<string, IDocumentParser>> {
             { ".odt", openDocumentTextIteratorFactory },
             { ".docx", docXIteratorFactory },
         };
         Extensions = _documentIterators.Keys.ToList();
 
-        _mod = new SkyrimMod(new ModKey(GetNewModName(), ModType.Plugin), SkyrimRelease.SkyrimSE, 1.7f);
-        Environment = GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>.Create(GameRelease.SkyrimSE)
-            .WithOutputMod(_mod)
-            .Build();
-        LinkCache = Environment.LinkCache;
-
-        TrySetPythonFromEnv();
+        DeleteDocuments = ReactiveCommand.Create<IList>(list => Documents.RemoveMany(list.OfType<DocumentVM>()));
+        ParseAll = ReactiveCommand.Create(ParseAllImpl);
+        AutoParseAll = ReactiveCommand.CreateFromTask(AutoParseAllImpl);
 
         this.WhenAnyValue(x => x.QuestFormKey)
             .Subscribe(_ => ValidQuest = !QuestFormKey.IsNull);
     }
 
-    private string GetNewModName() {
-        var index = 1;
-        var fileInfo = new DirectoryInfo(Path.Combine(OutputPathProvider.OutputPath, $"{ModName}{index}"));
-        while (fileInfo.Exists) {
-            index++;
-            fileInfo = new DirectoryInfo(Path.Combine(OutputPathProvider.OutputPath, $"{ModName}{index}"));
-        }
-
-        return ModName + index;
-    }
-
-    private void TrySetPythonFromEnv() {
-        var paths = System.Environment.GetEnvironmentVariable("PATH");
-        if (paths is null) return;
-
-        foreach (var path in paths.Split(';')) {
-            if (!path.Contains("python", StringComparison.OrdinalIgnoreCase)) continue;
-            if (!Directory.Exists(path)) continue;
-
-            var filePath = Directory
-                .EnumerateFiles(path, "python3*.dll", SearchOption.TopDirectoryOnly)
-                // Don't use python3.dll
-                .Where(x => !x.Contains("python3.dll"))
-                .FirstOrDefault(File.Exists);
-            if (filePath is null) continue;
-
-            Observable.Start(() => RefreshPython(filePath), RxApp.MainThreadScheduler).Subscribe();
-            break;
+    private void ParseAllImpl() {
+        foreach (var documentVM in Documents) {
+            documentVM.LaunchParser();
         }
     }
 
-    public void RefreshPython(string dllPath) {
-        PythonDllPath = dllPath;
-        if (_emotionClassifier?.PythonDllPath == PythonDllPath) return;
+    private async Task AutoParseAllImpl() {
+        var tasks = Documents
+            .Select(vm => Task.Run(vm.ImplementDialogue))
+            .ToArray();
 
-        try {
-            PythonState = LoadState.InProgress;
-            _emotionClassifier?.Dispose();
-            _emotionClassifier = null;
-            _emotionClassifier = _emotionClassifierFactory(PythonDllPath);
-            PythonState = LoadState.Loaded;
-        } catch (Exception e) {
-            Console.WriteLine($"Failed to load emotion classifier: {e.Message}");
-            PythonState = LoadState.NotLoaded;
-        }
+        await Task.WhenAll(tasks);
+
+        EnvironmentContext.Mod.Save(OutputPathProvider.OutputPath);
     }
 
-    public DialogueVM GetDialogueVM(string filePath) {
+    private IDocumentParser GetDocumentParser(string filePath) {
         var extension = Path.GetExtension(filePath).ToLower();
         var documentParserFactory = _documentIterators.GetValueOrDefault(extension);
         if (documentParserFactory is null) throw new InvalidOperationException($"No parser exists for {extension}");
 
-        var emotionClassifier = (IEmotionClassifier?) _emotionClassifier ?? new NullEmotionClassifier();
-        var emotionChecker = new EmotionChecker(emotionClassifier);
-        var context = new SkyrimDialogueContext(
-            Prefix,
-            Environment,
-            _mod,
-            LinkCache.ResolveContext<IQuest, IQuestGetter>(QuestFormKey).GetOrAddAsOverride(_mod),
-            new UISpeakerSelection(LinkCache, _speakerFavoritesSelection, filePath),
-            _speakerFavoritesSelection,
-            new UIFormKeySelection(LinkCache));
-        var dialogueProcessor = _dialogueProcessorFactory(context, emotionChecker);
+        var documentParser = documentParserFactory(filePath);
+        return documentParser;
+    }
 
-        return _dialogueVMFactory(context, dialogueProcessor, documentParserFactory(filePath));
+    private SkyrimDialogueContext GetContext(string filePath) {
+        return new SkyrimDialogueContext(
+            Prefix,
+            EnvironmentContext.Environment,
+            EnvironmentContext.Mod,
+            EnvironmentContext.LinkCache.ResolveContext<IQuest, IQuestGetter>(QuestFormKey)
+                .GetOrAddAsOverride(EnvironmentContext.Mod),
+            new UISpeakerSelection(EnvironmentContext.LinkCache, _speakerFavoritesSelection, filePath),
+            _autoApplyProvider,
+            _speakerFavoritesSelection,
+            _formKeySelection);
+    }
+
+    public void AddDocument(string documentFilePath) {
+        var documentVM = _documentVMFactory(
+            GetDocumentParser(documentFilePath),
+            GetContext(documentFilePath),
+            doc => Documents.Remove(doc));
+
+        Documents.Add(documentVM);
     }
 }

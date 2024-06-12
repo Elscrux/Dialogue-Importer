@@ -5,11 +5,13 @@
         xmlns:plugins="clr-namespace:Mutagen.Bethesda.WPF.Plugins;assembly=Mutagen.Bethesda.WPF"
         xmlns:viewModels="clr-namespace:DialogueImplementationTool.UI.ViewModels"
         xmlns:converters="clr-namespace:DialogueImplementationTool.UI.Converters"
+        xmlns:views="clr-namespace:DialogueImplementationTool.UI.Views"
         x:Class="DialogueImplementationTool.UI.Views.MainWindow"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance viewModels:MainWindowVM}"
-        Title="Select a quest" Height="400" Width="400"
-        MinHeight="400" MinWidth="400">
+        Title="Select a quest"
+        Height="800" Width="800"
+        MinHeight="800" MinWidth="800">
     <DockPanel>
         <DockPanel.Resources>
             <converters:LoadStateToBrushConverter x:Key="LoadStateToBrushConverter"/>
@@ -19,10 +21,6 @@
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="Open Output Folder"
                       Click="OpenFolder_OnClick"
-                      HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            <MenuItem Header="Auto apply cached selections"
-                      IsCheckable="True"
-                      IsChecked="{Binding AutoApplyCachedSelection}"
                       HorizontalAlignment="Left" VerticalAlignment="Top"/>
         </Menu>
 
@@ -41,7 +39,7 @@
                      Margin="2"
                      Text="{Binding Prefix}"/>
         </Grid>
-        
+
         <Grid DockPanel.Dock="Top">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -58,12 +56,12 @@
                      Grid.Column="1"
                      IsReadOnly="True"
                      Margin="2"
-                     Text="{Binding PythonDllPath}"/>
+                     Text="{Binding PythonEmotionClassifierProvider.PythonDllPath}"/>
 
             <TextBlock Grid.Column="2"
                        VerticalAlignment="Center"
-                       Text="{Binding PythonState, Converter={StaticResource LoadStateToTextConverter}}"
-                       Background="{Binding PythonState, Converter={StaticResource LoadStateToBrushConverter}}"/>
+                       Text="{Binding PythonEmotionClassifierProvider.PythonState, Converter={StaticResource LoadStateToTextConverter}}"
+                       Background="{Binding PythonEmotionClassifierProvider.PythonState, Converter={StaticResource LoadStateToBrushConverter}}"/>
 
             <Button Grid.Column="3"
                     Content="Select"
@@ -72,23 +70,70 @@
 
         <plugins:FormKeyPicker DockPanel.Dock="Top"
                                FormKey="{Binding QuestFormKey}"
-                               LinkCache="{Binding LinkCache, Mode=OneWay}"
+                               LinkCache="{Binding EnvironmentContext.LinkCache, Mode=OneWay}"
                                ScopedTypes="{Binding QuestTypes, Mode=OneWay}"/>
 
-        <Grid Visibility="{Binding ValidQuest, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Grid DockPanel.Dock="Top"
+              Visibility="{Binding ValidQuest, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid.RowDefinitions>
-                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
-            <Button Grid.Row="0"
-                    Content="Select File" FontSize="36"
-                    Margin="10"
-                    Click="SelectFile_OnClick"/>
-            <Button Grid.Row="1"
-                    Content="Select Folder" FontSize="36"
-                    Margin="10"
-                    Click="SelectFolder_OnClick"/>
+            <Grid Grid.Row="0" VerticalAlignment="Bottom">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0"
+                        Command="{Binding ParseAll}"
+                        Content="Parse All"
+                        FontSize="18"
+                        Background="DodgerBlue"
+                        Margin="5"/>
+                <Button Grid.Column="1"
+                        Command="{Binding AutoParseAll}"
+                        Content="Auto Parse All"
+                        FontSize="18"
+                        Background="RoyalBlue"
+                        Margin="5"/>
+            </Grid>
+
+            <ListView Grid.Row="1" DockPanel.Dock="Bottom"
+                      x:Name="DocumentListView"
+                      ItemsSource="{Binding Documents}">
+                <ListView.InputBindings>
+                    <KeyBinding
+                        Key="Delete"
+                        Command="{Binding DeleteDocuments}"
+                        CommandParameter="{Binding ElementName=DocumentListView, Path=SelectedItems}"/>
+                </ListView.InputBindings>
+
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <views:DocumentView DataContext="{Binding}"/>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <Grid Grid.Row="1" VerticalAlignment="Bottom">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0"
+                        Content="+ File"
+                        FontSize="18"
+                        Margin="10"
+                        Click="SelectFile_OnClick"/>
+                <Button Grid.Column="1"
+                        Content="+ Folder"
+                        FontSize="18"
+                        Margin="10"
+                        Click="SelectFolder_OnClick"/>
+            </Grid>
         </Grid>
     </DockPanel>
 </Window>
