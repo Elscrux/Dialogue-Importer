@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using DialogueImplementationTool.Dialogue.Model;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
@@ -7,6 +6,9 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 public partial class VendorServiceChecker : IConversationProcessor {
     [GeneratedRegex(@"What do you have for sale\?|What have you got for sale\?|I'd like some food and drink\.|Show me what you have for sale\.|Show me what you've got for sale\.")]
     public static partial Regex VendorRegex();
+
+    [GeneratedRegex("vendor|shop")]
+    public static partial Regex VendorNoteRegex();
 
     public void Process(Conversation conversation) {
         foreach (var dialogue in conversation) {
@@ -24,7 +26,7 @@ public partial class VendorServiceChecker : IConversationProcessor {
         topic.ServiceType = ServiceType.Vendor;
         foreach (var topicInfo in topic.TopicInfos) {
             foreach (var response in topicInfo.Responses) {
-                response.RemoveNote(note => note.Contains("vendor", StringComparison.OrdinalIgnoreCase));
+                response.RemoveNote(note => VendorNoteRegex().IsMatch(note));
             }
 
             topicInfo.Script.EndScriptLines.Add("akSpeaker.ShowBarterMenu()");
