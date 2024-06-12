@@ -30,19 +30,19 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
     private static partial Regex UnlockedRegex();
 
     // [unlocked HERE]
-    [GeneratedRegex($"(?i)^locked {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
+    [GeneratedRegex($"(?i)^locked:? {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
     private static partial Regex StatusLockedRegex();
 
     // [locked HERE]
-    [GeneratedRegex($"(?i)^locked {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
+    [GeneratedRegex($"(?i)^locked:? {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
     private static partial Regex StatusUnlockedRegex();
 
     // [lock all HERE] [remove HERE]
-    [GeneratedRegex($"(?i)^(?:lock(?:s)?|remove(?:s)?) {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
+    [GeneratedRegex($"(?i)^(?:lock(?:s)?|remove(?:s)?):? {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
     private static partial Regex ActionLockRegex();
 
     // [unlock HERE] [add HERE]
-    [GeneratedRegex($"(?i)^(?:unlock(?:s)?|add(?:s)?) {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
+    [GeneratedRegex($"(?i)^(?:unlock(?:s)?|add(?:s)?):? {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
     private static partial Regex ActionUnlockRegex();
 
     public void Process(Conversation conversation) {
