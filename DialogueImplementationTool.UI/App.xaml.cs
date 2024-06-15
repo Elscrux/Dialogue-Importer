@@ -70,7 +70,8 @@ public partial class App {
             .SingleInstance();
 
         builder.RegisterType<EnvironmentContext>()
-            .As<EnvironmentContext>();
+            .As<EnvironmentContext>()
+            .SingleInstance();
 
         var container = builder.Build();
 
