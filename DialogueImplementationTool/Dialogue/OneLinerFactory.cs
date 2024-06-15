@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using DialogueImplementationTool.Dialogue.Model;
+using DialogueImplementationTool.Extension;
+using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue;
@@ -18,39 +21,34 @@ public abstract class OneLinerFactory(IDialogueContext context) : BaseDialogueFa
         }
 
         Context.AddDialogTopic(dialogTopic);
+
+        ReorderBySpeaker(dialogTopic);
     }
 
-    /*====================================================
-       Post Processing
-    ====================================================*/
-    private static FormKey GetMainSpeaker(IDialogResponses responses) {
-        foreach (var condition in responses.Conditions) {
-            if (condition is not ConditionFloat { Data: IGetIsIDConditionDataGetter getisID }) continue;
+    private void ReorderBySpeaker(IDialogTopic topic) {
+        // Gather responses per speaker
+        var topicsWithSpeakers = topic.Responses
+            .GroupBy(x => x.GetMainSpeaker())
+            .OrderBy(x => Context.LinkCache.TryResolveIdentifier<INpcGetter>(x.Key, out var editorId) ? editorId : null)
+            .ToArray();
 
-            if (getisID.Object.UsesLink()) {
-                return getisID.Object.Link.FormKey;
+        topic.Responses.Clear();
+
+        // Insert responses ordered by speaker and say once
+        IDialogResponses? lastResponses = null;
+        foreach (var responsesGrouping in topicsWithSpeakers) {
+            foreach (var responses in responsesGrouping.OrderBy(x => !x.IsSayOnce())) {
+                if (lastResponses is not null) responses.PreviousDialog = lastResponses.ToNullableLink();
+                lastResponses = responses;
+                topic.Responses.Add(responses);
             }
         }
 
-        return FormKey.Null;
-    }
-
-    private static void ReorderBySpeaker(IDialogTopic topic) {
-        for (var index = 0; index < topic.Responses.Count; index++) {
-            var currentSpeaker = GetMainSpeaker(topic.Responses[index]);
-
-            var rightSpeaker = false;
-            for (var runner = index + 1; runner < topic.Responses.Count; runner++) {
-                var current = topic.Responses[runner];
-                if (GetMainSpeaker(current) == currentSpeaker) {
-                    if (rightSpeaker) break;
-
-                    topic.Remove(current);
-                    topic.Responses.Insert(index + 1, current);
-                } else {
-                    rightSpeaker = false;
-                }
-            }
+        // Set last responses
+        var lastResponse = FormKey.Null;
+        foreach (var response in topic.Responses) {
+            response.PreviousDialog = new FormLinkNullable<IDialogResponsesGetter>(lastResponse);
+            lastResponse = response.FormKey;
         }
     }
 
