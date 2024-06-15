@@ -45,8 +45,9 @@
                 Visibility="{Binding Status,
                   Converter={StaticResource DocumentStatusToVisibilityConverter},
                   ConverterParameter={x:Static viewModels:DocumentStatus.NotLoaded}}"/>
-            <StackPanel Visibility="{Binding HasCachedSelections, Converter={StaticResource BooleanToVisibilityConverter}}"
-                        Margin="5,0,0,0">
+            <StackPanel
+                Visibility="{Binding HasCachedSelections, Converter={StaticResource BooleanToVisibilityConverter}}"
+                Margin="5,0,0,0">
                 <Button
                     Command="{Binding AutoParse}"
                     Content="Auto Parse"
@@ -57,14 +58,14 @@
                   Converter={StaticResource DocumentStatusToVisibilityConverter},
                   ConverterParameter={x:Static viewModels:DocumentStatus.NotLoaded}}"/>
             </StackPanel>
-            <!-- <Button -->
-            <!--     Content="Configure" -->
-            <!--     Padding="5,0" -->
-            <!--     Background="CornflowerBlue" -->
-            <!--     VerticalAlignment="Stretch" -->
-            <!--     Visibility="{Binding Status, -->
-            <!--       Converter={StaticResource DocumentStatusToVisibilityConverter}, -->
-            <!--       ConverterParameter={x:Static viewModels:DocumentStatus.Parsed}}"/> -->
+            <Button
+                Content="Running"
+                Padding="5,0"
+                Background="OrangeRed"
+                VerticalAlignment="Stretch"
+                Visibility="{Binding Status,
+                  Converter={StaticResource DocumentStatusToVisibilityConverter},
+                  ConverterParameter={x:Static viewModels:DocumentStatus.InProgress}}"/>
             <Button
                 Content="Implemented"
                 Padding="5,0"

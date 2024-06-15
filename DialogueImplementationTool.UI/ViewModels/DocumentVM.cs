@@ -57,6 +57,7 @@ public sealed class DocumentVM : ViewModel {
     public void ImplementDialogue() => ImplementDialogue(true);
 
     private void ImplementDialogue(bool autoApply) {
+        Status = DocumentStatus.InProgress;
         _context.AutoApplyProvider.AutoApply = autoApply;
 
         BaseDialogueFactory.ImplementDialogue(
@@ -96,6 +97,6 @@ public sealed class DocumentVM : ViewModel {
 
 public enum DocumentStatus {
     NotLoaded,
-    Parsed,
+    InProgress,
     Implemented,
 }
