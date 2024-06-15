@@ -49,9 +49,10 @@ public sealed class PythonEmotionClassifier : IDisposable, IEmotionClassifier {
         var classification = GetAverageEmotion(_pipelines, text);
 
         var emotion = classification.Emotion.Actual;
-        if (emotion == Emotion.Neutral) return new EmotionValue(Emotion.Neutral, 50);
+        emotionValue = emotion == Emotion.Neutral
+            ? new EmotionValue(Emotion.Neutral, 50)
+            : new EmotionValue(emotion, (uint) classification.Score);
 
-        emotionValue = new EmotionValue(emotion, (uint) classification.Score);
         _speakerEmotions.Add(text, emotionValue);
         SaveSpeakers();
         return emotionValue;
