@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using DialogueImplementationTool.Services;
 using Mutagen.Bethesda.Json;
@@ -10,7 +11,7 @@ namespace DialogueImplementationTool.UI.Services;
 
 public partial class FormKeyCache {
     private readonly object _writeLock = new();
-    private readonly string _contextString;
+    private readonly string _contextHash;
     private readonly Dictionary<string, Dictionary<string, FormKey>> _cache;
 
     [GeneratedRegex("[\\/:*?\"<>|]")]
@@ -20,7 +21,7 @@ public partial class FormKeyCache {
         Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "Selections",
-            IllegalFileNameRegex().Replace(_contextString + ".formkeyselections", string.Empty));
+            IllegalFileNameRegex().Replace(_contextHash + ".formkeyselections", string.Empty));
 
     private readonly JsonSerializerSettings _serializerSettings = new() {
         Formatting = Formatting.Indented,
@@ -32,7 +33,11 @@ public partial class FormKeyCache {
     };
 
     public FormKeyCache(EnvironmentContext context) {
-        _contextString = string.Join("_", context.Environment.LoadOrder.ListedOrder.Select(x => x.ModKey.FileName));
+        var source = string.Join(", ", context.Environment.LoadOrder.ListedOrder.Select(mod => mod.ModKey.FileName.String));
+        var hashData = SHA256.HashData(source.ToBytes());
+        var hexString = hashData.ToHexString();
+        _contextHash = hexString;
+        Console.WriteLine(_contextHash);
         _cache = LoadSelection();
     }
 
@@ -41,7 +46,8 @@ public partial class FormKeyCache {
         if (!File.Exists(selectionsPath)) return [];
 
         var text = File.ReadAllText(selectionsPath);
-        var selections = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, FormKey>>>(text, _serializerSettings);
+        var selections =
+            JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, FormKey>>>(text, _serializerSettings);
         return selections ?? [];
     }
 
