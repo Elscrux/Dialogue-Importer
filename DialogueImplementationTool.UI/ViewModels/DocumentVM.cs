@@ -58,6 +58,8 @@ public sealed class DocumentVM : ViewModel {
     }
 
     public void ImplementDialogue() {
+        if (Status != DocumentStatus.NotLoaded) return;
+
         ImplementDialogue(true);
         Context.Mod.Save(_outputPathProvider.OutputPath);
     }
@@ -79,6 +81,8 @@ public sealed class DocumentVM : ViewModel {
     }
 
     public void LaunchParser() {
+        if (Status != DocumentStatus.NotLoaded) return;
+
         var selections = _dialogueSelectionsCache.LoadSelection();
         var dialogueVM = _dialogueVMFactory(_documentParser, selections);
 
