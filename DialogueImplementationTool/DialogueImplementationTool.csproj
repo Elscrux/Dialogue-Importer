@@ -212,6 +212,15 @@
       <Compile Update="Dialogue\Processor\EmptyBracesRemover.cs">
         <DependentUpon>IDialogueResponseProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\Processor\OffersServicesChecker.cs">
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\TalkedToChecker.cs">
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\TimeChecker.cs">
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>
