@@ -77,10 +77,32 @@
               Visibility="{Binding ValidQuest, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0" VerticalAlignment="Bottom">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0"
+                        Content="+ File"
+                        FontSize="18"
+                        Margin="5"
+                        Background="#574eb9"
+                        Click="SelectFile_OnClick"/>
+                <Button Grid.Column="1"
+                        Content="+ Folder"
+                        FontSize="18"
+                        Margin="5"
+                        Background="#574eb9"
+                        Click="SelectFolder_OnClick"/>
+            </Grid>
+
+            <Grid Grid.Row="1" VerticalAlignment="Bottom">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
@@ -100,7 +122,7 @@
                         Margin="5"/>
             </Grid>
 
-            <ListView Grid.Row="1" DockPanel.Dock="Bottom"
+            <ListView Grid.Row="2" DockPanel.Dock="Bottom"
                       x:Name="DocumentListView"
                       ItemsSource="{Binding Documents}">
                 <ListView.InputBindings>
