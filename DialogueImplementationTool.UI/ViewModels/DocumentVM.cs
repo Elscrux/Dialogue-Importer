@@ -54,7 +54,10 @@ public sealed class DocumentVM : ViewModel {
         Delete = ReactiveCommand.Create(DeleteDocument);
     }
 
-    public void ImplementDialogue() => ImplementDialogue(true);
+    public void ImplementDialogue() {
+        ImplementDialogue(true);
+        _context.Mod.Save(_outputPathProvider.OutputPath);
+    }
 
     private void ImplementDialogue(bool autoApply) {
         Status = DocumentStatus.InProgress;
