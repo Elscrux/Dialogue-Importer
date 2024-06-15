@@ -61,7 +61,7 @@ public sealed class MainWindowVM : ViewModel {
 
         DeleteDocuments = ReactiveCommand.Create<IList>(list => Documents.RemoveMany(list.OfType<DocumentVM>()));
         ParseAll = ReactiveCommand.Create(ParseAllImpl);
-        AutoParseAll = ReactiveCommand.CreateFromTask(AutoParseAllImpl);
+        AutoParseAll = ReactiveCommand.Create(AutoParseAllImpl);
 
         this.WhenAnyValue(x => x.QuestFormKey)
             .Subscribe(_ => ValidQuest = !QuestFormKey.IsNull);
@@ -73,12 +73,10 @@ public sealed class MainWindowVM : ViewModel {
         }
     }
 
-    private async Task AutoParseAllImpl() {
-        var tasks = Documents
-            .Select(vm => Task.Run(vm.ImplementDialogue))
-            .ToArray();
-
-        await Task.WhenAll(tasks);
+    private void AutoParseAllImpl() {
+        foreach (var document in Documents) {
+            document.ImplementDialogue();
+        }
 
         EnvironmentContext.Mod.Save(OutputPathProvider.OutputPath);
     }
