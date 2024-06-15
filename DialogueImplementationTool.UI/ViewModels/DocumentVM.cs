@@ -14,14 +14,15 @@ namespace DialogueImplementationTool.UI.ViewModels;
 
 public sealed class DocumentVM : ViewModel {
     private readonly IDocumentParser _documentParser;
-    private readonly IDialogueContext _context;
     private readonly OutputPathProvider _outputPathProvider;
     private readonly PapyrusCompilerWrapper _papyrusCompilerWrapper;
     private readonly Func<IDocumentParser, IReadOnlyList<DialogueSelection>, DialogueVM> _dialogueVMFactory;
     private readonly Action<DocumentVM> _deleteDocument;
+    private readonly Action<DocumentVM, bool> _onImplementationComplete;
     private readonly Func<IDialogueContext, DialogueProcessor> _dialogueProcessorFactory;
     private readonly DialogueSelectionsCache _dialogueSelectionsCache;
 
+    public IDialogueContext Context { get; }
     public string FilePath => _documentParser.FilePath;
     [Reactive] public DocumentStatus Status { get; set; } = DocumentStatus.NotLoaded;
     [Reactive] public bool HasCachedSelections { get; set; }
@@ -37,13 +38,15 @@ public sealed class DocumentVM : ViewModel {
         PapyrusCompilerWrapper papyrusCompilerWrapper,
         Func<IDocumentParser, IReadOnlyList<DialogueSelection>, DialogueVM> dialogueVMFactory,
         Action<DocumentVM> deleteDocument,
+        Action<DocumentVM, bool> onImplementationComplete,
         Func<IDialogueContext, DialogueProcessor> dialogueProcessorFactory) {
         _documentParser = documentParser;
-        _context = context;
+        Context = context;
         _outputPathProvider = outputPathProvider;
         _papyrusCompilerWrapper = papyrusCompilerWrapper;
         _dialogueVMFactory = dialogueVMFactory;
         _deleteDocument = deleteDocument;
+        _onImplementationComplete = onImplementationComplete;
         _dialogueProcessorFactory = dialogueProcessorFactory;
         _dialogueSelectionsCache = new DialogueSelectionsCache(_documentParser.FilePath);
         DialogueSelections = _dialogueSelectionsCache.LoadSelection();
@@ -56,22 +59,23 @@ public sealed class DocumentVM : ViewModel {
 
     public void ImplementDialogue() {
         ImplementDialogue(true);
-        _context.Mod.Save(_outputPathProvider.OutputPath);
+        Context.Mod.Save(_outputPathProvider.OutputPath);
     }
 
     private void ImplementDialogue(bool autoApply) {
         Status = DocumentStatus.InProgress;
-        _context.AutoApplyProvider.AutoApply = autoApply;
+        Context.AutoApplyProvider.AutoApply = autoApply;
 
         BaseDialogueFactory.ImplementDialogue(
-            _context,
+            Context,
             _documentParser,
             _outputPathProvider,
             _papyrusCompilerWrapper,
-            _dialogueProcessorFactory(_context),
+            _dialogueProcessorFactory(Context),
             DialogueSelections);
 
         Status = DocumentStatus.Implemented;
+        _onImplementationComplete(this, autoApply);
     }
 
     public void LaunchParser() {
@@ -92,7 +96,7 @@ public sealed class DocumentVM : ViewModel {
 
         ImplementDialogue(false);
 
-        _context.Mod.Save(_outputPathProvider.OutputPath);
+        Context.Mod.Save(_outputPathProvider.OutputPath);
     }
 
     public void DeleteDocument() => _deleteDocument(this);

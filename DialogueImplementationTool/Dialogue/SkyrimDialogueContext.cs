@@ -34,6 +34,7 @@ public sealed class SkyrimDialogueContext(
     public IMod Mod { get; } = mod;
     public Dictionary<string, string> Scripts { get; } = [];
     public AutoApplyProvider AutoApplyProvider { get; } = autoApplyProvider;
+    public List<string> Issues { get; } = [];
 
     public FormKey GetNextFormKey() {
         return mod.GetNextFormKey();

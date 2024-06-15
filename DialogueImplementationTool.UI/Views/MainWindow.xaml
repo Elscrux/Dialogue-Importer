@@ -79,7 +79,6 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition/>
-                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0" VerticalAlignment="Bottom">
@@ -122,40 +121,41 @@
                         Margin="5"/>
             </Grid>
 
-            <ListView Grid.Row="2" DockPanel.Dock="Bottom"
-                      x:Name="DocumentListView"
-                      ItemsSource="{Binding Documents}">
-                <ListView.InputBindings>
-                    <KeyBinding
-                        Key="Delete"
-                        Command="{Binding DeleteDocuments}"
-                        CommandParameter="{Binding ElementName=DocumentListView, Path=SelectedItems}"/>
-                </ListView.InputBindings>
+            <DockPanel Grid.Row="2">
+                
+                <Expander DockPanel.Dock="Bottom"
+                          Header="Warnings">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
 
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <views:DocumentView DataContext="{Binding}"/>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                        <Button Grid.Row="0"
+                                Content="Copy"
+                                Command="{Binding CopyWarnings}"/>
+                        <ListView Grid.Row="1"
+                                  ItemsSource="{Binding Warnings}"/>
+                    </Grid>
+                </Expander>
 
-            <Grid Grid.Row="1" VerticalAlignment="Bottom">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
+                <ListView DockPanel.Dock="Top"
+                          x:Name="DocumentListView"
+                          ItemsSource="{Binding Documents}">
+                    <ListView.InputBindings>
+                        <KeyBinding
+                            Key="Delete"
+                            Command="{Binding DeleteDocuments}"
+                            CommandParameter="{Binding ElementName=DocumentListView, Path=SelectedItems}"/>
+                    </ListView.InputBindings>
 
-                <Button Grid.Column="0"
-                        Content="+ File"
-                        FontSize="18"
-                        Margin="10"
-                        Click="SelectFile_OnClick"/>
-                <Button Grid.Column="1"
-                        Content="+ Folder"
-                        FontSize="18"
-                        Margin="10"
-                        Click="SelectFolder_OnClick"/>
-            </Grid>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <views:DocumentView DataContext="{Binding}"/>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </DockPanel>
         </Grid>
     </DockPanel>
 </Window>

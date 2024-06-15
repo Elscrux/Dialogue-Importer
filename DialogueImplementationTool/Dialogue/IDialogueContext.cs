@@ -18,6 +18,7 @@ public interface IDialogueContext {
     IMod Mod { get; }
     Dictionary<string, string> Scripts { get; }
     AutoApplyProvider AutoApplyProvider { get; }
+    List<string> Issues { get; }
     FormKey GetNextFormKey();
     void AddScene(Scene scene);
     void AddQuest(Quest quest);
