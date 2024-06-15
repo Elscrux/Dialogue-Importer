@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Dialogue.Processor;
 using DialogueImplementationTool.Dialogue.Speaker;
@@ -49,18 +50,20 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
             dialogue.Factory.Create(dialogue);
         }
 
-        var directoryInfo = new DirectoryInfo(Path.Combine(outputPathProvider.OutputPath, context.Mod.ModKey.Name));
-        var fileInfo = new FileInfo(Path.Combine(directoryInfo.FullName, context.Mod.ModKey.FileName));
+        Task.Run(() => {
+            var directoryInfo = new DirectoryInfo(Path.Combine(outputPathProvider.OutputPath, context.Mod.ModKey.Name));
+            var fileInfo = new FileInfo(Path.Combine(directoryInfo.FullName, context.Mod.ModKey.FileName));
 
-        if (fileInfo.Directory is { Exists: false }) fileInfo.Directory?.Create();
-        foreach (var (fileName, content) in context.Scripts) {
-            var scriptsDirectory = Path.Combine(directoryInfo.FullName, "Scripts");
-            var scriptsSourceDirectory = Path.Combine(scriptsDirectory, "Source");
-            Directory.CreateDirectory(scriptsSourceDirectory);
-            var sourcePath = Path.Combine(scriptsSourceDirectory, fileName + ".psc");
-            File.WriteAllText(sourcePath, content);
-            compiler.Compile(sourcePath, scriptsDirectory, scriptsSourceDirectory);
-        }
+            if (fileInfo.Directory is { Exists: false }) fileInfo.Directory?.Create();
+            foreach (var (fileName, content) in context.Scripts) {
+                var scriptsDirectory = Path.Combine(directoryInfo.FullName, "Scripts");
+                var scriptsSourceDirectory = Path.Combine(scriptsDirectory, "Source");
+                Directory.CreateDirectory(scriptsSourceDirectory);
+                var sourcePath = Path.Combine(scriptsSourceDirectory, fileName + ".psc");
+                File.WriteAllText(sourcePath, content);
+                compiler.Compile(sourcePath, scriptsDirectory, scriptsSourceDirectory);
+            }
+        });
     }
 
     public static IEnumerable<GeneratedDialogue> PrepareDialogue(
@@ -250,7 +253,7 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
                 FragmentName = "Fragment_0",
             };
         }
-        
+
         if (hasEnd) {
             scriptFragments.OnEnd = new ScriptFragment {
                 ExtraBindDataVersion = 2,
@@ -258,7 +261,7 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
                 FragmentName = "Fragment_1",
             };
         }
-        
+
         responses.VirtualMachineAdapter = new DialogResponsesAdapter {
             Scripts = [
                 new ScriptEntry {
