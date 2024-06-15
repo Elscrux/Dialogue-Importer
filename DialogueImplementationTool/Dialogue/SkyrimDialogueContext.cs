@@ -149,20 +149,20 @@ public sealed class SkyrimDialogueContext(
     public IFormLink<IQuestGetter> GetFavorDialogueQuest() {
         if (_favorDialogueQuest is not null) return _favorDialogueQuest;
 
-        var formKey = formKeySelection.GetFormKey(
-            "Select the favor dialogue quest",
-            [typeof(IQuestGetter)],
-            Skyrim.Quest.DialogueFavorGeneric.FormKey);
+        var formKey =
+            formKeySelection.GetFormKey<IQuestGetter>(
+                "Select the favor dialogue quest",
+                Skyrim.Quest.DialogueFavorGeneric.FormKey);
 
         _favorDialogueQuest = formKey.ToLink<IQuestGetter>();
         return _favorDialogueQuest;
     }
 
     public DialogBranch GetServiceBranch(ServiceType serviceType, FormKey defaultBranchFormKey) {
-        var formKey = formKeySelection.GetFormKey(
-            $"Select the {serviceType} branch",
-            [typeof(IDialogBranchGetter)],
-            defaultBranchFormKey);
+        var formKey =
+            formKeySelection.GetFormKey<IDialogBranchGetter>(
+                $"Select the {serviceType} branch",
+                defaultBranchFormKey);
 
         var context = environment.LinkCache.ResolveContext<DialogBranch, IDialogBranchGetter>(formKey);
         return context.GetOrAddAsOverride(mod);
@@ -171,10 +171,7 @@ public sealed class SkyrimDialogueContext(
     public TMajor SelectRecord<TMajor, TMajorGetter>(string prompt)
         where TMajor : class, TMajorGetter, IMajorRecordQueryable
         where TMajorGetter : class, IMajorRecordQueryableGetter {
-        var formKey = formKeySelection.GetFormKey(
-            $"Select: {prompt}",
-            [typeof(TMajorGetter)],
-            FormKey.Null);
+        var formKey = formKeySelection.GetFormKey<TMajorGetter>($"Select: {prompt}", FormKey.Null);
 
         var context = environment.LinkCache.ResolveContext<TMajor, TMajorGetter>(formKey);
         return context.GetOrAddAsOverride(mod);

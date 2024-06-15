@@ -52,6 +52,9 @@ public partial class App {
         builder.RegisterType<PapyrusCompilerWrapper>()
             .SingleInstance();
 
+        builder.RegisterType<FormKeyCache>()
+            .SingleInstance();
+
         builder.RegisterType<UIFormKeySelection>()
             .As<IFormKeySelection>()
             .SingleInstance();

@@ -2,22 +2,27 @@
 using DialogueImplementationTool.Services;
 using DialogueImplementationTool.UI.Views;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Records;
 namespace DialogueImplementationTool.UI.Services;
 
-public sealed class UIFormKeySelection(EnvironmentContext environmentContext, AutoApplyProvider autoApplyProvider)
+public sealed class UIFormKeySelection(
+    EnvironmentContext environmentContext,
+    AutoApplyProvider autoApplyProvider,
+    FormKeyCache formKeyCache)
     : IFormKeySelection {
-    private readonly Dictionary<string, FormKey> _formKeyCache = new();
     private readonly object _lock = new();
 
-    public FormKey GetFormKey(string title, IReadOnlyList<Type> types, FormKey defaultFormKey) {
+    public FormKey GetFormKey<TMajor>(string title, FormKey defaultFormKey)
+        where TMajor : IMajorRecordQueryableGetter {
         // Only show one form key selection window at a time
         lock (_lock) {
-            return GetFormKeyImpl(title, types, defaultFormKey);
+            return GetFormKeyImpl<TMajor>(title, defaultFormKey);
         }
     }
 
-    private FormKey GetFormKeyImpl(string title, IReadOnlyList<Type> types, FormKey defaultFormKey) {
-        if (_formKeyCache.TryGetValue(title, out var formKey)) {
+    private FormKey GetFormKeyImpl<TMajor>(string title, FormKey defaultFormKey)
+        where TMajor : IMajorRecordQueryableGetter {
+        if (formKeyCache.TryGetFormKey<TMajor>(title, out var formKey)) {
             defaultFormKey = formKey;
 
             // Don't prompt if it should auto apply
@@ -38,10 +43,10 @@ public sealed class UIFormKeySelection(EnvironmentContext environmentContext, Au
 
             return formKeySelection.FormKey;
 
-            FormKeySelectionWindow GetSelection() => new(title, environmentContext.LinkCache, types, defaultFormKey);
+            FormKeySelectionWindow GetSelection() => new(title, environmentContext.LinkCache, [typeof(TMajor)], defaultFormKey);
         });
 
-        _formKeyCache[title] = formKey;
+        formKeyCache.Set<TMajor>(title, formKey);
         return formKey;
     }
 }

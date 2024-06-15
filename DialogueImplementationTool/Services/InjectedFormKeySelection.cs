@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Mutagen.Bethesda.Plugins;
+﻿using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Records;
 namespace DialogueImplementationTool.Services;
 
 public class InjectedFormKeySelection : IFormKeySelection {
-    public FormKey GetFormKey(string title, IReadOnlyList<Type> types, FormKey defaultFormKey) {
-        return defaultFormKey;
-    }
+    public FormKey GetFormKey<TMajor>(string title, FormKey defaultFormKey) 
+        where TMajor : IMajorRecordQueryableGetter => defaultFormKey;
 }
