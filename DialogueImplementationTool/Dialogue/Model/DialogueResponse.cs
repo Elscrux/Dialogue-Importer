@@ -17,7 +17,7 @@ public class DialogueResponse : DialogueText, IEqualityComparer<DialogueResponse
     public string ScriptNote { get; set; } = string.Empty;
     public Emotion Emotion { get; set; } = Emotion.Neutral;
     public uint EmotionValue { get; set; } = 50;
-    public FormKey SpeakerIdle { get; set; } = FormKey.Null;
+    public FormKey? SpeakerIdle { get; set; }
 
     public override bool Equals(object? obj) => Equals(obj as DialogueResponse, this);
 
