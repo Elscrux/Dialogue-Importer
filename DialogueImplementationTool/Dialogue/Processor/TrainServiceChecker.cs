@@ -3,7 +3,7 @@ using DialogueImplementationTool.Dialogue.Model;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public partial class TrainServiceChecker : IConversationProcessor {
-    [GeneratedRegex("I'd like to train ")]
+    [GeneratedRegex("I'd like to train|Can you teach me")]
     public static partial Regex TrainRegex();
 
     public void Process(Conversation conversation) {
