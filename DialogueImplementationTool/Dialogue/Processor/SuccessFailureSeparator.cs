@@ -5,6 +5,7 @@ using DialogueImplementationTool.Dialogue.Model;
 using Mutagen.Bethesda.FormKeys.SkyrimSE;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed partial class SuccessFailureSeparator(IDialogueContext context) : IDialogueTopicProcessor {
@@ -104,7 +105,7 @@ public sealed partial class SuccessFailureSeparator(IDialogueContext context) : 
                 var globalFormKey = _actorValueLevels[actorValue][level];
 
                 // Add skill check to success topic info
-                successInfo.ExtraConditions.Add(new ConditionGlobal {
+                var condition = new ConditionGlobal {
                     Data = new GetActorValueConditionData {
                         RunOnType = Condition.RunOnType.Reference,
                         Reference = Skyrim.PlayerRef,
@@ -112,7 +113,24 @@ public sealed partial class SuccessFailureSeparator(IDialogueContext context) : 
                     },
                     CompareOperator = CompareOperator.GreaterThanOrEqualTo,
                     ComparisonValue = globalFormKey.ToLink<IGlobalGetter>(),
-                });
+                };
+                successInfo.ExtraConditions.Add(condition);
+
+                if (actorValue == ActorValue.Speech) {
+                    condition.Flags.SetFlag(Condition.Flag.OR, true);
+
+                    var getEquipped = new GetEquippedConditionData {
+                        RunOnType = Condition.RunOnType.Reference,
+                        Reference = new FormLink<ISkyrimMajorRecordGetter>(Skyrim.PlayerRef.FormKey),
+                    };
+                    getEquipped.ItemOrList.Link.SetTo(Skyrim.FormList.TGAmuletofArticulationList.FormKey);
+                    successInfo.ExtraConditions.Add(new ConditionFloat {
+                        Data = getEquipped,
+                        CompareOperator = CompareOperator.EqualTo,
+                        ComparisonValue = 1,
+                        Flags = Condition.Flag.OR,
+                    });
+                }
 
                 var (line, scriptName) = _actorValueScriptLines[actorValue];
                 successInfo.Script.StartScriptLines.Add(line);
