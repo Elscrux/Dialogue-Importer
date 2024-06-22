@@ -29,6 +29,7 @@ public partial class VendorServiceChecker : IConversationProcessor {
                 response.RemoveNote(note => VendorNoteRegex().IsMatch(note));
             }
 
+            topicInfo.Prompt.Text = "";
             topicInfo.Script.EndScriptLines.Add("akSpeaker.ShowBarterMenu()");
             topicInfo.ExtraConditions.Add(new ConditionFloat {
                 Data = new GetOffersServicesNowConditionData(),
