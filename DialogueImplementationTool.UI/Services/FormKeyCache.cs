@@ -80,7 +80,10 @@ public partial class FormKeyCache {
 
     public void Set<TMajor>(string title, FormKey formKey)
         where TMajor : IMajorRecordQueryableGetter {
-        var dict = _cache.GetOrAdd(typeof(TMajor).FullName);
+        var fullName = typeof(TMajor).FullName;
+        if (fullName is null) throw new InvalidOperationException("Type.FullName is null");
+
+        var dict = _cache.GetOrAdd(fullName);
         dict[title] = formKey;
         SaveSelection();
     }
