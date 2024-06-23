@@ -89,7 +89,7 @@ public sealed class TestDialogueFactory {
         persuadeTopic.Responses[1].Responses.Should().HaveCount(2);
         persuadeTopic.Responses[0].LinkTo.Should().ContainSingle();
         persuadeTopic.Responses[1].LinkTo.Should().ContainSingle();
-        persuadeTopic.Responses[0].Conditions.Should().HaveCount(2);
+        persuadeTopic.Responses[0].Conditions.Should().HaveCount(3);
         persuadeTopic.Responses[1].Conditions.Should().ContainSingle();
 
         // Check both persuade options link to the same final line
@@ -170,7 +170,7 @@ public sealed class TestDialogueFactory {
         var persuadeTopic = rootTopicInfo.Links[2];
         persuadeTopic.TopicInfos.Should().HaveCount(2);
         persuadeTopic.TopicInfos[0].SharedInfo.Should().NotBeNull();
-        persuadeTopic.TopicInfos[0].ExtraConditions.Should().ContainSingle();
+        persuadeTopic.TopicInfos[0].ExtraConditions.Should().HaveCount(2);
         persuadeTopic.TopicInfos[0].ExtraConditions[0].Data.Should().BeOfType<GetActorValueConditionData>();
         persuadeTopic.TopicInfos[1].SharedInfo.Should().NotBeNull();
         persuadeTopic.TopicInfos[1].ExtraConditions.Should().BeEmpty();
@@ -280,7 +280,7 @@ public sealed class TestDialogueFactory {
         var successInfo = conversation[1].Topics[1].TopicInfos[0].Links[1].TopicInfos[0];
         successInfo.Script.StartScriptLines.Should().ContainSingle();
         successInfo.Script.StartScriptLines[0].Should().Be("pFDS.Persuade(akSpeaker)");
-        successInfo.ExtraConditions.Should().ContainSingle();
+        successInfo.ExtraConditions.Should().HaveCount(2);
         var actorValueCondition = successInfo.ExtraConditions[0].Data.Should().BeOfType<GetActorValueConditionData>();
         actorValueCondition.Subject.ActorValue.Should().Be(ActorValue.Speech);
         successInfo.Links.Should().ContainSingle();
