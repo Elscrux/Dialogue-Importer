@@ -107,6 +107,11 @@ public sealed class SharedInfoConverter : IConversationProcessor {
                     .All(x => x.TopicInfoUsingLine.Links.SequenceEqual(firstShared.Users[0].TopicInfoUsingLine.Links))) {
                 // Split off for all users
                 foreach (var (topicUsingLine, _, _) in firstShared.Users) {
+                    var matchingTopicInfo = topicUsingLine
+                        .EnumerateInvisibleContinues()
+                        .FirstOrDefault(info => info.Responses.Contains(sharedTopicInfo.Responses[0]));
+                    if (matchingTopicInfo is null) continue;
+
                     topicUsingLine.SplitOffDialogue(sharedTopicInfo);
                 }
 
@@ -122,6 +127,11 @@ public sealed class SharedInfoConverter : IConversationProcessor {
 
                 //Integrate into dialogue structure and setup all the linking correctly
                 foreach (var (topicUsingLine, _, _) in firstShared.Users) {
+                    var matchingTopicInfo = topicUsingLine
+                        .EnumerateInvisibleContinues()
+                        .FirstOrDefault(info => info.Responses.Contains(sharedTopicInfo.Responses[0]));
+                    if (matchingTopicInfo is null) continue;
+
                     if (topicUsingLine.SharedInfo is not null) continue;
 
                     var dialogueTopicInfo = topicUsingLine.SplitOffDialogue(sharedTopicInfo);

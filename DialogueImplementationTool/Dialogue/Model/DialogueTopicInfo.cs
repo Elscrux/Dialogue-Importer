@@ -84,6 +84,16 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
         };
     }
 
+    public IEnumerable<DialogueTopicInfo> EnumerateInvisibleContinues() {
+        var currentInfo = this;
+        yield return currentInfo;
+
+        while (currentInfo is { InvisibleContinue: true, Links: [{ TopicInfos: [var nextInfo] }] }) {
+            yield return nextInfo;
+            currentInfo = nextInfo;
+        }
+    } 
+
     /// <summary>
     ///     Links dialogue to be played after this topic, linked with an invisible continue
     ///     This handles all relinking of topics, flags, etc.
@@ -134,6 +144,11 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
                     $"ERROR: Response {startingResponse.FullResponse} is not part of {string.Join(" ", currentInfo.Responses)}");
             case 0: {
                 // Split info starts the topic, make the current topic the split info
+                var responsesCount = currentInfo.Responses.Count - splitOffTopicInfo.Responses.Count;
+                if (responsesCount < 0) {
+                    Console.WriteLine();
+                }
+
                 var nextRange = currentInfo.Responses.GetRange(
                     splitOffTopicInfo.Responses.Count,
                     currentInfo.Responses.Count - splitOffTopicInfo.Responses.Count);
@@ -213,7 +228,6 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
         Responses.Clear();
         SayOnce = topicInfo.SayOnce;
         Goodbye = topicInfo.Goodbye;
-        InvisibleContinue = topicInfo.InvisibleContinue;
         Random = topicInfo.Random;
         ResetHours = topicInfo.ResetHours;
 
