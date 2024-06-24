@@ -11,16 +11,8 @@ public sealed class QuestSceneFactory(IDialogueContext context) : SceneFactory(c
     protected override (Scene? Scene, IQuest? QuestForDialogue) GetCurrentScene() {
         // Set alias indices
         foreach (var aliasSpeaker in AliasSpeakers) {
-            var alias = Context.Quest.GetAlias(aliasSpeaker.FormKey);
-            if (alias is null) {
-                // Add missing alias
-                var questAlias = CreateAlias(aliasSpeaker);
-                Context.Quest.Aliases.Add(questAlias);
-                aliasSpeaker.AliasIndex = Context.Quest.Aliases.Count;
-            } else {
-                // Set existing alias index
-                aliasSpeaker.AliasIndex = Convert.ToInt32(alias.ID);
-            }
+            var alias = Context.Quest.GetOrAddAlias(Context.LinkCache, aliasSpeaker.FormKey);
+            aliasSpeaker.AliasIndex = Convert.ToInt32(alias.ID);
         }
 
         //Add scene
