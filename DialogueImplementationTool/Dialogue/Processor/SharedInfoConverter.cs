@@ -100,8 +100,8 @@ public sealed class SharedInfoConverter : IConversationProcessor {
             };
 
             // when all topic infos that use a shared line link to the same next line(s) (or none at all), merge those again or make sure it never splits
-            // exclude lines that don't have a common last ancestor, because in this case these are still separate topics and an empty line would be needed as proxy in between
-            if (commonSharedLine.CommonLast is not null
+            // exclude lines that don't have a previous line, because in this case they wouldn't be able to be linked to without an empty line as proxy in between
+            if (commonSharedLine.SharedLines.TrueForAll(x => x.Users.TrueForAll(link => link.Last is not null))
              && firstShared.Users
                     .Skip(1)
                     .All(x => x.TopicInfoUsingLine.Links.SequenceEqual(firstShared.Users[0].TopicInfoUsingLine.Links))) {
