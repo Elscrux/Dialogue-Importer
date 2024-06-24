@@ -37,7 +37,6 @@ public partial class FormKeyCache {
         var hashData = SHA256.HashData(source.ToBytes());
         var hexString = hashData.ToHexString();
         _contextHash = hexString;
-        Console.WriteLine(_contextHash);
         _cache = LoadSelection();
     }
 
