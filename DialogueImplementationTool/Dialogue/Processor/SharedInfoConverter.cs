@@ -47,11 +47,11 @@ public sealed class SharedInfoConverter : IConversationProcessor {
         foreach (var currentSharedLine in sharedLines) {
             var sharingLast = currentSharedLine.Users
                 .Select(l => l.Last)
-                .All(l => l is not null && l.Speaker.Equals(currentSharedLine.Speaker));
+                .All(l => l is not null && l.Equals(currentSharedLine.Users[0].Last) && l.Speaker.Equals(currentSharedLine.Speaker));
 
             var sharingNext = currentSharedLine.Users
                 .Select(l => l.Next)
-                .All(l => l is not null && l.Speaker.Equals(currentSharedLine.Speaker));
+                .All(n => n is not null && n.Equals(currentSharedLine.Users[0].Next) && n.Speaker.Equals(currentSharedLine.Speaker));
 
             commonSharedLines.Add(new CommonSharedLine(currentSharedLine) {
                 CommonLast = sharingLast ? currentSharedLine.Users[0].Last : null,
