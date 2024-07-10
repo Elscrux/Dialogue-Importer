@@ -14,8 +14,8 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 /// </code>
 /// <para>After:</para>
 /// <code>
-/// <para>1. [5C0ED72F_AC54_4E64_B2BA_15FA95FCF95A] Hi, Player. How are you?</para>
-/// <para>	1.1. I'm good. [Lock 5C0ED72F_AC54_4E64_B2BA_15FA95FCF95A]</para>
+/// <para>1. [ROOT_OPTION_0] Hi, Player. How are you?</para>
+/// <para>	1.1. I'm good. [Lock ROOT_OPTION_0]</para>
 /// </code>
 /// </example>
 /// </summary>
