@@ -47,7 +47,7 @@ public sealed partial class PythonEmotionClassifierProvider : ReactiveObject, IE
                     if (!match.Success) return false;
 
                     var version = match.Groups[1].Value;
-                    return version is "37" or "38" or "39" or "310" or "311";
+                    return version is "311";
                 })
                 .FirstOrDefault(File.Exists);
             if (filePath is null) continue;
