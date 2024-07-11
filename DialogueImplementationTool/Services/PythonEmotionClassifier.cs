@@ -19,6 +19,7 @@ public sealed class PythonEmotionClassifier : IDisposable, IEmotionClassifier {
     private readonly Dictionary<string, EmotionValue> _speakerEmotions = LoadSpeakers();
 
     public PythonEmotionClassifier(string pythonDllPath) {
+        Console.WriteLine($"Starting Python with {pythonDllPath}...");
         PythonDllPath = pythonDllPath;
         Environment.SetEnvironmentVariable("PYTHONNET_PYDLL", pythonDllPath);
 
