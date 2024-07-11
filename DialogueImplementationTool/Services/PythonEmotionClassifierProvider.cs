@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Text.RegularExpressions;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace DialogueImplementationTool.Services;
@@ -12,7 +13,7 @@ public enum LoadState {
     Loaded,
 }
 
-public sealed class PythonEmotionClassifierProvider : ReactiveObject, IEmotionClassifierProvider {
+public sealed partial class PythonEmotionClassifierProvider : ReactiveObject, IEmotionClassifierProvider {
     private readonly Func<string, PythonEmotionClassifier> _emotionClassifierFactory;
     private PythonEmotionClassifier? _pythonEmotionClassifier;
 
@@ -28,6 +29,9 @@ public sealed class PythonEmotionClassifierProvider : ReactiveObject, IEmotionCl
         TrySetPythonFromEnv();
     }
 
+    [GeneratedRegex(@"python(\d+)\.dll")]
+    private static partial Regex PythonDllRegex();
+
     private void TrySetPythonFromEnv() {
         var paths = Environment.GetEnvironmentVariable("PATH");
         if (paths is null) return;
@@ -38,8 +42,13 @@ public sealed class PythonEmotionClassifierProvider : ReactiveObject, IEmotionCl
 
             var filePath = Directory
                 .EnumerateFiles(path, "python3*.dll", SearchOption.TopDirectoryOnly)
-                // Don't use python3.dll
-                .Where(x => !x.Contains("python3.dll"))
+                .Where(x => {
+                    var match = PythonDllRegex().Match(x);
+                    if (!match.Success) return false;
+
+                    var version = match.Groups[1].Value;
+                    return version is "37" or "38" or "39" or "310" or "311";
+                })
                 .FirstOrDefault(File.Exists);
             if (filePath is null) continue;
 
