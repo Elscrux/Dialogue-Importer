@@ -162,7 +162,7 @@ public sealed partial class SuccessFailureSeparator(IDialogueContext context) : 
             successInfo.ExtraConditions.Add(condition);
 
             if (actorValue == ActorValue.Speech) {
-                condition.Flags.SetFlag(Condition.Flag.OR, true);
+                condition.Flags = condition.Flags.SetFlag(Condition.Flag.OR, true);
 
                 var getEquipped = new GetEquippedConditionData {
                     RunOnType = Condition.RunOnType.Reference,
