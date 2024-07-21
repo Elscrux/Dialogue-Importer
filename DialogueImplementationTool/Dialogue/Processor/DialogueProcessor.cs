@@ -51,7 +51,6 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new SameResponseChecker(),
             new SharedInfoConverter(),
             new CollapseEmptyInvisibleContinues(),
-            new BlockingChecker(),
             new SetInvisibleContinuePrompt(),
             new BeggarServiceChecker(),
             new RumorServiceChecker(),

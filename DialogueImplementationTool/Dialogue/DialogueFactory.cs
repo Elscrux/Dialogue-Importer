@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using DialogueImplementationTool.Dialogue.Model;
+using DialogueImplementationTool.Dialogue.Processor;
 using DialogueImplementationTool.Extension;
 using Mutagen.Bethesda.FormKeys.SkyrimSE;
 using Mutagen.Bethesda.Plugins;
@@ -10,6 +11,13 @@ using Noggog;
 namespace DialogueImplementationTool.Dialogue;
 
 public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFactory(context) {
+    public override IDialogueProcessor ConfigureProcessor(DialogueProcessor dialogueProcessor) {
+        // Remove trailing colons from prompts (speaker names)
+        dialogueProcessor.ConversationProcessors.Add(new BlockingChecker());
+        // Skip pre-processing of regular scene factory
+        return dialogueProcessor;
+    }
+
     public override void PreProcess(List<DialogueTopic> topics) {}
 
     public override void GenerateDialogue(List<DialogueTopic> topics) {
