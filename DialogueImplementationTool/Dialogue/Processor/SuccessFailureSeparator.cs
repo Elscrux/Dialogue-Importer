@@ -127,8 +127,8 @@ public sealed partial class SuccessFailureSeparator(IDialogueContext context) : 
             foreach (var note in successInfo.Prompt.Notes()) {
                 if (!_levelMap.TryGetValue(note.Text, out _)) continue;
 
-                successInfo.Prompt.RemoveNote(note);
-                failureInfo.Prompt.RemoveNote(note);
+                successInfo.Prompt.RemoveNote(note.Text);
+                failureInfo.Prompt.RemoveNote(note.Text);
             }
         } else {
             var skillCheck = _skillCheckActorValue.Keys.FirstOrDefault(x => playerText.EndsWith(x));
@@ -141,8 +141,8 @@ public sealed partial class SuccessFailureSeparator(IDialogueContext context) : 
                 if (!_levelMap.TryGetValue(note.Text, out var noteLevel)) continue;
 
                 level = noteLevel;
-                successInfo.Prompt.RemoveNote(note);
-                failureInfo.Prompt.RemoveNote(note);
+                successInfo.Prompt.RemoveNote(note.Text);
+                failureInfo.Prompt.RemoveNote(note.Text);
             }
 
             if (level == -1) return;
