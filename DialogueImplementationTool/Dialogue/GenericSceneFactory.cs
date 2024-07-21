@@ -6,7 +6,7 @@ using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Skyrim.Internals;
 namespace DialogueImplementationTool.Dialogue;
 
-public class GenericGenericSceneFactory(IDialogueContext context) : SceneFactory(context) {
+public class GenericSceneFactory(IDialogueContext context) : SceneFactory(context) {
     public override BaseDialogueFactory SpecifyType(List<DialogueTopic> topics) {
         // 3x3 scenes have a prompt set on their topic infos
         if (topics.Exists(t => t.TopicInfos.Exists(x => x.Prompt.FullText != string.Empty))) {
