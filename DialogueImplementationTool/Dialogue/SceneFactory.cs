@@ -6,7 +6,6 @@ using DialogueImplementationTool.Dialogue.Processor;
 using DialogueImplementationTool.Dialogue.Speaker;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
-using Mutagen.Bethesda.Skyrim.Internals;
 using Noggog;
 namespace DialogueImplementationTool.Dialogue;
 
@@ -122,35 +121,6 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
 
             currentPhaseIndex++;
         }
-    }
-
-    protected static QuestAlias GetEventAlias(string name, byte[] eventData, FormKey npc1, FormKey npc2) {
-        var data1 = new GetIsIDConditionData();
-        var data2 = new GetIsIDConditionData();
-        data1.Object.Link.SetTo(npc1);
-        data2.Object.Link.SetTo(npc2);
-        return new QuestAlias {
-            Name = name,
-            FindMatchingRefFromEvent = new FindMatchingRefFromEvent {
-                FromEvent = RecordTypes.ADIA,
-                EventData = eventData,
-            },
-            Conditions = [
-                GetFormKeyCondition(data1, or: true),
-                GetFormKeyCondition(data2, or: true),
-            ],
-            Flags = QuestAlias.Flag.AllowReserved,
-            VoiceTypes = new FormLinkNullable<IAliasVoiceTypeGetter>(FormKey.Null),
-        };
-    }
-
-    protected static QuestAlias CreateAlias(AliasSpeaker aliasSpeaker) {
-        return new QuestAlias {
-            ID = Convert.ToUInt32(aliasSpeaker.AliasIndex),
-            Name = aliasSpeaker.NameNoSpaces,
-            UniqueActor = new FormLinkNullable<INpcGetter>(aliasSpeaker.FormKey),
-            VoiceTypes = new FormLinkNullable<IAliasVoiceTypeGetter>(FormKey.Null),
-        };
     }
 
     protected Scene AddScene(string editorId, FormKey questFormKey) {

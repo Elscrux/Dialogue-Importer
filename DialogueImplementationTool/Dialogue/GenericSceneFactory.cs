@@ -1,9 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using DialogueImplementationTool.Dialogue.Model;
+using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Extension;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Skyrim.Internals;
+using Noggog;
+using Condition = Mutagen.Bethesda.Skyrim.Condition;
 namespace DialogueImplementationTool.Dialogue;
 
 public class GenericSceneFactory(IDialogueContext context) : SceneFactory(context) {
@@ -17,50 +23,59 @@ public class GenericSceneFactory(IDialogueContext context) : SceneFactory(contex
     }
 
     public override void PreProcessSpeakers() {
-        //Make sure there are only two speakers
-        if (NameMappedSpeakers.Count != 2) MessageBox.Show("Error, there can only be 2 NPCs");
+        //Make sure there are at least two speakers
+        if (NameMappedSpeakers.Count < 2) MessageBox.Show("Error, there must be at least 2 NPCs");
     }
 
     protected override (Scene? Scene, IQuest? QuestForDialogue) GetCurrentScene() {
-        if (AliasSpeakers is not [{} speaker1, {} speaker2]) return (null, null);
-
         //Assign alias indices
-        speaker1.AliasIndex = 2;
-        speaker2.AliasIndex = 3;
-
-        var npc1 = Context.LinkCache.Resolve<INpcGetter>(speaker1.FormKey);
-        var npc2 = Context.LinkCache.Resolve<INpcGetter>(speaker2.FormKey);
+        for (var i = 0; i < AliasSpeakers.Count; i++) {
+            AliasSpeakers[i].AliasIndex = AliasSpeakers.Count + i;
+        }
 
         //Add quest
-        var baseName = $"{Context.Quest.EditorID}Scene{npc1.GetName() + npc2.GetName()}";
+        var npcNames = AliasSpeakers
+            .Select(a => Context.LinkCache.Resolve<INpcGetter>(a.FormKey).GetName())
+            .ToList();
+
+        var baseName = $"{Context.Quest.EditorID}Scene{string.Join(string.Empty, npcNames)}";
         var questEditorId = Naming.GetFirstFreeIndex(
             i => baseName + i,
             name => !Context.LinkCache.TryResolve<IQuestGetter>(name, out _),
             1);
-        var alias1 = GetEventAlias("Actor 1",
-            [0x52, 0x31, 0x0, 0x0],
-            AliasSpeakers[0].FormKey,
-            AliasSpeakers[1].FormKey);
-        alias1.ID = 0;
-        var alias2 = GetEventAlias("Actor 2",
-            [0x52, 0x32, 0x0, 0x0],
-            AliasSpeakers[0].FormKey,
-            AliasSpeakers[1].FormKey);
-        alias2.ID = 1;
-        const QuestAlias.Flag genericSceneAliasFlags =
-            QuestAlias.Flag.AllowReserved | QuestAlias.Flag.AllowReuseInQuest;
-        var alias3 = CreateAlias(AliasSpeakers[0]);
-        alias3.Flags |= genericSceneAliasFlags;
-        var alias4 = CreateAlias(AliasSpeakers[1]);
-        alias4.Flags |= genericSceneAliasFlags;
+
+        var aliases = new ExtendedList<QuestAlias>();
+
+        var getIsIdConditions = AliasSpeakers
+            .Select(a => {
+                var data = new GetIsIDConditionData { Object = { Link = { FormKey = a.FormKey } } };
+                return GetFormKeyCondition(data, or: true);
+            })
+            .ToExtendedList();
+
+        // Create event aliases for the first two speakers
+        aliases.Add(CreateEventAlias(0, "Actor 1", [0x52, 0x31, 0x0, 0x0], getIsIdConditions));
+        aliases.Add(CreateEventAlias(1, "Actor 2", [0x52, 0x32, 0x0, 0x0], getIsIdConditions));
+
+        // Add remaining base aliases for additional speakers based on distance condition
+        if (AliasSpeakers.Count > 2) {
+            for (var i = 0; i < AliasSpeakers.Count; i++) {
+                if (i < 2) continue;
+
+                aliases.Add(CreateFakeEventAlias(i));
+            }
+        }
+
+        // Create unique npc fill type aliases
+        aliases.AddRange(AliasSpeakers.Select(CreateAlias));
 
         var sceneQuest = new Quest(Context.GetNextFormKey(), Context.Release) {
             EditorID = questEditorId,
             Priority = 10,
             Type = Quest.TypeEnum.None,
-            Name = $"{Context.Quest.Name?.String} Scene {npc1.GetName()} {npc2.GetName()} {questEditorId[^1]}",
+            Name = $"{Context.Quest.Name?.String} Scene {string.Join(" ", npcNames)} {questEditorId[^1]}",
             Event = RecordTypes.ADIA,
-            Aliases = [alias1, alias2, alias3, alias4],
+            Aliases = aliases,
         };
         Context.AddQuest(sceneQuest);
 
@@ -71,5 +86,51 @@ public class GenericSceneFactory(IDialogueContext context) : SceneFactory(contex
         Context.AddScene(scene);
 
         return (scene, sceneQuest);
+
+        QuestAlias CreateEventAlias(uint id, string name, byte[] eventData, ExtendedList<Condition> conditions) {
+            return new QuestAlias {
+                ID = id,
+                Name = name,
+                FindMatchingRefFromEvent = new FindMatchingRefFromEvent {
+                    FromEvent = RecordTypes.ADIA,
+                    EventData = eventData,
+                },
+                Conditions = conditions,
+                Flags = QuestAlias.Flag.AllowReserved,
+                VoiceTypes = new FormLinkNullable<IAliasVoiceTypeGetter>(FormKey.Null),
+            };
+        }
+
+        QuestAlias CreateFakeEventAlias(int aliasIndex) => new() {
+            ID = (uint) aliasIndex,
+            Type = QuestAlias.TypeEnum.Reference,
+            Name = "Actor " + (aliasIndex + 1),
+            Flags = QuestAlias.Flag.AllowReserved,
+            Conditions = [
+                new ConditionFloat {
+                    Data = new GetDistanceConditionData {
+                        UseAliases = true,
+                        Target = {
+                            Link = {
+                                FormKey = AliasSpeakers[aliasIndex].FormKey
+                            }
+                        },
+                    }
+                }
+            ],
+        };
+
+        QuestAlias CreateAlias(AliasSpeaker aliasSpeaker) {
+            const QuestAlias.Flag genericSceneAliasFlags =
+                QuestAlias.Flag.AllowReserved | QuestAlias.Flag.AllowReuseInQuest;
+
+            return new QuestAlias {
+                ID = Convert.ToUInt32(aliasSpeaker.AliasIndex),
+                Name = aliasSpeaker.NameNoSpaces,
+                UniqueActor = new FormLinkNullable<INpcGetter>(aliasSpeaker.FormKey),
+                VoiceTypes = new FormLinkNullable<IAliasVoiceTypeGetter>(FormKey.Null),
+                Flags = genericSceneAliasFlags
+            };
+        }
     }
 }
