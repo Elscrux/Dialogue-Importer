@@ -1,6 +1,5 @@
 ﻿using System.Text.RegularExpressions;
 using DialogueImplementationTool.Dialogue.Model;
-using Mutagen.Bethesda.FormKeys.SkyrimSE;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
@@ -35,13 +34,8 @@ public sealed partial class TimeChecker : IDialogueTopicInfoProcessor {
     }
 
     private static ConditionFloat GetGlobalValueCondition(int hour, int minutes) {
-        var data = new GetGlobalValueConditionData {
-            RunOnType = Condition.RunOnType.Subject,
-        };
-        data.Global.Link.SetTo(Skyrim.Global.GameHour.FormKey);
-
         return new ConditionFloat {
-            Data = data,
+            Data = new GetCurrentTimeConditionData(),
             ComparisonValue = hour + minutes / 60f,
         };
     }
