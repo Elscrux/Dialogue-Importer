@@ -87,19 +87,15 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicProcessor {
     }
 
     private static void AddConditions(DialogueTopicInfo topicInfo, FormKey regular, FormKey vampire) {
-        var getPCIsRace = new GetPCIsRaceConditionData();
-        getPCIsRace.Race.Link.SetTo(regular);
         topicInfo.ExtraConditions.Add(new ConditionFloat {
-            Data = getPCIsRace,
+            Data = new GetPCIsRaceConditionData { Race = { Link = { FormKey = regular } } },
             ComparisonValue = 1,
             CompareOperator = CompareOperator.EqualTo,
             Flags = Condition.Flag.OR,
         });
 
-        var getPCIsRaceVampire = new GetPCIsRaceConditionData();
-        getPCIsRaceVampire.Race.Link.SetTo(vampire);
         topicInfo.ExtraConditions.Add(new ConditionFloat {
-            Data = getPCIsRaceVampire,
+            Data = new GetPCIsRaceConditionData { Race = { Link = { FormKey = vampire } } },
             ComparisonValue = 1,
             CompareOperator = CompareOperator.EqualTo,
             Flags = Condition.Flag.OR,
@@ -107,18 +103,14 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicProcessor {
     }
 
     private static void AddNegatedConditions(DialogueTopicInfo topicInfo, FormKey regular, FormKey vampire) {
-        var getPCIsRace = new GetPCIsRaceConditionData();
-        getPCIsRace.Race.Link.SetTo(regular);
         topicInfo.ExtraConditions.Add(new ConditionFloat {
-            Data = getPCIsRace,
+            Data = new GetPCIsRaceConditionData { Race = { Link = { FormKey = regular } } },
             ComparisonValue = 0,
             CompareOperator = CompareOperator.EqualTo,
         });
 
-        var getPCIsRaceVampire = new GetPCIsRaceConditionData();
-        getPCIsRaceVampire.Race.Link.SetTo(vampire);
         topicInfo.ExtraConditions.Add(new ConditionFloat {
-            Data = getPCIsRaceVampire,
+            Data = new GetPCIsRaceConditionData { Race = { Link = { FormKey = vampire } } },
             ComparisonValue = 0,
             CompareOperator = CompareOperator.EqualTo,
         });

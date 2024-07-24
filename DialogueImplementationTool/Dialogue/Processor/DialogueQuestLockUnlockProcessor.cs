@@ -217,7 +217,12 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
         ConditionFloat GetStageDoneCondition(bool isInitiallyLocked, int stage) {
             var getStageDone = new GetStageDoneConditionData {
                 Stage = stage,
-                SecondUnusedStringParameter = null
+                SecondUnusedStringParameter = null,
+                Quest = {
+                    Link = {
+                        FormKey = context.Quest.FormKey
+                    }
+                }
             };
             getStageDone.Quest = new FormLinkOrIndex<IQuestGetter>(getStageDone, context.Quest.FormKey);
             return new ConditionFloat {

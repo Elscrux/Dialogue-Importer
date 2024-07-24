@@ -297,21 +297,23 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
                 },
             });
         } else if (Context.LinkCache.TryResolve<INpcGetter>(topicInfo.Speaker.FormKey, out var npc)) {
-            var data = new GetIsIDConditionData();
-            data.Object.Link.SetTo(npc.FormKey);
-            list.Add(GetFormKeyCondition(data));
+            list.Add(GetFormKeyCondition(new GetIsIDConditionData {
+                Object = {
+                    Link = { FormKey = npc.FormKey }
+                }
+            }));
         } else if (Context.LinkCache.TryResolve<IFactionGetter>(topicInfo.Speaker.FormKey, out var faction)) {
-            var data = new GetInFactionConditionData();
-            data.Faction.Link.SetTo(faction.FormKey);
-            list.Add(GetFormKeyCondition(data));
+            list.Add(GetFormKeyCondition(new GetInFactionConditionData {
+                Faction = { Link = { FormKey = faction.FormKey } }
+            }));
         } else if (Context.LinkCache.TryResolve<IVoiceTypeGetter>(topicInfo.Speaker.FormKey, out var voiceType)) {
-            var data = new GetIsVoiceTypeConditionData();
-            data.VoiceTypeOrList.Link.SetTo(voiceType.FormKey);
-            list.Add(GetFormKeyCondition(data));
+            list.Add(GetFormKeyCondition(new GetIsVoiceTypeConditionData {
+                VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } }
+            }));
         } else if (Context.LinkCache.TryResolve<IFormListGetter>(topicInfo.Speaker.FormKey, out var formList)) {
-            var data = new GetIsVoiceTypeConditionData();
-            data.VoiceTypeOrList.Link.SetTo(formList.FormKey);
-            list.Add(GetFormKeyCondition(data));
+            list.Add(GetFormKeyCondition(new GetIsVoiceTypeConditionData {
+                VoiceTypeOrList = { Link = { FormKey = formList.FormKey } }
+            }));
         }
 
         list.AddRange(topicInfo.ExtraConditions);

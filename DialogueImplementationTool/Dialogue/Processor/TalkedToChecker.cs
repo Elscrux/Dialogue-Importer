@@ -20,10 +20,8 @@ public sealed partial class TalkedToChecker(IDialogueContext context) : IDialogu
                     .FirstOrDefault(placedNpc => placedNpc.Base.FormKey == npc.FormKey);
                 if (placedNpc == null) continue;
 
-                var data = new GetTalkedToPCParamConditionData();
-                data.TargetNpc.Link.SetTo(placedNpc.FormKey);
                 topicInfo.ExtraConditions.Add(new ConditionFloat {
-                    Data = data,
+                    Data = new GetTalkedToPCParamConditionData { TargetNpc = { Link = { FormKey = placedNpc.FormKey } } },
                     CompareOperator = CompareOperator.EqualTo,
                     ComparisonValue = 1,
                 });

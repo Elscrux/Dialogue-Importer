@@ -163,14 +163,12 @@ public sealed partial class SuccessFailureSeparator(IDialogueContext context) : 
 
             if (actorValue == ActorValue.Speech) {
                 condition.Flags = condition.Flags.SetFlag(Condition.Flag.OR, true);
-
-                var getEquipped = new GetEquippedConditionData {
-                    RunOnType = Condition.RunOnType.Reference,
-                    Reference = new FormLink<ISkyrimMajorRecordGetter>(Skyrim.PlayerRef.FormKey),
-                };
-                getEquipped.ItemOrList.Link.SetTo(Skyrim.FormList.TGAmuletofArticulationList.FormKey);
                 successInfo.ExtraConditions.Add(new ConditionFloat {
-                    Data = getEquipped,
+                    Data = new GetEquippedConditionData {
+                        RunOnType = Condition.RunOnType.Reference,
+                        Reference = new FormLink<ISkyrimMajorRecordGetter>(Skyrim.PlayerRef.FormKey),
+                        ItemOrList = { Link = { FormKey = Skyrim.FormList.TGAmuletofArticulationList.FormKey } },
+                    },
                     CompareOperator = CompareOperator.EqualTo,
                     ComparisonValue = 1,
                     Flags = Condition.Flag.OR,
