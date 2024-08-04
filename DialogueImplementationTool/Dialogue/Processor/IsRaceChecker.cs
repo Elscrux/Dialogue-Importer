@@ -27,7 +27,7 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicProcessor {
     [GeneratedRegex($"(?:[Pp]layer|PC).+(?:{MergedRacesRegexPart})")]
     private static partial Regex IsRaceRegex();
 
-    [GeneratedRegex(@"\bnot\b")]
+    [GeneratedRegex(@"\bnot\b", RegexOptions.IgnoreCase)]
     private static partial Regex NegatedRegex();
 
     private static readonly Dictionary<int, (FormKey Regular, FormKey Vampire)> RaceFormKeys = new() {
