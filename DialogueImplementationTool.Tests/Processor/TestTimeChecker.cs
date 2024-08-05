@@ -26,13 +26,11 @@ public sealed class TestTimeChecker {
         var condition1 = topicInfo.ExtraConditions[0].Should().BeOfType<ConditionFloat>();
         condition1.Subject.ComparisonValue.Should().Be(10);
         condition1.Subject.CompareOperator.Should().Be(CompareOperator.GreaterThanOrEqualTo);
-        var conditionData1 = topicInfo.ExtraConditions[0].Data.Should().BeOfType<GetGlobalValueConditionData>();
-        conditionData1.Subject.Global.Link.FormKey.Should().Be(Skyrim.Global.GameHour.FormKey);
+        topicInfo.ExtraConditions[0].Data.Should().BeOfType<GetCurrentTimeConditionData>();
 
         var condition2 = topicInfo.ExtraConditions[1].Should().BeOfType<ConditionFloat>();
         condition2.Subject.ComparisonValue.Should().Be(12.5f);
         condition2.Subject.CompareOperator.Should().Be(CompareOperator.LessThanOrEqualTo);
-        var conditionData2 = topicInfo.ExtraConditions[1].Data.Should().BeOfType<GetGlobalValueConditionData>();
-        conditionData2.Subject.Global.Link.FormKey.Should().Be(Skyrim.Global.GameHour.FormKey);
+        topicInfo.ExtraConditions[1].Data.Should().BeOfType<GetCurrentTimeConditionData>();
     }
 }
