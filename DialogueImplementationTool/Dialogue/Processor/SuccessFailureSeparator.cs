@@ -171,7 +171,6 @@ public sealed partial class SuccessFailureSeparator(IDialogueContext context) : 
                     },
                     CompareOperator = CompareOperator.EqualTo,
                     ComparisonValue = 1,
-                    Flags = Condition.Flag.OR,
                 });
             }
 

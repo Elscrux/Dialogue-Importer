@@ -98,7 +98,6 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicProcessor {
             Data = new GetPCIsRaceConditionData { Race = { Link = { FormKey = vampire } } },
             ComparisonValue = 1,
             CompareOperator = CompareOperator.EqualTo,
-            Flags = Condition.Flag.OR,
         });
     }
 

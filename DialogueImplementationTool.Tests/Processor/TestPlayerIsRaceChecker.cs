@@ -15,6 +15,7 @@ public class TestPlayerIsRaceChecker {
 
         // Check - conditions were added
         CheckCondition(greeting.Topics[0].TopicInfos[3].ExtraConditions[^2], Skyrim.Race.NordRace.FormKey);
+        greeting.Topics[0].TopicInfos[3].ExtraConditions[^2].Flags.Should().HaveFlag(Condition.Flag.OR);
         CheckCondition(greeting.Topics[0].TopicInfos[3].ExtraConditions[^1], Skyrim.Race.NordRaceVampire.FormKey);
 
         // Check - note is gone
@@ -24,7 +25,6 @@ public class TestPlayerIsRaceChecker {
         void CheckCondition(Condition condition, FormKey formKey) {
             var data = condition.Data.Should().BeOfType<GetPCIsRaceConditionData>();
             data.Subject.Race.Link.FormKey.Should().Be(formKey);
-            condition.Flags.Should().HaveFlag(Condition.Flag.OR);
         }
     }
 }
