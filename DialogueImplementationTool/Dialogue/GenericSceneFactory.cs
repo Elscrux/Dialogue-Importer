@@ -36,6 +36,7 @@ public class GenericSceneFactory(IDialogueContext context) : SceneFactory(contex
         //Add quest
         var npcNames = AliasSpeakers
             .Select(a => Context.LinkCache.Resolve<INpcGetter>(a.FormKey).GetName())
+            .Order()
             .ToList();
 
         var baseName = $"{Context.Quest.EditorID}Scene{string.Join(string.Empty, npcNames)}";
