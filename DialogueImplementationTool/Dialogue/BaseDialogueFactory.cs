@@ -81,6 +81,22 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
 
             // Parse document
             var topics = documentParser.Parse(type, factorySpecificProcessor, index);
+            
+            // Set speaker
+            ISpeaker speaker;
+            if (selection.UseGetIsAliasRef) {
+                var alias = context.Quest.GetOrAddAlias(context.LinkCache, selection.Speaker);
+                speaker = new AliasSpeaker(selection.Speaker, alias.Name!, (int) alias.ID);
+            } else {
+                speaker = new NpcSpeaker(context.LinkCache, selection.Speaker);
+            }
+
+            //Set speaker for all linked topics
+            foreach (var topic in topics.EnumerateLinks(true)) {
+                foreach (var topicInfo in topic.TopicInfos) {
+                    topicInfo.Speaker = speaker;
+                }
+            }
 
             // Use more specific factory if needed
             factory = factory.SpecifyType(topics);
@@ -97,12 +113,7 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
 
             factorySpecificProcessor.Process(topics);
 
-            yield return new GeneratedDialogue(
-                context,
-                factory,
-                topics,
-                selection.Speaker,
-                selection.UseGetIsAliasRef);
+            yield return new GeneratedDialogue(factory, topics);
         }
     }
 
