@@ -199,7 +199,9 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
     private (DialogBranch branch, int branchIndex) CreateBranch(DialogueTopic topic) {
         // Use the first speaker for the editor id
         var speakerName = topic.TopicInfos[0].Speaker.NameNoSpaces;
-        var baseName = Context.Quest.EditorID + speakerName;
+        var quest = Context.LinkCache.Resolve<IQuestGetter>(Context.Quest.FormKey);
+        var blockingSuffix = topic.Blocking && quest.IsDialogueQuest() ? "Blocking" : string.Empty;
+        var baseName = Context.Quest.EditorID + speakerName + blockingSuffix;
         var branchEditorId = Naming.GetFirstFreeIndex(
             i => baseName + i,
             editorId => !Context.LinkCache.TryResolveIdentifier<IDialogBranchGetter>(editorId, out _),
