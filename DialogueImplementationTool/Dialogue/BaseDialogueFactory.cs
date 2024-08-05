@@ -181,7 +181,7 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
         if (topicInfo.SharedInfo is not null) {
             // Empty line shared info
             if (topicInfo.SharedInfo.ResponseDataTopicInfo.Responses is [] or [{ Text: "" }]) {
-                var emptyLine = Context.SelectRecord<DialogResponses, IDialogResponsesGetter>("Select: Empty Line Shared Info");
+                var emptyLine = Context.SelectRecord<DialogResponses, IDialogResponsesGetter>("Empty Line Shared Info");
                 return new DialogResponses(context.GetNextFormKey(), context.Release) {
                     ResponseData = new FormLinkNullable<IDialogResponsesGetter>(emptyLine.FormKey),
                     Conditions = GetConditions(topicInfo),
