@@ -1,6 +1,8 @@
 ﻿using DialogueImplementationTool.Parser;
+using DialogueImplementationTool.Services;
 using DialogueImplementationTool.Tests.Samples;
 using FluentAssertions;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Tests.Factory;
 
@@ -246,6 +248,10 @@ public sealed class TestDialogueFactory {
     [Fact]
     public void TestAdilaNadeDialogue() {
         // Import as dialogue quest
+        _testConstants.FormKeySelection = new InjectedFormKeySelection(new Dictionary<string, FormKey> {
+            { "Select: Marille Nade", _testConstants.Speaker1.FormKey },
+            { "Select: Ezzib Nade", _testConstants.Speaker2.FormKey },
+        });
         var (greeting, dialogue1, dialogue2, farewell) = TestSamples.GetAdilaNadeDialogue(_testConstants);
 
         // Process
@@ -272,7 +278,22 @@ public sealed class TestDialogueFactory {
         stageCondition.Subject.Stage.Should().Be(10);
 
         // [unlock KID]
-        conversation[1].Topics[0].TopicInfos[0].Links[1].TopicInfos[0].Script.StartScriptLines.Should().BeEmpty();
+        var topic = conversation[1].Topics[0].TopicInfos[0].Links[1];
+        topic.TopicInfos[0].Script.StartScriptLines.Should().BeEmpty();
+
+        topic.TopicInfos.Should().HaveCount(2);
+        topic.TopicInfos[0].Links.Should().ContainSingle();
+        topic.TopicInfos[0].ExtraConditions.Should().ContainSingle();
+        topic.TopicInfos[1].Responses.Should().ContainSingle();
+        topic.TopicInfos[1].Responses[0].Response.Should().BeEmpty();
+
+        topic.TopicInfos[0].Links[0].TopicInfos.Should().ContainSingle();
+        topic.TopicInfos[0].Links[0].TopicInfos[0].Links.Should().ContainSingle();
+        topic.TopicInfos[0].Links[0].TopicInfos[0].ExtraConditions.Should().BeEmpty();
+
+        topic.TopicInfos[0].Links[0].TopicInfos[0].Links[0].TopicInfos.Should().ContainSingle();
+        topic.TopicInfos[0].Links[0].TopicInfos[0].Links[0].TopicInfos[0].Links.Should().BeEmpty();
+        topic.TopicInfos[0].Links[0].TopicInfos[0].Links[0].TopicInfos[0].ExtraConditions.Should().ContainSingle();
 
         // [REASON]
         conversation[1].Topics[1].TopicInfos[0].ExtraConditions.Should().ContainSingle();

@@ -179,8 +179,18 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
 
         // Handle shared info
         if (topicInfo.SharedInfo is not null) {
-            var dialogResponses =
-                topicInfo.SharedInfo.GetResponseData(quest, Context, TopicInfos, GetConditions);
+            // Empty line shared info
+            if (topicInfo.SharedInfo.ResponseDataTopicInfo.Responses is [] or [{ Text: "" }]) {
+                var emptyLine = Context.SelectRecord<DialogResponses, IDialogResponsesGetter>("Select: Empty Line Shared Info");
+                return new DialogResponses(context.GetNextFormKey(), context.Release) {
+                    ResponseData = new FormLinkNullable<IDialogResponsesGetter>(emptyLine.FormKey),
+                    Conditions = GetConditions(topicInfo),
+                    Flags = flags,
+                    PreviousDialog = previousDialog,
+                };
+            }
+
+            var dialogResponses = topicInfo.SharedInfo.GetResponseData(quest, Context, TopicInfos, GetConditions);
             dialogResponses.PreviousDialog = previousDialog;
             dialogResponses.Flags = flags;
 

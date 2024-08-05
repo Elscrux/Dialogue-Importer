@@ -24,7 +24,6 @@ public sealed class DialogueProcessor : IDialogueProcessor {
         ];
 
         TopicInfoProcessors = [
-            new DeadAliveChecker(_context),
             new TalkedToChecker(_context),
             new OffersServicesChecker(),
             new TimeChecker(),
@@ -38,6 +37,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new TopicInfoNoteExtractor(),
             new PlayerIsRaceChecker(),
             new SuccessFailureSeparator(context),
+            new DeadAliveChecker(_context),
             new RandomChecker(),
             new RemoveEmptyTopicInfos(),
         ];
