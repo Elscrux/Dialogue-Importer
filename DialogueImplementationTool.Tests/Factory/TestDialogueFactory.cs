@@ -107,7 +107,9 @@ public sealed class TestDialogueFactory {
 
         // Process
         Conversation conversation = [dialogue, dialogue2];
-        _testConstants.DialogueProcessor.Process(conversation);
+        dialogue.Factory
+            .ConfigureProcessor(_testConstants.DialogueProcessor)
+            .Process(conversation);
 
         // Check structure
         conversation[0].Topics.Should().ContainSingle();
