@@ -74,6 +74,7 @@ public class GenericSceneFactory(IDialogueContext context) : SceneFactory(contex
             EditorID = questEditorId,
             Priority = 10,
             Type = Quest.TypeEnum.None,
+            Filter = Context.Quest.Filter,
             Name = $"{Context.Quest.Name?.String} Scene {string.Join(" ", npcNames)} {questEditorId[^1]}",
             Event = RecordTypes.ADIA,
             Aliases = aliases,
