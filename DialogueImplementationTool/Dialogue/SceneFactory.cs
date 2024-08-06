@@ -12,7 +12,6 @@ namespace DialogueImplementationTool.Dialogue;
 public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFactory(context) {
     private List<int> _aliasIndices = [];
     protected IReadOnlyList<AliasSpeaker> AliasSpeakers = [];
-    protected List<(FormKey FormKey, List<AliasSpeaker> Speakers)> NameMappedSpeakers = [];
 
     public override IDialogueProcessor ConfigureProcessor(DialogueProcessor dialogueProcessor) {
         // Add scene response processor
@@ -124,7 +123,7 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
     }
 
     protected Scene AddScene(string editorId, FormKey questFormKey) {
-        _aliasIndices = NameMappedSpeakers.SelectMany(x => x.Speakers.Select(speaker => speaker.AliasIndex)).ToList();
+        _aliasIndices = AliasSpeakers.Select(speaker => speaker.AliasIndex).ToList();
 
         return new Scene(Context.GetNextFormKey(), Context.Release) {
             EditorID = editorId,
@@ -144,11 +143,6 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
     public override void PreProcess(List<DialogueTopic> topics) {
         // Set up speaker
         AliasSpeakers = GetAliasSpeakers(topics);
-
-        NameMappedSpeakers = AliasSpeakers
-            .GroupBy(x => x.FormKey)
-            .Select(x => (x.Key, x.ToList()))
-            .ToList();
 
         // Set speaker from prompt
         foreach (var topic in topics) {
@@ -170,8 +164,33 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
             .Distinct()
             .ToList();
 
+        var allAliasSpeakers = Context.GetAliasSpeakers(speakerNames);
+
+        var nameMappedSpeakers = allAliasSpeakers
+            .GroupBy(x => x.FormKey)
+            .Select(x => (x.Key, x.ToList()))
+            .ToList();
+
+        // Limit alias speakers to one per form key
+        foreach (var (_, aliasSpeakers) in nameMappedSpeakers) {
+            if (aliasSpeakers.Count == 1) continue;
+
+            foreach (var aliasSpeaker in aliasSpeakers.Skip(1)) {
+                var replacementName = aliasSpeakers[0].Name;
+                foreach (var topic in topics) {
+                    foreach (var topicInfo in topic.TopicInfos) {
+                        if (topicInfo.Prompt.FullText == aliasSpeaker.Name) {
+                            topicInfo.Prompt.Text = replacementName;
+                        }
+                    }
+                }
+            }
+        }
+
         //Map speaker form keys
-        return Context.GetAliasSpeakers(speakerNames);
+        return nameMappedSpeakers
+            .Select(x => x.Item2[0])
+            .ToArray();
     }
 
     protected virtual void TransformLines(List<DialogueTopic> topics) {
@@ -277,10 +296,8 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
 
     public AliasSpeaker GetSpeaker(string name) {
         name = ISpeaker.GetSpeakerName(name);
-        foreach (var (_, speakers) in NameMappedSpeakers) {
-            foreach (var speaker in speakers) {
-                if (speaker.NameNoSpaces == name) return speaker;
-            }
+        foreach (var speaker in AliasSpeakers) {
+            if (speaker.NameNoSpaces == name) return speaker;
         }
 
         throw new InvalidOperationException($"Didn't find speaker {name}");

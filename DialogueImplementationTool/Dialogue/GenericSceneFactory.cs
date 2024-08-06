@@ -24,7 +24,7 @@ public class GenericSceneFactory(IDialogueContext context) : SceneFactory(contex
 
     public override void PreProcessSpeakers() {
         //Make sure there are at least two speakers
-        if (NameMappedSpeakers.Count < 2) MessageBox.Show("Error, there must be at least 2 NPCs");
+        if (AliasSpeakers.Count < 2) MessageBox.Show("Error, there must be at least 2 NPCs");
     }
 
     protected override (Scene? Scene, IQuest? QuestForDialogue) GetCurrentScene() {
