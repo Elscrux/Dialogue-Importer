@@ -172,6 +172,7 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
                     // Remove [Lock HERE] or [Unlock HERE]
                     lockMatch.TopicInfo.Responses[^1].RemoveNote(lockMatch.Note);
                     lockMatch.TopicInfo.RemoveRedundantResponses();
+                    lockMatch.TopicInfo.Script.StartScriptLines.Add($"; {locking} {keyword}");
                     lockMatch.TopicInfo.Script.StartScriptLines.Add($"GetOwningQuest().SetStage({stage})");
                 }
             }
