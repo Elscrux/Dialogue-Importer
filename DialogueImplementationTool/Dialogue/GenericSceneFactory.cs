@@ -63,7 +63,9 @@ public class GenericSceneFactory(IDialogueContext context) : SceneFactory(contex
             for (var i = 0; i < AliasSpeakers.Count; i++) {
                 if (i < 2) continue;
 
-                aliases.Add(CreateFakeEventAlias(i));
+                var fakeEventAlias = CreateFakeEventAlias(i);
+                fakeEventAlias.Conditions.AddRange(getIsIdConditions);
+                aliases.Add(fakeEventAlias);
             }
         }
 
@@ -110,6 +112,8 @@ public class GenericSceneFactory(IDialogueContext context) : SceneFactory(contex
             Flags = QuestAlias.Flag.AllowReserved,
             Conditions = [
                 new ConditionFloat {
+                    CompareOperator = CompareOperator.LessThan,
+                    ComparisonValue = 1000,
                     Data = new GetDistanceConditionData {
                         UseAliases = true,
                         Target = {
