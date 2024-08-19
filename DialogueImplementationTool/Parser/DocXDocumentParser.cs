@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -65,7 +66,6 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
     public List<DialogueTopic> ParseDialogue(IDialogueProcessor processor, int index) {
         var branches = new List<DialogueTopic>();
         var list = _doc.Lists[index];
-        var paragraphs = EnumerateBetween(list.Items[0], list.Items[^1]);
 
         //Evaluate if the player starts dialogue
         if (IsPlayerLine(list.Items[0])) {
@@ -79,8 +79,7 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
                 var firstIndex = listIndices[i];
                 var lastIndex = listIndices[i + 1];
 
-                var enumerable = EnumerateBetween(list.Items[firstIndex], list.Items[lastIndex]);
-                using var enumerator = enumerable.GetEnumerator();
+                var enumerator = new ParagraphEnumerator(list.Items[firstIndex], list.Items[lastIndex]);
                 if (!enumerator.MoveNext()) continue;
 
                 var topic = GetTopic(processor, enumerator);
@@ -100,10 +99,10 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
             }
         } else {
             //One new branch, NPC starts to talk
-            using var enumerator = paragraphs.GetEnumerator();
-            if (!enumerator.MoveNext()) return branches;
+            var paragraphEnumerator = new ParagraphEnumerator(list.Items[0], list.Items[^1]);
+            if (!paragraphEnumerator.MoveNext()) return branches;
 
-            var topicInfos = GetTopicInfos(processor, enumerator).ToList();
+            var topicInfos = GetTopicInfos(processor, paragraphEnumerator).ToList();
             var currentBranch = new DialogueTopic { TopicInfos = topicInfos };
             branches.Add(currentBranch);
 
@@ -121,8 +120,11 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
         }
 
         return branches;
+    }
 
-        static IEnumerable<Paragraph> EnumerateBetween(Paragraph first, Paragraph last) {
+    public sealed class ParagraphEnumerator(Paragraph first, Paragraph last) : IEnumerator<Paragraph> {
+        private readonly IEnumerator<Paragraph> _enumerator = EnumeratorImplementation(first, last);
+        private static IEnumerator<Paragraph> EnumeratorImplementation(Paragraph first, Paragraph last) {
             var current = first;
             while (current.Xml != last.Xml && current.Xml != current.NextParagraph.Xml) {
                 yield return current;
@@ -132,6 +134,13 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
 
             yield return last;
         }
+
+        public bool IsLast => Current.Xml == last.Xml;
+        public bool MoveNext() => _enumerator.MoveNext();
+        public void Reset() => _enumerator.Reset();
+        public Paragraph Current => _enumerator.Current;
+        object IEnumerator.Current => Current;
+        public void Dispose() => _enumerator.Dispose();
     }
 
     public List<DialogueTopic> ParseOneLiner(IDialogueProcessor processor, int index) {
@@ -150,12 +159,11 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
         return [new DialogueTopic { TopicInfos = topicInfos }];
     }
 
-    private DialogueTopic GetTopic(IDialogueProcessor processor, IEnumerator<Paragraph> enumerator) {
+    private DialogueTopic GetTopic(IDialogueProcessor processor, ParagraphEnumerator enumerator) {
         var startingIndentation = enumerator.Current.IndentLevel;
         var prompt = enumerator.Current.Text;
 
-        enumerator.MoveNext();
-        if (enumerator.Current.IndentLevel != startingIndentation + 1) {
+        if (!enumerator.MoveNext() || enumerator.Current.IndentLevel != startingIndentation + 1) {
             return new DialogueTopic { TopicInfos = [new DialogueTopicInfo { Prompt = prompt }] };
         }
 
@@ -168,7 +176,7 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
         return new DialogueTopic { TopicInfos = list };
     }
 
-    private IEnumerable<DialogueTopicInfo> GetTopicInfos(IDialogueProcessor processor, IEnumerator<Paragraph> enumerator) {
+    private IEnumerable<DialogueTopicInfo> GetTopicInfos(IDialogueProcessor processor, ParagraphEnumerator enumerator) {
         var startingIndentation = enumerator.Current.IndentLevel;
         var abort = false;
 
@@ -208,6 +216,10 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
                 if (IsPlayerLine(enumerator.Current)) {
                     var nextTopic = GetTopic(processor, enumerator);
                     topicInfo.Links.Add(nextTopic);
+                    if (enumerator.IsLast) {
+                        abort = true;
+                        break;
+                    }
                 } else {
                     if (!enumerator.MoveNext()) {
                         abort = true;
