@@ -8,6 +8,6 @@ public static class ModExtension {
         var fileInfo = new FileInfo(Path.Combine(directoryInfo.FullName, mod.ModKey.FileName));
 
         if (fileInfo.Directory is { Exists: false }) fileInfo.Directory?.Create();
-        mod.WriteToBinaryParallel(fileInfo.FullName);
+        mod.WriteToBinary(fileInfo.FullName);
     }
 }
