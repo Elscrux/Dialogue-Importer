@@ -10,11 +10,11 @@
       <PackageReference Include="Autofac" Version="8.0.0" />
       <PackageReference Include="AODL" Version="1.2.0.1" />
       <PackageReference Include="DocX" Version="3.0.1" />
-      <PackageReference Include="Mutagen.Bethesda.Autofac" Version="0.46.0.1-nightly-20240818-095514" />
+      <PackageReference Include="Mutagen.Bethesda.Autofac" Version="0.46.0.1-nightly-20240828-085588" />
       <PackageReference Include="Mutagen.Bethesda.FormKeys.SkyrimSE" Version="3.2.0" />
-      <PackageReference Include="Mutagen.Bethesda.Json" Version="0.46.0.1-nightly-20240818-095514" />
-      <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.46.0.1-nightly-20240818-095514" />
-      <PackageReference Include="Mutagen.Bethesda.WPF" Version="0.45.0" />
+      <PackageReference Include="Mutagen.Bethesda.Json" Version="0.46.0.1-nightly-20240828-085588" />
+      <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.46.0.1-nightly-20240828-085588" />
+      <PackageReference Include="Mutagen.Bethesda.WPF" Version="0.45.1" />
       <PackageReference Include="pythonnet" Version="3.1.0-preview2024-08-05" />
       <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
     </ItemGroup>

@@ -82,7 +82,7 @@ public sealed class MainWindowVM : ViewModel {
             document.ImplementDialogue();
         }
 
-        EnvironmentContext.Mod.Save(OutputPathProvider.OutputPath);
+        EnvironmentContext.Mod.Save(OutputPathProvider.OutputPath, EnvironmentContext.Environment.LoadOrder);
     }
 
     private IDocumentParser GetDocumentParser(string filePath) {

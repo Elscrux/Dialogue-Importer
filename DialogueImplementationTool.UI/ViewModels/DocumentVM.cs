@@ -61,7 +61,7 @@ public sealed class DocumentVM : ViewModel {
         if (Status != DocumentStatus.NotLoaded) return;
 
         ImplementDialogue(true);
-        Context.Mod.Save(_outputPathProvider.OutputPath);
+        Context.Mod.Save(_outputPathProvider.OutputPath, Context.Environment.LoadOrder);
     }
 
     private void ImplementDialogue(bool autoApply) {
@@ -100,7 +100,7 @@ public sealed class DocumentVM : ViewModel {
 
         ImplementDialogue(false);
 
-        Context.Mod.Save(_outputPathProvider.OutputPath);
+        Context.Mod.Save(_outputPathProvider.OutputPath, Context.Environment.LoadOrder);
     }
 
     public void DeleteDocument() => _deleteDocument(this);
