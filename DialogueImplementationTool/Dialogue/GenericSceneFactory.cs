@@ -89,6 +89,8 @@ public class GenericSceneFactory(IDialogueContext context) : SceneFactory(contex
         scene.Flags |= Scene.Flag.BeginOnQuestStart | Scene.Flag.StopQuestOnEnd | Scene.Flag.Interruptable;
         Context.AddScene(scene);
 
+        sceneQuest.NextAliasID = (uint?) sceneQuest.Aliases.Count;
+
         return (scene, sceneQuest);
 
         QuestAlias CreateEventAlias(uint id, string name, byte[] eventData, ExtendedList<Condition> conditions) {
