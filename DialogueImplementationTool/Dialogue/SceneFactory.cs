@@ -14,7 +14,10 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
     protected IReadOnlyList<AliasSpeaker> AliasSpeakers = [];
 
     public override IDialogueProcessor ConfigureProcessor(DialogueProcessor dialogueProcessor) {
-        // Add scene response processor
+        // Add scene response processor before note extractor so the speaker name can be trimmed and the line starts with the note
+        // NPC A: [some note] some text.
+        // => [some note] some text.        | Speaker: NPC A
+        // => some text.                    | Speaker: NPC A, Note: [some note]
         var noteExtractorIndex = dialogueProcessor.ResponseProcessors.FindIndex(p => p is ResponseNoteExtractor);
         dialogueProcessor.ResponseProcessors.Insert(noteExtractorIndex, new SceneResponseProcessor());
 

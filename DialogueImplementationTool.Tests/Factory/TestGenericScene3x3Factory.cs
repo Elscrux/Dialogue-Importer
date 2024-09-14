@@ -23,6 +23,10 @@ public sealed class TestGenericScene3x3Factory {
         _testConstants.DialogueProcessor.Process(conversation);
 
         // Check
+        var firstResponse = conversation[0].Topics[0].TopicInfos[0].Responses[0];
+        firstResponse.FullResponse.Should().NotContain("tone: happy");
+        firstResponse.ScriptNote.Should().Be("tone: happy");
+
         var secondTopic = conversation[0].Topics[1].TopicInfos[0].Responses[0];
         secondTopic.Response.Should().NotContain("nervous");
         secondTopic.ScriptNote.Should().Be("nervous");

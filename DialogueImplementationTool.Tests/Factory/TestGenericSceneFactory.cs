@@ -24,6 +24,10 @@ public sealed class TestGenericSceneFactory {
         secondResponse.FullResponse.Should().NotContain("morose");
         secondResponse.ScriptNote.Should().Be("morose");
 
+        var lastResponse = conversation[0].Topics[^1].TopicInfos[0].Responses[0];
+        lastResponse.FullResponse.Should().NotContain("emphasis: usual");
+        lastResponse.ScriptNote.Should().Be("emphasis: usual");
+
         // Implement
         scene1.Create();
 

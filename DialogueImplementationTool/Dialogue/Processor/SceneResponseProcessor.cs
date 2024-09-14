@@ -7,7 +7,7 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 public sealed partial class SceneResponseProcessor : IDialogueResponseProcessor {
     public const string SceneNotePrefix = "SPEAKER=";
 
-    [GeneratedRegex(@"^([^:]+):\s*(.+)")]
+    [GeneratedRegex(@"^([^[:]+):\s*(.+)")]
     private static partial Regex SceneLineRegex();
 
     public static string? GetSpeaker(Note note) {
