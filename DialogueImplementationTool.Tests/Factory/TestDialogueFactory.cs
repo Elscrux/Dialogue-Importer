@@ -233,7 +233,7 @@ public sealed class TestDialogueFactory {
         x.Subject.Stage.Should().Be(12);
 
         conversation[0].Topics[1].TopicInfos[0].ExtraConditions.Should().BeEmpty();
-        conversation[0].Topics[1].TopicInfos[0].Script.StartScriptLines.Should().HaveCount(2);
+        conversation[0].Topics[1].TopicInfos[0].Script.StartScriptLines.Should().HaveCount(4);
 
         conversation[0].Topics[2].TopicInfos[0].ExtraConditions.Should().ContainSingle();
         x = conversation[0].Topics[2].TopicInfos[0].ExtraConditions[0].Data.Should().BeOfType<GetStageDoneConditionData>();
@@ -314,10 +314,10 @@ public sealed class TestDialogueFactory {
         // [unlock all BRAVE] [lock all FEAR, REASON]
         var links = conversation[2].Topics[0].TopicInfos[0].Links[0].TopicInfos[0].Links;
         links.Should().HaveCount(2);
-        links[0].TopicInfos[0].Links[0].TopicInfos[0].Links[0].TopicInfos[0].Script.StartScriptLines.Should().HaveCount(3);
+        links[0].TopicInfos[0].Links[0].TopicInfos[0].Links[0].TopicInfos[0].Script.StartScriptLines.Should().HaveCount(6);
 
         // [unlock all BRAVE in Adila and Marille's dialogue] [lock all FEAR, REASON]
-        links[1].TopicInfos[0].Links[0].TopicInfos[0].Links[0].TopicInfos[0].Script.StartScriptLines.Should().HaveCount(3);
+        links[1].TopicInfos[0].Links[0].TopicInfos[0].Links[0].TopicInfos[0].Script.StartScriptLines.Should().HaveCount(6);
     }
 
     [Fact]
