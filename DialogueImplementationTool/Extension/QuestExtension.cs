@@ -27,6 +27,7 @@ public static class QuestExtension {
         };
 
         quest.Aliases.Add(alias);
+        quest.NextAliasID = Convert.ToUInt32(quest.Aliases.Count);
 
         return alias;
     }
