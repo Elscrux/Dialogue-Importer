@@ -10,6 +10,8 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 
 public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) : IConversationProcessor {
     private const string LockFillerPart = "(?:(?:-|all) )";
+    private const string Locked = "locked";
+    private const string Unlocked = "unlocked";
 
     // [DONE], [HERE]
     [GeneratedRegex(KeywordUtils.KeywordRegexPart)]
@@ -21,20 +23,20 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
 
     // [Locked]
     // In combination with a SimpleKeywordRegex this creates a locked keyword
-    [GeneratedRegex("(?i)^locked$")]
+    [GeneratedRegex($"(?i)^{Locked}")]
     private static partial Regex LockedRegex();
 
     // [Locked]
     // In combination with a SimpleKeywordRegex this creates an unlocked keyword
-    [GeneratedRegex("(?i)^unlocked")]
+    [GeneratedRegex($"(?i)^{Unlocked}")]
     private static partial Regex UnlockedRegex();
 
     // [unlocked HERE]
-    [GeneratedRegex($"(?i)^locked:? {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
+    [GeneratedRegex($"(?i)^{Locked}:? {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
     private static partial Regex StatusLockedRegex();
 
     // [locked HERE]
-    [GeneratedRegex($"(?i)^locked:? {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
+    [GeneratedRegex($"(?i)^{Unlocked}:? {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
     private static partial Regex StatusUnlockedRegex();
 
     // [lock all HERE] [remove HERE]
