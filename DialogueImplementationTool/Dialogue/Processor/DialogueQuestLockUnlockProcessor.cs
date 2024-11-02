@@ -32,11 +32,11 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
     private static partial Regex UnlockedRegex();
 
     // [unlocked HERE]
-    [GeneratedRegex($"(?i)^{Locked}:? {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
+    [GeneratedRegex($"(?i)^{Locked}:? {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}|^{KeywordUtils.KeywordRegexPart}(?i):? {LockFillerPart}?{Locked}")]
     private static partial Regex StatusLockedRegex();
 
     // [locked HERE]
-    [GeneratedRegex($"(?i)^{Unlocked}:? {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
+    [GeneratedRegex($"(?i)^{Unlocked}:? {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}|^{KeywordUtils.KeywordRegexPart}(?i):? {LockFillerPart}?{Unlocked}")]
     private static partial Regex StatusUnlockedRegex();
 
     // [lock all HERE] [remove HERE]

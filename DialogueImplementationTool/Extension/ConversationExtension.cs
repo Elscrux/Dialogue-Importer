@@ -70,7 +70,8 @@ public static class ConversationExtension {
                 var match = regex.Match(note.Text);
                 if (!match.Success) return TryGet<(Note Note, string Keyword)>.Failure;
 
-                return TryGet<(Note Note, string Keyword)>.Succeed((note, match.Groups[1].Value));
+                var value = match.Groups.Values.Skip(1).First(x => !x.Value.IsNullOrEmpty()).Value;
+                return TryGet<(Note Note, string Keyword)>.Succeed((note, value));
             });
     }
 }

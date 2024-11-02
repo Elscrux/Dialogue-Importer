@@ -123,4 +123,12 @@ public static class TestSamples {
             GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 1),
             GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 2));
     }
+
+    public static GeneratedDialogue
+        GetLockTestDialogue(TestConstants testConstants) {
+        var docXDocumentParser = new DocXDocumentParser(
+            Path.GetFullPath("../../../Samples/Documents/LockTest.docx"));
+
+        return GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 0);
+    }
 }
