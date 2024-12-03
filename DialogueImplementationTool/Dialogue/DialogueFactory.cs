@@ -18,8 +18,6 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
         return dialogueProcessor;
     }
 
-    public override void PreProcess(List<DialogueTopic> topics) {}
-
     public override void GenerateDialogue(List<DialogueTopic> topics) {
         foreach (var topic in topics) {
             if (topic.ServiceType == ServiceType.Default) {

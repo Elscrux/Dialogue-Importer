@@ -18,7 +18,6 @@ namespace DialogueImplementationTool.Dialogue;
 public abstract class BaseDialogueFactory(IDialogueContext context) {
     protected readonly IDialogueContext Context = context;
 
-    public abstract void PreProcess(List<DialogueTopic> topics);
     public abstract void GenerateDialogue(List<DialogueTopic> topics);
 
     public static BaseDialogueFactory GetBaseFactory(DialogueType type, IDialogueContext context) {
@@ -138,7 +137,6 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
     public void Create(GeneratedDialogue generatedDialogue) {
         if (generatedDialogue.Topics.Count == 0) return;
 
-        PreProcess(generatedDialogue.Topics);
         GenerateDialogue(generatedDialogue.Topics);
     }
 

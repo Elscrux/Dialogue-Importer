@@ -51,6 +51,4 @@ public abstract class OneLinerFactory(IDialogueContext context) : BaseDialogueFa
             lastResponse = response.FormKey;
         }
     }
-
-    public override void PreProcess(List<DialogueTopic> topics) {}
 }

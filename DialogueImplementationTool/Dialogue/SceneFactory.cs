@@ -39,6 +39,8 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
     }
 
     public override void GenerateDialogue(List<DialogueTopic> topics) {
+        PreProcess(topics);
+
         var (scene, quest) = GetCurrentScene();
         if (scene is null || quest is null) return;
 
@@ -143,7 +145,7 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
         };
     }
 
-    public override void PreProcess(List<DialogueTopic> topics) {
+    public virtual void PreProcess(List<DialogueTopic> topics) {
         // Set up speaker
         AliasSpeakers = GetAliasSpeakers(topics);
 
