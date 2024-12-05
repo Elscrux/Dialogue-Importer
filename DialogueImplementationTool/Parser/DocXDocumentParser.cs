@@ -15,7 +15,12 @@ using Xceed.Words.NET;
 using Note = DialogueImplementationTool.Dialogue.Model.Note;
 namespace DialogueImplementationTool.Parser;
 
-public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
+public sealed class DocXDocumentParser
+    : ReactiveObject,
+        IDocumentIterator,
+        IBranchingDialogueParser,
+        IOneLinerParser,
+        ISceneParser {
     private const int FirstIndentationLevel = 0;
     private readonly DocX _doc;
 
@@ -63,7 +68,7 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
             : _doc.Lists[index].Items.FirstOrDefault()?.Text ?? string.Empty;
     }
 
-    public List<DialogueTopic> ParseDialogue(IDialogueProcessor processor, int index) {
+    public List<DialogueTopic> ParseBranchingDialogue(IDialogueProcessor processor, int index) {
         var branches = new List<DialogueTopic>();
         var list = _doc.Lists[index];
 
@@ -121,6 +126,8 @@ public sealed class DocXDocumentParser : ReactiveObject, IDocumentParser {
 
         return branches;
     }
+
+    public List<DialogueTopic> ParseScene(IDialogueProcessor processor, int index) => ParseBranchingDialogue(processor, index);
 
     public sealed class ParagraphEnumerator(Paragraph first, Paragraph last) : IEnumerator<Paragraph> {
         private readonly IEnumerator<Paragraph> _enumerator = EnumeratorImplementation(first, last);

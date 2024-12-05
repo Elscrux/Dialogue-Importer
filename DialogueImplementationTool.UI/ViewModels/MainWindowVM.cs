@@ -73,7 +73,7 @@ public sealed class MainWindowVM : ViewModel {
 
     private void ParseAllImpl() {
         foreach (var documentVM in Documents) {
-            documentVM.LaunchParser();
+            documentVM.LaunchParserConfig();
         }
     }
 

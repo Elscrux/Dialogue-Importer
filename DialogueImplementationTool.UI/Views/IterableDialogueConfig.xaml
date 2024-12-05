@@ -11,7 +11,7 @@
         x:Name="DialogueWindow"
         Title="{Binding Title, StringFormat='Dialogue Implementation Tool - {0}'}"
         Height="720" Width="1280"
-        MinHeight="360" MinWidth="640" d:DataContext="{d:DesignInstance viewModels:DialogueVM}">
+        MinHeight="360" MinWidth="640" d:DataContext="{d:DesignInstance viewModels:IterableDialogueConfigVM}">
     <Window.InputBindings>
         <KeyBinding Key="D1" Command="{Binding SelectIndex}" CommandParameter="1"/>
         <KeyBinding Key="NumPad1" Command="{Binding SelectIndex}" CommandParameter="1"/>

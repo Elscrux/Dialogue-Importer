@@ -30,7 +30,7 @@ public partial class App {
         builder.RegisterType<MainWindowVM>()
             .SingleInstance();
 
-        builder.RegisterType<DialogueVM>();
+        builder.RegisterType<IterableDialogueConfigVM>();
 
         builder.RegisterType<DialogueProcessor>()
             .AsSelf();

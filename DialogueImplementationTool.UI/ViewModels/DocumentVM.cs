@@ -15,8 +15,8 @@ namespace DialogueImplementationTool.UI.ViewModels;
 public sealed class DocumentVM : ViewModel {
     private readonly IDocumentParser _documentParser;
     private readonly OutputPathProvider _outputPathProvider;
-    private readonly PapyrusCompilerWrapper _papyrusCompilerWrapper;
-    private readonly Func<IDocumentParser, IReadOnlyList<DialogueSelection>, DialogueVM> _dialogueVMFactory;
+    private readonly ScriptWriter _scriptWriter;
+    private readonly Func<IDocumentIterator, IterableDialogueConfigVM> _iterableDialogueConfigVMFactory;
     private readonly Action<DocumentVM> _deleteDocument;
     private readonly Action<DocumentVM, bool> _onImplementationComplete;
     private readonly Func<IDialogueContext, DialogueProcessor> _dialogueProcessorFactory;
@@ -35,16 +35,16 @@ public sealed class DocumentVM : ViewModel {
         IDocumentParser documentParser,
         IDialogueContext context,
         OutputPathProvider outputPathProvider,
-        PapyrusCompilerWrapper papyrusCompilerWrapper,
-        Func<IDocumentParser, IReadOnlyList<DialogueSelection>, DialogueVM> dialogueVMFactory,
+        ScriptWriter scriptWriter,
+        Func<IDocumentIterator, IterableDialogueConfigVM> iterableDialogueConfigVMFactory,
         Action<DocumentVM> deleteDocument,
         Action<DocumentVM, bool> onImplementationComplete,
         Func<IDialogueContext, DialogueProcessor> dialogueProcessorFactory) {
         _documentParser = documentParser;
         Context = context;
         _outputPathProvider = outputPathProvider;
-        _papyrusCompilerWrapper = papyrusCompilerWrapper;
-        _dialogueVMFactory = dialogueVMFactory;
+        _scriptWriter = scriptWriter;
+        _iterableDialogueConfigVMFactory = iterableDialogueConfigVMFactory;
         _deleteDocument = deleteDocument;
         _onImplementationComplete = onImplementationComplete;
         _dialogueProcessorFactory = dialogueProcessorFactory;
@@ -53,7 +53,7 @@ public sealed class DocumentVM : ViewModel {
         HasCachedSelections = DialogueSelections.Count > 0;
 
         AutoParse = ReactiveCommand.Create(ImplementDialogue);
-        ManualParse = ReactiveCommand.Create(LaunchParser);
+        ManualParse = ReactiveCommand.Create(LaunchParserConfig);
         Delete = ReactiveCommand.Create(DeleteDocument);
     }
 
@@ -68,35 +68,56 @@ public sealed class DocumentVM : ViewModel {
         Status = DocumentStatus.InProgress;
         Context.AutoApplyProvider.AutoApply = autoApply;
 
-        BaseDialogueFactory.ImplementDialogue(
-            Context,
-            _documentParser,
-            _outputPathProvider,
-            _papyrusCompilerWrapper,
-            _dialogueProcessorFactory(Context),
-            DialogueSelections);
+        var dialogueProcessor = _dialogueProcessorFactory(Context);
+        switch (_documentParser) {
+            case IDocumentIterator documentIterator: {
+                var conversation = documentIterator.ParseDialogue(Context, dialogueProcessor, DialogueSelections);
+
+                // Actually create the dialogues
+                conversation.Create();
+
+                break;
+            }
+        }
+
+        // Write scripts
+        foreach (var (scriptName, content) in Context.Scripts) {
+            _scriptWriter.WriteScript(scriptName, content, Context.Mod.ModKey);
+        }
 
         Status = DocumentStatus.Implemented;
         _onImplementationComplete(this, autoApply);
     }
 
-    public void LaunchParser() {
+    public void LaunchParserConfig() {
         if (Status != DocumentStatus.NotLoaded) return;
 
-        var selections = _dialogueSelectionsCache.LoadSelection();
-        var dialogueVM = _dialogueVMFactory(_documentParser, selections);
+        switch (_documentParser) {
+            case IDocumentIterator documentIterator: {
+                var selections = _dialogueSelectionsCache.LoadSelection();
 
-        var processDialogue = new ProcessDialogue(dialogueVM);
-        processDialogue.ShowDialog();
+                var dialogueIteratorVM = _iterableDialogueConfigVMFactory(documentIterator);
+                dialogueIteratorVM.SetSelections(selections);
 
-        // Skip if no selections were made
-        if (dialogueVM.DialogueSelections.TrueForAll(s => s.SelectedTypes.Count == 0)) return;
+                var processDialogue = new ProcessDialogue(dialogueIteratorVM);
+                processDialogue.ShowDialog();
 
-        _dialogueSelectionsCache.SaveSelection(dialogueVM.DialogueSelections);
-        HasCachedSelections = true;
+                // Skip if no selections were made
+                if (dialogueIteratorVM.DialogueSelections.TrueForAll(s => s.SelectedTypes.Count == 0)) return;
 
-        DialogueSelections.Clear();
-        DialogueSelections.AddRange(dialogueVM.DialogueSelections);
+                // Update selections
+                _dialogueSelectionsCache.SaveSelection(dialogueIteratorVM.DialogueSelections);
+                HasCachedSelections = true;
+
+                DialogueSelections.Clear();
+                DialogueSelections.AddRange(dialogueIteratorVM.DialogueSelections);
+                break;
+            }
+            case IDocumentParser: {
+                break;
+            }
+            default: throw new ArgumentOutOfRangeException(nameof(_documentParser));
+        }
 
         ImplementDialogue(false);
 

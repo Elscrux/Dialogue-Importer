@@ -3,11 +3,11 @@ using DialogueImplementationTool.UI.ViewModels;
 namespace DialogueImplementationTool.UI.Views;
 
 public partial class ProcessDialogue {
-    public ProcessDialogue(DialogueVM vm) {
+    public ProcessDialogue(IterableDialogueConfigVM iterableDialogueConfigVM) {
         InitializeComponent();
-        DataContext = vm;
+        DataContext = iterableDialogueConfigVM;
 
-        vm.RefreshPreview(true);
+        iterableDialogueConfigVM.RefreshPreview(true);
     }
 
     private void Save_OnClick(object sender, RoutedEventArgs e) {

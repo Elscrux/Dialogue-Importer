@@ -7,13 +7,12 @@ namespace DialogueImplementationTool.Tests.Samples;
 public static class TestSamples {
     public static GeneratedDialogue GetDialogue(
         TestConstants testConstants,
-        IDocumentParser documentParser,
+        IDocumentIterator documentIterator,
         DialogueType type,
         int index) {
-        return BaseDialogueFactory.PrepareDialogue(
+        return documentIterator.ParseDialogue(
                 testConstants.SkyrimDialogueContext,
                 testConstants.DialogueProcessor,
-                documentParser,
                 new DialogueSelection {
                     Speaker = testConstants.Speaker1.FormKey,
                     SelectedTypes = { type },

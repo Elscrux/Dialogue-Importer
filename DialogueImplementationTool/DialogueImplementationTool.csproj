@@ -9,6 +9,7 @@
     <ItemGroup>
       <PackageReference Include="Autofac" Version="8.0.0" />
       <PackageReference Include="AODL" Version="1.2.0.1" />
+      <PackageReference Include="CsvHelper" Version="33.0.1" />
       <PackageReference Include="DocX" Version="3.0.1" />
       <PackageReference Include="Mutagen.Bethesda.Autofac" Version="0.46.0.1-nightly-20240828-085588" />
       <PackageReference Include="Mutagen.Bethesda.FormKeys.SkyrimSE" Version="3.2.0" />
@@ -48,13 +49,10 @@
         <DependentUpon>BaseDialogueFactory.cs</DependentUpon>
       </Compile>
       <Compile Update="Parser\OpenDocumentTextParser.cs">
-        <DependentUpon>DocumentParser.cs</DependentUpon>
+        <DependentUpon>IDocumentParser.cs</DependentUpon>
       </Compile>
       <Compile Update="Parser\DocXDocumentParser.cs">
-        <DependentUpon>DocumentParser.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Parser\DocumentParser.cs">
-        <DependentUpon>DocumentIterator.cs</DependentUpon>
+        <DependentUpon>IDocumentParser.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Speaker\NpcSpeaker.cs">
         <DependentUpon>ISpeaker.cs</DependentUpon>

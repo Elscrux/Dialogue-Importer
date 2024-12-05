@@ -32,104 +32,6 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
         };
     }
 
-    public static void ImplementDialogue(
-        IDialogueContext context,
-        IDocumentParser documentParser,
-        OutputPathProvider outputPathProvider,
-        PapyrusCompilerWrapper compiler,
-        DialogueProcessor dialogueProcessor,
-        List<DialogueSelection> selections) {
-        var conversation = PrepareDialogue(context, dialogueProcessor, documentParser, selections);
-
-        // Conversation wide processing
-        dialogueProcessor.Process(conversation);
-
-        // Actually create the dialogues
-        foreach (var dialogue in conversation) {
-            dialogue.Factory.Create(dialogue);
-        }
-
-        Task.Run(() => {
-            var directoryInfo = new DirectoryInfo(Path.Combine(outputPathProvider.OutputPath, context.Mod.ModKey.Name));
-            var fileInfo = new FileInfo(Path.Combine(directoryInfo.FullName, context.Mod.ModKey.FileName));
-
-            if (fileInfo.Directory is { Exists: false }) fileInfo.Directory?.Create();
-            foreach (var (fileName, content) in context.Scripts) {
-                var scriptsDirectory = Path.Combine(directoryInfo.FullName, "Scripts");
-                var scriptsSourceDirectory = Path.Combine(scriptsDirectory, "Source");
-                Directory.CreateDirectory(scriptsSourceDirectory);
-                var sourcePath = Path.Combine(scriptsSourceDirectory, fileName + ".psc");
-                File.WriteAllText(sourcePath, content);
-                compiler.Compile(sourcePath, scriptsDirectory, scriptsSourceDirectory);
-            }
-        });
-    }
-
-    public static IEnumerable<GeneratedDialogue> PrepareDialogue(
-        IDialogueContext context,
-        DialogueProcessor dialogueProcessor,
-        IDocumentParser documentParser,
-        DialogueSelection selection,
-        int index) {
-        foreach (var type in selection.SelectedTypes) {
-            var processor = dialogueProcessor.Clone();
-
-            // Setup factory and factory specific processing
-            var factory = GetBaseFactory(type, context);
-            var factorySpecificProcessor = factory.ConfigureProcessor(processor);
-
-            // Parse document
-            var topics = documentParser.Parse(type, factorySpecificProcessor, index);
-            
-            // Set speaker
-            ISpeaker speaker;
-            if (selection.UseGetIsAliasRef) {
-                var alias = context.Quest.GetOrAddAlias(context.LinkCache, selection.Speaker);
-                speaker = new AliasSpeaker(selection.Speaker, alias.Name!, (int) alias.ID);
-            } else {
-                speaker = new NpcSpeaker(context.LinkCache, selection.Speaker);
-            }
-
-            //Set speaker for all linked topics
-            foreach (var topic in topics.EnumerateLinks(true)) {
-                foreach (var topicInfo in topic.TopicInfos) {
-                    topicInfo.Speaker = speaker;
-                }
-            }
-
-            // Use more specific factory if needed
-            factory = factory.SpecifyType(topics);
-            factorySpecificProcessor = factory.ConfigureProcessor(processor);
-
-            // Process topic and topic infos
-            foreach (var topic in topics.EnumerateLinks(true)) {
-                foreach (var topicInfo in topic.TopicInfos) {
-                    factorySpecificProcessor.Process(topicInfo);
-                }
-
-                factorySpecificProcessor.Process(topic);
-            }
-
-            factorySpecificProcessor.Process(topics);
-
-            yield return new GeneratedDialogue(factory, topics);
-        }
-    }
-
-    public static Conversation PrepareDialogue(
-        IDialogueContext context,
-        DialogueProcessor dialogueProcessor,
-        IDocumentParser documentParser,
-        List<DialogueSelection> dialogueSelections) {
-        var conversation = new Conversation();
-        for (var i = 0; i < dialogueSelections.Count; i++) {
-            var selection = dialogueSelections[i];
-            conversation.AddRange(PrepareDialogue(context, dialogueProcessor, documentParser, selection, i));
-        }
-
-        return conversation;
-    }
-
     public virtual BaseDialogueFactory SpecifyType(List<DialogueTopic> topics) => this;
 
     public virtual IDialogueProcessor ConfigureProcessor(DialogueProcessor dialogueProcessor) => dialogueProcessor;
@@ -180,7 +82,7 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
             // Empty line shared info
             if (topicInfo.SharedInfo.ResponseDataTopicInfo.Responses is [] or [{ Text: "" }]) {
                 var emptyLine = Context.SelectRecord<DialogResponses, IDialogResponsesGetter>("Empty Line Shared Info");
-                return new DialogResponses(context.GetNextFormKey(), context.Release) {
+                return new DialogResponses(Context.GetNextFormKey(), Context.Release) {
                     ResponseData = new FormLinkNullable<IDialogResponsesGetter>(emptyLine.FormKey),
                     Conditions = GetConditions(topicInfo),
                     Flags = flags,
@@ -308,31 +210,27 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
         var list = new ExtendedList<Condition>();
 
         if (topicInfo.Speaker is AliasSpeaker aliasSpeaker) {
-            list.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 1,
-                Data = new GetIsAliasRefConditionData {
-                    ReferenceAliasIndex = aliasSpeaker.AliasIndex,
-                },
-            });
+            list.Add(new GetIsAliasRefConditionData {
+                ReferenceAliasIndex = aliasSpeaker.AliasIndex,
+            }.ToConditionFloat());
         } else if (Context.LinkCache.TryResolve<INpcGetter>(topicInfo.Speaker.FormKey, out var npc)) {
-            list.Add(GetFormKeyCondition(new GetIsIDConditionData {
+            list.Add(new GetIsIDConditionData {
                 Object = {
                     Link = { FormKey = npc.FormKey }
                 }
-            }));
+            }.ToConditionFloat());
         } else if (Context.LinkCache.TryResolve<IFactionGetter>(topicInfo.Speaker.FormKey, out var faction)) {
-            list.Add(GetFormKeyCondition(new GetInFactionConditionData {
+            list.Add(new GetInFactionConditionData {
                 Faction = { Link = { FormKey = faction.FormKey } }
-            }));
+            }.ToConditionFloat());
         } else if (Context.LinkCache.TryResolve<IVoiceTypeGetter>(topicInfo.Speaker.FormKey, out var voiceType)) {
-            list.Add(GetFormKeyCondition(new GetIsVoiceTypeConditionData {
+            list.Add(new GetIsVoiceTypeConditionData {
                 VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } }
-            }));
+            }.ToConditionFloat());
         } else if (Context.LinkCache.TryResolve<IFormListGetter>(topicInfo.Speaker.FormKey, out var formList)) {
-            list.Add(GetFormKeyCondition(new GetIsVoiceTypeConditionData {
+            list.Add(new GetIsVoiceTypeConditionData {
                 VoiceTypeOrList = { Link = { FormKey = formList.FormKey } }
-            }));
+            }.ToConditionFloat());
         }
 
         list.AddRange(topicInfo.ExtraConditions);

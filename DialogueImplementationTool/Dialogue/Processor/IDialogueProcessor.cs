@@ -5,7 +5,7 @@ using DialogueImplementationTool.Parser;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public interface IDialogueProcessor {
-    public DialogueResponse BuildResponse(IReadOnlyList<FormattedText> textSnippets) {
+    DialogueResponse BuildResponse(IReadOnlyList<FormattedText> textSnippets) {
         var dialogueResponse = new DialogueResponse {
             Response = string.Join(string.Empty, textSnippets.Select(x => x.Text)),
         };

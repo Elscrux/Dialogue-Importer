@@ -14,7 +14,12 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace DialogueImplementationTool.Parser;
 
-public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
+public sealed class OpenDocumentTextParser
+    : ReactiveObject,
+        IDocumentIterator,
+        IBranchingDialogueParser,
+        IOneLinerParser,
+        ISceneParser {
     private readonly TextDocument _doc = new();
 
     public OpenDocumentTextParser(string filePath) {
@@ -105,7 +110,7 @@ public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
         return string.Empty;
     }
 
-    public List<DialogueTopic> ParseDialogue(IDialogueProcessor processor, int index) {
+    public List<DialogueTopic> ParseBranchingDialogue(IDialogueProcessor processor, int index) {
         if (_doc.Content[index] is not List list) return [];
 
         var branches = new List<DialogueTopic>();
@@ -145,6 +150,8 @@ public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
 
         return branches;
     }
+
+    public List<DialogueTopic> ParseScene(IDialogueProcessor processor, int index) => ParseBranchingDialogue(processor, index);
 
     public List<DialogueTopic> ParseOneLiner(IDialogueProcessor processor, int index) {
         if (_doc.Content[index] is not List list) return [];
@@ -279,7 +286,7 @@ public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
         }
     }
 
-    private string GetText(ITextContainer paragraph) {
+    private string GetText(Paragraph paragraph) {
         var sb = new StringBuilder();
         foreach (IText text in paragraph.TextContent) {
             sb.Append(text.Text);
@@ -288,7 +295,7 @@ public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
         return sb.ToString();
     }
 
-    private bool IsPlayerLine(ITextContainer paragraph) {
+    private bool IsPlayerLine(Paragraph paragraph) {
         foreach (IText text in paragraph.TextContent) {
             if (text is not FormatedText formattedText || formattedText.TextStyle.TextProperties.Bold is null)
                 return false;
@@ -297,7 +304,7 @@ public sealed class OpenDocumentTextParser : ReactiveObject, IDocumentParser {
         return true;
     }
 
-    private List<FormattedText> GetFormattedText(ITextContainer paragraph) {
+    private List<FormattedText> GetFormattedText(Paragraph paragraph) {
         return (from IText text in paragraph.TextContent select GetFormattedText(text))
             .NotNull()
             .ToList();

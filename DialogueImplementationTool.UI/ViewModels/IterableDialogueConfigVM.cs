@@ -14,8 +14,8 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace DialogueImplementationTool.UI.ViewModels;
 
-public sealed class DialogueVM : ViewModel {
-    private readonly IDocumentParser _documentParser;
+public sealed class IterableDialogueConfigVM : ViewModel {
+    private readonly IDocumentIterator _documentParser;
 
     public ISpeakerFavoritesSelection SpeakerFavoritesSelection { get; }
 
@@ -67,10 +67,9 @@ public sealed class DialogueVM : ViewModel {
     public string Title { get; }
     [Reactive] public bool UseGetIsAliasRef { get; set; }
 
-    public DialogueVM(
-        IReadOnlyList<DialogueSelection> dialogueSelections,
+    public IterableDialogueConfigVM(
         EnvironmentContext context,
-        IDocumentParser documentParser,
+        IDocumentIterator documentParser,
         ISpeakerFavoritesSelection speakerFavoritesSelection) {
         SpeakerFavoritesSelection = speakerFavoritesSelection;
         _documentParser = documentParser;
@@ -85,9 +84,6 @@ public sealed class DialogueVM : ViewModel {
         // Set up selections
         DialogueSelections.Clear();
         for (var i = 0; i <= _documentParser.LastIndex; i++) DialogueSelections.Add(new DialogueSelection());
-        for (var i = 0; i < DialogueSelections.Count && i < dialogueSelections.Count; i++) {
-            DialogueSelections[i] = dialogueSelections[i];
-        }
 
         Task.Run(() => {
             foreach (var speakerType in SpeakerTypes) {
@@ -231,7 +227,7 @@ public sealed class DialogueVM : ViewModel {
         SetupSelectionSubscription(vm => vm.GenericSceneSelected, DialogueType.GenericScene);
         SetupSelectionSubscription(vm => vm.QuestSceneSelected, DialogueType.QuestScene);
 
-        void SetupSelectionSubscription(Expression<Func<DialogueVM, bool>> property, DialogueType type) {
+        void SetupSelectionSubscription(Expression<Func<IterableDialogueConfigVM, bool>> property, DialogueType type) {
             this.WhenAnyValue(property)
                 .Subscribe(selected => {
                     if (DialogueSelections.Count <= Index) return;
@@ -242,6 +238,16 @@ public sealed class DialogueVM : ViewModel {
                         DialogueSelections[Index].SelectedTypes.Remove(type);
                     }
                 });
+        }
+    }
+
+    public void SetSelections(IReadOnlyList<DialogueSelection> dialogueSelections) {
+        if (dialogueSelections.Count != DialogueSelections.Count) {
+            throw new InvalidOperationException("Selection count mismatch");
+        }
+
+        for (var i = 0; i < dialogueSelections.Count; i++) {
+            DialogueSelections[i] = dialogueSelections[i];
         }
     }
 

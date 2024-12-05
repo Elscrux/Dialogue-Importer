@@ -6,7 +6,7 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Tests.Factory;
 
-public sealed class TestDialogueFactory {
+public sealed class TestBranchingDialogueFactory {
     private readonly TestConstants _testConstants = new();
 
     [Fact]
