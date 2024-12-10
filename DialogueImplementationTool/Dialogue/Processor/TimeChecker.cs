@@ -1,42 +1,19 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Linq;
+using DialogueImplementationTool.Converter;
 using DialogueImplementationTool.Dialogue.Model;
-using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
-public sealed partial class TimeChecker : IDialogueTopicInfoProcessor {
-    private const string HourPattern = @"(\d{1,2}):(\d{2})";
-
-    [GeneratedRegex(@$"{HourPattern}[^\d]*{HourPattern}")]
-    private static partial Regex TimeRegex();
-
+public sealed class TimeChecker : IDialogueTopicInfoProcessor {
     public void Process(DialogueTopicInfo topicInfo) {
         foreach (var response in topicInfo.Responses) {
             foreach (var note in response.Notes()) {
-                var match = TimeRegex().Match(note.Text);
-                if (!match.Success) continue;
+                var conditions = TimeConditionConverter.Convert(note.Text).ToList();
+                if (conditions.Count == 0) continue;
 
-                if (!int.TryParse(match.Groups[1].Value, out var startHour)
-                 || !int.TryParse(match.Groups[2].Value, out var startMinutes)
-                 || !int.TryParse(match.Groups[3].Value, out var endHour)
-                 || !int.TryParse(match.Groups[4].Value, out var endMinutes)) continue;
-
-                var startCondition = GetGlobalValueCondition(startHour, startMinutes);
-                startCondition.CompareOperator = CompareOperator.GreaterThanOrEqualTo;
-                var endCondition = GetGlobalValueCondition(endHour, endMinutes);
-                endCondition.CompareOperator = CompareOperator.LessThanOrEqualTo;
-
-                topicInfo.ExtraConditions.Add(startCondition);
-                topicInfo.ExtraConditions.Add(endCondition);
+                topicInfo.ExtraConditions.AddRange(conditions);
 
                 response.RemoveNote(note);
             }
         }
-    }
-
-    private static ConditionFloat GetGlobalValueCondition(int hour, int minutes) {
-        return new ConditionFloat {
-            Data = new GetCurrentTimeConditionData(),
-            ComparisonValue = hour + minutes / 60f,
-        };
     }
 }

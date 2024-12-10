@@ -1,7 +1,7 @@
-﻿using DialogueImplementationTool.Dialogue.Model;
+﻿using DialogueImplementationTool.Converter;
+using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Dialogue.Processor;
 using FluentAssertions;
-using Mutagen.Bethesda.FormKeys.SkyrimSE;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Tests.Processor;
 
