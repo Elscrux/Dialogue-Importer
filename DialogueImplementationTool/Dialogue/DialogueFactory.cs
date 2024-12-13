@@ -12,9 +12,7 @@ namespace DialogueImplementationTool.Dialogue;
 
 public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFactory(context) {
     public override IDialogueProcessor ConfigureProcessor(DialogueProcessor dialogueProcessor) {
-        // Remove trailing colons from prompts (speaker names)
         dialogueProcessor.ConversationProcessors.Add(new BlockingChecker());
-        // Skip pre-processing of regular scene factory
         return dialogueProcessor;
     }
 
