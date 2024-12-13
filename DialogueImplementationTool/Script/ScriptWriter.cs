@@ -5,10 +5,9 @@ namespace DialogueImplementationTool.Script;
 
 public class ScriptWriter(OutputPathProvider outputPathProvider, PapyrusCompilerWrapper compiler) {
     public void WriteScript(string scriptName, string content, ModKey modKey) {
-        var directoryInfo = new DirectoryInfo(Path.Combine(outputPathProvider.OutputPath, modKey.FileName));
-        var fileInfo = new FileInfo(Path.Combine(directoryInfo.FullName, modKey.FileName));
+        var directoryInfo = new DirectoryInfo(Path.Combine(outputPathProvider.OutputPath, modKey.FileName.NameWithoutExtension));
 
-        if (fileInfo.Directory is { Exists: false }) fileInfo.Directory?.Create();
+        if (!directoryInfo.Exists) directoryInfo.Create();
 
         var scriptsDirectory = Path.Combine(directoryInfo.FullName, "Scripts");
         var scriptsSourceDirectory = Path.Combine(scriptsDirectory, "Source");
