@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Dialogue.Processor;
 using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Extension;
 using DialogueImplementationTool.Parser;
-using DialogueImplementationTool.Script;
-using DialogueImplementationTool.Services;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
@@ -150,7 +146,7 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
         if (hasEnd) middlePart += GetFragmentCode(script.EndScriptLines, 1) + "\n";
 
         var nameStart = Context.Prefix.IsNullOrEmpty() ? string.Empty : Context.Prefix + '_';
-        var scriptName = $"{nameStart}TIF__{responses.FormKey.ToFormID(Context.Mod, Context.LinkCache)}";
+        var scriptName = $"{nameStart}TIF__{responses.FormKey.ToFormID(Context.LinkCache)}";
         var nextFragment = hasEnd ? 2 : 1;
         var scriptText = $"""
             ;BEGIN FRAGMENT CODE - Do not edit anything between this and the end comment
