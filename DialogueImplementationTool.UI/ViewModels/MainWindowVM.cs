@@ -18,7 +18,7 @@ namespace DialogueImplementationTool.UI.ViewModels;
 
 public sealed class MainWindowVM : ViewModel {
     private readonly AutoApplyProvider _autoApplyProvider;
-    private readonly Dictionary<string, Func<string, IDocumentParser>> _documentIterators;
+    private readonly Dictionary<string, Func<string, IDocumentParser>> _documentParsers;
     private readonly IFormKeySelection _formKeySelection;
     private readonly ISpeakerFavoritesSelection _speakerFavoritesSelection;
     private readonly Func<IDocumentParser, IDialogueContext, Action<DocumentVM>, Action<DocumentVM, bool>, DocumentVM>
@@ -48,6 +48,7 @@ public sealed class MainWindowVM : ViewModel {
         Func<IDocumentParser, IDialogueContext, Action<DocumentVM>, Action<DocumentVM, bool>, DocumentVM> documentVMFactory,
         Func<string, OpenDocumentTextParser> openDocumentTextIteratorFactory,
         Func<string, DocXDocumentParser> docXIteratorFactory,
+        Func<string, IDialogueContext, CsvDocumentParser> csvIteratorFactory,
         OutputPathProvider outputPathProvider) {
         _autoApplyProvider = autoApplyProvider;
         EnvironmentContext = environmentContext;
@@ -56,11 +57,12 @@ public sealed class MainWindowVM : ViewModel {
         _speakerFavoritesSelection = speakerFavoritesSelection;
         _documentVMFactory = documentVMFactory;
         OutputPathProvider = outputPathProvider;
-        _documentIterators = new Dictionary<string, Func<string, IDocumentParser>> {
+        _documentParsers = new Dictionary<string, Func<string, IDocumentParser>> {
             { ".odt", openDocumentTextIteratorFactory },
             { ".docx", docXIteratorFactory },
+            { ".csv", path => csvIteratorFactory(path, GetContext(path)) },
         };
-        Extensions = _documentIterators.Keys.ToList();
+        Extensions = _documentParsers.Keys.ToList();
 
         DeleteDocuments = ReactiveCommand.Create<IList>(list => Documents.RemoveMany(list.OfType<DocumentVM>()));
         ParseAll = ReactiveCommand.Create(ParseAllImpl);
@@ -87,7 +89,7 @@ public sealed class MainWindowVM : ViewModel {
 
     private IDocumentParser GetDocumentParser(string filePath) {
         var extension = Path.GetExtension(filePath).ToLower();
-        var documentParserFactory = _documentIterators.GetValueOrDefault(extension);
+        var documentParserFactory = _documentParsers.GetValueOrDefault(extension);
         if (documentParserFactory is null) throw new InvalidOperationException($"No parser exists for {extension}");
 
         var documentParser = documentParserFactory(filePath);

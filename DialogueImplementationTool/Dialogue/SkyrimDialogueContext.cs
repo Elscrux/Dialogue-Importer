@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Services;
@@ -46,6 +47,19 @@ public sealed class SkyrimDialogueContext(
 
     public void AddQuest(Quest quest) {
         if (!mod.Quests.ContainsKey(quest.FormKey)) mod.Quests.Add(quest);
+    }
+
+    public Quest GetOrAddQuest(string editorId, Func<Quest> questFactory) {
+        var questGetter = Environment.LinkCache.PriorityOrder.WinningOverrides<IQuestGetter>()
+            .FirstOrDefault(q => q.EditorID == editorId);
+        if (questGetter is null) {
+            var newQuest = questFactory();
+            mod.Quests.Add(newQuest);
+            return newQuest;
+        }
+
+        var questContext = environment.LinkCache.ResolveContext<Quest, IQuestGetter>(questGetter.FormKey);
+        return questContext.GetOrAddAsOverride(mod);
     }
 
     public void AddDialogBranch(DialogBranch branch) {

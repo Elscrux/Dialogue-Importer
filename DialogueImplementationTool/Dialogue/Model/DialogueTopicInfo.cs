@@ -46,7 +46,8 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
     public bool Random { get; set; }
     public float ResetHours { get; set; }
     public List<Condition> ExtraConditions { get; init; } = [];
-    public DialogueScript Script { get; set; } = new();
+    public DialogueScript Script { get; init; } = new();
+    public Dictionary<string, object> MetaData { get; init; } = [];
 
     public DialogueTopicInfo() {}
 
@@ -63,6 +64,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
         Links = other.Links.ToList();
         ExtraConditions = other.ExtraConditions.ToList();
         Script = new DialogueScript(other.Script);
+        MetaData = other.MetaData.ToDictionary();
     }
 
     public IEnumerable<Note> AllNotes() => Responses.SelectMany(r => r.Notes());
@@ -81,6 +83,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
             Links = Links.ToList(),
             ExtraConditions = ExtraConditions.ToList(),
             Script = new DialogueScript(Script),
+            MetaData = MetaData.ToDictionary(),
         };
     }
 
@@ -264,7 +267,8 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
          && ResetHours.Equals(other.ResetHours)
          && Script.Equals(other.Script)
          && Responses.SequenceEqual(other.Responses)
-         && ExtraConditions.SequenceEqual(other.ExtraConditions);
+         && ExtraConditions.SequenceEqual(other.ExtraConditions)
+         && MetaData.OrderBy(x => x.Key).SequenceEqual(other.MetaData.OrderBy(x => x.Key));
     }
 
     public bool Equals(DialogueTopicInfo? other) {
@@ -297,6 +301,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
         hashCode.Add(ResetHours);
         hashCode.Add(Script);
         hashCode.Add(ExtraConditions);
+        hashCode.Add(MetaData);
         return hashCode.ToHashCode();
     }
 }

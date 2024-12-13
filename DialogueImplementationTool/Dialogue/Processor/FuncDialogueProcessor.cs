@@ -5,6 +5,9 @@ using DialogueImplementationTool.Parser;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed class FuncDialogueProcessor(IDialogueProcessor processor) : IDialogueProcessor {
+    public Action<GenericDialogue, DialogueTopicInfo, Action<GenericDialogue, DialogueTopicInfo>> ProcessGenericDialogue { get; init; }
+        = (genericDialogue, dialogueTopicInfo, baseProcess) => baseProcess(genericDialogue, dialogueTopicInfo);
+
     public Action<DialogueTopicInfo, Action<DialogueTopicInfo>> PreProcessTopicInfo { get; init; }
         = (topicInfo, baseProcess) => baseProcess(topicInfo);
 
@@ -20,6 +23,10 @@ public sealed class FuncDialogueProcessor(IDialogueProcessor processor) : IDialo
 
     public Action<Conversation, Action<Conversation>> ProcessConversation { get; init; }
         = (dialogue, baseProcess) => baseProcess(dialogue);
+
+    public void Process(GenericDialogue genericDialogue, DialogueTopicInfo topicInfo) {
+        ProcessGenericDialogue(genericDialogue, topicInfo, processor.Process);
+    }
 
     public void Process(DialogueTopicInfo topicInfo) {
         PreProcessTopicInfo(topicInfo, processor.Process);

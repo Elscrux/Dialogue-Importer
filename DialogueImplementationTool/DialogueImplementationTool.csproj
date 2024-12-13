@@ -219,6 +219,165 @@
       <Compile Update="Dialogue\Processor\TimeChecker.cs">
         <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Parser\CsvDocumentParser.cs">
+        <DependentUpon>IDocumentParser.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\PlayerRaceProcessor.cs">
+        <DependentUpon>IGenericDialogueProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\PlayerSexProcessor.cs">
+        <DependentUpon>IGenericDialogueProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\WeatherProcessor.cs">
+        <DependentUpon>IGenericDialogueProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\TimeProcessor.cs">
+        <DependentUpon>IGenericDialogueProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\GenericDialogueFactory.cs">
+        <DependentUpon>BaseDialogueFactory.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\DialogueTypeProcessor.cs">
+        <DependentUpon>IGenericDialogueProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\TrespassingProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\CollideActorProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\RandomProcessor.cs">
+        <DependentUpon>IGenericDialogueProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\IdleProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\WICommentQuestFactory.cs">
+        <DependentUpon>IGenericDialogueQuestFactory.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\VoiceTypeGenericDialogueQuestFactory.cs">
+        <DependentUpon>IGenericDialogueQuestFactory.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\GuardDialogueQuestFactory.cs">
+        <DependentUpon>IGenericDialogueQuestFactory.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\HelloProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\GuardPursueProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\GoodbyeProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\AimBowProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\GenericLineTrimmer.cs">
+        <DependentUpon>IGenericDialogueProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\GenericLineInvalidStringFixer.cs">
+        <DependentUpon>IGenericDialogueProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\LookAtLockedObjectProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\NoticeCorpseProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\AcceptYieldProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\AlertIdleProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\AlertToCombatProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\AlertToNormalProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\AssaultProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\AttackProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\BashShieldProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\BeingHitProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\BleedingOutProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\CollideItemProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\CombatToLostProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\CombatToNormalProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\DetectFriendDieProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\DyingProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\FleeProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\GrabItemProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\MurderProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\PowerAttackProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\UseMeleeNonCombatProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\LostIdleProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\PickpocketProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\LostToCombatProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\ShoutingProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\ShootBowNonCombatProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\StealingProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\NormalToAlertProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\TransformWerewolfProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\NormalToCombatProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\TauntProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\ObserveCombatProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\LostToNormalProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

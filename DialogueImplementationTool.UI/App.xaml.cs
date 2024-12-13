@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.IO.Abstractions;
 using System.Windows;
 using Autofac;
 using DialogueImplementationTool.Dialogue.Processor;
@@ -21,6 +22,9 @@ public partial class App {
         base.OnStartup(e);
 
         var builder = new ContainerBuilder();
+
+        builder.RegisterInstance(new FileSystem())
+            .As<IFileSystem>();
 
         builder.RegisterType<PythonEmotionClassifier>()
             .AsSelf()
@@ -52,6 +56,9 @@ public partial class App {
         builder.RegisterType<PapyrusCompilerWrapper>()
             .SingleInstance();
 
+        builder.RegisterType<ScriptWriter>()
+            .SingleInstance();
+
         builder.RegisterType<FormKeyCache>()
             .SingleInstance();
 
@@ -63,8 +70,8 @@ public partial class App {
             .As<ISpeakerFavoritesSelection>();
 
         builder.RegisterType<OpenDocumentTextParser>();
-
         builder.RegisterType<DocXDocumentParser>();
+        builder.RegisterType<CsvDocumentParser>();
 
         builder.RegisterType<MainWindow>()
             .SingleInstance();

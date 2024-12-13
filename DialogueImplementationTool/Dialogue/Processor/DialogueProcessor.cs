@@ -13,6 +13,56 @@ public sealed class DialogueProcessor : IDialogueProcessor {
         _context = context;
         _emotionClassifierProvider = emotionClassifierProvider;
 
+        GenericDialogueProcessors = [
+            new GenericLineInvalidStringFixer(),
+            new GenericLineTrimmer(),
+            new PlayerRaceProcessor(),
+            new PlayerSexProcessor(),
+            new RandomProcessor(),
+            new TimeProcessor(),
+            new WeatherProcessor(),
+            new AcceptYieldProcessor(),
+            new AimBowProcessor(),
+            new AlertIdleProcessor(),
+            new AlertToCombatProcessor(),
+            new AlertToNormalProcessor(),
+            new AssaultProcessor(),
+            new AttackProcessor(),
+            new BashShieldProcessor(),
+            new BeingHitProcessor(),
+            new BleedingOutProcessor(),
+            new CollideActorProcessor(),
+            new CollideItemProcessor(),
+            new CombatToLostProcessor(),
+            new CombatToNormalProcessor(),
+            new DetectFriendDieProcessor(),
+            new DyingProcessor(),
+            new FleeProcessor(),
+            new GoodbyeProcessor(),
+            new GrabItemProcessor(),
+            new GuardPursueProcessor(),
+            new HelloProcessor(context),
+            new IdleProcessor(),
+            new LookAtLockedObjectProcessor(),
+            new LostIdleProcessor(),
+            new LostToCombatProcessor(),
+            new LostToNormalProcessor(),
+            new MurderProcessor(),
+            new NormalToAlertProcessor(),
+            new NormalToCombatProcessor(),
+            new NoticeCorpseProcessor(),
+            new ObserveCombatProcessor(),
+            new PickpocketProcessor(),
+            new PowerAttackProcessor(),
+            new ShootBowNonCombatProcessor(),
+            new ShoutingProcessor(),
+            new StealingProcessor(),
+            new TauntProcessor(),
+            new TransformWerewolfProcessor(),
+            new TrespassingProcessor(),
+            new UseMeleeNonCombatProcessor(),
+        ];
+
         ResponseProcessors = [
             new InvalidStringFixer(),
             new ResponseNoteExtractor(),
@@ -67,6 +117,9 @@ public sealed class DialogueProcessor : IDialogueProcessor {
         }
     }
 
+    // Runs only for generic dialogue
+    public List<IGenericDialogueProcessor> GenericDialogueProcessors { get; }
+
     // Runs during document parsing
     public List<IDialogueResponseProcessor> ResponseProcessors { get; }
 
@@ -83,6 +136,12 @@ public sealed class DialogueProcessor : IDialogueProcessor {
     public List<IConversationProcessor> ConversationProcessors { get; }
 
     public DialogueProcessor Clone() => new(_context, _emotionClassifierProvider);
+
+    public void Process(GenericDialogue genericDialogue, DialogueTopicInfo topicInfo) {
+        foreach (var processor in GenericDialogueProcessors) {
+            processor.Process(genericDialogue, topicInfo);
+        }
+    }
 
     public void Process(DialogueResponse response, IReadOnlyList<FormattedText> textSnippets) {
         foreach (var processor in ResponseProcessors) {

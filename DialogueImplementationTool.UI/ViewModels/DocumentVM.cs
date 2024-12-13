@@ -78,6 +78,11 @@ public sealed class DocumentVM : ViewModel {
 
                 break;
             }
+            case IGenericDialogueParser genericDialogueParser:
+                var genericDialogue = genericDialogueParser.ParseGenericDialogue(dialogueProcessor);
+                var genericDialogueFactory = new GenericDialogueFactory(Context);
+                genericDialogueFactory.GenerateDialogue(genericDialogue);
+                break;
         }
 
         // Write scripts

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Services;
@@ -22,6 +23,7 @@ public interface IDialogueContext {
     FormKey GetNextFormKey();
     void AddScene(Scene scene);
     void AddQuest(Quest quest);
+    Quest GetOrAddQuest(string editorId, Func<Quest> questFactory);
     void AddDialogBranch(DialogBranch branch);
     void AddDialogTopic(DialogTopic topic);
     DialogTopic? GetTopic(string editorId);
