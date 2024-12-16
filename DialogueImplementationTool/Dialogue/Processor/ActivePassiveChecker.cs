@@ -17,13 +17,13 @@ public sealed partial class ActivePassiveChecker: IDialogueTopicInfoProcessor {
                 Condition condition;
                 if (activeMatch.Success) 
                 {
-                    condition = GetValueCondition(activeMatch, CompareOperator.EqualTo, 1);
+                    condition = GetValueCondition(CompareOperator.EqualTo, 1);
                 } 
                 else {
                     var passiveMatch = PassiveRegex().Match(note.Text);
                     if (!passiveMatch.Success) continue;
 
-                    condition = GetValueCondition(passiveMatch, CompareOperator.EqualTo, 0);
+                    condition = GetValueCondition(CompareOperator.EqualTo, 0);
                 }
 
                 // apply condition and remove the note
@@ -33,7 +33,7 @@ public sealed partial class ActivePassiveChecker: IDialogueTopicInfoProcessor {
             }
         }
 
-        Condition GetValueCondition(Match match, CompareOperator compareOperator, float comparisonValue) {
+        Condition GetValueCondition(CompareOperator compareOperator, float comparisonValue) {
             
             var isInDialogueWithPlayer = new ConditionFloat 
             {
