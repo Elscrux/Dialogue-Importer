@@ -74,6 +74,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
         ];
 
         TopicInfoProcessors = [
+            new ActivePassiveChecker(),
             new TalkedToChecker(_context),
             new OffersServicesChecker(),
             new TimeChecker(),
