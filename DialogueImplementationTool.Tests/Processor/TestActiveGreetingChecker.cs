@@ -12,16 +12,12 @@ public class TestActiveGreetingChecker {
         var (greeting, _) = TestSamples.GetCraneShoreDialogue(_testConstants);
 
         // Check - condition was added
-        if (greeting.Topics[0].TopicInfos[2].ExtraConditions.Count >= 1)
-            CheckCondition(greeting.Topics[0].TopicInfos[2].ExtraConditions[^1]);
+        var topicInfo = greeting.Topics[0].TopicInfos[2];
+        if (topicInfo.ExtraConditions.Count >= 1) {
+            topicInfo.ExtraConditions[^1].Data.Should().BeOfType<IsInDialogueWithPlayerConditionData>();
+        }
 
         // Check - note is gone
-        greeting.Topics[0].TopicInfos[2].Responses[0]
-            .StartNotes.Exists(x => x.Text == "active").Should().BeFalse();
-
-        void CheckCondition(Condition condition) {
-            condition.Data.Should().BeOfType<IsInDialogueWithPlayerConditionData>();
-        
-        }
+        topicInfo.Responses[0].StartNotes.Exists(x => x.Text == "active").Should().BeFalse();
     }
 }
