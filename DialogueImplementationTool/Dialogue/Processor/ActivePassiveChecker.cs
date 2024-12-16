@@ -1,7 +1,5 @@
-﻿using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using DialogueImplementationTool.Dialogue.Model;
-using Mutagen.Bethesda;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
