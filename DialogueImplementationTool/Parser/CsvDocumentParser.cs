@@ -24,9 +24,27 @@ public sealed class CsvDocumentParser(
 
     public List<DialogueTopic> ParseGenericDialogue(IDialogueProcessor processor) {
         using var streamReader = new StreamReader(FilePath);
+        var isPreHeader = true;
         var csvConfiguration = new CsvConfiguration(CultureInfo.InvariantCulture) {
             HeaderValidated = null,
-            MissingFieldFound = null
+            MissingFieldFound = null,
+            PrepareHeaderForMatch = args => {
+                isPreHeader = false;
+                return args.Header;
+            },
+            ShouldSkipRecord = args => {
+                // Skip rows at the start that before the header row
+                if (!isPreHeader) return false;
+
+                for (var i = 0; i < args.Row.ColumnCount; i++) {
+                    var field = args.Row.GetField(i);
+                    if (field == nameof(GenericDialogue.Line)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            },
         };
         using var csvReader = new CsvReader(streamReader, csvConfiguration);
         csvReader.Context.RegisterClassMap<GenericDialogueRecordMap>();
