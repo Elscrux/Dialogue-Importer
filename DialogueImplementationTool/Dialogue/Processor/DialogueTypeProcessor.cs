@@ -13,7 +13,7 @@ public abstract class DialogueTypeProcessor : IGenericDialogueProcessor {
     protected static readonly Condition NullCondition = new ConditionFloat();
 
     public void Process(GenericDialogue genericDialogue, DialogueTopicInfo topicInfo) {
-        if (topicInfo.MetaData["Subtype"] is not DialogTopic.SubtypeEnum subtype)
+        if (topicInfo.MetaData[GenericMetaData.Subtype] is not DialogTopic.SubtypeEnum subtype)
             throw new InvalidOperationException("Subtype not found");
 
         if (!IsApplicable(subtype)) return;
@@ -22,7 +22,7 @@ public abstract class DialogueTypeProcessor : IGenericDialogueProcessor {
 
         if (conditions.Count > 0) {
             // When a matching condition is found, remove the description from the topic
-            topicInfo.MetaData.Remove("Description");
+            topicInfo.MetaData.Remove(GenericMetaData.Description);
         } else {
             // Otherwise, add the description as a note to the topic to be implemented manually
             var note = new Note { Text = genericDialogue.Description };

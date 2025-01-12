@@ -9,11 +9,19 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue;
 
+public static class GenericMetaData {
+    public const string Category = "Category";
+    public const string Subtype = "Subtype";
+    public const string Description = "Description";
+    public const string VoiceType = "VoiceType";
+    public const string GenericQuestFactory = "GenericQuestFactory";
+}
+
 public sealed class GenericDialogueFactory(IDialogueContext context) : BaseDialogueFactory(context) {
     public override void GenerateDialogue(List<DialogueTopic> topics) {
         foreach (var topic in topics) {
             foreach (var topicInfo in topic.TopicInfos) {
-                if (topicInfo.MetaData["GenericQuestFactory"] is not IGenericDialogueQuestFactory questFactory)
+                if (topicInfo.MetaData[GenericMetaData.GenericQuestFactory] is not IGenericDialogueQuestFactory questFactory)
                     throw new InvalidOperationException("GenericQuestFactory is not set");
 
                 var quest = questFactory.Create();
@@ -26,9 +34,9 @@ public sealed class GenericDialogueFactory(IDialogueContext context) : BaseDialo
     }
 
     private DialogTopic GetTopic(DialogueTopicInfo topicInfo, Quest voiceTypeQuest) {
-        if (topicInfo.MetaData["Category"] is not DialogTopic.CategoryEnum category)
+        if (topicInfo.MetaData[GenericMetaData.Category] is not DialogTopic.CategoryEnum category)
             throw new InvalidOperationException("Category is not set");
-        if (topicInfo.MetaData["Subtype"] is not DialogTopic.SubtypeEnum subtype)
+        if (topicInfo.MetaData[GenericMetaData.Subtype] is not DialogTopic.SubtypeEnum subtype)
             throw new InvalidOperationException("Subtype is not set");
 
         var matchingTopic = Context.LinkCache.PriorityOrder.WinningOverrides<IDialogTopicGetter>()

@@ -6,8 +6,6 @@ using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed class HelloProcessor(IDialogueContext context) : DialogueTypeProcessor {
-    private const string GenericQuestFactory = "GenericQuestFactory";
-
     protected override bool IsApplicable(DialogTopic.SubtypeEnum subtype) =>
         subtype is DialogTopic.SubtypeEnum.Hello;
 
@@ -69,7 +67,7 @@ public sealed class HelloProcessor(IDialogueContext context) : DialogueTypeProce
                 break;
             case "Player is seen sneaking":
                 topicInfo.Script.EndScriptLines.Add(WICommentQuestFactory.TopicCommentScript);
-                topicInfo.MetaData[GenericQuestFactory] = new WICommentQuestFactory(
+                topicInfo.MetaData[GenericMetaData.GenericQuestFactory] = new WICommentQuestFactory(
                     context,
                     "Sneaking",
                     "Player is seen sneaking",
@@ -89,7 +87,7 @@ public sealed class HelloProcessor(IDialogueContext context) : DialogueTypeProce
                 break;
             case "Player is naked":
                 topicInfo.Script.EndScriptLines.Add(WICommentQuestFactory.TopicCommentScript);
-                topicInfo.MetaData[GenericQuestFactory] = new WICommentQuestFactory(
+                topicInfo.MetaData[GenericMetaData.GenericQuestFactory] = new WICommentQuestFactory(
                     context,
                     "Naked",
                     "Player is seen naked",
@@ -113,7 +111,7 @@ public sealed class HelloProcessor(IDialogueContext context) : DialogueTypeProce
                 break;
             case "Player is sick":
                 topicInfo.Script.EndScriptLines.Add(WICommentQuestFactory.TopicCommentScript);
-                topicInfo.MetaData[GenericQuestFactory] = new WICommentQuestFactory(
+                topicInfo.MetaData[GenericMetaData.GenericQuestFactory] = new WICommentQuestFactory(
                     context,
                     "Diseased",
                     "Player is seen sick",
@@ -133,7 +131,7 @@ public sealed class HelloProcessor(IDialogueContext context) : DialogueTypeProce
                 break;
             case "Player is seen with an active flame spell":
                 topicInfo.Script.EndScriptLines.Add(WICommentQuestFactory.TopicCommentScript);
-                topicInfo.MetaData[GenericQuestFactory] = new WICommentQuestFactory(
+                topicInfo.MetaData[GenericMetaData.GenericQuestFactory] = new WICommentQuestFactory(
                     context,
                     "MagicFlames",
                     "Player is seen with magic flames equipped",
@@ -160,7 +158,7 @@ public sealed class HelloProcessor(IDialogueContext context) : DialogueTypeProce
                 break;
             case "Player casts a dangerous spell":
                 topicInfo.Script.EndScriptLines.Add(WICommentQuestFactory.TopicCommentScript);
-                topicInfo.MetaData[GenericQuestFactory] = new WICommentQuestFactory(
+                topicInfo.MetaData[GenericMetaData.GenericQuestFactory] = new WICommentQuestFactory(
                     context,
                     "MagicDangerous",
                     "Player is seen with dangerous on going magic effect on",

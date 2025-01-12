@@ -71,11 +71,11 @@ public sealed class CsvDocumentParser(
                 var topicInfo = new DialogueTopicInfo {
                     Responses = [response],
                     MetaData = new Dictionary<string, object> {
-                        { "Category", categoryEnum },
-                        { "Subtype", subtypeEnum },
-                        { "Description", genericDialogue.Description },
-                        { "VoiceType", voiceType },
-                        { "GenericQuestFactory", new VoiceTypeGenericDialogueQuestFactory(context, voiceType) },
+                        { GenericMetaData.Category, categoryEnum },
+                        { GenericMetaData.Subtype, subtypeEnum },
+                        { GenericMetaData.Description, genericDialogue.Description },
+                        { GenericMetaData.VoiceType, voiceType },
+                        { GenericMetaData.GenericQuestFactory, new VoiceTypeGenericDialogueQuestFactory(context, voiceType) },
                     },
                 };
                 var topic = new DialogueTopic { TopicInfos = [topicInfo] };
