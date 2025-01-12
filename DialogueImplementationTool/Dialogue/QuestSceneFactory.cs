@@ -18,7 +18,7 @@ public sealed class QuestSceneFactory(IDialogueContext context) : SceneFactory(c
                 name => !Context.LinkCache.TryResolve<ISceneGetter>(name, out _),
                 1),
             Context.Quest.FormKey);
-        Context.AddScene(scene);
+        Context.AddRecord(scene);
 
         return (scene, Context.Quest);
     }

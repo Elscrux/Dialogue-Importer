@@ -41,12 +41,12 @@ public sealed class SkyrimDialogueContext(
         return mod.GetNextFormKey();
     }
 
-    public void AddScene(Scene scene) {
-        if (!mod.Scenes.ContainsKey(scene.FormKey)) mod.Scenes.Add(scene);
-    }
-
-    public void AddQuest(Quest quest) {
-        if (!mod.Quests.ContainsKey(quest.FormKey)) mod.Quests.Add(quest);
+    public void AddRecord<TMajorRecord>(TMajorRecord record)
+        where TMajorRecord : IMajorRecord {
+        var group = mod.GetTopLevelGroup<TMajorRecord>();
+        if (!group.ContainsKey(record.FormKey)) {
+            group.Add(record);
+        }
     }
 
     public Quest GetOrAddQuest(string editorId, Func<Quest> questFactory) {
@@ -62,13 +62,7 @@ public sealed class SkyrimDialogueContext(
         return questContext.GetOrAddAsOverride(mod);
     }
 
-    public void AddDialogBranch(DialogBranch branch) {
-        if (!mod.DialogBranches.ContainsKey(branch.FormKey)) mod.DialogBranches.Add(branch);
-    }
-
-    public void AddDialogTopic(DialogTopic topic) {
-        if (!mod.DialogTopics.ContainsKey(topic.FormKey)) mod.DialogTopics.Add(topic);
-    }
+    
 
     public DialogTopic? GetTopic(string editorId) {
         if (!environment.LinkCache.TryResolveIdentifier<IDialogTopicGetter>(editorId, out var formKey)) return null;
@@ -189,6 +183,13 @@ public sealed class SkyrimDialogueContext(
         var formKey = formKeySelection.GetFormKey<TMajorGetter>($"Select: {prompt}", FormKey.Null);
 
         var context = environment.LinkCache.ResolveContext<TMajor, TMajorGetter>(formKey);
+        return context.GetOrAddAsOverride(mod);
+    }
+
+    public TMajor GetOrAddOverride<TMajor, TMajorGetter>(IFormKeyGetter formKeyGetter)
+        where TMajor : class, TMajorGetter, IMajorRecord
+        where TMajorGetter : class, IMajorRecordGetter, IMajorRecordQueryableGetter {
+        var context = environment.LinkCache.ResolveContext<TMajor, TMajorGetter>(formKeyGetter.FormKey);
         return context.GetOrAddAsOverride(mod);
     }
 }

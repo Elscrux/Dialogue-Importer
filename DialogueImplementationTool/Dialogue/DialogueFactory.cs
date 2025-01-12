@@ -82,7 +82,7 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                     SubtypeName = "CUST",
                     Responses = responses,
                 };
-                Context.AddDialogTopic(dialogTopic);
+                Context.AddRecord(dialogTopic);
 
                 // Set the starting topic
                 if (rawTopic.Identifier == string.Empty) {
@@ -211,7 +211,7 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
 
         branch.Flags ??= new DialogBranch.Flag();
         branch.Flags |= topic.Blocking ? DialogBranch.Flag.Blocking : DialogBranch.Flag.TopLevel;
-        Context.AddDialogBranch(branch);
+        Context.AddRecord(branch);
 
         return (branch, branchIndex);
     }

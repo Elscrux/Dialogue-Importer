@@ -53,7 +53,7 @@ public sealed class SharedInfo {
                     SubtypeName = "IDAT",
                     Responses = [],
                 };
-                modContext.AddDialogTopic(newDialogueTopic);
+                modContext.AddRecord(newDialogueTopic);
             } else {
                 newDialogueTopic = modContext.GetTopic(dialogTopic.FormKey);
             }

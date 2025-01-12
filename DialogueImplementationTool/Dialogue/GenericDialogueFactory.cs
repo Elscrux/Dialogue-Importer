@@ -45,7 +45,7 @@ public sealed class GenericDialogueFactory(IDialogueContext context) : BaseDialo
                 Subtype = subtype,
                 SubtypeName = subtype.ToRecordType(),
             };
-            Context.AddDialogTopic(dialogTopic);
+            Context.AddRecord(dialogTopic);
         } else {
             dialogTopic = Context.GetTopic(matchingTopic.FormKey);
         }

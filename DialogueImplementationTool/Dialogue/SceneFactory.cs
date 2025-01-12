@@ -70,7 +70,7 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
                     .Select(info => GetResponses(Context.Quest, info))
                     .ToExtendedList(),
             };
-            Context.AddDialogTopic(sceneTopic);
+            Context.AddRecord(sceneTopic);
 
             AddTopic(sceneTopic, aliasSpeaker.AliasIndex);
         }

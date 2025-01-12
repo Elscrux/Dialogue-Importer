@@ -81,13 +81,13 @@ public class GenericSceneFactory(IDialogueContext context) : SceneFactory(contex
             Event = RecordTypes.ADIA,
             Aliases = aliases,
         };
-        Context.AddQuest(sceneQuest);
+        Context.AddRecord(sceneQuest);
 
         //Add scene
         var scene = AddScene($"{questEditorId}Scene", sceneQuest.FormKey);
         scene.Flags = new Scene.Flag();
         scene.Flags |= Scene.Flag.BeginOnQuestStart | Scene.Flag.StopQuestOnEnd | Scene.Flag.Interruptable;
-        Context.AddScene(scene);
+        Context.AddRecord(scene);
 
         sceneQuest.NextAliasID = (uint?) sceneQuest.Aliases.Count;
 

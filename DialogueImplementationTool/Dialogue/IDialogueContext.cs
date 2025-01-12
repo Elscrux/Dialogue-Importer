@@ -21,11 +21,8 @@ public interface IDialogueContext {
     AutoApplyProvider AutoApplyProvider { get; }
     List<string> Issues { get; }
     FormKey GetNextFormKey();
-    void AddScene(Scene scene);
-    void AddQuest(Quest quest);
+    void AddRecord<TMajorRecord>(TMajorRecord record) where TMajorRecord : IMajorRecord ;
     Quest GetOrAddQuest(string editorId, Func<Quest> questFactory);
-    void AddDialogBranch(DialogBranch branch);
-    void AddDialogTopic(DialogTopic topic);
     DialogTopic? GetTopic(string editorId);
     DialogTopic GetTopic(FormKey formKey);
     IDialogTopicGetter? GetTopic(DialogueTopic topic);
@@ -35,4 +32,7 @@ public interface IDialogueContext {
     TMajor SelectRecord<TMajor, TMajorGetter>(string prompt)
         where TMajor : class, TMajorGetter, IMajorRecordQueryable
         where TMajorGetter : class, IMajorRecordQueryableGetter;
+    TMajor GetOrAddOverride<TMajor, TMajorGetter>(IFormKeyGetter formKeyGetter)
+        where TMajor : class, TMajorGetter, IMajorRecord
+        where TMajorGetter : class, IMajorRecordGetter, IMajorRecordQueryableGetter;
 }

@@ -20,7 +20,7 @@ public abstract class OneLinerFactory(IDialogueContext context) : BaseDialogueFa
             dialogTopic.Responses.Add(responses);
         }
 
-        Context.AddDialogTopic(dialogTopic);
+        Context.AddRecord(dialogTopic);
 
         ReorderBySpeaker(dialogTopic);
     }
