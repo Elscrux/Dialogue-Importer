@@ -13,8 +13,7 @@ public abstract class DialogueTypeProcessor : IGenericDialogueProcessor {
     protected static readonly Condition NullCondition = new ConditionFloat();
 
     public void Process(GenericDialogue genericDialogue, DialogueTopicInfo topicInfo) {
-        if (topicInfo.MetaData[GenericMetaData.Subtype] is not DialogTopic.SubtypeEnum subtype)
-            throw new InvalidOperationException("Subtype not found");
+        var subtype = GenericMetaData.GetSubtype(topicInfo.MetaData);
 
         if (!IsApplicable(subtype)) return;
 

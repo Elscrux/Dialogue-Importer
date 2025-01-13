@@ -67,116 +67,126 @@ public sealed class HelloProcessor(IDialogueContext context) : DialogueTypeProce
                 break;
             case "Player is seen sneaking":
                 topicInfo.Script.EndScriptLines.Add(WICommentQuestFactory.TopicCommentScript);
-                topicInfo.MetaData[GenericMetaData.GenericQuestFactory] = new WICommentQuestFactory(
-                    context,
-                    "Sneaking",
-                    "Player is seen sneaking",
-                    [
-                        new ConditionGlobal {
-                            Data = new GetRandomPercentConditionData(),
-                            CompareOperator = CompareOperator.LessThanOrEqualTo,
-                            ComparisonValue = Skyrim.Global.WICommentChanceSneaking,
-                        },
-                        new IsSneakingConditionData {
-                            RunOnType = Condition.RunOnType.Reference,
-                            Reference = Skyrim.PlayerRef
-                        }.ToConditionFloat(),
-                    ]);
+                GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData,
+                    new WICommentQuestFactory(
+                        context,
+                        "Sneaking",
+                        "Player is seen sneaking",
+                        [
+                            new ConditionGlobal {
+                                Data = new GetRandomPercentConditionData(),
+                                CompareOperator = CompareOperator.LessThanOrEqualTo,
+                                ComparisonValue = Skyrim.Global.WICommentChanceSneaking,
+                            },
+                            new IsSneakingConditionData {
+                                RunOnType = Condition.RunOnType.Reference,
+                                Reference = Skyrim.PlayerRef
+                            }.ToConditionFloat(),
+                        ]));
+
                 yield return NullCondition;
 
                 break;
             case "Player is naked":
                 topicInfo.Script.EndScriptLines.Add(WICommentQuestFactory.TopicCommentScript);
-                topicInfo.MetaData[GenericMetaData.GenericQuestFactory] = new WICommentQuestFactory(
-                    context,
-                    "Naked",
-                    "Player is seen naked",
-                    [
-                        new ConditionGlobal {
-                            Data = new GetRandomPercentConditionData(),
-                            CompareOperator = CompareOperator.LessThanOrEqualTo,
-                            ComparisonValue = Skyrim.Global.WICommentChanceNaked,
-                        },
-                        new WornHasKeywordConditionData {
-                            RunOnType = Condition.RunOnType.Target,
-                            Keyword = { Link = { FormKey = Skyrim.Keyword.ArmorCuirass.FormKey } },
-                        }.ToConditionFloat(comparisonValue: 0),
-                        new WornHasKeywordConditionData {
-                            RunOnType = Condition.RunOnType.Target,
-                            Keyword = { Link = { FormKey = Skyrim.Keyword.ClothingBody.FormKey } },
-                        }.ToConditionFloat(comparisonValue: 0),
-                    ]);
+                GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData,
+                    new WICommentQuestFactory(
+                        context,
+                        "Naked",
+                        "Player is seen naked",
+                        [
+                            new ConditionGlobal {
+                                Data = new GetRandomPercentConditionData(),
+                                CompareOperator = CompareOperator.LessThanOrEqualTo,
+                                ComparisonValue = Skyrim.Global.WICommentChanceNaked,
+                            },
+                            new WornHasKeywordConditionData {
+                                RunOnType = Condition.RunOnType.Target,
+                                Keyword = { Link = { FormKey = Skyrim.Keyword.ArmorCuirass.FormKey } },
+                            }.ToConditionFloat(comparisonValue: 0),
+                            new WornHasKeywordConditionData {
+                                RunOnType = Condition.RunOnType.Target,
+                                Keyword = { Link = { FormKey = Skyrim.Keyword.ClothingBody.FormKey } },
+                            }.ToConditionFloat(comparisonValue: 0),
+                        ]));
+
                 yield return NullCondition;
 
                 break;
             case "Player is sick":
                 topicInfo.Script.EndScriptLines.Add(WICommentQuestFactory.TopicCommentScript);
-                topicInfo.MetaData[GenericMetaData.GenericQuestFactory] = new WICommentQuestFactory(
-                    context,
-                    "Diseased",
-                    "Player is seen sick",
-                    [
-                        new ConditionGlobal {
-                            Data = new GetRandomPercentConditionData(),
-                            CompareOperator = CompareOperator.LessThanOrEqualTo,
-                            ComparisonValue = Skyrim.Global.WICommentChanceDiseased,
-                        },
-                        new GetDiseaseConditionData {
-                            RunOnType = Condition.RunOnType.Reference,
-                            Reference = Skyrim.PlayerRef,
-                        }.ToConditionFloat(),
-                    ]);
+                GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData,
+                    new WICommentQuestFactory(
+                        context,
+                        "Diseased",
+                        "Player is seen sick",
+                        [
+                            new ConditionGlobal {
+                                Data = new GetRandomPercentConditionData(),
+                                CompareOperator = CompareOperator.LessThanOrEqualTo,
+                                ComparisonValue = Skyrim.Global.WICommentChanceDiseased,
+                            },
+                            new GetDiseaseConditionData {
+                                RunOnType = Condition.RunOnType.Reference,
+                                Reference = Skyrim.PlayerRef,
+                            }.ToConditionFloat(),
+                        ]));
+
                 yield return NullCondition;
 
                 break;
             case "Player is seen with an active flame spell":
                 topicInfo.Script.EndScriptLines.Add(WICommentQuestFactory.TopicCommentScript);
-                topicInfo.MetaData[GenericMetaData.GenericQuestFactory] = new WICommentQuestFactory(
-                    context,
-                    "MagicFlames",
-                    "Player is seen with magic flames equipped",
-                    [
-                        new ConditionGlobal {
-                            Data = new GetRandomPercentConditionData(),
-                            CompareOperator = CompareOperator.LessThanOrEqualTo,
-                            ComparisonValue = Skyrim.Global.WICommentChanceMagicFlames,
-                        },
-                        new IsWeaponMagicOutConditionData {
-                            RunOnType = Condition.RunOnType.Target,
-                        }.ToConditionFloat(),
-                        new SpellHasKeywordConditionData {
-                            SpellSource = CastSource.Left,
-                            Keyword = { Link = { FormKey = Skyrim.Keyword.MagicDamageFire.FormKey } }
-                        }.ToConditionFloat(or: true),
-                        new SpellHasKeywordConditionData {
-                            SpellSource = CastSource.Right,
-                            Keyword = { Link = { FormKey = Skyrim.Keyword.MagicDamageFire.FormKey } }
-                        }.ToConditionFloat(),
-                    ]);
+                GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData,
+                    new WICommentQuestFactory(
+                        context,
+                        "MagicFlames",
+                        "Player is seen with magic flames equipped",
+                        [
+                            new ConditionGlobal {
+                                Data = new GetRandomPercentConditionData(),
+                                CompareOperator = CompareOperator.LessThanOrEqualTo,
+                                ComparisonValue = Skyrim.Global.WICommentChanceMagicFlames,
+                            },
+                            new IsWeaponMagicOutConditionData {
+                                RunOnType = Condition.RunOnType.Target,
+                            }.ToConditionFloat(),
+                            new SpellHasKeywordConditionData {
+                                SpellSource = CastSource.Left,
+                                Keyword = { Link = { FormKey = Skyrim.Keyword.MagicDamageFire.FormKey } }
+                            }.ToConditionFloat(or: true),
+                            new SpellHasKeywordConditionData {
+                                SpellSource = CastSource.Right,
+                                Keyword = { Link = { FormKey = Skyrim.Keyword.MagicDamageFire.FormKey } }
+                            }.ToConditionFloat(),
+                        ]));
+
                 yield return NullCondition;
 
                 break;
             case "Player casts a dangerous spell":
                 topicInfo.Script.EndScriptLines.Add(WICommentQuestFactory.TopicCommentScript);
-                topicInfo.MetaData[GenericMetaData.GenericQuestFactory] = new WICommentQuestFactory(
-                    context,
-                    "MagicDangerous",
-                    "Player is seen with dangerous on going magic effect on",
-                    [
-                        new ConditionGlobal {
-                            Data = new GetRandomPercentConditionData(),
-                            CompareOperator = CompareOperator.LessThanOrEqualTo,
-                            ComparisonValue = Skyrim.Global.WICommentChanceMagicDangerous,
-                        },
-                        new HasMagicEffectKeywordConditionData {
-                            RunOnType = Condition.RunOnType.Target,
-                            Keyword = { Link = { FormKey = Skyrim.Keyword.WISpellDangerous.FormKey } },
-                        }.ToConditionFloat(or: true),
-                        new HasMagicEffectKeywordConditionData {
-                            RunOnType = Condition.RunOnType.Target,
-                            Keyword = { Link = { FormKey = Skyrim.Keyword.MagicCloak.FormKey } },
-                        }.ToConditionFloat(),
-                    ]);
+                GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData,
+                    new WICommentQuestFactory(
+                        context,
+                        "MagicDangerous",
+                        "Player is seen with dangerous on going magic effect on",
+                        [
+                            new ConditionGlobal {
+                                Data = new GetRandomPercentConditionData(),
+                                CompareOperator = CompareOperator.LessThanOrEqualTo,
+                                ComparisonValue = Skyrim.Global.WICommentChanceMagicDangerous,
+                            },
+                            new HasMagicEffectKeywordConditionData {
+                                RunOnType = Condition.RunOnType.Target,
+                                Keyword = { Link = { FormKey = Skyrim.Keyword.WISpellDangerous.FormKey } },
+                            }.ToConditionFloat(or: true),
+                            new HasMagicEffectKeywordConditionData {
+                                RunOnType = Condition.RunOnType.Target,
+                                Keyword = { Link = { FormKey = Skyrim.Keyword.MagicCloak.FormKey } },
+                            }.ToConditionFloat(),
+                        ]));
+
                 yield return NullCondition;
 
                 break;
