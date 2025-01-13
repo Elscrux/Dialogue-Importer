@@ -11,6 +11,7 @@ public sealed class UIFormKeySelection(
     FormKeyCache formKeyCache)
     : IFormKeySelection {
     private readonly Lock _lock = new();
+    private readonly HashSet<string> _openedTitles = [];
 
     public FormKey GetFormKey<TMajor>(string title, FormKey defaultFormKey)
         where TMajor : IMajorRecordQueryableGetter {
@@ -25,8 +26,8 @@ public sealed class UIFormKeySelection(
         if (formKeyCache.TryGetFormKey<TMajor>(title, out var formKey)) {
             defaultFormKey = formKey;
 
-            // Don't prompt if it should auto apply
-            if (autoApplyProvider.AutoApply) {
+            // Don't prompt if it should auto apply, or if it's already been opened before
+            if (autoApplyProvider.AutoApply || _openedTitles.Contains(title)) {
                 return formKey;
             }
         }
@@ -34,6 +35,7 @@ public sealed class UIFormKeySelection(
         formKey = Application.Current.Dispatcher.Invoke(() => {
             var formKeySelection = GetSelection();
             formKeySelection.ShowDialog();
+            _openedTitles.Add(title);
 
             while (formKeySelection.FormKey == FormKey.Null) {
                 MessageBox.Show("You must select a form key");
