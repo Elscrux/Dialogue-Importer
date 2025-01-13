@@ -10,7 +10,7 @@ public sealed class UIFormKeySelection(
     AutoApplyProvider autoApplyProvider,
     FormKeyCache formKeyCache)
     : IFormKeySelection {
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
 
     public FormKey GetFormKey<TMajor>(string title, FormKey defaultFormKey)
         where TMajor : IMajorRecordQueryableGetter {
