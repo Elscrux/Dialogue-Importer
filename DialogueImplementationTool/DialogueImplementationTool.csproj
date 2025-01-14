@@ -378,6 +378,9 @@
       <Compile Update="Dialogue\Processor\LostToNormalProcessor.cs">
         <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\Processor\ActivePassiveChecker.cs">
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>
