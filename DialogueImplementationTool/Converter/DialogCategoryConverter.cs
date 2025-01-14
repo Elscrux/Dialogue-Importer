@@ -55,6 +55,7 @@ public static class DialogCategoryConverter {
             "DetectionLostToNormal" => (DialogTopic.CategoryEnum.Detection, DialogTopic.SubtypeEnum.LostToNormal),
             "DetectionLostToCombat" => (DialogTopic.CategoryEnum.Detection, DialogTopic.SubtypeEnum.LostToCombat),
             "DetectFriendDie" => (DialogTopic.CategoryEnum.Detection, DialogTopic.SubtypeEnum.DetectFriendDie),
+            "Custom" => (DialogTopic.CategoryEnum.Topic, DialogTopic.SubtypeEnum.Custom),
             _ => throw new NotSupportedException($"Category {text} not supported"),
         };
     }

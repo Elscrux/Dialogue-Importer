@@ -381,6 +381,12 @@
       <Compile Update="Dialogue\Processor\ActivePassiveChecker.cs">
         <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\WIRemoveItemReturnQuestFactory.cs">
+        <DependentUpon>IGenericDialogueQuestFactory.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\CustomProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

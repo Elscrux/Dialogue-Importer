@@ -35,6 +35,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new CollideItemProcessor(),
             new CombatToLostProcessor(),
             new CombatToNormalProcessor(),
+            new CustomProcessor(_context),
             new DetectFriendDieProcessor(),
             new DyingProcessor(),
             new FleeProcessor(),
