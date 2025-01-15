@@ -14,9 +14,9 @@ public sealed class CustomProcessor(IDialogueContext context) : DialogueTypeProc
 
         switch (description) {
             case "NPC returns the dropped item to the player":
-                // Set quest factory
                 var questFactory = new WIRemoveItemReturnQuestFactory(context, voiceType);
                 GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData, questFactory);
+                GenericMetaData.SetPostProcessor(topicInfo.MetaData, new WIRemoveItemReturnPostProcessor(context));
 
                 // Add script to return the item to the player
                 topicInfo.Script.StartScriptLines.Add(questFactory.GetReturnItemScript());

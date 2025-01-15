@@ -1,4 +1,5 @@
 ﻿using DialogueImplementationTool.Extension;
+using Mutagen.Bethesda;
 using Mutagen.Bethesda.FormKeys.SkyrimSE;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
@@ -45,6 +46,18 @@ public sealed class WIRemoveItemReturnQuestFactory(IDialogueContext context, Voi
             Name,
             () => {
                 var questFormKey = context.GetNextFormKey();
+
+                var acquirePackage = context.LinkCache.Resolve(Skyrim.Package.WIRemoveItem02BystanderAcquireItem);
+                var forceGreetPackage = context.LinkCache.Resolve(Skyrim.Package.WIRemoveItem02BystanderForceGreet);
+                var acquire = acquirePackage.Duplicate(context.GetNextFormKey());
+                acquire.EditorID = Name + "Acquire";
+                acquire.OwnerQuest = new FormLinkNullable<IQuestGetter>(questFormKey);
+                var forceGreet = forceGreetPackage.Duplicate(context.GetNextFormKey());
+                forceGreet.EditorID = Name + "ForceGreet";
+                forceGreet.OwnerQuest = new FormLinkNullable<IQuestGetter>(questFormKey);
+                context.AddRecord(acquire);
+                context.AddRecord(forceGreet);
+
                 return new Quest(questFormKey, context.Release) {
                     EditorID = Name,
                     Name = "Accidentally dropped this",
@@ -162,6 +175,10 @@ public sealed class WIRemoveItemReturnQuestFactory(IDialogueContext context, Voi
                                     ComparisonValue = Skyrim.Global.WISpectatorDistance
                                 },
                             ],
+                            PackageData = [
+                                acquire.ToLink(),
+                                forceGreet.ToLink(),
+                            ]
                         },
                         new QuestAlias {
                             ID = 2,
