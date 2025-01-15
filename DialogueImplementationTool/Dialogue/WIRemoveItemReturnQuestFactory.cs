@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using DialogueImplementationTool.Extension;
-using Mutagen.Bethesda;
+﻿using DialogueImplementationTool.Extension;
 using Mutagen.Bethesda.FormKeys.SkyrimSE;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
@@ -13,21 +11,11 @@ public sealed class WIRemoveItemReturnQuestFactory(IDialogueContext context) : I
 
     public FormList GetVoiceTypesList() {
         var voiceTypesListEditorId = context.Prefix + Name + "VoiceTypes";
-        var voiceTypesList = context.LinkCache.PriorityOrder.WinningOverrides<IFormListGetter>()
-            .FirstOrDefault(l => l.EditorID == voiceTypesListEditorId);
-
-        FormList formList;
-        if (voiceTypesList is null) {
-            formList = new FormList(context.GetNextFormKey(), context.Release) {
+        return context.GetOrAddRecord<FormList, IFormListGetter>(voiceTypesListEditorId,
+            () => new FormList(context.GetNextFormKey(), context.Release) {
                 EditorID = voiceTypesListEditorId,
                 Items = [],
-            };
-            context.AddRecord(formList);
-        } else {
-            formList = context.GetOrAddOverride<FormList, IFormListGetter>(voiceTypesList);
-        }
-
-        return formList;
+            });
     }
 
     public string GetQuestEditorId() {
@@ -186,7 +174,7 @@ public sealed class WIRemoveItemReturnQuestFactory(IDialogueContext context) : I
                                 new GetInFactionConditionData {
                                     Faction = { Link = { FormKey = Skyrim.Faction.WINeverFillAliasesFaction.FormKey } }
                                 }.ToConditionFloat(comparisonValue: 0),
-                                new GetAllowWorldInteractionsConditionData().ToConditionFloat(comparisonValue: 1),
+                                new GetAllowWorldInteractionsConditionData().ToConditionFloat(),
                                 new GetIsVoiceTypeConditionData {
                                     VoiceTypeOrList = { Link = { FormKey = voiceTypesList.FormKey } }
                                 }.ToConditionFloat(comparisonValue: 0),

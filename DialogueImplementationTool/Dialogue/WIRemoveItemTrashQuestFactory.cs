@@ -90,7 +90,7 @@ public sealed class WIRemoveItemTrashQuestFactory(IDialogueContext context) : IG
                                 new GetInFactionConditionData {
                                     Faction = { Link = { FormKey = Skyrim.Faction.WINeverFillAliasesFaction.FormKey } }
                                 }.ToConditionFloat(comparisonValue: 0),
-                                new GetAllowWorldInteractionsConditionData().ToConditionFloat(comparisonValue: 1),
+                                new GetAllowWorldInteractionsConditionData().ToConditionFloat(),
                                 new GetIsVoiceTypeConditionData {
                                     VoiceTypeOrList = { Link = { FormKey = voiceTypesList.FormKey } }
                                 }.ToConditionFloat(comparisonValue: 0),
