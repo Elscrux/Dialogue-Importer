@@ -16,7 +16,7 @@ public interface IGenericDialogueQuestFactory {
     }
 
     FormList GetVoiceTypesList(IDialogueContext context) {
-        var voiceTypesListEditorId = context.Prefix + Name + "VoiceTypes";
+        var voiceTypesListEditorId = Name + "VoiceTypes";
         return context.GetOrAddRecord<FormList, IFormListGetter>(voiceTypesListEditorId,
             () => new FormList(context.GetNextFormKey(), context.Release) {
                 EditorID = voiceTypesListEditorId,
