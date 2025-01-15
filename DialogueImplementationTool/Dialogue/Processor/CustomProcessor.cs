@@ -2,7 +2,6 @@
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Extension;
 using Mutagen.Bethesda.FormKeys.SkyrimSE;
-using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
@@ -16,12 +15,8 @@ public sealed class CustomProcessor(IDialogueContext context) : DialogueTypeProc
         switch (description) {
             case "NPC returns the dropped item to the player":
                 // Set quest factory
-                var questFactory = new WIRemoveItemReturnQuestFactory(context);
+                var questFactory = new WIRemoveItemReturnQuestFactory(context, voiceType);
                 GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData, questFactory);
-
-                // Add the voice type to the list of voice types for the quest
-                var voiceTypesList = questFactory.GetVoiceTypesList();
-                voiceTypesList.Items.Add(new FormLink<ISkyrimMajorRecordGetter>(voiceType));
 
                 // Add script to return the item to the player
                 topicInfo.Script.StartScriptLines.Add(questFactory.GetReturnItemScript());

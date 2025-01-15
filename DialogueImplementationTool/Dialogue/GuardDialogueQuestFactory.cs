@@ -3,15 +3,16 @@ using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue;
 
 public sealed class GuardDialogueQuestFactory(IDialogueContext context) : IGenericDialogueQuestFactory {
+    public string Name => context.Prefix + "GuardDialogue";
+
     public Quest Create() {
-        var questEditorId = context.Prefix + "GuardDialogue";
         var guardFaction = context.SelectRecord<Faction, IFactionGetter>("Guard Faction");
         var disableFaction = context.SelectRecord<Faction, IFactionGetter>("Guard Dialogue Disable Faction");
 
         return context.GetOrAddRecord<Quest, IQuestGetter>(
-            questEditorId,
+            Name,
             () => new Quest(context.GetNextFormKey(), context.Release) {
-                EditorID = questEditorId,
+                EditorID = Name,
                 Priority = 30,
                 Filter = context.Quest.Filter,
                 DialogConditions = [

@@ -6,35 +6,17 @@ using Mutagen.Bethesda.Skyrim.Internals;
 using Quest = Mutagen.Bethesda.Skyrim.Quest;
 namespace DialogueImplementationTool.Dialogue;
 
-public sealed class WIRemoveItemTrashQuestFactory(IDialogueContext context) : IGenericDialogueQuestFactory {
-    private const string Name = "WIRemoveItemDroppedTrash";
-
-    public FormList GetVoiceTypesList() {
-        var voiceTypesListEditorId = context.Prefix + Name + "VoiceTypes";
-        return context.GetOrAddRecord<FormList, IFormListGetter>(voiceTypesListEditorId,
-            () => new FormList(context.GetNextFormKey(), context.Release) {
-                EditorID = voiceTypesListEditorId,
-                Items = [],
-            });
-    }
-
-    public string GetQuestEditorId() {
-        return context.Prefix + Name;
-    }
-
-    public string GetQuestScriptName() {
-        return GetQuestEditorId() + "Script";
-    }
+public sealed class WIRemoveItemTrashQuestFactory(IDialogueContext context, VoiceType voiceType) : IGenericDialogueQuestFactory {
+    public string Name => context.Prefix + "WIRemoveItemDroppedTrash";
+    public string ScriptName => Name + "Script";
 
     public Quest Create() {
-        var questEditorId = GetQuestEditorId();
+        var voiceTypesList = (this as IGenericDialogueQuestFactory).GetVoiceTypesList(context);
+        (this as IGenericDialogueQuestFactory).AddVoiceType(context, voiceType);
 
-        var voiceTypesList = GetVoiceTypesList();
-
-        var scriptName = GetQuestScriptName();
-        context.Scripts.Add(scriptName,
+        context.Scripts.Add(ScriptName,
             $$"""
-            Scriptname {{scriptName}} extends WorldInteractionsScript Conditional
+            Scriptname {{ScriptName}} extends WorldInteractionsScript Conditional
             {Extends WorldInteractionsScript which extends Quest script.}
 
             Event OnStoryRemoveFromPlayer(ObjectReference akOwner, ObjectReference akItem, Location akLocation, Form akItemBase, int aiRemoveType)
@@ -43,11 +25,11 @@ public sealed class WIRemoveItemTrashQuestFactory(IDialogueContext context) : IG
             """);
 
         var quest = context.GetOrAddRecord<Quest, IQuestGetter>(
-            questEditorId,
+            Name,
             () => {
                 var questFormKey = context.GetNextFormKey();
                 return new Quest(questFormKey, context.Release) {
-                    EditorID = GetQuestEditorId(),
+                    EditorID = Name,
                     Name = "Just throw trash",
                     Priority = 30,
                     Filter = @"World Interactions\Remove Item\",
@@ -56,7 +38,7 @@ public sealed class WIRemoveItemTrashQuestFactory(IDialogueContext context) : IG
                     VirtualMachineAdapter = new QuestAdapter {
                         Scripts = [
                             new ScriptEntry {
-                                Name = scriptName,
+                                Name = ScriptName,
                                 Flags = ScriptEntry.Flag.Local,
                                 Properties = [
                                     new ScriptObjectProperty {

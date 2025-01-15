@@ -12,14 +12,15 @@ public sealed class WICommentQuestFactory(
     : IGenericDialogueQuestFactory {
     public const string TopicCommentScript = "(GetOwningQuest() as WICommentScript).Commented()";
 
+    public string Name => $"{context.Prefix}WIComment{commentType}";
+
     public Quest Create() {
-        var questEditorId = $"{context.Prefix}WIComment{commentType}";
         var defaultNpcVoiceTypeList = context.SelectRecord<FormList, IFormListGetter>("Default NPC Voice Types formlist");
 
         return context.GetOrAddRecord<Quest, IQuestGetter>(
-            questEditorId,
+            Name,
             () => new Quest(context.GetNextFormKey(), context.Release) {
-                EditorID = questEditorId,
+                EditorID = Name,
                 Priority = 30,
                 Filter = context.Quest.Filter,
                 DialogConditions = [

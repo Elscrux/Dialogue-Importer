@@ -5,13 +5,13 @@ using Noggog;
 namespace DialogueImplementationTool.Dialogue;
 
 public sealed class VoiceTypeGenericDialogueQuestFactory(IDialogueContext context, VoiceType voiceType) : IGenericDialogueQuestFactory {
-    public Quest Create() {
-        var questEditorId = context.Prefix + "GenericDialogue" + voiceType.EditorID?.TrimStart(context.Prefix);
+    public string Name => context.Prefix + "GenericDialogue" + voiceType.EditorID?.TrimStart(context.Prefix);
 
+    public Quest Create() {
         return context.GetOrAddRecord<Quest, IQuestGetter>(
-            questEditorId,
+            Name,
             () => new Quest(context.GetNextFormKey(), context.Release) {
-                EditorID = questEditorId,
+                EditorID = Name,
                 Priority = 30,
                 Filter = context.Quest.Filter,
                 DialogConditions = [
