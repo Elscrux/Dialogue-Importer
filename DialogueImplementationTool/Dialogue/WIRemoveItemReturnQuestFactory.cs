@@ -7,7 +7,7 @@ using Quest = Mutagen.Bethesda.Skyrim.Quest;
 namespace DialogueImplementationTool.Dialogue;
 
 public sealed class WIRemoveItemReturnQuestFactory(IDialogueContext context) : IGenericDialogueQuestFactory {
-    private const string Name = "WIRemoveItemDroppedAccidentally";
+    private const string Name = "WIRemoveItemReturn";
 
     public FormList GetVoiceTypesList() {
         var voiceTypesListEditorId = context.Prefix + Name + "VoiceTypes";
