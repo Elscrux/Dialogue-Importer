@@ -4,7 +4,7 @@ using System.Windows.Media;
 using DialogueImplementationTool.Services;
 namespace DialogueImplementationTool.UI.Converters;
 
-public class LoadStateToBrushConverter : IValueConverter {
+public sealed class LoadStateToBrushConverter : IValueConverter {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) {
         if (value is not LoadState loadState) return null;
 

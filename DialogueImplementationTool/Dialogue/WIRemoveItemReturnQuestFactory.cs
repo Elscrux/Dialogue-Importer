@@ -8,7 +8,7 @@ using Mutagen.Bethesda.Skyrim.Internals;
 using Quest = Mutagen.Bethesda.Skyrim.Quest;
 namespace DialogueImplementationTool.Dialogue;
 
-public class WIRemoveItemReturnQuestFactory(IDialogueContext context) : IGenericDialogueQuestFactory {
+public sealed class WIRemoveItemReturnQuestFactory(IDialogueContext context) : IGenericDialogueQuestFactory {
     private const string Name = "WIRemoveItemDroppedAccidentally";
 
     public FormList GetVoiceTypesList() {

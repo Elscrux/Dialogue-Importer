@@ -3,7 +3,7 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 namespace DialogueImplementationTool.Services;
 
-public class InjectedFormKeySelection : IFormKeySelection {
+public sealed class InjectedFormKeySelection : IFormKeySelection {
     private readonly Dictionary<string, FormKey> _injectedEntries = new();
 
     public InjectedFormKeySelection() {}

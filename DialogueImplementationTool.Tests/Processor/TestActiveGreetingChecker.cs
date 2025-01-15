@@ -3,7 +3,7 @@ using FluentAssertions;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Tests.Processor;
 
-public class TestActiveGreetingChecker {
+public sealed class TestActiveGreetingChecker {
     private readonly TestConstants _testConstants = new();
 
     [Fact]

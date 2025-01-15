@@ -1,7 +1,7 @@
 ﻿using DialogueImplementationTool.Dialogue.Model;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
-public class RemoveEmptyTopicInfos : IDialogueTopicProcessor {
+public sealed class RemoveEmptyTopicInfos : IDialogueTopicProcessor {
     public void Process(DialogueTopic topic) {
         topic.TopicInfos.RemoveAll(info =>
             info.Links.Count == 0

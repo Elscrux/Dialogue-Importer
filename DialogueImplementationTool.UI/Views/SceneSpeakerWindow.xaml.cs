@@ -42,7 +42,7 @@ public partial class SceneSpeakerWindow {
     }
 }
 
-public class FormKeyWrapper {
+public sealed class FormKeyWrapper {
     public FormKey FormKey { get; set; }
 }
 

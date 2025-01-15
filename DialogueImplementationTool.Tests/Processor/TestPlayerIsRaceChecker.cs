@@ -5,7 +5,7 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Tests.Processor;
 
-public class TestPlayerIsRaceChecker {
+public sealed class TestPlayerIsRaceChecker {
     private readonly TestConstants _testConstants = new();
 
     [Fact]

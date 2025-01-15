@@ -145,7 +145,7 @@ public sealed class SharedInfoConverter : IConversationProcessor {
         public SharedLine? Next { get; set; } = Next;
     }
 
-    private sealed class SharedLine : DialogueResponse, IEquatable<SharedLine> {
+    private class SharedLine : DialogueResponse, IEquatable<SharedLine> {
         public SharedLine(DialogueResponse dialogueResponse, ISpeaker speaker) {
             Response = dialogueResponse.Response;
             StartNotes = dialogueResponse.StartNotes;

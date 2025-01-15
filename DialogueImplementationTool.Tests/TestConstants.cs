@@ -9,7 +9,7 @@ using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Tests;
 
-public class TestConstants {
+public sealed class TestConstants {
     private const SkyrimRelease Release = SkyrimRelease.SkyrimSE;
 
     public TestConstants() {

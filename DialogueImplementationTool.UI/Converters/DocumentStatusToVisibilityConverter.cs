@@ -4,7 +4,7 @@ using System.Windows.Data;
 using DialogueImplementationTool.UI.ViewModels;
 namespace DialogueImplementationTool.UI.Converters;
 
-public class DocumentStatusToVisibilityConverter : IValueConverter {
+public sealed class DocumentStatusToVisibilityConverter : IValueConverter {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) {
         if (value is not DocumentStatus documentStatus || parameter is not DocumentStatus desiredDocumentStatus) return null;
 

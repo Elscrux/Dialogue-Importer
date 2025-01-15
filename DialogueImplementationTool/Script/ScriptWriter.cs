@@ -3,7 +3,7 @@ using DialogueImplementationTool.Services;
 using Mutagen.Bethesda.Plugins;
 namespace DialogueImplementationTool.Script;
 
-public class ScriptWriter(OutputPathProvider outputPathProvider, PapyrusCompilerWrapper compiler) {
+public sealed class ScriptWriter(OutputPathProvider outputPathProvider, PapyrusCompilerWrapper compiler) {
     public void WriteScript(string scriptName, string content, ModKey modKey) {
         var directoryInfo = new DirectoryInfo(Path.Combine(outputPathProvider.OutputPath, modKey.FileName.NameWithoutExtension));
 
