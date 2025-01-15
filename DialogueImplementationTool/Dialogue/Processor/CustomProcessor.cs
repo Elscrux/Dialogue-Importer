@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Extension;
+using Mutagen.Bethesda.FormKeys.SkyrimSE;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
@@ -10,10 +11,10 @@ public sealed class CustomProcessor(IDialogueContext context) : DialogueTypeProc
         => subtype is DialogTopic.SubtypeEnum.Custom;
 
     protected override IEnumerable<Condition> GetConditions(string description, DialogueTopicInfo topicInfo) {
+        var voiceType = GenericMetaData.GetVoiceType(topicInfo.MetaData);
+
         switch (description) {
             case "NPC returns the dropped item to the player":
-                var voiceType = GenericMetaData.GetVoiceType(topicInfo.MetaData);
-
                 // Set quest factory
                 var questFactory = new WIRemoveItemReturnQuestFactory(context);
                 GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData, questFactory);
@@ -32,6 +33,56 @@ public sealed class CustomProcessor(IDialogueContext context) : DialogueTypeProc
                 }.ToConditionFloat();
 
                 break;
+            case "Player casts Calm on NPC": {
+                var dialogTopic = context.GetOrAddOverride<DialogTopic, IDialogTopicGetter>(Skyrim.DialogTopic.WICastMagicNonHostileSpellCalmTopic);
+                GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new ExistingDialogueTopicFactory(dialogTopic));
+                
+                yield return new GetIsVoiceTypeConditionData {
+                    VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
+                }.ToConditionFloat();
+
+                break;
+            }
+            case "Player casts Courage on NPC": {
+                var dialogTopic = context.GetOrAddOverride<DialogTopic, IDialogTopicGetter>(Skyrim.DialogTopic.WICastMagicNonHostileSpellCourageTopic);
+                GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new ExistingDialogueTopicFactory(dialogTopic));
+                
+                yield return new GetIsVoiceTypeConditionData {
+                    VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
+                }.ToConditionFloat();
+
+                break;
+            }
+            case "Player casts Healing spell on NPC": {
+                var dialogTopic = context.GetOrAddOverride<DialogTopic, IDialogTopicGetter>(Skyrim.DialogTopic.WICastMagicNonHostileSpellHealingTopic);
+                GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new ExistingDialogueTopicFactory(dialogTopic));
+                
+                yield return new GetIsVoiceTypeConditionData {
+                    VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
+                }.ToConditionFloat();
+
+                break;
+            }
+            case "Player casts Stealth spell on NPC": {
+                var dialogTopic = context.GetOrAddOverride<DialogTopic, IDialogTopicGetter>(Skyrim.DialogTopic.WICastMagicNonHostileSpellStealthTopic);
+                GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new ExistingDialogueTopicFactory(dialogTopic));
+                
+                yield return new GetIsVoiceTypeConditionData {
+                    VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
+                }.ToConditionFloat();
+
+                break;
+            }
+            case "Player casts other non-hostile spell on NPC": {
+                var dialogTopic = context.GetOrAddOverride<DialogTopic, IDialogTopicGetter>(Skyrim.DialogTopic.WICastMagicNonHostileSpellWeirdTopic);
+                GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new ExistingDialogueTopicFactory(dialogTopic));
+                
+                yield return new GetIsVoiceTypeConditionData {
+                    VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
+                }.ToConditionFloat();
+
+                break;
+            }
         }
     }
 }
