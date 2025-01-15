@@ -6,9 +6,6 @@ using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Extension;
 
 public static class QuestExtension {
-    public static byte[] EventAlias1() => [0x52, 0x31, 0x0, 0x0];
-    public static byte[] EventAlias2() => [0x52, 0x32, 0x0, 0x0];
-
     public static IQuestAliasGetter? GetAlias(this IQuestGetter quest, FormKey npcFormKey) {
         return quest.Aliases.FirstOrDefault(alias => alias.UniqueActor.FormKey == npcFormKey);
     }

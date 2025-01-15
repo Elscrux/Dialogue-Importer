@@ -152,17 +152,13 @@ public sealed class WIRemoveItemReturnQuestFactory(IDialogueContext context) : I
                             Name = "Item",
                             FindMatchingRefFromEvent = new FindMatchingRefFromEvent {
                                 FromEvent = RecordTypes.REMP,
-                                EventData = QuestExtension.EventAlias1(),
+                                EventData = (byte[]) [0x52, 0x32, 0x0, 0x0],
                             },
                             VoiceTypes = new FormLinkNullable<IAliasVoiceTypeGetter>(FormKey.Null),
                         },
                         new QuestAlias {
                             ID = 1,
                             Name = "Bystander",
-                            FindMatchingRefFromEvent = new FindMatchingRefFromEvent {
-                                FromEvent = RecordTypes.REMP,
-                                EventData = QuestExtension.EventAlias1(),
-                            },
                             Flags = QuestAlias.Flag.MatchingRefClosest | QuestAlias.Flag.MatchingRefInLoadedArea,
                             VoiceTypes = new FormLinkNullable<IAliasVoiceTypeGetter>(FormKey.Null),
                             Conditions = [

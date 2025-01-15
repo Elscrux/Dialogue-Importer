@@ -55,8 +55,8 @@ public class GenericSceneFactory(IDialogueContext context) : SceneFactory(contex
             .ToExtendedList();
 
         // Create event aliases for the first two speakers
-        aliases.Add(CreateEventAlias(0, "Actor 1", QuestExtension.EventAlias1(), getIsIdConditions));
-        aliases.Add(CreateEventAlias(1, "Actor 2", QuestExtension.EventAlias2(), getIsIdConditions));
+        aliases.Add(CreateEventAlias(0, "Actor 1", [0x52, 0x31, 0x0, 0x0], getIsIdConditions));
+        aliases.Add(CreateEventAlias(1, "Actor 2", [0x52, 0x32, 0x0, 0x0], getIsIdConditions));
 
         // Add remaining base aliases for additional speakers based on distance condition
         if (AliasSpeakers.Count > 2) {
