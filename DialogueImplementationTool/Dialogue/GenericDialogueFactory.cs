@@ -15,6 +15,8 @@ public sealed class GenericDialogueFactory(IDialogueContext context) : BaseDialo
                 topicInfo.Speaker ??= new NpcSpeaker(Context.LinkCache, FormKey.Null);
                 var dialogTopicInfo = GetResponses(quest, topicInfo);
                 dialogTopic.Responses.Add(dialogTopicInfo);
+                var postProcessor = GenericMetaData.GetPostProcessor(topicInfo.MetaData);
+                postProcessor.Process(quest, dialogTopic);
             }
         }
     }

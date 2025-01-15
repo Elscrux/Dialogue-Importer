@@ -76,6 +76,8 @@ public sealed class CsvDocumentParser(
                         { GenericMetaData.Description, genericDialogue.Description },
                         { GenericMetaData.VoiceType, voiceType },
                         { GenericMetaData.GenericQuestFactory, new VoiceTypeGenericDialogueQuestFactory(context, voiceType) },
+                        { GenericMetaData.GenericDialogTopicFactory, new NewDialogueTopicFactory(context) },
+                        { GenericMetaData.PostProcessor, new NullPostProcessor() },
                     },
                 };
                 var topic = new DialogueTopic { TopicInfos = [topicInfo] };

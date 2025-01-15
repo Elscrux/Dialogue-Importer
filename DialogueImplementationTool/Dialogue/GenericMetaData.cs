@@ -10,6 +10,7 @@ public static class GenericMetaData {
     public const string VoiceType = "VoiceType";
     public const string GenericQuestFactory = "GenericQuestFactory";
     public const string GenericDialogTopicFactory = "GenericDialogTopicFactory";
+    public const string PostProcessor = "PostProcessor";
 
     public static DialogTopic.CategoryEnum GetCategory(Dictionary<string, object> metaData) {
         if (metaData[Category] is not DialogTopic.CategoryEnum category)
@@ -77,5 +78,16 @@ public static class GenericMetaData {
         Dictionary<string, object> metaData,
         IGenericDialogueTopicFactory topicFactory) {
         metaData[GenericDialogTopicFactory] = topicFactory;
+    }
+
+    public static IGenericDialoguePostProcessor GetPostProcessor(Dictionary<string, object> metaData) {
+        if (metaData[PostProcessor] is not IGenericDialoguePostProcessor postProcessor)
+            throw new InvalidOperationException("PostProcessor is not set");
+
+        return postProcessor;
+    }
+    
+    public static void SetPostProcessor(Dictionary<string, object> metaData, IGenericDialoguePostProcessor postProcessor) {
+        metaData[PostProcessor] = postProcessor;
     }
 }
