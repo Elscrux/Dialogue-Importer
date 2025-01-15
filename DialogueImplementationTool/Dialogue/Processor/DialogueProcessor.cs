@@ -55,6 +55,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new ObserveCombatProcessor(),
             new PickpocketProcessor(),
             new PowerAttackProcessor(),
+            new SceneProcessor(_context),
             new ShootBowNonCombatProcessor(),
             new ShoutingProcessor(),
             new StealingProcessor(),
