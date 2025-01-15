@@ -4,7 +4,7 @@ using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Skyrim.Internals;
 namespace DialogueImplementationTool.Dialogue;
 
-public sealed class SceneWithOneDialogTopicFactory(IDialogueContext context) : IGenericDialogueTopicFactory {
+public sealed class SceneWithOneDialogTopicFactory(IDialogueContext context, uint aliasId) : IGenericDialogueTopicFactory {
     public DialogTopic Create(IQuestGetter quest, DialogueTopicInfo topicInfo) {
         var scene = context.GetOrAddRecord<Scene, ISceneGetter>(quest.EditorID + "Scene",
             () => {
@@ -23,7 +23,7 @@ public sealed class SceneWithOneDialogTopicFactory(IDialogueContext context) : I
                             // EditorWidth = 400,
                         }
                     ],
-                    Actors = [new SceneActor { ID = 0 }],
+                    Actors = [new SceneActor { ID = aliasId }],
                     Actions = [
                         new SceneAction {
                             Type = SceneAction.TypeEnum.Dialog,

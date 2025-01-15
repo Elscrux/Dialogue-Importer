@@ -14,7 +14,7 @@ public sealed class SceneProcessor(IDialogueContext context) : DialogueTypeProce
         switch (description) {
             case "Player drops an item (comment about littering)":
                 GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData, new WIRemoveItemTrashQuestFactory(context));
-                GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new SceneWithOneDialogTopicFactory(context));
+                GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new SceneWithOneDialogTopicFactory(context, 0));
                 yield return new GetIsVoiceTypeConditionData {
                     VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
                 }.ToConditionFloat();
