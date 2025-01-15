@@ -387,6 +387,30 @@
       <Compile Update="Dialogue\Processor\CustomProcessor.cs">
         <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\Processor\SceneProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\WIRemoveItemTrashQuestFactory.cs">
+        <DependentUpon>IGenericDialogueQuestFactory.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\SceneWithOneDialogTopicFactory.cs">
+        <DependentUpon>IGenericDialogueTopicFactory.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\NewDialogueTopicFactory.cs">
+        <DependentUpon>IGenericDialogueTopicFactory.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\ExistingDialogueTopicFactory.cs">
+        <DependentUpon>IGenericDialogueTopicFactory.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\WIHouseQuestFactory.cs">
+        <DependentUpon>IGenericDialogueQuestFactory.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\WIRemoveItemReturnPostProcessor.cs">
+        <DependentUpon>IGenericDialoguePostProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\NullPostProcessor.cs">
+        <DependentUpon>IGenericDialoguePostProcessor.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>
