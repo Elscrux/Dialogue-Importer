@@ -9,6 +9,7 @@ public static class GenericMetaData {
     public const string Description = "Description";
     public const string VoiceType = "VoiceType";
     public const string GenericQuestFactory = "GenericQuestFactory";
+    public const string GenericDialogTopicFactory = "GenericDialogTopicFactory";
 
     public static DialogTopic.CategoryEnum GetCategory(Dictionary<string, object> metaData) {
         if (metaData[Category] is not DialogTopic.CategoryEnum category)
@@ -63,5 +64,18 @@ public static class GenericMetaData {
 
     public static void SetGenericQuestFactory(Dictionary<string, object> metaData, IGenericDialogueQuestFactory questFactory) {
         metaData[GenericQuestFactory] = questFactory;
+    }
+
+    public static IGenericDialogueTopicFactory GetGenericDialogTopicFactory(Dictionary<string, object> metaData) {
+        if (metaData[GenericDialogTopicFactory] is not IGenericDialogueTopicFactory topicFactory)
+            throw new InvalidOperationException("GenericDialogTopicFactory is not set");
+
+        return topicFactory;
+    }
+
+    public static void SetGenericDialogTopicFactory(
+        Dictionary<string, object> metaData,
+        IGenericDialogueTopicFactory topicFactory) {
+        metaData[GenericDialogTopicFactory] = topicFactory;
     }
 }
