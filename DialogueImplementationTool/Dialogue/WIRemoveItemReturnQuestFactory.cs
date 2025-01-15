@@ -71,7 +71,7 @@ public class WIRemoveItemReturnQuestFactory(IDialogueContext context) : IGeneric
             EndFunction
             """);
 
-        return context.GetOrAddQuest(
+        return context.GetOrAddRecord<Quest, IQuestGetter>(
             questEditorId,
             () => {
                 var questFormKey = context.GetNextFormKey();

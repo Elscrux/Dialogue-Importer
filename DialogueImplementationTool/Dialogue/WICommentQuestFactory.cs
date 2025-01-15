@@ -16,7 +16,7 @@ public sealed class WICommentQuestFactory(
         var questEditorId = $"{context.Prefix}WIComment{commentType}";
         var defaultNpcVoiceTypeList = context.SelectRecord<FormList, IFormListGetter>("Default NPC Voice Types formlist");
 
-        return context.GetOrAddQuest(
+        return context.GetOrAddRecord<Quest, IQuestGetter>(
             questEditorId,
             () => new Quest(context.GetNextFormKey(), context.Release) {
                 EditorID = questEditorId,

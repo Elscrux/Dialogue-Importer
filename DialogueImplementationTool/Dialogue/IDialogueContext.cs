@@ -22,7 +22,6 @@ public interface IDialogueContext {
     List<string> Issues { get; }
     FormKey GetNextFormKey();
     void AddRecord<TMajorRecord>(TMajorRecord record) where TMajorRecord : IMajorRecord ;
-    Quest GetOrAddQuest(string editorId, Func<Quest> questFactory);
     DialogTopic? GetTopic(string editorId);
     DialogTopic GetTopic(FormKey formKey);
     IDialogTopicGetter? GetTopic(DialogueTopic topic);
@@ -35,4 +34,7 @@ public interface IDialogueContext {
     TMajor GetOrAddOverride<TMajor, TMajorGetter>(IFormKeyGetter formKeyGetter)
         where TMajor : class, TMajorGetter, IMajorRecord
         where TMajorGetter : class, IMajorRecordGetter, IMajorRecordQueryableGetter;
+    TMajorRecord GetOrAddRecord<TMajorRecord, TMajorRecordGetter>(string editorId, Func<TMajorRecord> recordFactory)
+        where TMajorRecord : class, TMajorRecordGetter, IMajorRecord
+        where TMajorRecordGetter : class, IMajorRecordGetter;
 }

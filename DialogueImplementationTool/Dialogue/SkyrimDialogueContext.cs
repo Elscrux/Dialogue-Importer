@@ -49,20 +49,20 @@ public sealed class SkyrimDialogueContext(
         }
     }
 
-    public Quest GetOrAddQuest(string editorId, Func<Quest> questFactory) {
-        var questGetter = Environment.LinkCache.PriorityOrder.WinningOverrides<IQuestGetter>()
+    public TMajorRecord GetOrAddRecord<TMajorRecord, TMajorRecordGetter>(string editorId, Func<TMajorRecord> recordFactory)
+        where TMajorRecord : class, TMajorRecordGetter, IMajorRecord
+        where TMajorRecordGetter : class, IMajorRecordGetter {
+        var recordGetter = Environment.LinkCache.PriorityOrder.WinningOverrides<IQuestGetter>()
             .FirstOrDefault(q => q.EditorID == editorId);
-        if (questGetter is null) {
-            var newQuest = questFactory();
-            mod.Quests.Add(newQuest);
-            return newQuest;
+        if (recordGetter is null) {
+            var record = recordFactory();
+            AddRecord(record);
+            return record;
         }
 
-        var questContext = environment.LinkCache.ResolveContext<Quest, IQuestGetter>(questGetter.FormKey);
-        return questContext.GetOrAddAsOverride(mod);
+        var recordContext = environment.LinkCache.ResolveContext<TMajorRecord, TMajorRecordGetter>(recordGetter.FormKey);
+        return recordContext.GetOrAddAsOverride(mod);
     }
-
-    
 
     public DialogTopic? GetTopic(string editorId) {
         if (!environment.LinkCache.TryResolveIdentifier<IDialogTopicGetter>(editorId, out var formKey)) return null;

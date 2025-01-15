@@ -8,7 +8,7 @@ public sealed class VoiceTypeGenericDialogueQuestFactory(IDialogueContext contex
     public Quest Create() {
         var questEditorId = context.Prefix + "GenericDialogue" + voiceType.EditorID?.TrimStart(context.Prefix);
 
-        return context.GetOrAddQuest(
+        return context.GetOrAddRecord<Quest, IQuestGetter>(
             questEditorId,
             () => new Quest(context.GetNextFormKey(), context.Release) {
                 EditorID = questEditorId,

@@ -8,7 +8,7 @@ public sealed class GuardDialogueQuestFactory(IDialogueContext context) : IGener
         var guardFaction = context.SelectRecord<Faction, IFactionGetter>("Guard Faction");
         var disableFaction = context.SelectRecord<Faction, IFactionGetter>("Guard Dialogue Disable Faction");
 
-        return context.GetOrAddQuest(
+        return context.GetOrAddRecord<Quest, IQuestGetter>(
             questEditorId,
             () => new Quest(context.GetNextFormKey(), context.Release) {
                 EditorID = questEditorId,
