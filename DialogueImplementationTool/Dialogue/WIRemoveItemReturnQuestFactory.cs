@@ -145,11 +145,6 @@ public sealed class WIRemoveItemReturnQuestFactory(IDialogueContext context, Voi
                             VoiceTypes = new FormLinkNullable<IAliasVoiceTypeGetter>(FormKey.Null),
                             Conditions = [
                                 new GetInFactionConditionData {
-                                    Faction = {
-                                        Link = { FormKey = HearthFires.Faction.BYOHRelationshipAdoptionFaction.FormKey }
-                                    }
-                                }.ToConditionFloat(comparisonValue: 0),
-                                new GetInFactionConditionData {
                                     Faction = { Link = { FormKey = Skyrim.Faction.WINeverFillAliasesFaction.FormKey } }
                                 }.ToConditionFloat(comparisonValue: 0),
                                 new GetAllowWorldInteractionsConditionData().ToConditionFloat(),

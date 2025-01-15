@@ -22,7 +22,7 @@ public sealed class WICommentQuestFactory(
             () => new Quest(context.GetNextFormKey(), context.Release) {
                 EditorID = Name,
                 Priority = 30,
-                Filter = context.Quest.Filter,
+                Filter = @"World Interactions\Comment\",
                 DialogConditions = [
                     ..extraConditions,
                     new GetInFactionConditionData {
