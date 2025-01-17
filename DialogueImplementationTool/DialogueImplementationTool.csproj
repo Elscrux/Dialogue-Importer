@@ -411,6 +411,9 @@
       <Compile Update="Dialogue\NullPostProcessor.cs">
         <DependentUpon>IGenericDialoguePostProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\Processor\TimeToGoProcessor.cs">
+        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

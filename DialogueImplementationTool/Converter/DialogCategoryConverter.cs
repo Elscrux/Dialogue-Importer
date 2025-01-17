@@ -11,7 +11,7 @@ public static class DialogCategoryConverter {
             "Farewell" => (DialogTopic.CategoryEnum.Misc, DialogTopic.SubtypeEnum.Goodbye),
             "Idle" => (DialogTopic.CategoryEnum.Misc, DialogTopic.SubtypeEnum.Idle),
             "GuardPursue" => (DialogTopic.CategoryEnum.Misc, DialogTopic.SubtypeEnum.PursueIdleTopic),
-            // Time to go subtype?
+            "TimeToGo" => (DialogTopic.CategoryEnum.Misc, DialogTopic.SubtypeEnum.TimeToGo),
             "CollideActor" => (DialogTopic.CategoryEnum.Misc, DialogTopic.SubtypeEnum.ActorCollideWithActor),
             "CollideItem" => (DialogTopic.CategoryEnum.Misc, DialogTopic.SubtypeEnum.KnockOverObject),
             "LookAtLockedObject" => (DialogTopic.CategoryEnum.Misc, DialogTopic.SubtypeEnum.LockedObject),
