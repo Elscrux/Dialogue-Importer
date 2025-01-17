@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:DialogueImplementationTool.UI.Views"
         xmlns:plugins="clr-namespace:Mutagen.Bethesda.WPF.Plugins;assembly=Mutagen.Bethesda.WPF"
         mc:Ignorable="d" d:DataContext="{d:DesignInstance local:FormKeySelectionWindow}"
-        Height="200" Width="400">
+        Height="300" Width="600">
     <DockPanel>
         <Button Content="Save and Close"
                 HorizontalAlignment="Left"
