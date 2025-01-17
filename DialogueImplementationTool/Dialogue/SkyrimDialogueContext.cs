@@ -52,7 +52,7 @@ public sealed class SkyrimDialogueContext(
     public TMajorRecord GetOrAddRecord<TMajorRecord, TMajorRecordGetter>(string editorId, Func<TMajorRecord> recordFactory)
         where TMajorRecord : class, TMajorRecordGetter, IMajorRecord
         where TMajorRecordGetter : class, IMajorRecordGetter {
-        var recordGetter = Environment.LinkCache.PriorityOrder.WinningOverrides<IQuestGetter>()
+        var recordGetter = Environment.LinkCache.PriorityOrder.WinningOverrides<TMajorRecordGetter>()
             .FirstOrDefault(q => q.EditorID == editorId);
         if (recordGetter is null) {
             var record = recordFactory();
