@@ -9,6 +9,8 @@ public sealed class WIRemoveItemReturnPostProcessor(IDialogueContext context) : 
             packageDataTopic.Topics[0] = new TopicReference { Reference = dialogTopic.ToLink() };
         }
 
+        dialogTopic.EditorID = context.Prefix + "WIRemoveItemReturn";
+
         var branchEditorId = context.Prefix + "WIRemoveItemReturnBranch";
         var branch = context.GetOrAddRecord<DialogBranch, IDialogBranchGetter>(
             branchEditorId,
