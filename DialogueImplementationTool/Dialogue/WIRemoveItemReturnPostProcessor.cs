@@ -9,12 +9,16 @@ public sealed class WIRemoveItemReturnPostProcessor(IDialogueContext context) : 
             packageDataTopic.Topics[0] = new TopicReference { Reference = dialogTopic.ToLink() };
         }
 
-        var branch = new DialogBranch(context.GetNextFormKey(), context.Release) {
-            EditorID = context.Prefix + "WIRemoveItemReturnBranch",
-            Quest = quest.ToLink(),
-            Flags = DialogBranch.Flag.Blocking,
-            StartingTopic = dialogTopic.ToNullableLink(),
-        };
+        var branchEditorId = context.Prefix + "WIRemoveItemReturnBranch";
+        var branch = context.GetOrAddRecord<DialogBranch, IDialogBranchGetter>(
+            branchEditorId,
+            () => new DialogBranch(context.GetNextFormKey(), context.Release) {
+                EditorID = branchEditorId,
+                Quest = quest.ToLink(),
+                Flags = DialogBranch.Flag.Blocking,
+                StartingTopic = dialogTopic.ToNullableLink(),
+            }
+        );
 
         context.AddRecord(branch);
     }
