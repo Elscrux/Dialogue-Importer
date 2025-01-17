@@ -4,8 +4,8 @@ using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace DialogueImplementationTool.Dialogue;
 
-public sealed class VoiceTypeGenericDialogueQuestFactory(IDialogueContext context, VoiceType voiceType) : IGenericDialogueQuestFactory {
-    public string Name => context.Prefix + "GenericDialogue" + voiceType.EditorID?.TrimStart(context.Prefix);
+public sealed class VoiceTypeGenericDialogueQuestFactory(IDialogueContext context, IVoiceTypeOrList voiceTypeOrList) : IGenericDialogueQuestFactory {
+    public string Name => context.Prefix + "GenericDialogue" + voiceTypeOrList.EditorID?.TrimStart(context.Prefix);
 
     public Quest Create() {
         return context.GetOrAddRecord<Quest, IQuestGetter>(
@@ -20,10 +20,10 @@ public sealed class VoiceTypeGenericDialogueQuestFactory(IDialogueContext contex
                         Keyword = { Link = { FormKey = Update.Keyword.CommandedVoiceExcluded.FormKey } }
                     }.ToConditionFloat(),
                     new GetIsVoiceTypeConditionData {
-                        VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
+                        VoiceTypeOrList = { Link = { FormKey = voiceTypeOrList.FormKey } },
                     }.ToConditionFloat(),
                 ],
-                Name = $"Generic Dialogue for {voiceType.EditorID}",
+                Name = $"Generic Dialogue for {voiceTypeOrList.EditorID}",
                 Flags = Quest.Flag.StartGameEnabled,
             });
     }

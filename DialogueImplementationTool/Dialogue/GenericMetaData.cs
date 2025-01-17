@@ -45,14 +45,14 @@ public static class GenericMetaData {
         metaData[Description] = description;
     }
 
-    public static VoiceType GetVoiceType(Dictionary<string, object> metaData) {
-        if (metaData[VoiceType] is not VoiceType voiceType)
+    public static IVoiceTypeOrList GetVoiceType(Dictionary<string, object> metaData) {
+        if (metaData[VoiceType] is not IVoiceTypeOrList voiceType)
             throw new InvalidOperationException("VoiceType is not set");
 
         return voiceType;
     }
 
-    public static void SetVoiceType(Dictionary<string, object> metaData, VoiceType voiceType) {
+    public static void SetVoiceType(Dictionary<string, object> metaData, IVoiceTypeOrList voiceType) {
         metaData[VoiceType] = voiceType;
     }
 

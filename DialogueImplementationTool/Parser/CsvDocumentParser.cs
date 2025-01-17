@@ -10,6 +10,7 @@ using DialogueImplementationTool.Converter;
 using DialogueImplementationTool.Dialogue;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Dialogue.Processor;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReactiveUI;
@@ -51,11 +52,15 @@ public sealed class CsvDocumentParser(
         csvReader.Context.TypeConverterCache.AddConverter(new MaleFemaleGenderTypeConverter());
 
         var fileName = fileSystem.Path.GetFileNameWithoutExtension(FilePath);
-        var voiceType = context.SelectRecord<VoiceType, IVoiceTypeGetter>($"Voice Type for {fileName}");
+        var defaultFormKey = FormKey.Null;
+        if (context.LinkCache.TryResolve<IVoiceTypeOrListGetter>(fileName, out var voiceTypeOrList)) {
+            defaultFormKey = voiceTypeOrList.FormKey;
+        }
+        var voiceType = context.SelectRecord<IVoiceTypeOrList, IVoiceTypeOrListGetter>($"Voice Type or FormList of Voice Types for {fileName}", defaultFormKey);
         if (voiceType.EditorID is null) throw new InvalidOperationException("Voice Type is not set");
 
         return csvReader.GetRecords<GenericDialogue>()
-            .Where(g => !g.Line.IsNullOrEmpty())
+            .Where(g => !g.Line.IsNullOrWhitespace())
             .Select(genericDialogue => {
                 var (categoryEnum, subtypeEnum) = DialogCategoryConverter.Convert(genericDialogue.Category);
                 var response = new DialogueResponse {

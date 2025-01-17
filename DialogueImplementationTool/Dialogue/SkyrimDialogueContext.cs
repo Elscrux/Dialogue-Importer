@@ -180,7 +180,13 @@ public sealed class SkyrimDialogueContext(
     public TMajor SelectRecord<TMajor, TMajorGetter>(string prompt)
         where TMajor : class, TMajorGetter, IMajorRecordQueryable
         where TMajorGetter : class, IMajorRecordQueryableGetter {
-        var formKey = formKeySelection.GetFormKey<TMajorGetter>($"Select: {prompt}", FormKey.Null);
+        return SelectRecord<TMajor, TMajorGetter>(prompt, FormKey.Null);
+    }
+
+    public TMajor SelectRecord<TMajor, TMajorGetter>(string prompt, FormKey defaultFormKey)
+        where TMajor : class, TMajorGetter, IMajorRecordQueryable
+        where TMajorGetter : class, IMajorRecordQueryableGetter {
+        var formKey = formKeySelection.GetFormKey<TMajorGetter>($"Select: {prompt}", defaultFormKey);
 
         var context = environment.LinkCache.ResolveContext<TMajor, TMajorGetter>(formKey);
         return context.GetOrAddAsOverride(mod);

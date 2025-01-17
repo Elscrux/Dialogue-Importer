@@ -6,7 +6,7 @@ using Mutagen.Bethesda.Skyrim.Internals;
 using Quest = Mutagen.Bethesda.Skyrim.Quest;
 namespace DialogueImplementationTool.Dialogue;
 
-public sealed class WIRemoveItemTrashQuestFactory(IDialogueContext context, VoiceType voiceType) : IGenericDialogueQuestFactory {
+public sealed class WIRemoveItemTrashQuestFactory(IDialogueContext context, IVoiceTypeOrList voiceType) : IGenericDialogueQuestFactory {
     public string Name => context.Prefix + "WIRemoveItemDroppedTrash";
     public string ScriptName => Name + "Script";
 

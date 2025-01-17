@@ -7,7 +7,7 @@ using Mutagen.Bethesda.Skyrim.Internals;
 using Quest = Mutagen.Bethesda.Skyrim.Quest;
 namespace DialogueImplementationTool.Dialogue;
 
-public sealed class WIRemoveItemReturnQuestFactory(IDialogueContext context, VoiceType voiceType) : IGenericDialogueQuestFactory {
+public sealed class WIRemoveItemReturnQuestFactory(IDialogueContext context, IVoiceTypeOrList voiceType) : IGenericDialogueQuestFactory {
     public string Name => context.Prefix + "WIRemoveItemReturn";
     public string ScriptName => Name + "Script";
 

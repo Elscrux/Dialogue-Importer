@@ -6,7 +6,7 @@ using Mutagen.Bethesda.Skyrim.Internals;
 using LocationHasKeywordConditionData = Mutagen.Bethesda.Skyrim.LocationHasKeywordConditionData;
 namespace DialogueImplementationTool.Dialogue;
 
-public sealed class WIHouseQuestFactory(IDialogueContext context, VoiceType voiceType) : IGenericDialogueQuestFactory {
+public sealed class WIHouseQuestFactory(IDialogueContext context, IVoiceTypeOrList voiceType) : IGenericDialogueQuestFactory {
     public string Name => context.Prefix + "WIHouse";
 
     public Quest Create() {

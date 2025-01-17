@@ -31,6 +31,9 @@ public interface IDialogueContext {
     TMajor SelectRecord<TMajor, TMajorGetter>(string prompt)
         where TMajor : class, TMajorGetter, IMajorRecordQueryable
         where TMajorGetter : class, IMajorRecordQueryableGetter;
+    TMajor SelectRecord<TMajor, TMajorGetter>(string prompt, FormKey defaultFormKey)
+        where TMajor : class, TMajorGetter, IMajorRecordQueryable
+        where TMajorGetter : class, IMajorRecordQueryableGetter;
     TMajor GetOrAddOverride<TMajor, TMajorGetter>(IFormKeyGetter formKeyGetter)
         where TMajor : class, TMajorGetter, IMajorRecord
         where TMajorGetter : class, IMajorRecordGetter, IMajorRecordQueryableGetter;
