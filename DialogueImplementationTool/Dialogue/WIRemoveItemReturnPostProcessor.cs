@@ -11,17 +11,7 @@ public sealed class WIRemoveItemReturnPostProcessor(IDialogueContext context) : 
 
         dialogTopic.EditorID = context.Prefix + "WIRemoveItemReturn";
 
-        var branchEditorId = context.Prefix + "WIRemoveItemReturnBranch";
-        var branch = context.GetOrAddRecord<DialogBranch, IDialogBranchGetter>(
-            branchEditorId,
-            () => new DialogBranch(context.GetNextFormKey(), context.Release) {
-                EditorID = branchEditorId,
-                Quest = quest.ToLink(),
-                Flags = DialogBranch.Flag.Blocking,
-                StartingTopic = dialogTopic.ToNullableLink(),
-            }
-        );
-
-        context.AddRecord(branch);
+        var addBranch = new AddBranchPostProcessor(context, DialogBranch.Flag.Blocking);
+        addBranch.Process(quest, dialogTopic);
     }
 }
