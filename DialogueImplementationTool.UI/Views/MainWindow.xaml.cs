@@ -10,6 +10,10 @@ namespace DialogueImplementationTool.UI.Views;
 public partial class MainWindow {
     private readonly MainWindowVM _vm;
 
+    public MainWindow() {
+        InitializeComponent();
+    }
+
     public MainWindow(MainWindowVM vm) {
         InitializeComponent();
         DataContext = _vm = vm;
