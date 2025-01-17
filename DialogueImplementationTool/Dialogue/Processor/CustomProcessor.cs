@@ -29,9 +29,11 @@ public sealed class CustomProcessor(IDialogueContext context) : DialogueTypeProc
 
                 break;
             case "Player casts Calm on NPC": {
-                var dialogTopic = context.GetOrAddOverride<DialogTopic, IDialogTopicGetter>(Skyrim.DialogTopic.WICastMagicNonHostileSpellCalmTopic);
+                var dialogTopic =
+                    context.GetOrAddOverride<DialogTopic, IDialogTopicGetter>(Skyrim.DialogTopic
+                        .WICastMagicNonHostileSpellCalmTopic);
                 GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new ExistingDialogueTopicFactory(dialogTopic));
-                
+
                 yield return new GetIsVoiceTypeConditionData {
                     VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
                 }.ToConditionFloat();
@@ -39,9 +41,11 @@ public sealed class CustomProcessor(IDialogueContext context) : DialogueTypeProc
                 break;
             }
             case "Player casts Courage on NPC": {
-                var dialogTopic = context.GetOrAddOverride<DialogTopic, IDialogTopicGetter>(Skyrim.DialogTopic.WICastMagicNonHostileSpellCourageTopic);
+                var dialogTopic =
+                    context.GetOrAddOverride<DialogTopic, IDialogTopicGetter>(Skyrim.DialogTopic
+                        .WICastMagicNonHostileSpellCourageTopic);
                 GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new ExistingDialogueTopicFactory(dialogTopic));
-                
+
                 yield return new GetIsVoiceTypeConditionData {
                     VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
                 }.ToConditionFloat();
@@ -49,9 +53,11 @@ public sealed class CustomProcessor(IDialogueContext context) : DialogueTypeProc
                 break;
             }
             case "Player casts Healing spell on NPC": {
-                var dialogTopic = context.GetOrAddOverride<DialogTopic, IDialogTopicGetter>(Skyrim.DialogTopic.WICastMagicNonHostileSpellHealingTopic);
+                var dialogTopic =
+                    context.GetOrAddOverride<DialogTopic, IDialogTopicGetter>(Skyrim.DialogTopic
+                        .WICastMagicNonHostileSpellHealingTopic);
                 GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new ExistingDialogueTopicFactory(dialogTopic));
-                
+
                 yield return new GetIsVoiceTypeConditionData {
                     VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
                 }.ToConditionFloat();
@@ -59,9 +65,11 @@ public sealed class CustomProcessor(IDialogueContext context) : DialogueTypeProc
                 break;
             }
             case "Player casts Stealth spell on NPC": {
-                var dialogTopic = context.GetOrAddOverride<DialogTopic, IDialogTopicGetter>(Skyrim.DialogTopic.WICastMagicNonHostileSpellStealthTopic);
+                var dialogTopic =
+                    context.GetOrAddOverride<DialogTopic, IDialogTopicGetter>(Skyrim.DialogTopic
+                        .WICastMagicNonHostileSpellStealthTopic);
                 GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new ExistingDialogueTopicFactory(dialogTopic));
-                
+
                 yield return new GetIsVoiceTypeConditionData {
                     VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
                 }.ToConditionFloat();
@@ -69,9 +77,11 @@ public sealed class CustomProcessor(IDialogueContext context) : DialogueTypeProc
                 break;
             }
             case "Player casts other non-hostile spell on NPC": {
-                var dialogTopic = context.GetOrAddOverride<DialogTopic, IDialogTopicGetter>(Skyrim.DialogTopic.WICastMagicNonHostileSpellWeirdTopic);
+                var dialogTopic =
+                    context.GetOrAddOverride<DialogTopic, IDialogTopicGetter>(Skyrim.DialogTopic
+                        .WICastMagicNonHostileSpellWeirdTopic);
                 GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new ExistingDialogueTopicFactory(dialogTopic));
-                
+
                 yield return new GetIsVoiceTypeConditionData {
                     VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
                 }.ToConditionFloat();
