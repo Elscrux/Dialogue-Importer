@@ -58,7 +58,7 @@ public sealed class HelloProcessor(IDialogueContext context) : DialogueTypeProce
                 }.ToConditionFloat(comparisonValue: 0);
 
                 break;
-            case "Waking up sleeping person":
+            case "Player wakes up a sleeping NPC":
                 yield return new GetSleepingConditionData().ToConditionFloat(
                     compareOperator: CompareOperator.GreaterThanOrEqualTo,
                     comparisonValue: 3
