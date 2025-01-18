@@ -45,6 +45,44 @@ public sealed class NoticeCorpseProcessor : DialogueTypeProcessor {
                 };
 
                 break;
+            case "NPC sees a corpse of a friend":
+                yield return new GetFactionRelationConditionData().ToConditionFloat(
+                    compareOperator: CompareOperator.NotEqualTo,
+                    comparisonValue: 1
+                );
+                yield return new HasKeywordConditionData {
+                    RunOnType = Condition.RunOnType.Target,
+                    Keyword = { Link = { FormKey = Skyrim.Keyword.ActorTypeNPC.FormKey } }
+                }.ToConditionFloat(comparisonValue: 0);
+                yield return new GetInFactionConditionData {
+                    RunOnType = Condition.RunOnType.Target,
+                    Faction = { Link = { FormKey = Skyrim.Faction.BanditFaction.FormKey } }
+                }.ToConditionFloat(comparisonValue: 0);
+                yield return new GetInFactionConditionData {
+                    RunOnType = Condition.RunOnType.Target,
+                    Faction = { Link = { FormKey = Skyrim.Faction.NecromancerFaction.FormKey } }
+                }.ToConditionFloat(comparisonValue: 0);
+                yield return new GetInFactionConditionData {
+                    RunOnType = Condition.RunOnType.Target,
+                    Faction = { Link = { FormKey = Skyrim.Faction.WarlockFaction.FormKey } }
+                }.ToConditionFloat(comparisonValue: 0);
+                yield return new ConditionFloat {
+                    Data = new GetShouldAttackConditionData(),
+                    CompareOperator = CompareOperator.EqualTo,
+                    ComparisonValue = 0
+                };
+                yield return new ConditionFloat {
+                    Data = new GetShouldAttackConditionData(),
+                    CompareOperator = CompareOperator.EqualTo,
+                    Flags = Condition.Flag.SwapSubjectAndTarget,
+                    ComparisonValue = 0
+                };
+                yield return new GetRelationshipRankConditionData().ToConditionFloat(
+                    compareOperator: CompareOperator.GreaterThan,
+                    comparisonValue: 0
+                );
+
+                break;
         }
     }
 }
