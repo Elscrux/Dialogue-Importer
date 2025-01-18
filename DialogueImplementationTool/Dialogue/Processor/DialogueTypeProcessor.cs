@@ -16,14 +16,15 @@ public abstract class DialogueTypeProcessor : IGenericDialogueProcessor {
 
         if (!IsApplicable(subtype)) return;
 
-        var conditions = GetConditions(genericDialogue.Description, topicInfo).ToList();
+        var description = genericDialogue.Description.Trim();
+        var conditions = GetConditions(description, topicInfo).ToList();
 
         if (conditions.Count > 0) {
             // When a matching condition is found, remove the description from the topic
             topicInfo.MetaData.Remove(GenericMetaData.Description);
         } else {
             // Otherwise, add the description as a note to the topic to be implemented manually
-            var note = new Note { Text = genericDialogue.Description };
+            var note = new Note { Text = description };
             topicInfo.Responses[0].StartNotes.Add(note);
         }
 
