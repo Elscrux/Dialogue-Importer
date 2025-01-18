@@ -6,7 +6,7 @@ namespace DialogueImplementationTool.Dialogue;
 public sealed class AddBranchPostProcessor(IDialogueContext context, DialogBranch.Flag flags) : IGenericDialoguePostProcessor {
     public void Process(Quest quest, DialogTopic dialogTopic) {
         var branchEditorId = dialogTopic.EditorID?.TrimEnd("Topic") + "Branch";
-        context.GetOrAddRecord<DialogBranch, IDialogBranchGetter>(
+        var branch = context.GetOrAddRecord<DialogBranch, IDialogBranchGetter>(
             branchEditorId,
             () => new DialogBranch(context.GetNextFormKey(), context.Release) {
                 EditorID = branchEditorId,
@@ -15,5 +15,7 @@ public sealed class AddBranchPostProcessor(IDialogueContext context, DialogBranc
                 StartingTopic = dialogTopic.ToNullableLink(),
             }
         );
+
+        dialogTopic.Branch = branch.ToNullableLink();
     }
 }
