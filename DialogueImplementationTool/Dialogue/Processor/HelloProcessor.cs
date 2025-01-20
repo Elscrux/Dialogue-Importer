@@ -10,6 +10,8 @@ public sealed class HelloProcessor(IDialogueContext context) : DialogueTypeProce
         subtype is DialogTopic.SubtypeEnum.Hello;
 
     protected override IEnumerable<Condition> GetConditions(string description, DialogueTopicInfo topicInfo) {
+        var voiceTypeOrList = GenericMetaData.GetVoiceType(topicInfo.MetaData);
+
         switch (description) {
             case "Neutral/Base (0)":
                 yield return new GetRelationshipRankConditionData {
@@ -84,7 +86,9 @@ public sealed class HelloProcessor(IDialogueContext context) : DialogueTypeProce
                             }.ToConditionFloat(),
                         ]));
 
-                yield return NullCondition;
+                yield return new GetIsVoiceTypeConditionData {
+                    VoiceTypeOrList = { Link = { FormKey = voiceTypeOrList.FormKey } },
+                }.ToConditionFloat();
 
                 break;
             case "Player is naked":
@@ -110,7 +114,9 @@ public sealed class HelloProcessor(IDialogueContext context) : DialogueTypeProce
                             }.ToConditionFloat(comparisonValue: 0),
                         ]));
 
-                yield return NullCondition;
+                yield return new GetIsVoiceTypeConditionData {
+                    VoiceTypeOrList = { Link = { FormKey = voiceTypeOrList.FormKey } },
+                }.ToConditionFloat();
 
                 break;
             case "Player is sick":
@@ -132,7 +138,9 @@ public sealed class HelloProcessor(IDialogueContext context) : DialogueTypeProce
                             }.ToConditionFloat(),
                         ]));
 
-                yield return NullCondition;
+                yield return new GetIsVoiceTypeConditionData {
+                    VoiceTypeOrList = { Link = { FormKey = voiceTypeOrList.FormKey } },
+                }.ToConditionFloat();
 
                 break;
             case "Player is seen with an active flame spell":
@@ -161,7 +169,9 @@ public sealed class HelloProcessor(IDialogueContext context) : DialogueTypeProce
                             }.ToConditionFloat(),
                         ]));
 
-                yield return NullCondition;
+                yield return new GetIsVoiceTypeConditionData {
+                    VoiceTypeOrList = { Link = { FormKey = voiceTypeOrList.FormKey } },
+                }.ToConditionFloat();
 
                 break;
             case "Player casts a dangerous spell":
@@ -187,7 +197,9 @@ public sealed class HelloProcessor(IDialogueContext context) : DialogueTypeProce
                             }.ToConditionFloat(),
                         ]));
 
-                yield return NullCondition;
+                yield return new GetIsVoiceTypeConditionData {
+                    VoiceTypeOrList = { Link = { FormKey = voiceTypeOrList.FormKey } },
+                }.ToConditionFloat();
 
                 break;
         }
