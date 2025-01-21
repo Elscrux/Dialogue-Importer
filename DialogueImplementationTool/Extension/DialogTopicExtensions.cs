@@ -67,7 +67,7 @@ public static class DialogTopicExtensions {
             DialogTopic.SubtypeEnum.NormalToCombat => "NOTC",
             DialogTopic.SubtypeEnum.AlertToNormal => "ALTN",
             DialogTopic.SubtypeEnum.CombatToNormal => "COTN",
-            DialogTopic.SubtypeEnum.CombatToLost => "COTL",
+            DialogTopic.SubtypeEnum.CombatToLost => "COLO",
             DialogTopic.SubtypeEnum.LostToNormal => "LOTN",
             DialogTopic.SubtypeEnum.LostToCombat => "LOTC",
             DialogTopic.SubtypeEnum.DetectFriendDie => "DFDA",
