@@ -242,6 +242,8 @@ public sealed class IterableDialogueConfigVM : ViewModel {
     }
 
     public void SetSelections(IReadOnlyList<DialogueSelection> dialogueSelections) {
+        if (dialogueSelections.Count == 0) return;
+
         if (dialogueSelections.Count != DialogueSelections.Count) {
             throw new InvalidOperationException("Selection count mismatch");
         }
