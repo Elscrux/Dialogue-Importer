@@ -59,6 +59,7 @@ public sealed class DocumentVM : ViewModel {
 
     public void ImplementDialogue() {
         if (Status != DocumentStatus.NotLoaded) return;
+        if (HasCachedSelections == false) return;
 
         ImplementDialogue(true);
         Context.Mod.Save(_outputPathProvider.OutputPath, Context.Environment.LoadOrder);
