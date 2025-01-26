@@ -15,34 +15,36 @@ public sealed partial class ResponseNoteExtractor : IDialogueResponseProcessor {
         ProcessNotes(
             NoteUtils.StartNoteRegex(),
             StringExt.TrimStart,
-            (s, i) => s[..i],
+            (s, i) => s[i..],
             response.StartNotes,
-            processedSnippets);
+            x => x);
         ProcessNotes(
             NoteUtils.EndNoteRegex(),
             StringExt.TrimEnd,
             (s, i) => s[..^i],
             response.EndsNotes,
-            (processedSnippets as IEnumerable<FormattedText>).Reverse().ToList());
+            x => x.Reverse());
 
         void ProcessNotes(
             Regex regex,
             Func<string, string, string> trim,
             Func<string, int, string> subString,
             List<Note> notes,
-            IReadOnlyList<FormattedText> snippetOrder) {
+            Func<IEnumerable<FormattedText>, IEnumerable<FormattedText>> orderSnippets) {
+            processedSnippets = orderSnippets(processedSnippets).ToList();
+
             var match = regex.Match(response.Response);
             while (match.Success) {
                 // Trim text
                 var withWhitespaces = trim(response.Response, match.Value);
                 var newResponse = trim(withWhitespaces, " ");
-                var charsToRemove = response.Response.Length - withWhitespaces.Length;
+                var charsToRemove = response.Response.Length - newResponse.Length;
                 response.Response = newResponse;
 
                 // Check which colors are used in matched text
                 var colors = new List<Color>();
                 var newSnippets = new List<FormattedText>();
-                foreach (var snippet in snippetOrder) {
+                foreach (var snippet in processedSnippets) {
                     // Skip chars and add remaining snippet (parts)
                     if (charsToRemove == 0) {
                         newSnippets.Add(snippet);
@@ -50,9 +52,14 @@ public sealed partial class ResponseNoteExtractor : IDialogueResponseProcessor {
                         charsToRemove -= snippet.Text.Length;
                         colors.Add(snippet.Color);
                     } else {
-                        newSnippets.Add(snippet with { Text = subString(snippet.Text, charsToRemove) });
+                        var trimmedText = subString(snippet.Text, charsToRemove);
+                        newSnippets.Add(snippet with { Text = trimmedText });
                         charsToRemove = 0;
-                        colors.Add(snippet.Color);
+
+                        // Only if non-whitespace text was removed, add the color
+                        if (trimmedText.Trim() != snippet.Text.Trim()) {
+                            colors.Add(snippet.Color);
+                        }
                     }
                 }
 
