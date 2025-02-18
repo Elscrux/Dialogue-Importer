@@ -11,6 +11,7 @@ public sealed class IdleProcessor : DialogueTypeProcessor {
     protected override IEnumerable<Condition> GetConditions(string description, DialogueTopicInfo topicInfo) {
         switch (description) {
             case "Noises, nonverbal":
+            case "Idle bark":
                 topicInfo.ResetHours = 0.1f;
 
                 yield return new IsMovingConditionData().ToConditionFloat(comparisonValue: 0);
