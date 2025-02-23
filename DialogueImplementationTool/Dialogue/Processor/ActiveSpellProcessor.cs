@@ -14,7 +14,7 @@ public sealed class ActiveSpellProcessor : DialogueTypeProcessor {
             case "Player is seen with an active flame spell":
                 yield return new SpellHasKeywordConditionData {
                     RunOnType = Condition.RunOnType.Reference,
-                    Reference = { FormKey = Skyrim.PlayerRef.FormKey },
+                    Reference = Skyrim.PlayerRef,
                     Keyword = { Link = { FormKey = Skyrim.Keyword.MagicDamageFire.FormKey } },
                 }.ToConditionFloat();
 
@@ -23,7 +23,7 @@ public sealed class ActiveSpellProcessor : DialogueTypeProcessor {
             case "Player is seen with an active frost spell":
                 yield return new SpellHasKeywordConditionData {
                     RunOnType = Condition.RunOnType.Reference,
-                    Reference = { FormKey = Skyrim.PlayerRef.FormKey },
+                    Reference = Skyrim.PlayerRef,
                     Keyword = { Link = { FormKey = Skyrim.Keyword.MagicDamageFrost.FormKey } },
                 }.ToConditionFloat();
 
