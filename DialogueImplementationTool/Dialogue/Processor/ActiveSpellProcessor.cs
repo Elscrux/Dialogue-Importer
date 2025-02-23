@@ -10,23 +10,19 @@ public sealed class ActiveSpellProcessor : DialogueTypeProcessor {
         => subtype is DialogTopic.SubtypeEnum.PlayerCastProjectileSpell;
 
     protected override IEnumerable<Condition> GetConditions(string description, DialogueTopicInfo topicInfo) {
-        
         switch (description) {
-                
             case "Player is seen with an active flame spell":
-
                 yield return new SpellHasKeywordConditionData {
-                    RunOnType = Condition.RunOnType.Reference, 
+                    RunOnType = Condition.RunOnType.Reference,
                     Reference = { FormKey = Skyrim.PlayerRef.FormKey },
-                    Keyword = {Link = { FormKey = Skyrim.Keyword.MagicDamageFire.FormKey } },
+                    Keyword = { Link = { FormKey = Skyrim.Keyword.MagicDamageFire.FormKey } },
                 }.ToConditionFloat();
-                
+
                 break;
 
             case "Player is seen with an active frost spell":
-
                 yield return new SpellHasKeywordConditionData {
-                    RunOnType = Condition.RunOnType.Reference, 
+                    RunOnType = Condition.RunOnType.Reference,
                     Reference = { FormKey = Skyrim.PlayerRef.FormKey },
                     Keyword = { Link = { FormKey = Skyrim.Keyword.MagicDamageFrost.FormKey } },
                 }.ToConditionFloat();
