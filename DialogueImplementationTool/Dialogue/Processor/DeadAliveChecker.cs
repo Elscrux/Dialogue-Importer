@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 using DialogueImplementationTool.Dialogue.Model;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
@@ -35,45 +37,58 @@ public sealed partial class DeadAliveChecker(IDialogueContext context) : IDialog
             // Handle response notes
             for (var i = 0; i < topicInfo.Responses.Count; i++) {
                 var response = topicInfo.Responses[i];
-                foreach (var note in response.Notes()) {
-                    Condition condition;
-                    var aliveMatch = AliveRegex().Match(note.Text);
-                    if (aliveMatch.Success) {
-                        condition = GetCondition(aliveMatch, CompareOperator.EqualTo, 0);
-                    } else {
-                        var deadMatch = DeadRegex().Match(note.Text);
-                        if (!deadMatch.Success) continue;
+                var responseNotes = response.Notes();
 
-                        condition = GetCondition(deadMatch, CompareOperator.GreaterThanOrEqualTo, 1);
-                    }
-
-                    // Split off response
-                    var splitOffTopicInfo = new DialogueTopicInfo {
-                        Speaker = topicInfo.Speaker,
-                        Responses = [response],
-                    };
-                    var newTopicInfo = topicInfo.SplitOffDialogue(splitOffTopicInfo);
-
-                    // Add lower priority empty topic info that skips ahead in case the condition is not met
-                    // Add empty topic to current list if the end was split off, otherwise add it to the split off topic
-                    if (Equals(newTopicInfo.Responses[0], topicInfo.Responses[0])) {
-                        var emptyTopic = topicInfo.CopyWith([new DialogueResponse()]);
-                        emptyTopic.MakeSharedInfo();
-                        topic.TopicInfos.Insert(topicInfoIndex + 1, emptyTopic);
-                    } else {
-                        var nextTopic = topicInfo.Links[0].TopicInfos;
-                        // Only add empty topic if there are other responses to link to
-                        if (nextTopic[0].Links.Count > 0) {
-                            var emptyTopic = nextTopic[0].CopyWith([new DialogueResponse()]);
-                            emptyTopic.MakeSharedInfo();
-                            nextTopic.Add(emptyTopic);
+                // Find notes referencing alive or dead conditions and create conditions
+                var conditions = new List<Condition>();
+                var notes = responseNotes
+                    .Where(note => {
+                        var aliveMatch = AliveRegex().Match(note.Text);
+                        if (aliveMatch.Success) {
+                            conditions.Add(GetCondition(aliveMatch, CompareOperator.EqualTo, 0));
+                            return true;
                         }
+
+                        var deadMatch = DeadRegex().Match(note.Text);
+                        if (deadMatch.Success) {
+                            conditions.Add(GetCondition(deadMatch, CompareOperator.GreaterThanOrEqualTo, 1));
+                            return true;
+                        }
+
+                        return false;
+                    })
+                    .ToList();
+
+                if (notes.Count == 0) continue;
+
+                // Split off response
+                var splitOffTopicInfo = new DialogueTopicInfo {
+                    Speaker = topicInfo.Speaker,
+                    Responses = [response],
+                };
+                var newTopicInfo = topicInfo.SplitOffDialogue(splitOffTopicInfo);
+
+                // Add lower priority empty topic info that skips ahead in case the condition is not met
+                // Add empty topic to current list if the end was split off, otherwise add it to the split off topic
+                if (Equals(newTopicInfo.Responses[0], topicInfo.Responses[0])) {
+                    var emptyTopic = topicInfo.CopyWith([new DialogueResponse()]);
+                    emptyTopic.MakeSharedInfo();
+                    topic.TopicInfos.Insert(topicInfoIndex + 1, emptyTopic);
+                } else {
+                    var nextTopic = topicInfo.Links[0].TopicInfos;
+                    // Only add empty topic if there are other responses to link to
+                    if (nextTopic[0].Links.Count > 0) {
+                        var emptyTopic = nextTopic[0].CopyWith([new DialogueResponse()]);
+                        emptyTopic.MakeSharedInfo();
+                        nextTopic.Add(emptyTopic);
                     }
+                }
 
-                    // Apply condition to new topic
-                    newTopicInfo.ExtraConditions.Add(condition);
+                // Apply conditions to new topic
+                newTopicInfo.ExtraConditions.AddRange(conditions);
 
-                    // Remove note from response
+                // Remove notes from response
+                foreach (var note in notes) {
                     response.RemoveNote(note);
                 }
             }
