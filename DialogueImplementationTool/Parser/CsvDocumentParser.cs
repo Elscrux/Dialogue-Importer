@@ -60,7 +60,6 @@ public sealed class CsvDocumentParser(
         if (voiceType.EditorID is null) throw new InvalidOperationException("Voice Type is not set");
 
         return csvReader.GetRecords<GenericDialogue>()
-            .Where(g => !g.Line.IsNullOrWhitespace())
             .Select(genericDialogue => {
                 var (categoryEnum, subtypeEnum) = DialogCategoryConverter.Convert(genericDialogue.Category);
                 var response = new DialogueResponse {
