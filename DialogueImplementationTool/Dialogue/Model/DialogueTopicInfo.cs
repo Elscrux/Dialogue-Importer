@@ -144,7 +144,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
         switch (indexOf) {
             case -1:
                 throw new InvalidOperationException(
-                    $"ERROR: Response {startingResponse.FullResponse} is not part of {string.Join(" ", currentInfo.Responses)}");
+                    $"ERROR: Response \"{startingResponse.FullResponse}\" is not part of \"{string.Join(" ", currentInfo.Responses)}\"");
             case 0: {
                 // Split info starts the topic, make the current topic the split info
                 var responsesCount = currentInfo.Responses.Count - splitOffTopicInfo.Responses.Count;
