@@ -61,6 +61,10 @@ public sealed class CsvDocumentParser(
 
         return csvReader.GetRecords<GenericDialogue>()
             .Select(genericDialogue => {
+                if (genericDialogue.Line.IsNullOrEmpty()) {
+                    genericDialogue = genericDialogue with { Line = " " };
+                }
+
                 var (categoryEnum, subtypeEnum) = DialogCategoryConverter.Convert(genericDialogue.Category);
                 var response = new DialogueResponse {
                     Response = genericDialogue.Line,
