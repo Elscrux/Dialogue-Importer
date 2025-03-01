@@ -283,7 +283,7 @@ public sealed class TestBranchingDialogueFactory {
 
         topic.TopicInfos.Should().HaveCount(2);
         topic.TopicInfos[0].Links.Should().ContainSingle();
-        topic.TopicInfos[0].ExtraConditions.Should().ContainSingle();
+        topic.TopicInfos[0].ExtraConditions.Should().HaveCount(2);
         topic.TopicInfos[1].Responses.Should().ContainSingle();
         topic.TopicInfos[1].Responses[0].Response.Should().BeEmpty();
 
