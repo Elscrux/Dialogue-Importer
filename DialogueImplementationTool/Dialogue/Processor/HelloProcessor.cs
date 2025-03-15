@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Extension;
 using Mutagen.Bethesda.FormKeys.SkyrimSE;
@@ -57,7 +57,7 @@ public sealed class HelloProcessor(IDialogueContext context) : DialogueTypeProce
             case "Player is an untransformed werewolf (non-combat)":
                 yield return new GetGlobalValueConditionData {
                     Global = { Link = { FormKey = Skyrim.Global.PlayerIsWerewolf.FormKey } }
-                }.ToConditionFloat(comparisonValue: 0);
+                }.ToConditionFloat(comparisonValue: 1);
 
                 break;
             case "Player wakes up a sleeping NPC":
