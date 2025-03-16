@@ -9,6 +9,8 @@
         <UseWPF>true</UseWPF>
         <ApplicationIcon>DialogueImplementationTool.ico</ApplicationIcon>
         <AssemblyName>DialogueImporter</AssemblyName>
+        <!-- Disable to ensure Mod Organizer 2 compatibility -->
+        <CETCompat>false</CETCompat>
     </PropertyGroup>
 
     <ItemGroup>
