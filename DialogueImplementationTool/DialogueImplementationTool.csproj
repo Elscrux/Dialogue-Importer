@@ -417,9 +417,6 @@
       <Compile Update="Dialogue\AddBranchPostProcessor.cs">
         <DependentUpon>IGenericDialoguePostProcessor.cs</DependentUpon>
       </Compile>
-      <Compile Update="Dialogue\Processor\ActiveSpellProcessor.cs">
-        <DependentUpon>DialogueTypeProcessor.cs</DependentUpon>
-      </Compile>
     </ItemGroup>
 
 </Project>
