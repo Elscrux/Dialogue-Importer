@@ -22,7 +22,6 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new TimeProcessor(),
             new WeatherProcessor(),
             new AcceptYieldProcessor(),
-            new ActiveSpellProcessor(),
             new AimBowProcessor(),
             new AlertIdleProcessor(),
             new AlertToCombatProcessor(),
