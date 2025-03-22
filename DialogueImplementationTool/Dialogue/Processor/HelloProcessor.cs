@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Extension;
 using Mutagen.Bethesda.FormKeys.SkyrimSE;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
@@ -144,96 +145,15 @@ public sealed class HelloProcessor(IDialogueContext context) : DialogueTypeProce
 
                 break;
             case "Player is seen with an active flame spell":
-                topicInfo.Script.EndScriptLines.Add(WICommentQuestFactory.TopicCommentScript);
-                GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData,
-                    new WICommentQuestFactory(
-                        context,
-                        "MagicFlames",
-                        "Player is seen with magic flames equipped",
-                        [
-                            new ConditionGlobal {
-                                Data = new GetRandomPercentConditionData(),
-                                CompareOperator = CompareOperator.LessThanOrEqualTo,
-                                ComparisonValue = Skyrim.Global.WICommentChanceMagicFlames,
-                            },
-                            new IsWeaponMagicOutConditionData {
-                                RunOnType = Condition.RunOnType.Target,
-                            }.ToConditionFloat(),
-                            new SpellHasKeywordConditionData {
-                                SpellSource = CastSource.Left,
-                                Keyword = { Link = { FormKey = Skyrim.Keyword.MagicDamageFire.FormKey } }
-                            }.ToConditionFloat(or: true),
-                            new SpellHasKeywordConditionData {
-                                SpellSource = CastSource.Right,
-                                Keyword = { Link = { FormKey = Skyrim.Keyword.MagicDamageFire.FormKey } }
-                            }.ToConditionFloat(),
-                        ]));
-
-                yield return new GetIsVoiceTypeConditionData {
-                    VoiceTypeOrList = { Link = { FormKey = voiceTypeOrList.FormKey } },
-                }.ToConditionFloat();
+                yield return WICommentQuestForSpellType(Skyrim.Keyword.MagicDamageFire.FormKey);
 
                 break;
             case "Player is seen with an active frost spell":
-                topicInfo.Script.EndScriptLines.Add(WICommentQuestFactory.TopicCommentScript);
-                GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData,
-                    new WICommentQuestFactory(
-                        context,
-                        "MagicFlames",
-                        "Player is seen with magic flames equipped",
-                        [
-                            new ConditionGlobal {
-                                Data = new GetRandomPercentConditionData(),
-                                CompareOperator = CompareOperator.LessThanOrEqualTo,
-                                ComparisonValue = Skyrim.Global.WICommentChanceMagicFlames,
-                            },
-                            new IsWeaponMagicOutConditionData {
-                                RunOnType = Condition.RunOnType.Target,
-                            }.ToConditionFloat(),
-                            new SpellHasKeywordConditionData {
-                                SpellSource = CastSource.Left,
-                                Keyword = { Link = { FormKey = Skyrim.Keyword.MagicDamageFrost.FormKey } }
-                            }.ToConditionFloat(or: true),
-                            new SpellHasKeywordConditionData {
-                                SpellSource = CastSource.Right,
-                                Keyword = { Link = { FormKey = Skyrim.Keyword.MagicDamageFrost.FormKey } }
-                            }.ToConditionFloat(),
-                        ]));
-
-                yield return new GetIsVoiceTypeConditionData {
-                    VoiceTypeOrList = { Link = { FormKey = voiceTypeOrList.FormKey } },
-                }.ToConditionFloat();
+                yield return WICommentQuestForSpellType(Skyrim.Keyword.MagicDamageFrost.FormKey);
 
                 break;
             case "Player is seen with an active shock spell":
-                topicInfo.Script.EndScriptLines.Add(WICommentQuestFactory.TopicCommentScript);
-                GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData,
-                    new WICommentQuestFactory(
-                        context,
-                        "MagicFlames",
-                        "Player is seen with magic flames equipped",
-                        [
-                            new ConditionGlobal {
-                                Data = new GetRandomPercentConditionData(),
-                                CompareOperator = CompareOperator.LessThanOrEqualTo,
-                                ComparisonValue = Skyrim.Global.WICommentChanceMagicFlames,
-                            },
-                            new IsWeaponMagicOutConditionData {
-                                RunOnType = Condition.RunOnType.Target,
-                            }.ToConditionFloat(),
-                            new SpellHasKeywordConditionData {
-                                SpellSource = CastSource.Left,
-                                Keyword = { Link = { FormKey = Skyrim.Keyword.MagicDamageShock.FormKey } }
-                            }.ToConditionFloat(or: true),
-                            new SpellHasKeywordConditionData {
-                                SpellSource = CastSource.Right,
-                                Keyword = { Link = { FormKey = Skyrim.Keyword.MagicDamageShock.FormKey } }
-                            }.ToConditionFloat(),
-                        ]));
-
-                yield return new GetIsVoiceTypeConditionData {
-                    VoiceTypeOrList = { Link = { FormKey = voiceTypeOrList.FormKey } },
-                }.ToConditionFloat();
+                yield return WICommentQuestForSpellType(Skyrim.Keyword.MagicDamageShock.FormKey);
 
                 break;
             case "Player casts a dangerous spell":
@@ -264,6 +184,37 @@ public sealed class HelloProcessor(IDialogueContext context) : DialogueTypeProce
                 }.ToConditionFloat();
 
                 break;
+        }
+
+        Condition WICommentQuestForSpellType(FormKey spellKeyword) {
+            topicInfo.Script.EndScriptLines.Add(WICommentQuestFactory.TopicCommentScript);
+            GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData,
+                new WICommentQuestFactory(
+                    context,
+                    "MagicFlames",
+                    "Player is seen with magic flames equipped",
+                    [
+                        new ConditionGlobal {
+                            Data = new GetRandomPercentConditionData(),
+                            CompareOperator = CompareOperator.LessThanOrEqualTo,
+                            ComparisonValue = Skyrim.Global.WICommentChanceMagicFlames,
+                        },
+                        new IsWeaponMagicOutConditionData {
+                            RunOnType = Condition.RunOnType.Target,
+                        }.ToConditionFloat(),
+                        new SpellHasKeywordConditionData {
+                            SpellSource = CastSource.Left,
+                            Keyword = { Link = { FormKey = spellKeyword } }
+                        }.ToConditionFloat(or: true),
+                        new SpellHasKeywordConditionData {
+                            SpellSource = CastSource.Right,
+                            Keyword = { Link = { FormKey = spellKeyword } }
+                        }.ToConditionFloat(),
+                    ]));
+
+            return new GetIsVoiceTypeConditionData {
+                VoiceTypeOrList = { Link = { FormKey = voiceTypeOrList.FormKey } },
+            }.ToConditionFloat();
         }
     }
 }
