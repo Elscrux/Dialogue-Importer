@@ -156,6 +156,21 @@ public sealed class HelloProcessor(IDialogueContext context) : DialogueTypeProce
                 yield return WICommentQuestForSpellType(Skyrim.Keyword.MagicDamageShock.FormKey);
 
                 break;
+            case "Player is seen with an active water spell":
+                var waterSpell = FormKey.Factory("00ABE1:BSAssets.esm");
+                yield return WICommentQuestForSpellType(waterSpell);
+
+                break;
+            case "Player is seen with an active earth spell":
+                var earthSpell = FormKey.Factory("00AB75:BSAssets.esm");
+                yield return WICommentQuestForSpellType(earthSpell);
+
+                break;
+            case "Player is seen with an active wind spell":
+                var windSpell = FormKey.Factory("00337F:BSAssets.esm");
+                yield return WICommentQuestForSpellType(windSpell);
+
+                break;
             case "Player casts a dangerous spell":
                 topicInfo.Script.EndScriptLines.Add(WICommentQuestFactory.TopicCommentScript);
                 GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData,
