@@ -6,11 +6,11 @@ using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Extension;
 
 public static class QuestExtension {
-    public static IQuestAliasGetter? GetAlias(this IQuestGetter quest, FormKey npcFormKey) {
+    public static IQuestAliasGetter? GetAliasUniqueActor(this IQuestGetter quest, FormKey npcFormKey) {
         return quest.Aliases.FirstOrDefault(alias => alias.UniqueActor.FormKey == npcFormKey);
     }
 
-    public static IQuestAliasGetter GetOrAddAlias(this IQuest quest, ILinkCache linkCache, FormKey npcFormKey) {
+    public static IQuestAliasGetter GetOrAddAliasUniqueActor(this IQuest quest, ILinkCache linkCache, FormKey npcFormKey) {
         // Detect existing alias
         var existingAlias = quest.Aliases.Find(alias => alias.UniqueActor.FormKey == npcFormKey);
         if (existingAlias is not null) return existingAlias;

@@ -56,7 +56,7 @@ public interface IDocumentIterator : IDocumentParser {
             // Set speaker
             ISpeaker speaker;
             if (selection.UseGetIsAliasRef) {
-                var alias = context.Quest.GetOrAddAlias(context.LinkCache, selection.Speaker);
+                var alias = context.Quest.GetOrAddAliasUniqueActor(context.LinkCache, selection.Speaker);
                 speaker = new AliasSpeaker(selection.Speaker, alias.Name!, (int) alias.ID);
             } else {
                 speaker = new NpcSpeaker(context.LinkCache, selection.Speaker);
