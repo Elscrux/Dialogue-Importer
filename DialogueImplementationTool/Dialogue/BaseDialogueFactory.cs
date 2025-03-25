@@ -227,6 +227,10 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
             list.Add(new GetIsVoiceTypeConditionData {
                 VoiceTypeOrList = { Link = { FormKey = formList.FormKey } }
             }.ToConditionFloat());
+        } else if (Context.LinkCache.TryResolve<ITalkingActivatorGetter>(topicInfo.Speaker.FormKey, out var talkingActivator)) {
+            list.Add(new GetIsIDConditionData {
+                Object = { Link = { FormKey = talkingActivator.FormKey } }
+            }.ToConditionFloat());
         }
 
         list.AddRange(topicInfo.ExtraConditions);

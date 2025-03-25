@@ -50,6 +50,7 @@ public sealed class IterableDialogueConfigVM : ViewModel {
         typeof(IFactionGetter),
         typeof(IVoiceTypeGetter),
         typeof(IFormListGetter),
+        typeof(ITalkingActivatorGetter),
     ];
 
     [Reactive] public FormKey SpeakerFormKey { get; set; }
