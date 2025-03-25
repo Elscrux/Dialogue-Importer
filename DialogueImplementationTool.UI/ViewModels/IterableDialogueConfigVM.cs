@@ -9,6 +9,7 @@ using DialogueImplementationTool.Services;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 using Noggog.WPF;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -68,6 +69,7 @@ public sealed class IterableDialogueConfigVM : ViewModel {
     public ICommand SkipMany { get; }
     public string Title { get; }
     [Reactive] public bool UseGetIsAliasRef { get; set; }
+    [Reactive] public bool HasNpcSelected { get; set; }
 
     public IterableDialogueConfigVM(
         EnvironmentContext context,
@@ -212,9 +214,23 @@ public sealed class IterableDialogueConfigVM : ViewModel {
 
         this.WhenAnyValue(v => v.SpeakerFormKey)
             .Subscribe(speaker => {
-                var speakerType = GetSpeakerType(speaker);
-                SpeakerLink = new FormLinkInformation(speaker, speakerType);
                 ValidSpeaker = SpeakerFormKey.IsNull is false;
+
+                if (speaker.IsNull) {
+                    SpeakerLink = FormLinkInformation.Null;
+                    HasNpcSelected = false;
+                } else {
+                    var speakerType = GetSpeakerType(speaker);
+                    SpeakerLink = new FormLinkInformation(speaker, speakerType);
+                    HasNpcSelected = speakerType.InheritsFrom(typeof(INpcGetter));
+                }
+            });
+
+        this.WhenAnyValue(x => x.HasNpcSelected)
+            .Subscribe(npcSelected => {
+                if (npcSelected) return;
+
+                UseGetIsAliasRef = false;
             });
 
         this.WhenAnyValue(v => v.SpeakerLink)
@@ -256,7 +272,7 @@ public sealed class IterableDialogueConfigVM : ViewModel {
             }
         }
 
-        throw new InvalidOperationException("Speaker type not found");
+        throw new InvalidOperationException("Speaker type not found for speaker form key " + speaker);
     }
 
     public void SetSelections(IReadOnlyList<DialogueSelection> dialogueSelections) {

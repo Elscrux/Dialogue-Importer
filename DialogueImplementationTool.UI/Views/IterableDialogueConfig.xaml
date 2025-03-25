@@ -118,6 +118,7 @@
                 </GroupBox>
 
                 <CheckBox Content="Use GetIsAliasRef"
+                          IsEnabled="{Binding HasNpcSelected}"
                           IsChecked="{Binding UseGetIsAliasRef}"/>
             </StackPanel>
         </GroupBox>
