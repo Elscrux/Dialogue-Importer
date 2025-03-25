@@ -3,12 +3,12 @@ using Mutagen.Bethesda.Plugins;
 namespace DialogueImplementationTool.Dialogue.Speaker;
 
 public partial interface ISpeaker {
-    public FormKey FormKey { get; }
-    public string? EditorID { get; }
-    public string Name { get; }
-    public string NameNoSpaces { get; }
+    FormKey FormKey { get; }
+    string? EditorID { get; }
+    string Name { get; }
+    string NameNoSpaces { get; }
 
-    public static string GetSpeakerName(string name) {
+    static string GetSpeakerName(string name) {
         return ReplaceRegex().Replace(name, string.Empty);
     }
 
