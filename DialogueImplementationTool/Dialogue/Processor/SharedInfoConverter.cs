@@ -169,11 +169,11 @@ public sealed class SharedInfoConverter : IConversationProcessor {
             if (ReferenceEquals(this, other)) return true;
 
             return Equals(this, other)
-             && Speaker.FormKey.Equals(other.Speaker.FormKey);
+             && Speaker.FormLink.Equals(other.Speaker.FormLink);
         }
 
         public override int GetHashCode() {
-            return HashCode.Combine(GetHashCode(this), Speaker.FormKey);
+            return HashCode.Combine(GetHashCode(this), Speaker.FormLink);
         }
     }
 

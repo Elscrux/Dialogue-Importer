@@ -54,6 +54,7 @@ public sealed class IterableDialogueConfigVM : ViewModel {
     ];
 
     [Reactive] public FormKey SpeakerFormKey { get; set; }
+    [Reactive] public IFormLinkGetter SpeakerLink { get; set; } = FormLinkInformation.Null;
     [Reactive] public bool ValidSpeaker { get; set; }
 
     public ICommand SetSpeaker { get; }
@@ -92,7 +93,7 @@ public sealed class IterableDialogueConfigVM : ViewModel {
             }
         });
 
-        SetSpeaker = ReactiveCommand.Create<ISpeaker>(speaker => SpeakerFormKey = speaker.FormKey);
+        SetSpeaker = ReactiveCommand.Create<ISpeaker>(speaker => SpeakerFormKey = speaker.FormLink.FormKey);
         SelectIndex = ReactiveCommand.Create<string>(indexStr => {
             switch (int.Parse(indexStr)) {
                 case 1:
@@ -191,13 +192,13 @@ public sealed class IterableDialogueConfigVM : ViewModel {
                 IsNotLastIndex = Index < _documentParser.LastIndex;
                 if (DialogueSelections.Count <= Index) return;
 
-                if (DialogueSelections[Index].Speaker == FormKey.Null) {
+                if (DialogueSelections[Index].Speaker.IsNull) {
                     // Keep current speaker for fresh dialogue and set in list
-                    DialogueSelections[Index].Speaker = SpeakerFormKey;
+                    DialogueSelections[Index].Speaker = SpeakerLink;
                     DialogueSelections[Index].UseGetIsAliasRef = UseGetIsAliasRef;
                 } else {
                     // Load speaker from list
-                    SpeakerFormKey = DialogueSelections[Index].Speaker;
+                    SpeakerFormKey = DialogueSelections[Index].Speaker.FormKey;
                     UseGetIsAliasRef = DialogueSelections[Index].UseGetIsAliasRef;
                 }
 
@@ -210,10 +211,16 @@ public sealed class IterableDialogueConfigVM : ViewModel {
             });
 
         this.WhenAnyValue(v => v.SpeakerFormKey)
-            .Subscribe(_ => {
-                ValidSpeaker = SpeakerFormKey != FormKey.Null;
-                if (DialogueSelections.Count > Index) DialogueSelections[Index].Speaker = SpeakerFormKey;
-                speakerFavoritesSelection.AddSpeaker(new NpcSpeaker(LinkCache, SpeakerFormKey));
+            .Subscribe(speaker => {
+                var speakerType = GetSpeakerType(speaker);
+                SpeakerLink = new FormLinkInformation(speaker, speakerType);
+                ValidSpeaker = SpeakerFormKey.IsNull is false;
+            });
+
+        this.WhenAnyValue(v => v.SpeakerLink)
+            .Subscribe(speaker => {
+                if (DialogueSelections.Count > Index) DialogueSelections[Index].Speaker = speaker;
+                speakerFavoritesSelection.AddSpeaker(new NpcSpeaker(LinkCache, speaker));
             });
 
         this.WhenAnyValue(v => v.UseGetIsAliasRef)
@@ -240,6 +247,16 @@ public sealed class IterableDialogueConfigVM : ViewModel {
                     }
                 });
         }
+    }
+
+    public Type GetSpeakerType(FormKey speaker) {
+        foreach (var speakerType in SpeakerTypes) {
+            if (LinkCache.TryResolve(speaker, speakerType, out var link)) {
+                return link.Type;
+            }
+        }
+
+        throw new InvalidOperationException("Speaker type not found");
     }
 
     public void SetSelections(IReadOnlyList<DialogueSelection> dialogueSelections) {

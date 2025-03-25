@@ -12,7 +12,7 @@ public sealed class GenericDialogueFactory(IDialogueContext context) : BaseDialo
                 var dialogTopicFactory = GenericMetaData.GetGenericDialogTopicFactory(topicInfo.MetaData);
                 var quest = questFactory.Create();
                 var dialogTopic = dialogTopicFactory.Create(quest, topicInfo);
-                topicInfo.Speaker ??= new NpcSpeaker(Context.LinkCache, FormKey.Null);
+                topicInfo.Speaker ??= new NpcSpeaker(Context.LinkCache, FormLinkInformation.Null);
                 var dialogTopicInfo = GetResponses(quest, topicInfo);
                 dialogTopic.Responses.Add(dialogTopicInfo);
                 var postProcessor = GenericMetaData.GetPostProcessor(topicInfo.MetaData);

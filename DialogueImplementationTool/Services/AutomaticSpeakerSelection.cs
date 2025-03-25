@@ -31,12 +31,12 @@ public sealed class AutomaticSpeakerSelection(
             }
 
             if (count == 1 && currentNpc is not null) {
-                aliasSpeakers.Add(new AliasSpeaker(currentNpc.FormKey, speakerName, editorId: currentNpc.EditorID));
+                aliasSpeakers.Add(new AliasSpeaker(currentNpc.ToLinkGetter(), speakerName, editorId: currentNpc.EditorID));
             } else {
                 // Try to find the NPC in the speaker favorites
                 var closestSpeaker = speakerFavoritesSelection.GetClosestSpeaker(speakerName);
                 if (closestSpeaker is not null) {
-                    aliasSpeakers.Add(new AliasSpeaker(closestSpeaker.FormKey, speakerName, editorId: closestSpeaker.EditorID));
+                    aliasSpeakers.Add(new AliasSpeaker(closestSpeaker.FormLink, speakerName, editorId: closestSpeaker.EditorID));
                 }
             }
         }

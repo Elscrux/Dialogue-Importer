@@ -2,17 +2,22 @@
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Aspects;
 using Mutagen.Bethesda.Plugins.Cache;
-using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Speaker;
 
 public sealed class NpcSpeaker : ISpeaker, IEquatable<NpcSpeaker> {
-    public NpcSpeaker(ILinkCache linkCache, FormKey npcFormKey) {
-        FormKey = npcFormKey;
+    public IFormLinkGetter FormLink { get; }
+    public FormKey FormKey { get; }
+    public string? EditorID { get; }
+    public string Name { get; }
+    public string NameNoSpaces { get; }
 
-        if (linkCache.TryResolve<ISkyrimMajorRecordGetter>(FormKey, out var recordGetter)) {
+    public NpcSpeaker(ILinkCache linkCache, IFormLinkGetter npcFormLink) {
+        FormLink = npcFormLink;
+
+        if (linkCache.TryResolve(FormLink, out var recordGetter)) {
             EditorID = recordGetter.EditorID;
 
-            if (linkCache.TryResolve<INamedGetter>(FormKey, out var namedGetter)) {
+            if (linkCache.TryResolve<INamedGetter>(FormLink.FormKey, out var namedGetter)) {
                 Name = namedGetter.Name ?? string.Empty;
                 NameNoSpaces = ISpeaker.GetSpeakerName(Name);
             } else {
@@ -23,16 +28,11 @@ public sealed class NpcSpeaker : ISpeaker, IEquatable<NpcSpeaker> {
         }
     }
 
-    public FormKey FormKey { get; }
-    public string? EditorID { get; }
-    public string Name { get; }
-    public string NameNoSpaces { get; }
-
     public bool Equals(NpcSpeaker? other) {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
 
-        return FormKey.Equals(other.FormKey)
+        return FormLink.Equals(other.FormLink)
          && EditorID == other.EditorID
          && NameNoSpaces == other.NameNoSpaces;
     }
@@ -44,5 +44,5 @@ public sealed class NpcSpeaker : ISpeaker, IEquatable<NpcSpeaker> {
         return Equals(other);
     }
 
-    public override int GetHashCode() => HashCode.Combine(FormKey);
+    public override int GetHashCode() => HashCode.Combine(FormLink);
 }

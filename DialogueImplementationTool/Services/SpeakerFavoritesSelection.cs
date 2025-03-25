@@ -16,14 +16,14 @@ public sealed class SpeakerFavoritesSelection : ReactiveObject, ISpeakerFavorite
     public ReadOnlyObservableCollection<ISpeaker> Speakers { get; }
 
     public void AddSpeaker(ISpeaker speaker) {
-        if (speaker.FormKey.IsNull) return;
-        if (Speakers.Any(s => s.FormKey == speaker.FormKey)) return;
+        if (speaker.FormLink.IsNull) return;
+        if (Speakers.Any(s => s.FormLink.FormKey == speaker.FormLink.FormKey)) return;
 
         _speakers.Add(speaker);
     }
 
     public ISpeaker? GetSpeaker(FormKey formKey) {
-        return Speakers.FirstOrDefault(s => s.FormKey == formKey);
+        return Speakers.FirstOrDefault(s => s.FormLink.FormKey == formKey);
     }
 
     public ISpeaker? GetClosestSpeaker(string name) {

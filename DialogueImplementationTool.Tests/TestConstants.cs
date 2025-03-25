@@ -18,16 +18,16 @@ public sealed class TestConstants {
             .WithOutputMod(Mod)
             .Build();
 
-        Speaker1 = new NpcSpeaker(LinkCache, FormKey.Factory("111111:TestMod.esp"));
-        Speaker2 = new NpcSpeaker(LinkCache, FormKey.Factory("222222:TestMod.esp"));
-        Speaker3 = new NpcSpeaker(LinkCache, FormKey.Factory("333333:TestMod.esp"));
+        Speaker1 = new NpcSpeaker(LinkCache, new FormLinkInformation(FormKey.Factory("111111:TestMod.esp"), typeof(INpcGetter)));
+        Speaker2 = new NpcSpeaker(LinkCache, new FormLinkInformation(FormKey.Factory("222222:TestMod.esp"), typeof(INpcGetter)));
+        Speaker3 = new NpcSpeaker(LinkCache, new FormLinkInformation(FormKey.Factory("333333:TestMod.esp"), typeof(INpcGetter)));
 
         Quest = new Quest(FormKey.Factory("999999:TestMod.esp"), Release) { EditorID = "TestQuest" };
 
         Mod.Quests.Add(Quest);
-        Mod.Npcs.AddNew(Speaker1.FormKey);
-        Mod.Npcs.AddNew(Speaker2.FormKey);
-        Mod.Npcs.AddNew(Speaker3.FormKey);
+        Mod.Npcs.AddNew(Speaker1.FormLink.FormKey);
+        Mod.Npcs.AddNew(Speaker2.FormLink.FormKey);
+        Mod.Npcs.AddNew(Speaker3.FormLink.FormKey);
     }
 
     public SkyrimMod Mod { get; } = new(ModKey.FromName("TestMod.esp", ModType.Plugin), SkyrimRelease.SkyrimSE);

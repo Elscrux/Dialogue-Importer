@@ -209,25 +209,25 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
             list.Add(new GetIsAliasRefConditionData {
                 ReferenceAliasIndex = aliasSpeaker.AliasIndex,
             }.ToConditionFloat());
-        } else if (Context.LinkCache.TryResolve<INpcGetter>(topicInfo.Speaker.FormKey, out var npc)) {
+        } else if (Context.LinkCache.TryResolve<INpcGetter>(topicInfo.Speaker.FormLink.FormKey, out var npc)) {
             list.Add(new GetIsIDConditionData {
                 Object = {
                     Link = { FormKey = npc.FormKey }
                 }
             }.ToConditionFloat());
-        } else if (Context.LinkCache.TryResolve<IFactionGetter>(topicInfo.Speaker.FormKey, out var faction)) {
+        } else if (Context.LinkCache.TryResolve<IFactionGetter>(topicInfo.Speaker.FormLink.FormKey, out var faction)) {
             list.Add(new GetInFactionConditionData {
                 Faction = { Link = { FormKey = faction.FormKey } }
             }.ToConditionFloat());
-        } else if (Context.LinkCache.TryResolve<IVoiceTypeGetter>(topicInfo.Speaker.FormKey, out var voiceType)) {
+        } else if (Context.LinkCache.TryResolve<IVoiceTypeGetter>(topicInfo.Speaker.FormLink.FormKey, out var voiceType)) {
             list.Add(new GetIsVoiceTypeConditionData {
                 VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } }
             }.ToConditionFloat());
-        } else if (Context.LinkCache.TryResolve<IFormListGetter>(topicInfo.Speaker.FormKey, out var formList)) {
+        } else if (Context.LinkCache.TryResolve<IFormListGetter>(topicInfo.Speaker.FormLink.FormKey, out var formList)) {
             list.Add(new GetIsVoiceTypeConditionData {
                 VoiceTypeOrList = { Link = { FormKey = formList.FormKey } }
             }.ToConditionFloat());
-        } else if (Context.LinkCache.TryResolve<ITalkingActivatorGetter>(topicInfo.Speaker.FormKey, out var talkingActivator)) {
+        } else if (Context.LinkCache.TryResolve<ITalkingActivatorGetter>(topicInfo.Speaker.FormLink.FormKey, out var talkingActivator)) {
             list.Add(new GetIsIDConditionData {
                 Object = { Link = { FormKey = talkingActivator.FormKey } }
             }.ToConditionFloat());

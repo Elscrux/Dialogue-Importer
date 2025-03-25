@@ -35,7 +35,7 @@ public class GenericSceneFactory(IDialogueContext context) : SceneFactory(contex
 
         //Add quest
         var npcNames = AliasSpeakers
-            .Select(a => Context.LinkCache.Resolve<INpcGetter>(a.FormKey).GetName())
+            .Select(a => Context.LinkCache.Resolve<INpcGetter>(a.FormLink.FormKey).GetName())
             .Order()
             .ToList();
 
@@ -49,7 +49,7 @@ public class GenericSceneFactory(IDialogueContext context) : SceneFactory(contex
 
         var getIsIdConditions = AliasSpeakers
             .Select(a => {
-                var data = new GetIsIDConditionData { Object = { Link = { FormKey = a.FormKey } } };
+                var data = new GetIsIDConditionData { Object = { Link = { FormKey = a.FormLink.FormKey } } };
                 return GetFormKeyCondition(data, or: true);
             })
             .ToExtendedList();
@@ -120,7 +120,7 @@ public class GenericSceneFactory(IDialogueContext context) : SceneFactory(contex
                         UseAliases = true,
                         Target = {
                             Link = {
-                                FormKey = AliasSpeakers[aliasIndex].FormKey
+                                FormKey = AliasSpeakers[aliasIndex].FormLink.FormKey
                             }
                         },
                     }
@@ -135,7 +135,7 @@ public class GenericSceneFactory(IDialogueContext context) : SceneFactory(contex
             return new QuestAlias {
                 ID = Convert.ToUInt32(aliasSpeaker.AliasIndex),
                 Name = aliasSpeaker.NameNoSpaces,
-                UniqueActor = new FormLinkNullable<INpcGetter>(aliasSpeaker.FormKey),
+                UniqueActor = new FormLinkNullable<INpcGetter>(aliasSpeaker.FormLink.FormKey),
                 VoiceTypes = new FormLinkNullable<IAliasVoiceTypeGetter>(FormKey.Null),
                 Flags = genericSceneAliasFlags
             };

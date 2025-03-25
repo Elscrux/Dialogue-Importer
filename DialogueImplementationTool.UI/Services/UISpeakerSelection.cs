@@ -12,7 +12,7 @@ using Mutagen.Bethesda.Plugins.Cache;
 using Newtonsoft.Json;
 namespace DialogueImplementationTool.UI.Services;
 
-sealed record AliasSelectionDto(FormKey FormKey, string? EditorID);
+sealed record AliasSelectionDto(IFormLinkGetter FormLink, string? EditorID);
 
 public sealed partial class UISpeakerSelection(
     ILinkCache linkCache,
@@ -31,7 +31,7 @@ public sealed partial class UISpeakerSelection(
         // Try load from file
         if (LoadSpeakers()) {
             return speakers
-                .Select(x => new AliasSpeaker(x.FormKey, x.Name, editorId: x.EditorID))
+                .Select(x => new AliasSpeaker(x.FormLink, x.Name, editorId: x.EditorID))
                 .ToList();
         }
 
@@ -41,13 +41,13 @@ public sealed partial class UISpeakerSelection(
             var speaker = speakers.FirstOrDefault(s => s.Name == automaticSpeaker.Name);
             if (speaker is null) continue;
 
-            speaker.FormKey = automaticSpeaker.FormKey;
+            speaker.FormLink = automaticSpeaker.FormLink;
             speaker.EditorID = automaticSpeaker.EditorID;
         }
 
         new SceneSpeakerWindow(linkCache, speakerFavoritesSelection, speakers).ShowDialog();
 
-        while (speakers.Any(s => s.FormKey == FormKey.Null)) {
+        while (speakers.Any(s => s.FormLink.IsNull)) {
             MessageBox.Show("You must assign every speaker of the scene to an npc");
             new SceneSpeakerWindow(linkCache, speakerFavoritesSelection, speakers).ShowDialog();
         }
@@ -55,7 +55,7 @@ public sealed partial class UISpeakerSelection(
         SaveSpeakers(speakers);
 
         return speakers
-            .Select(x => new AliasSpeaker(x.FormKey, x.Name, editorId: x.EditorID))
+            .Select(x => new AliasSpeaker(x.FormLink, x.Name, editorId: x.EditorID))
             .ToList();
 
         bool LoadSpeakers() {
@@ -67,7 +67,7 @@ public sealed partial class UISpeakerSelection(
             foreach (var selection in speakers) {
                 if (!savedSelections.TryGetValue(selection.Name, out var aliasSelectionDto)) return false;
 
-                selection.FormKey = aliasSelectionDto.FormKey;
+                selection.FormLink = aliasSelectionDto.FormLink;
                 selection.EditorID = aliasSelectionDto.EditorID;
             }
 
@@ -88,7 +88,7 @@ public sealed partial class UISpeakerSelection(
         void SaveSpeakers(ObservableCollection<AliasSpeakerSelection> aliasSpeakers) {
             var selections = new Dictionary<string, AliasSelectionDto>();
             foreach (var selection in aliasSpeakers) {
-                selections[selection.Name] = new AliasSelectionDto(selection.FormKey, selection.EditorID);
+                selections[selection.Name] = new AliasSelectionDto(selection.FormLink, selection.EditorID);
             }
 
             _savedSceneSelections ??= LoadFromFile();

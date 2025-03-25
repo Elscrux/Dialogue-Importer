@@ -167,7 +167,7 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
                     ]
                 };
                 context.Quest.Stages.Add(questStage);
-                speakerStages[speaker.FormKey] = (speakerStages[speaker.FormKey].StartStage, (ushort) (stage + 1));
+                speakerStages[speaker.FormLink.FormKey] = (speakerStages[speaker.FormLink.FormKey].StartStage, (ushort) (stage + 1));
 
                 foreach (var (lockMatch, _) in grouping.Distinct()) {
                     // Check for any keywords in note, to catch something like [unlock HERE, NOW, MERGE]
@@ -183,17 +183,17 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
         ushort CreateStage(ISpeaker speaker) {
             // Get stage for keyword to lock
             const ushort speakerRange = 10;
-            if (!speakerStages.TryGetValue(speaker.FormKey, out var speakerStage)) {
+            if (!speakerStages.TryGetValue(speaker.FormLink.FormKey, out var speakerStage)) {
                 ushort currentIndex = 10;
                 if (context.Quest.Stages.Count == 0) {
                     speakerStage = (currentIndex, currentIndex);
-                    speakerStages[speaker.FormKey] = speakerStage;
+                    speakerStages[speaker.FormLink.FormKey] = speakerStage;
                 } else {
                     foreach (var stage in context.Quest.Stages.OrderBy(x => x.Index)) {
                         // Check if the current range is free
                         if (stage.Index >= currentIndex + speakerRange) {
                             speakerStage = (currentIndex, currentIndex);
-                            speakerStages[speaker.FormKey] = speakerStage;
+                            speakerStages[speaker.FormLink.FormKey] = speakerStage;
                             break;
                         }
 
@@ -209,7 +209,7 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
                         nextStage -= (ushort) (nextStage % speakerRange);
 
                         speakerStage = (nextStage, nextStage);
-                        speakerStages[speaker.FormKey] = speakerStage;
+                        speakerStages[speaker.FormLink.FormKey] = speakerStage;
                     }
                 }
             }

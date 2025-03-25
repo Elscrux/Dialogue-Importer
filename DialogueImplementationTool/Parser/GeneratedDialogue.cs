@@ -8,6 +8,6 @@ public sealed record GeneratedDialogue(BaseDialogueFactory Factory, List<Dialogu
 
 public sealed class DialogueSelection {
     public HashSet<DialogueType> SelectedTypes { get; } = [];
-    public FormKey Speaker { get; set; } = FormKey.Null;
+    public IFormLinkGetter Speaker { get; set; } = FormLinkInformation.Null;
     public bool UseGetIsAliasRef { get; set; }
 }

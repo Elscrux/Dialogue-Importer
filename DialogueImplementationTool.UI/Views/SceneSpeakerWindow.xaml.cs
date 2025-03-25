@@ -26,7 +26,7 @@ public partial class SceneSpeakerWindow {
         // Assign the closest existing favorites
         foreach (var speaker in SceneSpeakers) {
             var matchingSpeaker = SpeakerFavoritesSelection.GetClosestSpeaker(speaker.Name);
-            if (matchingSpeaker is not null) speaker.FormKey = matchingSpeaker.FormKey;
+            if (matchingSpeaker is not null) speaker.FormLink = matchingSpeaker.FormLink;
         }
 
         DataContext = this;
@@ -63,7 +63,7 @@ public sealed class GridFormKeyPickerDropTarget : IDropTarget {
 public sealed class SpeakerFavouriteFormKeyDragSource : IDragSource {
     public void StartDrag(IDragInfo dragInfo) {
         if (dragInfo.SourceItem is NpcSpeaker speakerFavourite) {
-            dragInfo.Data = new FormKeyWrapper { FormKey = speakerFavourite.FormKey };
+            dragInfo.Data = new FormKeyWrapper { FormKey = speakerFavourite.FormLink.FormKey };
             dragInfo.Effects = DragDropEffects.Copy;
         }
     }

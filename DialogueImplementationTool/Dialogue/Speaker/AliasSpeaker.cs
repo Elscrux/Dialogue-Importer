@@ -1,14 +1,27 @@
 using System;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Speaker;
 
-public sealed class AliasSpeaker(FormKey formKey, string name, int aliasIndex = -1, string? editorId = null)
-    : ISpeaker, IEquatable<AliasSpeaker> {
-    public int AliasIndex { get; set; } = aliasIndex;
-    public string Name { get; } = name;
-    public string NameNoSpaces { get; } = ISpeaker.GetSpeakerName(name);
-    public FormKey FormKey { get; } = formKey;
-    public string? EditorID { get; } = editorId;
+public sealed class AliasSpeaker : ISpeaker, IEquatable<AliasSpeaker> {
+    public int AliasIndex { get; set; }
+    public string Name { get; }
+    public string NameNoSpaces { get; }
+    public IFormLinkGetter FormLink { get; }
+    public string? EditorID { get; }
+
+    public AliasSpeaker(IFormLinkGetter formLink, string name, int aliasIndex = -1, string? editorId = null) {
+        if (!formLink.IsNull && formLink.Type != typeof(INpcGetter)) {
+            throw new ArgumentException("Only INpcGetters are supported for AliasSpeakers");
+        }
+
+        FormLink = formLink;
+        AliasIndex = aliasIndex;
+        Name = name;
+        NameNoSpaces = ISpeaker.GetSpeakerName(name);
+        FormLink = formLink;
+        EditorID = editorId;
+    }
 
     public bool Equals(AliasSpeaker? other) {
         if (ReferenceEquals(null, other)) return false;
@@ -16,7 +29,7 @@ public sealed class AliasSpeaker(FormKey formKey, string name, int aliasIndex = 
 
         return AliasIndex == other.AliasIndex
          && NameNoSpaces == other.NameNoSpaces
-         && FormKey.Equals(other.FormKey)
+         && FormLink.Equals(other.FormLink)
          && EditorID == other.EditorID;
     }
 
@@ -27,5 +40,5 @@ public sealed class AliasSpeaker(FormKey formKey, string name, int aliasIndex = 
         return Equals(other);
     }
 
-    public override int GetHashCode() => HashCode.Combine(FormKey);
+    public override int GetHashCode() => HashCode.Combine(FormLink);
 }

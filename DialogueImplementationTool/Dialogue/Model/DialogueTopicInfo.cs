@@ -258,7 +258,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
         if (ReferenceEquals(this, other)) return true;
 
         return Equals(SharedInfo, other.SharedInfo)
-         && Speaker.FormKey.Equals(other.Speaker.FormKey)
+         && Speaker.FormLink.Equals(other.Speaker.FormLink)
          && (Prompt.FullText == other.Prompt.FullText || Prompt.FullText == "(invis cont)" || other.Prompt.FullText == "(invis cont)")
          && SayOnce == other.SayOnce
          && Goodbye == other.Goodbye

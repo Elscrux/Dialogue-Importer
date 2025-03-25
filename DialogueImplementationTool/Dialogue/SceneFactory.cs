@@ -172,7 +172,7 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
         var allAliasSpeakers = Context.GetAliasSpeakers(speakerNames);
 
         var nameMappedSpeakers = allAliasSpeakers
-            .GroupBy(x => x.FormKey)
+            .GroupBy(x => x.FormLink)
             .Select(x => (x.Key, x.ToList()))
             .ToList();
 
@@ -285,7 +285,7 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
                 var dialogueTopic = new DialogueTopic {
                     TopicInfos = [
                         new DialogueTopicInfo {
-                            Speaker = new AliasSpeaker(FormKey.Null, string.Empty),
+                            Speaker = new AliasSpeaker(FormLinkInformation.Null, string.Empty),
                             Prompt = currentSpeaker,
                             Responses = currentLines.ToList(),
                         },

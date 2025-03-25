@@ -14,7 +14,7 @@ public static class TestSamples {
                 testConstants.SkyrimDialogueContext,
                 testConstants.DialogueProcessor,
                 new DialogueSelection {
-                    Speaker = testConstants.Speaker1.FormKey,
+                    Speaker = testConstants.Speaker1.FormLink,
                     SelectedTypes = { type },
                 },
                 index)
@@ -23,8 +23,8 @@ public static class TestSamples {
 
     public static GeneratedDialogue GetBrinaCrossScenes(TestConstants testConstants, int scene) {
         testConstants.SpeakerSelection = new InjectedSpeakerSelection(new Dictionary<string, AliasSpeaker> {
-            { "Ornev", new AliasSpeaker(testConstants.Speaker1.FormKey, "Ornev") },
-            { "Astav", new AliasSpeaker(testConstants.Speaker2.FormKey, "Astav") },
+            { "Ornev", new AliasSpeaker(testConstants.Speaker1.FormLink, "Ornev") },
+            { "Astav", new AliasSpeaker(testConstants.Speaker2.FormLink, "Astav") },
         });
 
         var docXDocumentParser = new DocXDocumentParser(
@@ -36,8 +36,8 @@ public static class TestSamples {
     public static (GeneratedDialogue Scene1, GeneratedDialogue Scene2)
         GetOldwallScenes(TestConstants testConstants) {
         testConstants.SpeakerSelection = new InjectedSpeakerSelection(new Dictionary<string, AliasSpeaker> {
-            { "Jastara", new AliasSpeaker(testConstants.Speaker1.FormKey, "Jastara") },
-            { "Godehard", new AliasSpeaker(testConstants.Speaker2.FormKey, "Godehard") },
+            { "Jastara", new AliasSpeaker(testConstants.Speaker1.FormLink, "Jastara") },
+            { "Godehard", new AliasSpeaker(testConstants.Speaker2.FormLink, "Godehard") },
         });
 
         var docXDocumentParser = new DocXDocumentParser(
@@ -80,7 +80,8 @@ public static class TestSamples {
             GetDialogue(testConstants, docXDocumentParser, DialogueType.Farewell, 2));
     }
 
-    public static (GeneratedDialogue Greeting, GeneratedDialogue Farewell, GeneratedDialogue Dialogue, GeneratedDialogue Dialogue2)
+    public static (GeneratedDialogue Greeting, GeneratedDialogue Farewell, GeneratedDialogue Dialogue, GeneratedDialogue
+        Dialogue2)
         GetMalwonDialogue(TestConstants testConstants) {
         var docXDocumentParser = new DocXDocumentParser(
             Path.GetFullPath("../../../Samples/Documents/[Locked] Malwon.docx"));
@@ -92,7 +93,8 @@ public static class TestSamples {
             GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 3));
     }
 
-    public static (GeneratedDialogue Greeting, GeneratedDialogue Dialogue, GeneratedDialogue Dialogue2, GeneratedDialogue Farewell)
+    public static (GeneratedDialogue Greeting, GeneratedDialogue Dialogue, GeneratedDialogue Dialogue2, GeneratedDialogue
+        Farewell)
         GetAdilaNadeDialogue(TestConstants testConstants) {
         var docXDocumentParser = new DocXDocumentParser(
             Path.GetFullPath("../../../Samples/Documents/Adila Nade.docx"));

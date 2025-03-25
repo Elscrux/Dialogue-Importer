@@ -3,7 +3,7 @@ using Mutagen.Bethesda.Plugins;
 namespace DialogueImplementationTool.Dialogue.Speaker;
 
 public partial interface ISpeaker {
-    FormKey FormKey { get; }
+    IFormLinkGetter FormLink { get; }
     string? EditorID { get; }
     string Name { get; }
     string NameNoSpaces { get; }

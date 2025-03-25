@@ -249,8 +249,8 @@ public sealed class TestBranchingDialogueFactory {
     public void TestAdilaNadeDialogue() {
         // Import as dialogue quest
         _testConstants.FormKeySelection = new InjectedFormKeySelection(new Dictionary<string, FormKey> {
-            { "Select: Marille Nade", _testConstants.Speaker1.FormKey },
-            { "Select: Ezzib Nade", _testConstants.Speaker2.FormKey },
+            { "Select: Marille Nade", _testConstants.Speaker1.FormLink.FormKey },
+            { "Select: Ezzib Nade", _testConstants.Speaker2.FormLink.FormKey },
         });
         var (greeting, dialogue1, dialogue2, farewell) = TestSamples.GetAdilaNadeDialogue(_testConstants);
 
