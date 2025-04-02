@@ -14,6 +14,10 @@ public sealed class GenericScene3x3Factory(IDialogueContext context) : GenericSc
     protected override void TransformLines(List<DialogueTopic> topics) {
         foreach (var topic in topics) {
             topic.ConvertResponsesToTopicInfos();
+            var randomChecker = new RandomChecker();
+            var belongsToPreviousChecker = new BelongsToPreviousChecker();
+            randomChecker.Process(topic);
+            belongsToPreviousChecker.Process(topic);
 
             foreach (var topicInfo in topic.TopicInfos) {
                 topicInfo.Random = true;
