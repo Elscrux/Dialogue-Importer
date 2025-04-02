@@ -92,6 +92,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new SuccessFailureSeparator(context),
             new DeadAliveChecker(_context),
             new RandomChecker(),
+            new BelongsToPreviousChecker(),
             new RemoveEmptyTopicInfos(),
         ];
 
