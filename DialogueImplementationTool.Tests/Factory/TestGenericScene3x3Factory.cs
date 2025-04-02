@@ -14,7 +14,7 @@ public sealed class TestGenericScene3x3Factory {
 
         // Check
         scene3.Topics.Should().HaveCount(3);
-        scene3.Topics[0].TopicInfos[0].Responses.Should().HaveCount(2);
+        scene3.Topics[0].TopicInfos[0].Responses.Should().HaveCount(3);
         scene3.Topics[1].TopicInfos[0].Responses.Should().HaveCount(2);
         scene3.Topics[2].TopicInfos[0].Responses.Should().HaveCount(3);
 
@@ -27,6 +27,9 @@ public sealed class TestGenericScene3x3Factory {
         firstResponse.FullResponse.Should().NotContain("tone: happy");
         firstResponse.ScriptNote.Should().Be("tone: happy");
 
+        var secondResponse = conversation[0].Topics[0].TopicInfos[0].Responses[1];
+        secondResponse.FullResponse.Should().Be("[belongs to previous line] Anything special?");
+
         var secondTopic = conversation[0].Topics[1].TopicInfos[0].Responses[0];
         secondTopic.Response.Should().NotContain("nervous");
         secondTopic.ScriptNote.Should().Be("nervous");
@@ -38,6 +41,8 @@ public sealed class TestGenericScene3x3Factory {
         _testConstants.Mod.Scenes.Should().ContainSingle();
         _testConstants.Mod.DialogTopics.Should().HaveCount(3);
         _testConstants.Mod.DialogTopics.First().Responses.Should().HaveCount(2);
+        _testConstants.Mod.DialogTopics.First().Responses.First().Responses.Should().HaveCount(2);
+        _testConstants.Mod.DialogTopics.First().Responses.Skip(1).First().Responses.Should().HaveCount(1);
         _testConstants.Mod.DialogTopics.Skip(1).First().Responses.Should().HaveCount(2);
         _testConstants.Mod.DialogTopics.Skip(2).First().Responses.Should().HaveCount(3);
         foreach (var dialogResponses in _testConstants.Mod.DialogTopics.SelectMany(topic => topic.Responses)) {
