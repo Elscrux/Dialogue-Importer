@@ -248,8 +248,19 @@ public sealed class DocXDocumentParser
     }
 
     private static bool IsPlayerLine(Paragraph paragraph) {
-        return paragraph.MagicText.Count > 0
-         && paragraph.MagicText.NotNull().All(magicText => magicText.formatting?.Bold is not (null or false));
+        if (paragraph.MagicText.Count == 0) return false;
+
+        var nonBold = 0;
+        var bold = 0;
+        foreach (var magicText in paragraph.MagicText) {
+            if (magicText.formatting.Bold is true) {
+                bold += magicText.text.Length;
+            } else {
+                nonBold += magicText.text.Length;
+            }
+        }
+
+        return bold > nonBold;
     }
 
     private static List<FormattedText> GetFormattedText(Paragraph paragraph) {
