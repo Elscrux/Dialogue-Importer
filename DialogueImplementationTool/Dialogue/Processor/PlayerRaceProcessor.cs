@@ -31,18 +31,18 @@ public sealed class PlayerRaceProcessor : IGenericDialogueProcessor {
                 yield return GetCondition(Skyrim.Race.NordRace);
                 yield return GetCondition(Skyrim.Race.NordRaceVampire);
                 yield return GetCondition(Skyrim.Race.RedguardRace);
-                yield return GetCondition(Skyrim.Race.RedguardRaceVampire);
+                yield return GetCondition(Skyrim.Race.RedguardRaceVampire, false);
 
                 break;
             case "NOT Human":
-                yield return GetNegatedCondition(Skyrim.Race.BretonRace);
-                yield return GetNegatedCondition(Skyrim.Race.BretonRaceVampire);
-                yield return GetNegatedCondition(Skyrim.Race.ImperialRace);
-                yield return GetNegatedCondition(Skyrim.Race.ImperialRaceVampire);
-                yield return GetNegatedCondition(Skyrim.Race.NordRace);
-                yield return GetNegatedCondition(Skyrim.Race.NordRaceVampire);
-                yield return GetNegatedCondition(Skyrim.Race.RedguardRace);
-                yield return GetNegatedCondition(Skyrim.Race.RedguardRaceVampire);
+                yield return GetNegatedCondition(Skyrim.Race.BretonRace, false);
+                yield return GetNegatedCondition(Skyrim.Race.BretonRaceVampire, false);
+                yield return GetNegatedCondition(Skyrim.Race.ImperialRace, false);
+                yield return GetNegatedCondition(Skyrim.Race.ImperialRaceVampire, false);
+                yield return GetNegatedCondition(Skyrim.Race.NordRace, false);
+                yield return GetNegatedCondition(Skyrim.Race.NordRaceVampire, false);
+                yield return GetNegatedCondition(Skyrim.Race.RedguardRace, false);
+                yield return GetNegatedCondition(Skyrim.Race.RedguardRaceVampire, false);
 
                 break;
             case "Elf":
@@ -51,148 +51,148 @@ public sealed class PlayerRaceProcessor : IGenericDialogueProcessor {
                 yield return GetCondition(Skyrim.Race.HighElfRace);
                 yield return GetCondition(Skyrim.Race.HighElfRaceVampire);
                 yield return GetCondition(Skyrim.Race.WoodElfRace);
-                yield return GetCondition(Skyrim.Race.WoodElfRaceVampire);
+                yield return GetCondition(Skyrim.Race.WoodElfRaceVampire, false);
 
                 break;
             case "NOT Elf":
-                yield return GetNegatedCondition(Skyrim.Race.DarkElfRace);
-                yield return GetNegatedCondition(Skyrim.Race.DarkElfRaceVampire);
-                yield return GetNegatedCondition(Skyrim.Race.HighElfRace);
-                yield return GetNegatedCondition(Skyrim.Race.HighElfRaceVampire);
-                yield return GetNegatedCondition(Skyrim.Race.WoodElfRace);
-                yield return GetNegatedCondition(Skyrim.Race.WoodElfRaceVampire);
+                yield return GetNegatedCondition(Skyrim.Race.DarkElfRace, false);
+                yield return GetNegatedCondition(Skyrim.Race.DarkElfRaceVampire, false);
+                yield return GetNegatedCondition(Skyrim.Race.HighElfRace, false);
+                yield return GetNegatedCondition(Skyrim.Race.HighElfRaceVampire, false);
+                yield return GetNegatedCondition(Skyrim.Race.WoodElfRace, false);
+                yield return GetNegatedCondition(Skyrim.Race.WoodElfRaceVampire, false);
 
                 break;
             case "Beast":
                 yield return GetCondition(Skyrim.Race.ArgonianRace);
                 yield return GetCondition(Skyrim.Race.ArgonianRaceVampire);
                 yield return GetCondition(Skyrim.Race.KhajiitRace);
-                yield return GetCondition(Skyrim.Race.KhajiitRaceVampire);
+                yield return GetCondition(Skyrim.Race.KhajiitRaceVampire, false);
 
                 break;
             case "NOT Beast":
-                yield return GetNegatedCondition(Skyrim.Race.ArgonianRace);
-                yield return GetNegatedCondition(Skyrim.Race.ArgonianRaceVampire);
-                yield return GetNegatedCondition(Skyrim.Race.KhajiitRace);
-                yield return GetNegatedCondition(Skyrim.Race.KhajiitRaceVampire);
+                yield return GetNegatedCondition(Skyrim.Race.ArgonianRace, false);
+                yield return GetNegatedCondition(Skyrim.Race.ArgonianRaceVampire, false);
+                yield return GetNegatedCondition(Skyrim.Race.KhajiitRace, false);
+                yield return GetNegatedCondition(Skyrim.Race.KhajiitRaceVampire, false);
 
                 break;
             case "Altmer":
                 yield return GetCondition(Skyrim.Race.HighElfRace);
-                yield return GetCondition(Skyrim.Race.HighElfRaceVampire);
+                yield return GetCondition(Skyrim.Race.HighElfRaceVampire, false);
 
                 break;
             case "NOT Altmer":
-                yield return GetNegatedCondition(Skyrim.Race.HighElfRace);
-                yield return GetNegatedCondition(Skyrim.Race.HighElfRaceVampire);
+                yield return GetNegatedCondition(Skyrim.Race.HighElfRace, false);
+                yield return GetNegatedCondition(Skyrim.Race.HighElfRaceVampire, false);
 
                 break;
             case "Argonian":
                 yield return GetCondition(Skyrim.Race.ArgonianRace);
-                yield return GetCondition(Skyrim.Race.ArgonianRaceVampire);
+                yield return GetCondition(Skyrim.Race.ArgonianRaceVampire, false);
 
                 break;
             case "NOT Argonian":
-                yield return GetNegatedCondition(Skyrim.Race.ArgonianRace);
-                yield return GetNegatedCondition(Skyrim.Race.ArgonianRaceVampire);
+                yield return GetNegatedCondition(Skyrim.Race.ArgonianRace, false);
+                yield return GetNegatedCondition(Skyrim.Race.ArgonianRaceVampire, false);
 
                 break;
             case "Bosmer":
                 yield return GetCondition(Skyrim.Race.WoodElfRace);
-                yield return GetCondition(Skyrim.Race.WoodElfRaceVampire);
+                yield return GetCondition(Skyrim.Race.WoodElfRaceVampire, false);
 
                 break;
             case "NOT Bosmer":
-                yield return GetNegatedCondition(Skyrim.Race.WoodElfRace);
-                yield return GetNegatedCondition(Skyrim.Race.WoodElfRaceVampire);
+                yield return GetNegatedCondition(Skyrim.Race.WoodElfRace, false);
+                yield return GetNegatedCondition(Skyrim.Race.WoodElfRaceVampire, false);
 
                 break;
             case "Breton":
                 yield return GetCondition(Skyrim.Race.BretonRace);
-                yield return GetCondition(Skyrim.Race.BretonRaceVampire);
+                yield return GetCondition(Skyrim.Race.BretonRaceVampire, false);
 
                 break;
             case "NOT Breton":
-                yield return GetNegatedCondition(Skyrim.Race.BretonRace);
-                yield return GetNegatedCondition(Skyrim.Race.BretonRaceVampire);
+                yield return GetNegatedCondition(Skyrim.Race.BretonRace, false);
+                yield return GetNegatedCondition(Skyrim.Race.BretonRaceVampire, false);
 
                 break;
             case "Dunmer":
                 yield return GetCondition(Skyrim.Race.DarkElfRace);
-                yield return GetCondition(Skyrim.Race.DarkElfRaceVampire);
+                yield return GetCondition(Skyrim.Race.DarkElfRaceVampire, false);
 
                 break;
             case "NOT Dunmer":
-                yield return GetNegatedCondition(Skyrim.Race.DarkElfRace);
-                yield return GetNegatedCondition(Skyrim.Race.DarkElfRaceVampire);
+                yield return GetNegatedCondition(Skyrim.Race.DarkElfRace, false);
+                yield return GetNegatedCondition(Skyrim.Race.DarkElfRaceVampire, false);
 
                 break;
             case "Orc":
                 yield return GetCondition(Skyrim.Race.OrcRace);
-                yield return GetCondition(Skyrim.Race.OrcRaceVampire);
+                yield return GetCondition(Skyrim.Race.OrcRaceVampire, false);
 
                 break;
             case "NOT Orc":
-                yield return GetNegatedCondition(Skyrim.Race.OrcRace);
-                yield return GetNegatedCondition(Skyrim.Race.OrcRaceVampire);
+                yield return GetNegatedCondition(Skyrim.Race.OrcRace, false);
+                yield return GetNegatedCondition(Skyrim.Race.OrcRaceVampire, false);
 
                 break;
             case "Khajiit":
                 yield return GetCondition(Skyrim.Race.KhajiitRace);
-                yield return GetCondition(Skyrim.Race.KhajiitRaceVampire);
+                yield return GetCondition(Skyrim.Race.KhajiitRaceVampire, false);
 
                 break;
             case "NOT Khajiit":
-                yield return GetNegatedCondition(Skyrim.Race.KhajiitRace);
-                yield return GetNegatedCondition(Skyrim.Race.KhajiitRaceVampire);
+                yield return GetNegatedCondition(Skyrim.Race.KhajiitRace, false);
+                yield return GetNegatedCondition(Skyrim.Race.KhajiitRaceVampire, false);
 
                 break;
             case "Imperial":
                 yield return GetCondition(Skyrim.Race.ImperialRace);
-                yield return GetCondition(Skyrim.Race.ImperialRaceVampire);
+                yield return GetCondition(Skyrim.Race.ImperialRaceVampire, false);
 
                 break;
             case "NOT Imperial":
-                yield return GetNegatedCondition(Skyrim.Race.ImperialRace);
-                yield return GetNegatedCondition(Skyrim.Race.ImperialRaceVampire);
+                yield return GetNegatedCondition(Skyrim.Race.ImperialRace, false);
+                yield return GetNegatedCondition(Skyrim.Race.ImperialRaceVampire, false);
 
                 break;
             case "Redguard":
                 yield return GetCondition(Skyrim.Race.RedguardRace);
-                yield return GetCondition(Skyrim.Race.RedguardRaceVampire);
+                yield return GetCondition(Skyrim.Race.RedguardRaceVampire, false);
 
                 break;
             case "NOT Redguard":
-                yield return GetNegatedCondition(Skyrim.Race.RedguardRace);
-                yield return GetNegatedCondition(Skyrim.Race.RedguardRaceVampire);
+                yield return GetNegatedCondition(Skyrim.Race.RedguardRace, false);
+                yield return GetNegatedCondition(Skyrim.Race.RedguardRaceVampire, false);
 
                 break;
             case "Nord":
                 yield return GetCondition(Skyrim.Race.NordRace);
-                yield return GetCondition(Skyrim.Race.NordRaceVampire);
+                yield return GetCondition(Skyrim.Race.NordRaceVampire, false);
 
                 break;
             case "NOT Nord":
-                yield return GetNegatedCondition(Skyrim.Race.NordRace);
-                yield return GetNegatedCondition(Skyrim.Race.NordRaceVampire);
+                yield return GetNegatedCondition(Skyrim.Race.NordRace, false);
+                yield return GetNegatedCondition(Skyrim.Race.NordRaceVampire, false);
 
                 break;
         }
 
-        Condition GetCondition(FormLink<IRaceGetter> raceLink) => new GetPCIsRaceConditionData {
+        Condition GetCondition(FormLink<IRaceGetter> raceLink, bool or = true) => new GetPCIsRaceConditionData {
             Race = {
                 Link = {
                     FormKey = raceLink.FormKey
                 },
             },
-        }.ToConditionFloat(comparisonValue: 1, or: true);
+        }.ToConditionFloat(comparisonValue: 1, or: or);
 
-        Condition GetNegatedCondition(FormLink<IRaceGetter> raceLink) => new GetPCIsRaceConditionData {
+        Condition GetNegatedCondition(FormLink<IRaceGetter> raceLink, bool or = true) => new GetPCIsRaceConditionData {
             Race = {
                 Link = {
                     FormKey = raceLink.FormKey
                 },
             },
-        }.ToConditionFloat(comparisonValue: 0, or: false);
+        }.ToConditionFloat(comparisonValue: 0, or: or);
     }
 }
