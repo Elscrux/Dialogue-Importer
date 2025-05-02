@@ -89,6 +89,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
 
         TopicProcessors = [
             new TopicInfoNoteExtractor(),
+            new PlayerIsSexChecker(),
             new PlayerIsRaceChecker(),
             new SuccessFailureSeparator(context),
             new DeadAliveChecker(_context),
