@@ -100,7 +100,18 @@ public sealed partial class KeywordLinker : IConversationProcessor {
                 return;
             }
 
-            var response = destination.TopicInfo.Responses.First(r => r.HasNote(x => x == keyword));
+            var response = destination.TopicInfo.Responses.FirstOrDefault(r => r.HasNote(x => x == keyword));
+            while (response is null && destination.TopicInfo is {
+                InvisibleContinue: true,
+                Links: [{ TopicInfos: [{} invisibleContinue] }]
+            }) {
+                response = invisibleContinue.Responses.FirstOrDefault(r => r.HasNote(x => x == keyword));
+            }
+
+            if (response is null) {
+                throw new InvalidOperationException(
+                    $"Keyword {keyword} does not have a response in dialogue {destination.TopicInfo.Prompt.FullText}");
+            }
             removeNotes.Add(() => {
                 response.RemoveNote(destination.Note);
                 destination.TopicInfo.RemoveRedundantResponses();
