@@ -13,13 +13,13 @@ public sealed partial class ResponseNoteExtractor : IDialogueResponseProcessor {
         var processedSnippets = textSnippets.ToList();
 
         ProcessNotes(
-            NoteUtils.StartNoteRegex(),
+            NoteUtils.StartNoteRegex,
             StringExt.TrimStart,
             (s, i) => s[i..],
             response.StartNotes,
             x => x);
         ProcessNotes(
-            NoteUtils.EndNoteRegex(),
+            NoteUtils.EndNoteRegex,
             StringExt.TrimEnd,
             (s, i) => s[..^i],
             response.EndsNotes,

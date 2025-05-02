@@ -21,11 +21,11 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 public sealed partial class RemoveRootOptionChecker : IConversationProcessor {
     // [merge to DONE above]
     [GeneratedRegex("(remove|lock) root option", RegexOptions.IgnoreCase)]
-    private static partial Regex RemoveRootOption();
+    private static partial Regex RemoveRootOption { get; }
 
     // [DONE], [HERE]
     [GeneratedRegex($"^{KeywordUtils.KeywordRegexPart}$")]
-    private static partial Regex OnlyKeywordRegex();
+    private static partial Regex OnlyKeywordRegex { get; }
 
     public void Process(Conversation conversation) {
         foreach (var dialogue in conversation) {
@@ -40,7 +40,7 @@ public sealed partial class RemoveRootOptionChecker : IConversationProcessor {
                 foreach (var linkedTopic in rootTopic.EnumerateLinks(true)) {
                     foreach (var topicInfo in linkedTopic.TopicInfos) {
                         if (topicInfo.Responses.Count == 0) continue;
-                        if (!topicInfo.Responses[^1].RemoveNote(note => RemoveRootOption().IsMatch(note))) continue;
+                        if (!topicInfo.Responses[^1].RemoveNote(note => RemoveRootOption.IsMatch(note))) continue;
 
                         topicInfo.Responses[^1].EndsNotes.Add(new Note { Text = $"Lock {lockedKeyword}" });
 
@@ -59,7 +59,7 @@ public sealed partial class RemoveRootOptionChecker : IConversationProcessor {
     private static string GetLockedKeyword(DialogueTopic rootTopic, int topicIndex) {
         // Use existing keyword note if it exists
         if (rootTopic.TopicInfos is [var topicInfo]) {
-            var keywordNote = topicInfo.Prompt.StartNotes.Find(note => OnlyKeywordRegex().IsMatch(note.Text));
+            var keywordNote = topicInfo.Prompt.StartNotes.Find(note => OnlyKeywordRegex.IsMatch(note.Text));
             if (keywordNote is not null) {
                 return keywordNote.Text;
             }

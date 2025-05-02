@@ -15,69 +15,69 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
 
     // [DONE], [HERE]
     [GeneratedRegex(KeywordUtils.KeywordRegexPart)]
-    private static partial Regex KeywordRegex();
+    private static partial Regex KeywordRegex { get; }
 
     // [DONE], [HERE]
     [GeneratedRegex($"^{KeywordUtils.KeywordRegexPart}$")]
-    private static partial Regex OnlyKeywordRegex();
+    private static partial Regex OnlyKeywordRegex { get; }
 
     // [Locked]
     // In combination with a SimpleKeywordRegex this creates a locked keyword
     [GeneratedRegex($"(?i)^{Locked}")]
-    private static partial Regex LockedRegex();
+    private static partial Regex LockedRegex { get; }
 
     // [Locked]
     // In combination with a SimpleKeywordRegex this creates an unlocked keyword
     [GeneratedRegex($"(?i)^{Unlocked}")]
-    private static partial Regex UnlockedRegex();
+    private static partial Regex UnlockedRegex { get; }
 
     // [unlocked HERE]
     [GeneratedRegex($"(?i)^{Locked}:? {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}|^{KeywordUtils.KeywordRegexPart}(?i):? {LockFillerPart}?{Locked}")]
-    private static partial Regex StatusLockedRegex();
+    private static partial Regex StatusLockedRegex { get; }
 
     // [locked HERE]
     [GeneratedRegex($"(?i)^{Unlocked}:? {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}|^{KeywordUtils.KeywordRegexPart}(?i):? {LockFillerPart}?{Unlocked}")]
-    private static partial Regex StatusUnlockedRegex();
+    private static partial Regex StatusUnlockedRegex { get; }
 
     // [lock all HERE] [remove HERE]
     [GeneratedRegex($"(?i)^(?:lock(?:s)?|remove(?:s)?):? {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
-    private static partial Regex ActionLockRegex();
+    private static partial Regex ActionLockRegex { get; }
 
     // [unlock HERE] [add HERE]
     [GeneratedRegex($"(?i)^(?:unlock(?:s)?|add(?:s)?):? {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
-    private static partial Regex ActionUnlockRegex();
+    private static partial Regex ActionUnlockRegex { get; }
 
     public void Process(Conversation conversation) {
         var speakerStages = new Dictionary<FormKey, (ushort StartStage, ushort NextStage)>();
 
          var simplePromptKeywords = conversation.GetAllKeywordTopicInfos(
-            OnlyKeywordRegex(),
+            OnlyKeywordRegex,
             info => info.Prompt.StartNotes);
 
         var simpleResponseKeywords = conversation.GetAllKeywordTopicInfos(
-            OnlyKeywordRegex(),
+            OnlyKeywordRegex,
             info => info.Responses is [] ? [] : info.Responses[0].StartNotes);
 
         var statusLockedKeywords = conversation.GetAllKeywordTopicInfos(
-            StatusLockedRegex(),
+            StatusLockedRegex,
             info => info.Prompt.StartNotes);
 
         var statusUnlockedKeywords = conversation.GetAllKeywordTopicInfos(
-            StatusUnlockedRegex(),
+            StatusUnlockedRegex,
             info => info.Prompt.StartNotes);
 
         var actionLockKeywords = conversation.GetAllKeywordTopicInfos(
-            ActionLockRegex(),
+            ActionLockRegex,
             info => info.Responses.Count == 0 ? [] : info.Responses[^1].EndNotesAndStartIfResponseEmpty());
         var actionUnlockKeywords = conversation.GetAllKeywordTopicInfos(
-            ActionUnlockRegex(),
+            ActionUnlockRegex,
             info => info.Responses.Count == 0 ? [] : info.Responses[^1].EndNotesAndStartIfResponseEmpty());
 
         var actionKeywords = actionLockKeywords.Select(x => (Match: x, Lock: true))
             .Concat(actionUnlockKeywords.Select(x => (Match: x, Lock: false)))
             .SelectMany(x => {
                 // Check for any keywords in note, to catch something like [unlock HERE, NOW, MERGE]
-                return KeywordRegex().Matches(x.Match.Note.Text)
+                return KeywordRegex.Matches(x.Match.Note.Text)
                     .Select(match => match.Groups[1].Value)
                     .Select(keyword => (x.Match with { Keyword = keyword }, x.Lock))
                     .ToList();
@@ -106,7 +106,7 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
 
                         // Remove [Locked] [HERE]
                         initiallyUnlockedMatch.TopicInfo.Prompt.StartNotes.Remove(initiallyUnlockedMatch.Note);
-                        initiallyUnlockedMatch.TopicInfo.Prompt.StartNotes.RemoveAll(x => UnlockedRegex().IsMatch(x.Text));
+                        initiallyUnlockedMatch.TopicInfo.Prompt.StartNotes.RemoveAll(x => UnlockedRegex.IsMatch(x.Text));
                         initiallyUnlockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(false, stage));
                     }
 
@@ -116,7 +116,7 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
                         // Remove [Locked] [HERE]
                         initiallyUnlockedMatch.TopicInfo.Responses[0].StartNotes.Remove(initiallyUnlockedMatch.Note);
                         initiallyUnlockedMatch.TopicInfo.Responses[0].StartNotes
-                            .RemoveAll(x => UnlockedRegex().IsMatch(x.Text));
+                            .RemoveAll(x => UnlockedRegex.IsMatch(x.Text));
                         initiallyUnlockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(false, stage));
                     }
                 } else {
@@ -133,7 +133,7 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
 
                         // Remove [Locked] [HERE]
                         initiallyLockedMatch.TopicInfo.Prompt.StartNotes.Remove(initiallyLockedMatch.Note);
-                        initiallyLockedMatch.TopicInfo.Prompt.StartNotes.RemoveAll(x => LockedRegex().IsMatch(x.Text));
+                        initiallyLockedMatch.TopicInfo.Prompt.StartNotes.RemoveAll(x => LockedRegex.IsMatch(x.Text));
                         initiallyLockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(true, stage));
                     }
 
@@ -143,7 +143,7 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
                         // Remove [Locked] [HERE]
                         initiallyLockedMatch.TopicInfo.Responses[0].StartNotes.Remove(initiallyLockedMatch.Note);
                         initiallyLockedMatch.TopicInfo.Responses[0].StartNotes
-                            .RemoveAll(x => LockedRegex().IsMatch(x.Text));
+                            .RemoveAll(x => LockedRegex.IsMatch(x.Text));
                         initiallyLockedMatch.TopicInfo.ExtraConditions.Add(GetStageDoneCondition(true, stage));
                     }
                 }

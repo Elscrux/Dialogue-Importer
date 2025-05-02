@@ -108,13 +108,13 @@ public sealed partial class UISpeakerSelection(
     }
 
     [GeneratedRegex("[\\/:*?\"<>|]")]
-    private static partial Regex IllegalFileNameRegex();
+    private static partial Regex IllegalFileNameRegex { get; }
 
     private string SelectionsPath =>
         Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "Selections",
-            IllegalFileNameRegex().Replace(filePath + ".sceneselections", string.Empty));
+            IllegalFileNameRegex.Replace(filePath + ".sceneselections", string.Empty));
 
     private readonly JsonSerializerSettings _serializerSettings = new() {
         Formatting = Formatting.Indented,

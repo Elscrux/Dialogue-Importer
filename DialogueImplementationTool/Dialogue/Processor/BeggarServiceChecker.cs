@@ -6,7 +6,7 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 
 public partial class BeggarServiceChecker : IConversationProcessor {
     [GeneratedRegex(@"Have a coin, beggar\.|Here, have a gold piece\. \(1 gold\)")]
-    public static partial Regex BeggarRegex();
+    public static partial Regex BeggarRegex { get; }
 
     public void Process(Conversation conversation) {
         foreach (var dialogue in conversation) {
@@ -18,7 +18,7 @@ public partial class BeggarServiceChecker : IConversationProcessor {
 
     public void Process(DialogueTopic topic) {
         if (topic.TopicInfos.Count == 0) return;
-        if (!BeggarRegex().IsMatch(topic.GetPlayerText())) return;
+        if (!BeggarRegex.IsMatch(topic.GetPlayerText())) return;
 
         topic.ConvertResponsesToTopicInfos();
         topic.ServiceType = ServiceType.Beggar;

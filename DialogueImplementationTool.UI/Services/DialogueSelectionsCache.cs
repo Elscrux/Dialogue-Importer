@@ -7,13 +7,13 @@ namespace DialogueImplementationTool.UI.Services;
 
 public sealed partial class DialogueSelectionsCache(string documentFilePath) {
     [GeneratedRegex("[\\/:*?\"<>|]")]
-    private static partial Regex IllegalFileNameRegex();
+    private static partial Regex IllegalFileNameRegex { get; }
 
     private string SelectionsPath =>
         Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "Selections",
-            IllegalFileNameRegex().Replace(documentFilePath + ".selections", string.Empty));
+            IllegalFileNameRegex.Replace(documentFilePath + ".selections", string.Empty));
 
     private readonly JsonSerializerSettings _serializerSettings = new() {
         Formatting = Formatting.Indented,

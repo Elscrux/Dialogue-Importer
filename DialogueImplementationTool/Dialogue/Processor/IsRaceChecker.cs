@@ -25,10 +25,10 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicProcessor {
       + $"|{ImperialRegexPart}|{KhajiitRegexPart}|{NordRegexPart}|{OrcRegexPart}|{RedguardRegexPart}";
 
     [GeneratedRegex($"(?:[Pp]layer|PC).+(?:{MergedRacesRegexPart})")]
-    private static partial Regex IsRaceRegex();
+    private static partial Regex IsRaceRegex { get; }
 
     [GeneratedRegex(@"\bnot\b", RegexOptions.IgnoreCase)]
-    private static partial Regex NegatedRegex();
+    private static partial Regex NegatedRegex { get; }
 
     private static readonly Dictionary<int, (FormKey Regular, FormKey Vampire)> RaceFormKeys = new() {
         { 1, (Skyrim.Race.ArgonianRace.FormKey, Skyrim.Race.ArgonianRaceVampire.FormKey) },
@@ -62,11 +62,11 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicProcessor {
     }
 
     private static bool CheckNote(DialogueTopicInfo topicInfo, Note note) {
-        var match = IsRaceRegex().Match(note.Text);
+        var match = IsRaceRegex.Match(note.Text);
         if (!match.Success) return false;
 
         var text = note.Text;
-        var negated = NegatedRegex().IsMatch(text);
+        var negated = NegatedRegex.IsMatch(text);
         while (match.Success) {
             var matchingRace = match.Groups.Values.Skip(1).FirstOrDefault(x => x.Success);
             if (matchingRace is null) break;
@@ -80,7 +80,7 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicProcessor {
             }
 
             text = text.Replace(matchingRace.Value, string.Empty);
-            match = IsRaceRegex().Match(text);
+            match = IsRaceRegex.Match(text);
         }
 
         return true;

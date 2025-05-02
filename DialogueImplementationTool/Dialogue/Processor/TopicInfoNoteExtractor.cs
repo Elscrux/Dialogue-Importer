@@ -11,13 +11,13 @@ public sealed class TopicInfoNoteExtractor : IDialogueTopicProcessor {
         foreach (var topicInfo in topic.TopicInfos) {
             ProcessNotes(
                 topicInfo,
-                NoteUtils.StartNoteRegex(),
+                NoteUtils.StartNoteRegex,
                 StringExt.TrimStart,
                 topicInfo.Prompt.StartNotes);
 
             ProcessNotes(
                 topicInfo,
-                NoteUtils.EndNoteRegex(),
+                NoteUtils.EndNoteRegex,
                 StringExt.TrimEnd,
                 topicInfo.Prompt.EndsNotes);
         }

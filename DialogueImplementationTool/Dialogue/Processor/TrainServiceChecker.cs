@@ -4,7 +4,7 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 
 public partial class TrainServiceChecker : IConversationProcessor {
     [GeneratedRegex("I'd like to train|Can you teach me")]
-    public static partial Regex TrainRegex();
+    public static partial Regex TrainRegex { get; }
 
     public void Process(Conversation conversation) {
         foreach (var dialogue in conversation) {
@@ -16,7 +16,7 @@ public partial class TrainServiceChecker : IConversationProcessor {
 
     public void Process(DialogueTopic topic) {
         if (topic.TopicInfos.Count == 0) return;
-        if (!TrainRegex().IsMatch(topic.GetPlayerText())) return;
+        if (!TrainRegex.IsMatch(topic.GetPlayerText())) return;
 
         topic.ConvertResponsesToTopicInfos();
         topic.ServiceType = ServiceType.Train;

@@ -13,16 +13,16 @@ public sealed partial class KeywordLinker : IConversationProcessor {
 
     // [DONE], [HERE]
     [GeneratedRegex($"^{KeywordUtils.KeywordRegexPart}$")]
-    private static partial Regex SimpleKeywordRegex();
+    private static partial Regex SimpleKeywordRegex { get; }
 
     // [merge to DONE above]
     [GeneratedRegex($"(?i){FillerRegexPart}(?:{MergeRegexPart})?to (?-i){KeywordUtils.KeywordRegexPart}{FillerRegexPart}")]
-    private static partial Regex LinkSimpleRegex();
+    private static partial Regex LinkSimpleRegex { get; }
 
     // [merge to options after HERE above]
     [GeneratedRegex($"(?i){FillerRegexPart}(?:{MergeRegexPart})?to "
       + $"{OptionsAfterRegexPart}?(?-i){KeywordUtils.KeywordRegexPart}{FillerRegexPart}")]
-    private static partial Regex LinkOptionsRegex();
+    private static partial Regex LinkOptionsRegex { get; }
 
     public void Process(Conversation conversation) {
         ProcessKeywordLinks(conversation);
@@ -31,10 +31,10 @@ public sealed partial class KeywordLinker : IConversationProcessor {
 
     private static void ProcessOptionLinks(Conversation conversation) {
         var optionsDestinations = conversation.GetKeywordTopicInfoDictionary(
-            SimpleKeywordRegex(),
+            SimpleKeywordRegex,
             info => info.Responses.Count == 0 ? [] : info.Responses[^1].EndNotesAndStartIfResponseEmpty());
         var optionsLinks = conversation.GetAllKeywordTopicInfos(
-            LinkOptionsRegex(),
+            LinkOptionsRegex,
             info => info.Responses.Count == 0 ? [] : info.Responses[^1].EndNotesAndStartIfResponseEmpty());
 
         foreach (var (note, keyword, _, linkTopicInfo) in optionsLinks) {
@@ -59,13 +59,13 @@ public sealed partial class KeywordLinker : IConversationProcessor {
 
     private static void ProcessKeywordLinks(Conversation conversation) {
         var keywordDestination = conversation.GetKeywordTopicInfoDictionary(
-            SimpleKeywordRegex(),
+            SimpleKeywordRegex,
             info => info.Responses.Count == 0 ? [] : info.Responses.SelectMany(x => x.StartNotes));
         var promptKeywordLinks = conversation.GetAllKeywordTopicInfos(
-            LinkSimpleRegex(),
+            LinkSimpleRegex,
             info => info.Prompt.EndNotesAndStartIfResponseEmpty());
         var responseKeywordLinks = conversation.GetAllKeywordTopicInfos(
-            LinkSimpleRegex(),
+            LinkSimpleRegex,
             info => info.Responses.Count == 0 ? [] : info.Responses[^1].EndNotesAndStartIfResponseEmpty());
 
         var removeNotes = new List<Action>();

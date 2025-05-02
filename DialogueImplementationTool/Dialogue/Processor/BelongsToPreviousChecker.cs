@@ -5,7 +5,7 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed partial class BelongsToPreviousChecker : IDialogueTopicProcessor {
     [GeneratedRegex("belongs to previous( line)?", RegexOptions.IgnoreCase)]
-    private static partial Regex PreviousRegex();
+    private static partial Regex PreviousRegex { get; }
 
     public void Process(DialogueTopic topic) {
         var i = 1;
@@ -14,7 +14,7 @@ public sealed partial class BelongsToPreviousChecker : IDialogueTopicProcessor {
             if (topicInfo.Responses.Count == 0) continue;
 
             // Check if start note has a belongs to previous tag
-            var previousNote = topicInfo.Responses[0].StartNotes.FirstOrDefault(n => PreviousRegex().IsMatch((string) n.Text));
+            var previousNote = topicInfo.Responses[0].StartNotes.FirstOrDefault(n => PreviousRegex.IsMatch((string) n.Text));
             if (previousNote is null) {
                 i++;
                 continue;

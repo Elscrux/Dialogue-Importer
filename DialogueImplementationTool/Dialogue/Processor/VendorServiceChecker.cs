@@ -5,10 +5,10 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 
 public partial class VendorServiceChecker : IConversationProcessor {
     [GeneratedRegex(@"What do you have for sale\?|What have you got for sale\?|I'd like some food and drink\.|Show me what you have for sale\.|Show me what you've got for sale\.")]
-    public static partial Regex VendorRegex();
+    public static partial Regex VendorRegex { get; }
 
     [GeneratedRegex("vendor|shop")]
-    public static partial Regex VendorNoteRegex();
+    public static partial Regex VendorNoteRegex { get; }
 
     public void Process(Conversation conversation) {
         foreach (var dialogue in conversation) {
@@ -20,13 +20,13 @@ public partial class VendorServiceChecker : IConversationProcessor {
 
     public void Process(DialogueTopic topic) {
         if (topic.TopicInfos.Count == 0) return;
-        if (!VendorRegex().IsMatch(topic.GetPlayerText())) return;
+        if (!VendorRegex.IsMatch(topic.GetPlayerText())) return;
 
         topic.ConvertResponsesToTopicInfos();
         topic.ServiceType = ServiceType.Vendor;
         foreach (var topicInfo in topic.TopicInfos) {
             foreach (var response in topicInfo.Responses) {
-                response.RemoveNote(note => VendorNoteRegex().IsMatch(note));
+                response.RemoveNote(note => VendorNoteRegex.IsMatch(note));
             }
 
             topicInfo.Prompt.Text = "";

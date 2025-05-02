@@ -9,10 +9,10 @@ public static partial class TimeConditionConverter {
     private const string HourPattern = @"\b(\d{1,2})(?::(\d{2}))?\b";
 
     [GeneratedRegex(@$"{HourPattern}[^\d]*{HourPattern}")]
-    private static partial Regex TimeRegex();
+    private static partial Regex TimeRegex { get; }
 
     public static IEnumerable<Condition> Convert(string time) {
-        var match = TimeRegex().Match(time);
+        var match = TimeRegex.Match(time);
         if (!match.Success) yield break;
 
         if (!int.TryParse(match.Groups[1].Value, out var startHour)

@@ -5,8 +5,8 @@ public static partial class NoteUtils {
     private const string NotePattern = @"\[+([^\]]*)\]+";
 
     [GeneratedRegex(@$"^\s*{NotePattern}")]
-    public static partial Regex StartNoteRegex();
+    public static partial Regex StartNoteRegex { get; }
 
     [GeneratedRegex(@$"{NotePattern}\s*$")]
-    public static partial Regex EndNoteRegex();
+    public static partial Regex EndNoteRegex { get; }
 }

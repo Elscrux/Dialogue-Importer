@@ -7,12 +7,12 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed partial class TalkedToChecker(IDialogueContext context) : IDialogueTopicInfoProcessor {
     [GeneratedRegex("(?:PC|player )?\b(?:met|spoken|talked)\b(?:to )?(.+)")]
-    private static partial Regex TalkedToRegex();
+    private static partial Regex TalkedToRegex { get; }
 
     public void Process(DialogueTopicInfo topicInfo) {
         foreach (var response in topicInfo.Responses) {
             foreach (var note in response.Notes()) {
-                var match = TalkedToRegex().Match(note.Text);
+                var match = TalkedToRegex.Match(note.Text);
                 if (!match.Success) continue;
 
                 var npc = context.SelectRecord<Npc, INpcGetter>(match.Groups[1].Value);

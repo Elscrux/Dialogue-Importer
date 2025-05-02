@@ -30,7 +30,7 @@ public sealed partial class PythonEmotionClassifierProvider : ReactiveObject, IE
     }
 
     [GeneratedRegex(@"python(\d+)\.dll")]
-    private static partial Regex PythonDllRegex();
+    private static partial Regex PythonDllRegex { get; }
 
     private void TrySetPythonFromEnv() {
         var paths = Environment.GetEnvironmentVariable("PATH");
@@ -43,7 +43,7 @@ public sealed partial class PythonEmotionClassifierProvider : ReactiveObject, IE
             var filePath = Directory
                 .EnumerateFiles(path, "python3*.dll", SearchOption.TopDirectoryOnly)
                 .Where(x => {
-                    var match = PythonDllRegex().Match(x);
+                    var match = PythonDllRegex.Match(x);
                     if (!match.Success) return false;
 
                     var version = match.Groups[1].Value;

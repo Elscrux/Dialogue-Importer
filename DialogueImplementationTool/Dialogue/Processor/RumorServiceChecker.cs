@@ -4,7 +4,7 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 
 public partial class RumorServiceChecker : IConversationProcessor {
     [GeneratedRegex(@"Heard any (good )?rumors lately\?")]
-    public static partial Regex RumorRegex();
+    public static partial Regex RumorRegex { get; }
 
     public void Process(Conversation conversation) {
         foreach (var dialogue in conversation) {
@@ -16,7 +16,7 @@ public partial class RumorServiceChecker : IConversationProcessor {
 
     public void Process(DialogueTopic topic) {
         if (topic.TopicInfos.Count == 0) return;
-        if (!RumorRegex().IsMatch(topic.GetPlayerText())) return;
+        if (!RumorRegex.IsMatch(topic.GetPlayerText())) return;
 
         topic.ConvertResponsesToTopicInfos();
         topic.ServiceType = ServiceType.Rumor;

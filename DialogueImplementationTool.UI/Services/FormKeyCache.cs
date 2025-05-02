@@ -15,13 +15,13 @@ public partial class FormKeyCache {
     private readonly Dictionary<string, Dictionary<string, FormKey>> _cache;
 
     [GeneratedRegex("[\\/:*?\"<>|]")]
-    private static partial Regex IllegalFileNameRegex();
+    private static partial Regex IllegalFileNameRegex { get; }
 
     private string SelectionsPath =>
         Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "Selections",
-            IllegalFileNameRegex().Replace(_contextHash + ".formkeyselections", string.Empty));
+            IllegalFileNameRegex.Replace(_contextHash + ".formkeyselections", string.Empty));
 
     private readonly JsonSerializerSettings _serializerSettings = new() {
         Formatting = Formatting.Indented,

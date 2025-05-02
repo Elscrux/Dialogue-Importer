@@ -6,12 +6,12 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed partial class OffersServicesChecker : IDialogueTopicInfoProcessor {
     [GeneratedRegex("(?:if|when|is) (?:at|in|inside) (?:.* )?(?:store|stall)", RegexOptions.IgnoreCase)]
-    private static partial Regex OffersServicesRegex();
+    private static partial Regex OffersServicesRegex { get; }
 
     public void Process(DialogueTopicInfo topicInfo) {
         foreach (var response in topicInfo.Responses) {
             var notes = response.Notes()
-                .Where(x => OffersServicesRegex().IsMatch(x.Text))
+                .Where(x => OffersServicesRegex.IsMatch(x.Text))
                 .ToList();
 
             if (notes.Count == 0) continue;

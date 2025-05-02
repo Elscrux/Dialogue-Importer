@@ -9,9 +9,9 @@ public partial interface ISpeaker {
     string NameNoSpaces { get; }
 
     static string GetSpeakerName(string name) {
-        return ReplaceRegex().Replace(name, string.Empty);
+        return ReplaceRegex.Replace(name, string.Empty);
     }
 
     [GeneratedRegex(@"[\s-+|']")]
-    private static partial Regex ReplaceRegex();
+    private static partial Regex ReplaceRegex { get; }
 }
