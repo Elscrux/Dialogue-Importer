@@ -5,7 +5,7 @@ using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public partial class BeggarServiceChecker : IConversationProcessor {
-    [GeneratedRegex(@"Have a coin, beggar\.")]
+    [GeneratedRegex(@"Have a coin, beggar\.|Here, have a gold piece\. \(1 gold\)")]
     public static partial Regex BeggarRegex();
 
     public void Process(Conversation conversation) {
