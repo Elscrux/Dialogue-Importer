@@ -8,7 +8,7 @@
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance viewModels:DocumentVM}"
-             d:DesignHeight="100" d:DesignWidth="500">
+             d:DesignHeight="100" d:DesignWidth="750">
     <Grid Height="20">
         <Grid.Resources>
             <converters:DocumentStatusToVisibilityConverter x:Key="DocumentStatusToVisibilityConverter"/>
@@ -75,6 +75,13 @@
                   Converter={StaticResource DocumentStatusToVisibilityConverter},
                   ConverterParameter={x:Static viewModels:DocumentStatus.Implemented}}"/>
 
+            <Button
+                Command="{Binding Open}"
+                Content="Open"
+                Margin="5,0"
+                Padding="5,0"
+                Background="BlueViolet"
+                VerticalAlignment="Stretch"/>
             <Button Command="{Binding Delete}"
                     Margin="5,0">
                 <iconPacks:PackIconBoxIcons

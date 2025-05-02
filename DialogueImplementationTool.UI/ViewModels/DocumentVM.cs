@@ -1,4 +1,5 @@
-﻿using System.Reactive;
+﻿using System.Diagnostics;
+using System.Reactive;
 using DialogueImplementationTool.Dialogue;
 using DialogueImplementationTool.Dialogue.Processor;
 using DialogueImplementationTool.Extension;
@@ -30,6 +31,7 @@ public sealed class DocumentVM : ViewModel {
     public ReactiveCommand<Unit, Unit> AutoParse { get; }
     public ReactiveCommand<Unit, Unit> ManualParse { get; }
     public ReactiveCommand<Unit, Unit> Delete { get; }
+    public ReactiveCommand<Unit, Unit> Open { get; }
 
     public DocumentVM(
         IDocumentParser documentParser,
@@ -55,6 +57,7 @@ public sealed class DocumentVM : ViewModel {
         AutoParse = ReactiveCommand.Create(ImplementDialogue);
         ManualParse = ReactiveCommand.Create(LaunchParserConfig);
         Delete = ReactiveCommand.Create(DeleteDocument);
+        Open = ReactiveCommand.Create(OpenDocument);
     }
 
     public void ImplementDialogue() {
@@ -131,6 +134,15 @@ public sealed class DocumentVM : ViewModel {
     }
 
     public void DeleteDocument() => _deleteDocument(this);
+    private void OpenDocument() {
+        using var process = new Process();
+        process.StartInfo = new ProcessStartInfo {
+            FileName = $"\"{_documentParser.FilePath}\"",
+            UseShellExecute = true,
+            Verb = "open",
+        };
+        process.Start();
+    }
 }
 
 public enum DocumentStatus {
