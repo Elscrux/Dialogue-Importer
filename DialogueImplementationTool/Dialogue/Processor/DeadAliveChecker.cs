@@ -7,10 +7,13 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed partial class DeadAliveChecker(IDialogueContext context) : IDialogueTopicProcessor {
     [GeneratedRegex("(?:if )?(.+) is (?:still )?alive")]
-    private static partial Regex AliveRegex();
+    private static partial Regex AliveRegex { get; }
 
     [GeneratedRegex("(?:if )?(.+) is dead")]
-    private static partial Regex DeadRegex();
+    private static partial Regex DeadRegex { get; }
+
+    [GeneratedRegex("and|or|not", RegexOptions.IgnoreCase)]
+    private static partial Regex ComplexCondition { get; }
 
     public void Process(DialogueTopic topic) {
         for (var topicInfoIndex = 0; topicInfoIndex < topic.TopicInfos.Count; topicInfoIndex++) {
@@ -18,12 +21,14 @@ public sealed partial class DeadAliveChecker(IDialogueContext context) : IDialog
 
             // Handle prompt notes
             foreach (var note in topicInfo.Prompt.Notes()) {
-                var aliveMatch = AliveRegex().Match(note.Text);
+                if (ComplexCondition.IsMatch(note.Text)) continue;
+
+                var aliveMatch = AliveRegex.Match(note.Text);
                 Condition condition;
                 if (aliveMatch.Success) {
                     condition = GetCondition(aliveMatch, CompareOperator.EqualTo, 0);
                 } else {
-                    var deadMatch = DeadRegex().Match(note.Text);
+                    var deadMatch = DeadRegex.Match(note.Text);
                     if (!deadMatch.Success) continue;
 
                     condition = GetCondition(deadMatch, CompareOperator.GreaterThanOrEqualTo, 1);
@@ -43,13 +48,15 @@ public sealed partial class DeadAliveChecker(IDialogueContext context) : IDialog
                 var conditions = new List<Condition>();
                 var notes = responseNotes
                     .Where(note => {
-                        var aliveMatch = AliveRegex().Match(note.Text);
+                        if (ComplexCondition.IsMatch(note.Text)) return false;
+
+                        var aliveMatch = AliveRegex.Match(note.Text);
                         if (aliveMatch.Success) {
                             conditions.Add(GetCondition(aliveMatch, CompareOperator.EqualTo, 0));
                             return true;
                         }
 
-                        var deadMatch = DeadRegex().Match(note.Text);
+                        var deadMatch = DeadRegex.Match(note.Text);
                         if (deadMatch.Success) {
                             conditions.Add(GetCondition(deadMatch, CompareOperator.GreaterThanOrEqualTo, 1));
                             return true;
