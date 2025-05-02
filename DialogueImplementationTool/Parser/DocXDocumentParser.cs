@@ -253,7 +253,7 @@ public sealed class DocXDocumentParser
         var nonBold = 0;
         var bold = 0;
         foreach (var magicText in paragraph.MagicText) {
-            if (magicText.formatting.Bold is true) {
+            if (magicText.formatting?.Bold is true) {
                 bold += magicText.text.Length;
             } else {
                 nonBold += magicText.text.Length;
