@@ -285,7 +285,7 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
                 var dialogueTopic = new DialogueTopic {
                     TopicInfos = [
                         new DialogueTopicInfo {
-                            Speaker = new AliasSpeaker(FormLinkInformation.Null, string.Empty),
+                            Speaker = new AliasSpeaker(new FormLinkInformation(FormKey.Null, typeof(INpcGetter)), string.Empty),
                             Prompt = currentSpeaker,
                             Responses = currentLines.ToList(),
                         },

@@ -2,6 +2,7 @@
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Dialogue.Speaker;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue;
 
 public sealed class GenericDialogueFactory(IDialogueContext context) : BaseDialogueFactory(context) {
@@ -12,7 +13,7 @@ public sealed class GenericDialogueFactory(IDialogueContext context) : BaseDialo
                 var dialogTopicFactory = GenericMetaData.GetGenericDialogTopicFactory(topicInfo.MetaData);
                 var quest = questFactory.Create();
                 var dialogTopic = dialogTopicFactory.Create(quest, topicInfo);
-                topicInfo.Speaker ??= new NpcSpeaker(Context.LinkCache, FormLinkInformation.Null);
+                topicInfo.Speaker ??= new NpcSpeaker(Context.LinkCache, new FormLinkInformation(FormKey.Null, typeof(INpcGetter)));
                 var dialogTopicInfo = GetResponses(quest, topicInfo);
                 dialogTopic.Responses.Add(dialogTopicInfo);
                 var postProcessor = GenericMetaData.GetPostProcessor(topicInfo.MetaData);

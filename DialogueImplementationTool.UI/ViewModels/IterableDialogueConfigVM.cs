@@ -55,7 +55,7 @@ public sealed class IterableDialogueConfigVM : ViewModel {
     ];
 
     [Reactive] public FormKey SpeakerFormKey { get; set; }
-    [Reactive] public IFormLinkGetter SpeakerLink { get; set; } = FormLinkInformation.Null;
+    [Reactive] public IFormLinkGetter SpeakerLink { get; set; } = new FormLinkInformation(FormKey.Null, typeof(INpcGetter));
     [Reactive] public bool ValidSpeaker { get; set; }
 
     public ICommand SetSpeaker { get; }
@@ -217,7 +217,7 @@ public sealed class IterableDialogueConfigVM : ViewModel {
                 ValidSpeaker = SpeakerFormKey.IsNull is false;
 
                 if (speaker.IsNull) {
-                    SpeakerLink = FormLinkInformation.Null;
+                    SpeakerLink = new FormLinkInformation(FormKey.Null, typeof(INpcGetter));
                     HasNpcSelected = false;
                 } else {
                     var speakerType = GetSpeakerType(speaker);
