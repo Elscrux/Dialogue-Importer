@@ -101,8 +101,8 @@ public sealed class DialogueProcessor : IDialogueProcessor {
 
         ConversationProcessors = [
             new BackToOptionsLinker(),
+            new CollapseNoteOnlyResponse(), // Needs to be before KeywordLinker
             new KeywordLinker(),
-            new CollapseNoteOnlyResponse(),
             new SameResponseChecker(),
             new SharedInfoConverter(),
             new CollapseEmptyInvisibleContinues(),
