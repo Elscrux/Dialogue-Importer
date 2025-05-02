@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Extension;
@@ -24,7 +26,6 @@ public sealed partial class KeywordLinker : IConversationProcessor {
 
     public void Process(Conversation conversation) {
         ProcessKeywordLinks(conversation);
-        // todo support links to the middle of dialogue (create shared infos and so on)
         ProcessOptionLinks(conversation);
     }
 
@@ -59,13 +60,15 @@ public sealed partial class KeywordLinker : IConversationProcessor {
     private static void ProcessKeywordLinks(Conversation conversation) {
         var keywordDestination = conversation.GetKeywordTopicInfoDictionary(
             SimpleKeywordRegex(),
-            info => info.Responses.Count == 0 ? [] : info.Responses[0].StartNotes);
+            info => info.Responses.Count == 0 ? [] : info.Responses.SelectMany(x => x.StartNotes));
         var promptKeywordLinks = conversation.GetAllKeywordTopicInfos(
             LinkSimpleRegex(),
             info => info.Prompt.EndNotesAndStartIfResponseEmpty());
         var responseKeywordLinks = conversation.GetAllKeywordTopicInfos(
             LinkSimpleRegex(),
             info => info.Responses.Count == 0 ? [] : info.Responses[^1].EndNotesAndStartIfResponseEmpty());
+
+        var removeNotes = new List<Action>();
 
         foreach (var (note, keyword, _, linkTopicInfo) in promptKeywordLinks) {
             PerformLinking(linkTopicInfo,
@@ -82,6 +85,10 @@ public sealed partial class KeywordLinker : IConversationProcessor {
                 });
         }
 
+        foreach (var removeNote in removeNotes) {
+            removeNote();
+        }
+
         void PerformLinking(DialogueTopicInfo linkTopicInfo, string keyword, Action<DialogueTopicInfo> removeNote) {
             if (linkTopicInfo.Links.Count > 0) {
                 Console.WriteLine($"Keyword {keyword} already has links in dialogue {linkTopicInfo.Prompt.FullText}");
@@ -93,12 +100,34 @@ public sealed partial class KeywordLinker : IConversationProcessor {
                 return;
             }
 
-            destination.TopicInfo.Responses[0].RemoveNote(x => x == keyword);
-            destination.TopicInfo.RemoveRedundantResponses();
-            removeNote(linkTopicInfo);
+            var response = destination.TopicInfo.Responses.First(r => r.HasNote(x => x == keyword));
+            removeNotes.Add(() => {
+                response.RemoveNote(destination.Note);
+                destination.TopicInfo.RemoveRedundantResponses();
+                removeNote(linkTopicInfo);
+            });
 
-            linkTopicInfo.Links.Add(destination.Topic);
-            linkTopicInfo.InvisibleContinue = true;
+            var responseIndex = destination.TopicInfo.Responses.IndexOf(response);
+
+            if (responseIndex == 0) {
+                // Can link to topic info directly
+                linkTopicInfo.Links.Add(destination.Topic);
+                linkTopicInfo.InvisibleContinue = true;
+            } else {
+                // Need to split topic info to add link
+                var responsesStartingAtIndex = destination.TopicInfo.Responses
+                    .Skip(responseIndex)
+                    .ToList();
+                var splitOffTopicInfo = new DialogueTopicInfo {
+                    Speaker = linkTopicInfo.Speaker,
+                    Responses = responsesStartingAtIndex,
+                };
+                var (topic, _) = destination.TopicInfo.SplitOffDialogue(splitOffTopicInfo);
+                if (topic is null) return;
+
+                linkTopicInfo.Links.Add(topic);
+                linkTopicInfo.InvisibleContinue = true;
+            }
         }
     }
 }
