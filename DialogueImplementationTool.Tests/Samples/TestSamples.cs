@@ -22,7 +22,7 @@ public static class TestSamples {
     }
 
     public static GeneratedDialogue GetBrinaCrossScenes(TestConstants testConstants, int scene) {
-        testConstants.SpeakerSelection = new InjectedSpeakerSelection(new Dictionary<string, AliasSpeaker> {
+        testConstants.SpeakerSelection = new InjectedSpeakerSelection(new Dictionary<string, ISpeaker> {
             { "Ornev", new AliasSpeaker(testConstants.Speaker1.FormLink, "Ornev") },
             { "Astav", new AliasSpeaker(testConstants.Speaker2.FormLink, "Astav") },
         });
@@ -35,7 +35,7 @@ public static class TestSamples {
 
     public static (GeneratedDialogue Scene1, GeneratedDialogue Scene2)
         GetOldwallScenes(TestConstants testConstants) {
-        testConstants.SpeakerSelection = new InjectedSpeakerSelection(new Dictionary<string, AliasSpeaker> {
+        testConstants.SpeakerSelection = new InjectedSpeakerSelection(new Dictionary<string, ISpeaker> {
             { "Jastara", new AliasSpeaker(testConstants.Speaker1.FormLink, "Jastara") },
             { "Godehard", new AliasSpeaker(testConstants.Speaker2.FormLink, "Godehard") },
         });

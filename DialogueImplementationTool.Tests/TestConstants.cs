@@ -18,9 +18,12 @@ public sealed class TestConstants {
             .WithOutputMod(Mod)
             .Build();
 
-        Speaker1 = new NpcSpeaker(LinkCache, new FormLinkInformation(FormKey.Factory("111111:TestMod.esp"), typeof(INpcGetter)));
-        Speaker2 = new NpcSpeaker(LinkCache, new FormLinkInformation(FormKey.Factory("222222:TestMod.esp"), typeof(INpcGetter)));
-        Speaker3 = new NpcSpeaker(LinkCache, new FormLinkInformation(FormKey.Factory("333333:TestMod.esp"), typeof(INpcGetter)));
+        Speaker1 = new NpcSpeaker(LinkCache,
+            new FormLinkInformation(FormKey.Factory("111111:TestMod.esp"), typeof(INpcGetter)));
+        Speaker2 = new NpcSpeaker(LinkCache,
+            new FormLinkInformation(FormKey.Factory("222222:TestMod.esp"), typeof(INpcGetter)));
+        Speaker3 = new NpcSpeaker(LinkCache,
+            new FormLinkInformation(FormKey.Factory("333333:TestMod.esp"), typeof(INpcGetter)));
 
         Quest = new Quest(FormKey.Factory("999999:TestMod.esp"), Release) { EditorID = "TestQuest" };
 
@@ -36,11 +39,9 @@ public sealed class TestConstants {
 
     public ILinkCache<ISkyrimMod, ISkyrimModGetter> LinkCache => Environment.LinkCache;
 
-    public ISpeakerSelection SpeakerSelection { get; set; } =
-        new InjectedSpeakerSelection(new Dictionary<string, AliasSpeaker>());
+    public ISpeakerSelection SpeakerSelection { get; set; } = new InjectedSpeakerSelection(new Dictionary<string, ISpeaker>());
 
-    public IFormKeySelection FormKeySelection { get; set; } =
-        new InjectedFormKeySelection();
+    public IFormKeySelection FormKeySelection { get; set; } = new InjectedFormKeySelection();
 
     public SkyrimDialogueContext SkyrimDialogueContext => new(
         string.Empty,

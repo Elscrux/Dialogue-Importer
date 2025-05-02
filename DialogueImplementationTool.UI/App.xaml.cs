@@ -66,6 +66,10 @@ public partial class App {
             .As<IFormKeySelection>()
             .SingleInstance();
 
+        builder.RegisterType<AutomaticSpeakerSelection>()
+            .AsSelf()
+            .As<ISpeakerSelection>();
+
         builder.RegisterType<SpeakerFavoritesSelection>()
             .As<ISpeakerFavoritesSelection>();
 

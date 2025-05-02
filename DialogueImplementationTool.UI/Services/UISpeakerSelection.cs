@@ -23,7 +23,7 @@ public sealed partial class UISpeakerSelection(
     private Dictionary<string, Dictionary<string, AliasSelectionDto>>? _savedSceneSelections;
     private readonly AutomaticSpeakerSelection _automaticSpeakerSelection = new(linkCache, speakerFavoritesSelection);
 
-    public IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IReadOnlyList<string> speakerNames) {
+    public IReadOnlyList<T> GetSpeakers<T>(IReadOnlyList<string> speakerNames) where T : class, ISpeaker {
         var speakers = new ObservableCollection<AliasSpeakerSelection>(speakerNames
             .Select(s => new AliasSpeakerSelection(linkCache, speakerFavoritesSelection, s))
             .ToList());
@@ -31,12 +31,12 @@ public sealed partial class UISpeakerSelection(
         // Try load from file
         if (LoadSpeakers()) {
             return speakers
-                .Select(x => new AliasSpeaker(x.FormLink, x.Name, editorId: x.EditorID))
+                .Select(x => ISpeakerSelection.CreateSpeaker<T>(linkCache, x.FormLink, x.Name, editorId: x.EditorID))
                 .ToList();
         }
 
         // Try set automatically
-        var automaticSpeakers = _automaticSpeakerSelection.GetAliasSpeakers(speakerNames);
+        var automaticSpeakers = _automaticSpeakerSelection.GetSpeakers<AliasSpeaker>(speakerNames);
         foreach (var automaticSpeaker in automaticSpeakers) {
             var speaker = speakers.FirstOrDefault(s => s.Name == automaticSpeaker.Name);
             if (speaker is null) continue;
@@ -55,7 +55,7 @@ public sealed partial class UISpeakerSelection(
         SaveSpeakers(speakers);
 
         return speakers
-            .Select(x => new AliasSpeaker(x.FormLink, x.Name, editorId: x.EditorID))
+            .Select(x => ISpeakerSelection.CreateSpeaker<T>(linkCache, x.FormLink, x.Name, editorId: x.EditorID))
             .ToList();
 
         bool LoadSpeakers() {

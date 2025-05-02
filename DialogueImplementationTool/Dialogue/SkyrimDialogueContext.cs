@@ -148,11 +148,11 @@ public sealed class SkyrimDialogueContext(
 
     public IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IReadOnlyList<string> speakerNames) {
         if (AutoApplyProvider.AutoApply) {
-            var automaticSpeakers = _automaticSpeakerSelection.GetAliasSpeakers(speakerNames);
+            var automaticSpeakers = _automaticSpeakerSelection.GetSpeakers<AliasSpeaker>(speakerNames);
             if (automaticSpeakers.Count == speakerNames.Count) return automaticSpeakers;
         }
 
-        return speakerSelection.GetAliasSpeakers(speakerNames);
+        return speakerSelection.GetSpeakers<AliasSpeaker>(speakerNames);
     }
 
     public IFormLink<IQuestGetter> GetFavorDialogueQuest() {

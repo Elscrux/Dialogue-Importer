@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using DialogueImplementationTool.Dialogue.Speaker;
 using Mutagen.Bethesda;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Services;
@@ -10,8 +11,13 @@ public sealed class AutomaticSpeakerSelection(
     ILinkCache linkCache,
     ISpeakerFavoritesSelection speakerFavoritesSelection)
     : ISpeakerSelection {
-    public IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IReadOnlyList<string> speakerNames) {
-        var aliasSpeakers = new List<AliasSpeaker>();
+    public IReadOnlyList<T> GetSpeakers<T>(IReadOnlyList<string> speakerNames) where T : class, ISpeaker {
+        var aliasSpeakers = new List<T>();
+        
+        // Depending on type of T, switch constructor
+        Func<IFormLinkGetter, string, string?, T> createSpeaker = typeof(T) == typeof(AliasSpeaker)
+            ? (formLink, name, editorId) => (new AliasSpeaker(formLink, name, editorId: editorId) as T)!
+            : (formLink, _, _) => (new NpcSpeaker(linkCache, formLink) as T)!;
 
         foreach (var speakerName in speakerNames) {
             if (speakerName.Length < 3) continue;
@@ -21,8 +27,8 @@ public sealed class AutomaticSpeakerSelection(
             INpcGetter? currentNpc = null;
             foreach (var npc in linkCache.PriorityOrder.WinningOverrides<INpcGetter>()) {
                 if (npc.EditorID is null) continue;
-                if (!npc.EditorID.Contains(speakerName, StringComparison.Ordinal)
-                 && (npc.Name?.String is null || !npc.Name.String.Contains(speakerName, StringComparison.Ordinal))) continue;
+                if (!npc.EditorID.Contains(speakerName, StringComparison.OrdinalIgnoreCase)
+                 && (npc.Name?.String is null || !npc.Name.String.Contains(speakerName, StringComparison.OrdinalIgnoreCase))) continue;
 
                 count++;
                 if (count > 1) break;
@@ -31,12 +37,12 @@ public sealed class AutomaticSpeakerSelection(
             }
 
             if (count == 1 && currentNpc is not null) {
-                aliasSpeakers.Add(new AliasSpeaker(currentNpc.ToLinkGetter(), speakerName, editorId: currentNpc.EditorID));
+                aliasSpeakers.Add(createSpeaker(currentNpc.ToLinkGetter(), speakerName, currentNpc.EditorID));
             } else {
                 // Try to find the NPC in the speaker favorites
                 var closestSpeaker = speakerFavoritesSelection.GetClosestSpeaker(speakerName);
                 if (closestSpeaker is not null) {
-                    aliasSpeakers.Add(new AliasSpeaker(closestSpeaker.FormLink, speakerName, editorId: closestSpeaker.EditorID));
+                    aliasSpeakers.Add(createSpeaker(closestSpeaker.FormLink, speakerName, closestSpeaker.EditorID));
                 }
             }
         }
