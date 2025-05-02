@@ -1,9 +1,12 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
+using System.Text.RegularExpressions;
 using DialogueImplementationTool.Dialogue.Model;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
-public sealed class BackToOptionsLinker : IConversationProcessor {
+public sealed partial class BackToOptionsLinker : IConversationProcessor {
+    [GeneratedRegex("(?:return|back|go) to( dialog(ue)?)? options")]
+    private static partial Regex Regex { get; }
+
     public void Process(Conversation conversation) {
         foreach (var generatedDialogue in conversation) {
             // Just remove back to option links from base topic
@@ -25,8 +28,7 @@ public sealed class BackToOptionsLinker : IConversationProcessor {
     }
 
     private static bool RemoveBackToOptions(DialogueResponse response) =>
-        response.EndsNotes.RemoveAll(
-            note => note.Text.Equals("back to options", StringComparison.Ordinal)) > 0;
+        response.EndsNotes.RemoveAll(note => Regex.IsMatch(note.Text)) > 0;
 
     private static void AddBackToOptionsLink(DialogueTopic topic, DialogueTopicInfo incomingLink) {
         foreach (var topicInfo in topic.TopicInfos) {
