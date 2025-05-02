@@ -112,11 +112,6 @@ public sealed partial class KeywordLinker : IConversationProcessor {
                 throw new InvalidOperationException(
                     $"Keyword {keyword} does not have a response in dialogue {destination.TopicInfo.Prompt.FullText}");
             }
-            removeNotes.Add(() => {
-                response.RemoveNote(destination.Note);
-                destination.TopicInfo.RemoveRedundantResponses();
-                removeNote(linkTopicInfo);
-            });
 
             var responseIndex = destination.TopicInfo.Responses.IndexOf(response);
 
@@ -124,6 +119,12 @@ public sealed partial class KeywordLinker : IConversationProcessor {
                 // Can link to topic info directly
                 linkTopicInfo.Links.Add(destination.Topic);
                 linkTopicInfo.InvisibleContinue = true;
+
+                removeNotes.Add(() => {
+                    destination.TopicInfo.RemoveNote(destination.Note);
+                    destination.TopicInfo.RemoveRedundantResponses();
+                    removeNote(linkTopicInfo);
+                });
             } else {
                 // Need to split topic info to add link
                 var responsesStartingAtIndex = destination.TopicInfo.Responses
@@ -133,11 +134,17 @@ public sealed partial class KeywordLinker : IConversationProcessor {
                     Speaker = linkTopicInfo.Speaker,
                     Responses = responsesStartingAtIndex,
                 };
-                var (topic, _) = destination.TopicInfo.SplitOffDialogue(splitOffTopicInfo);
+                var (topic, topicInfo) = destination.TopicInfo.SplitOffDialogue(splitOffTopicInfo);
                 if (topic is null) return;
 
                 linkTopicInfo.Links.Add(topic);
                 linkTopicInfo.InvisibleContinue = true;
+
+                removeNotes.Add(() => {
+                    topicInfo.RemoveNote(destination.Note);
+                    topicInfo.RemoveRedundantResponses();
+                    removeNote(linkTopicInfo);
+                });
             }
         }
     }
