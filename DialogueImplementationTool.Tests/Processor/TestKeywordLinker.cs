@@ -27,7 +27,7 @@ public sealed class TestKeywordLinker {
 
         // Another link from the third link
         var thirdResponse = conversation[0].Topics[2].TopicInfos[0];
-        thirdResponse.Responses[0].FullResponse.Should().NotEndWith("[merge to DONE above]");
+        thirdResponse.Responses[0].FullResponse.Should().NotEndWith("[merge to DONE2 above]");
         thirdResponse.Links.Should().ContainSingle();
         thirdResponse.InvisibleContinue.Should().BeTrue();
     }
