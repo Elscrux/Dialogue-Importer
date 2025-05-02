@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 using System.Windows.Input;
 using DialogueImplementationTool.Dialogue;
 using DialogueImplementationTool.Dialogue.Speaker;
@@ -15,7 +16,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace DialogueImplementationTool.UI.ViewModels;
 
-public sealed class IterableDialogueConfigVM : ViewModel {
+public sealed partial class IterableDialogueConfigVM : ViewModel {
     private readonly IDocumentIterator _documentParser;
 
     public ISpeakerFavoritesSelection SpeakerFavoritesSelection { get; }
@@ -74,6 +75,7 @@ public sealed class IterableDialogueConfigVM : ViewModel {
     public IterableDialogueConfigVM(
         EnvironmentContext context,
         IDocumentIterator documentParser,
+        AutomaticSpeakerSelection automaticSpeakerSelection,
         ISpeakerFavoritesSelection speakerFavoritesSelection) {
         SpeakerFavoritesSelection = speakerFavoritesSelection;
         _documentParser = documentParser;
@@ -88,6 +90,9 @@ public sealed class IterableDialogueConfigVM : ViewModel {
         // Set up selections
         DialogueSelections.Clear();
         for (var i = 0; i <= _documentParser.LastIndex; i++) DialogueSelections.Add(new DialogueSelection());
+
+        // Try to parse initial speaker from document name
+        TrySetSpeaker(automaticSpeakerSelection);
 
         Task.Run(() => {
             foreach (var speakerType in SpeakerTypes) {
@@ -262,6 +267,21 @@ public sealed class IterableDialogueConfigVM : ViewModel {
                         DialogueSelections[Index].SelectedTypes.Remove(type);
                     }
                 });
+        }
+    }
+
+    [GeneratedRegex(@"\[[^\]]*\]|_s|'s|\([^\)]*\)|'s|standard dialogue|dialogue|dialog| - |_|\d+|\.|,", RegexOptions.IgnoreCase)]
+    private static partial Regex UnnecessaryDocumentNameParts { get; }
+
+    private void TrySetSpeaker(AutomaticSpeakerSelection automaticSpeakerSelection) {
+        var documentName = Path.GetFileNameWithoutExtension(_documentParser.FilePath);
+
+        // Cleanup document name
+        documentName = UnnecessaryDocumentNameParts.Replace(documentName, string.Empty).Trim();
+
+        var speakers = automaticSpeakerSelection.GetSpeakers<ISpeaker>([documentName]);
+        if (speakers.Count == 1) {
+            SpeakerFormKey = speakers[0].FormLink.FormKey;
         }
     }
 

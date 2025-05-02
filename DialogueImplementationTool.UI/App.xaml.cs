@@ -10,6 +10,7 @@ using DialogueImplementationTool.UI.Services;
 using DialogueImplementationTool.UI.ViewModels;
 using DialogueImplementationTool.UI.Views;
 using Mutagen.Bethesda;
+using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Order.DI;
 namespace DialogueImplementationTool.UI;
 
@@ -82,6 +83,10 @@ public partial class App {
 
         builder.RegisterType<EnvironmentContext>()
             .As<EnvironmentContext>()
+            .SingleInstance();
+
+        builder.Register(x => x.Resolve<EnvironmentContext>().Environment.LinkCache)
+            .As<ILinkCache>()
             .SingleInstance();
 
         var container = builder.Build();
