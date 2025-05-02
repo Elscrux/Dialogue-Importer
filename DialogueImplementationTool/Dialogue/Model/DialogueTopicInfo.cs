@@ -126,7 +126,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
         Links.Add(nextTopic);
     }
 
-    public DialogueTopicInfo SplitOffDialogue(DialogueTopicInfo splitOffTopicInfo) {
+    public (DialogueTopic? Topic, DialogueTopicInfo TopicInfo) SplitOffDialogue(DialogueTopicInfo splitOffTopicInfo) {
         var startingResponse = splitOffTopicInfo.Responses[0];
 
         //Search for topics that were nested behind invisible continues through shared dialogue
@@ -174,7 +174,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
                 currentInfo.Responses.RemoveRange(
                     splitOffTopicInfo.Responses.Count,
                     currentInfo.Responses.Count - splitOffTopicInfo.Responses.Count);
-                return currentInfo;
+                return (null, currentInfo);
             }
             default: {
                 // Split info is in the middle of the topic, either at the end or the middle
@@ -208,7 +208,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
 
                 // Get rid of all lines that aren't part of the base topic and are now part of the invisible continue or the next topic after that
                 currentInfo.Responses.RemoveRange(indexOf, currentInfo.Responses.Count - indexOf);
-                return invisibleContTopicInfo;
+                return (invisibleContTopic, invisibleContTopicInfo);
             }
         }
     }

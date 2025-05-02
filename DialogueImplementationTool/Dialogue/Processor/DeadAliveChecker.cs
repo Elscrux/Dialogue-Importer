@@ -66,7 +66,7 @@ public sealed partial class DeadAliveChecker(IDialogueContext context) : IDialog
                     Speaker = topicInfo.Speaker,
                     Responses = [response],
                 };
-                var newTopicInfo = topicInfo.SplitOffDialogue(splitOffTopicInfo);
+                var (_, newTopicInfo) = topicInfo.SplitOffDialogue(splitOffTopicInfo);
 
                 // Add lower priority empty topic info that skips ahead in case the condition is not met
                 // Add empty topic to current list if the end was split off, otherwise add it to the split off topic
