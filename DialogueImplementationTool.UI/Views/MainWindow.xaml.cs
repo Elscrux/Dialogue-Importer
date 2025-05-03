@@ -8,7 +8,7 @@ using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 namespace DialogueImplementationTool.UI.Views;
 
 public partial class MainWindow {
-    private readonly MainWindowVM _vm;
+     private readonly MainWindowVM _vm = null!;
 
     public MainWindow() {
         InitializeComponent();
