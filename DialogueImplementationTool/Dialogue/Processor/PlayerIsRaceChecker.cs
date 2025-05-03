@@ -24,7 +24,7 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicProcessor {
         $"{ArgonianRegexPart}|{AltmerRegexPart}|{BosmerRegexPart}|{BretonRegexPart}|{DunmerRegexPart}"
       + $"|{ImperialRegexPart}|{KhajiitRegexPart}|{NordRegexPart}|{OrcRegexPart}|{RedguardRegexPart}";
 
-    [GeneratedRegex($"(?:[Pp]layer|PC).+(?:{MergedRacesRegexPart})")]
+    [GeneratedRegex($"(?:if )?(?:[Pp]layer|PC)?\b.+\b(?:{MergedRacesRegexPart})")]
     private static partial Regex IsRaceRegex { get; }
 
     [GeneratedRegex(@"\bnot\b", RegexOptions.IgnoreCase)]
