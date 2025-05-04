@@ -13,6 +13,14 @@ public sealed class SceneProcessor(IDialogueContext context) : DialogueTypeProce
         var voiceType = GenericMetaData.GetVoiceType(topicInfo.MetaData);
 
         switch (description) {
+            case "Player enters NPC home":
+                GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData, new WIHouseQuestFactory(context, voiceType));
+                GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new SceneWithOneDialogTopicFactory(context, 1));
+                yield return new GetIsVoiceTypeConditionData {
+                    VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
+                }.ToConditionFloat();
+
+                break;
             case "Player enters NPC home with weapon drawn":
                 GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData, new WIHouseQuestFactory(context, voiceType));
                 GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new SceneWithOneDialogTopicFactory(context, 1));
