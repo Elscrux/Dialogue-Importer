@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Extension;
+using Mutagen.Bethesda.FormKeys.SkyrimSE;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
@@ -18,6 +19,10 @@ public sealed class SceneProcessor(IDialogueContext context) : DialogueTypeProce
                 yield return new GetIsVoiceTypeConditionData {
                     VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
                 }.ToConditionFloat();
+                yield return new IsWeaponOutConditionData {
+                    RunOnType = Condition.RunOnType.Reference,
+                    Reference = Skyrim.PlayerRef,
+                }.ToConditionFloat(comparisonValue: 2);
 
                 break;
             case "Player drops an item (comment about littering)":
