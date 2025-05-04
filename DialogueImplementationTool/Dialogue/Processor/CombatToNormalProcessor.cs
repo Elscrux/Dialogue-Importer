@@ -38,8 +38,8 @@ public sealed class CombatToNormalProcessor : DialogueTypeProcessor {
             case "Player was enemy and died":
                 yield return new GetPlayerTeammateConditionData().ToConditionFloat(comparisonValue: 0);
                 yield return new GetDeadConditionData {
-                    RunOnType = Condition.RunOnType.Subject,
-                    Reference = Skyrim.PlayerRef
+                    RunOnType = Condition.RunOnType.Reference,
+                    Reference = Skyrim.PlayerRef,
                 }.ToConditionFloat();
 
                 break;
