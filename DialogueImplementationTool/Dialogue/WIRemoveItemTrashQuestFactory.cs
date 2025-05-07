@@ -31,7 +31,7 @@ public sealed class WIRemoveItemTrashQuestFactory(IDialogueContext context, IVoi
                 return new Quest(questFormKey, context.Release) {
                     EditorID = Name,
                     Name = "Just throw trash",
-                    Priority = 30,
+                    Priority = 40,
                     Filter = @"World Interactions\Remove Item\",
                     Event = RecordTypes.REMP,
                     DialogConditions = [],

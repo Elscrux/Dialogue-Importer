@@ -20,7 +20,7 @@ public sealed class WIHouseQuestFactory(IDialogueContext context, IVoiceTypeOrLi
                 return new Quest(questFormKey, context.Release) {
                     EditorID = Name,
                     Name = "House Interactions",
-                    Priority = 30,
+                    Priority = 40,
                     Filter = @"World Interactions\House\",
                     Event = RecordTypes.CLOC,
                     EventConditions = [

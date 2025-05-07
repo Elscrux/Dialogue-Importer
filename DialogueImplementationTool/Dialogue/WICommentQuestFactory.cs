@@ -21,7 +21,7 @@ public sealed class WICommentQuestFactory(
             Name,
             () => new Quest(context.GetNextFormKey(), context.Release) {
                 EditorID = Name,
-                Priority = 30,
+                Priority = 40,
                 Filter = @"World Interactions\Comment\",
                 DialogConditions = [
                     ..extraConditions,

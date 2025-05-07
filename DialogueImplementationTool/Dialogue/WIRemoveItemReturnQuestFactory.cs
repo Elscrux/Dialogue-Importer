@@ -61,7 +61,7 @@ public sealed class WIRemoveItemReturnQuestFactory(IDialogueContext context, IVo
                 return new Quest(questFormKey, context.Release) {
                     EditorID = Name,
                     Name = "Accidentally dropped this",
-                    Priority = 30,
+                    Priority = 40,
                     Filter = @"World Interactions\Remove Item\",
                     Event = RecordTypes.REMP,
                     EventConditions = [

@@ -12,7 +12,7 @@ public sealed class VoiceTypeGenericDialogueQuestFactory(IDialogueContext contex
             Name,
             () => new Quest(context.GetNextFormKey(), context.Release) {
                 EditorID = Name,
-                Priority = 30,
+                Priority = 0,
                 Filter = context.Quest.Filter,
                 DialogConditions = [
                     new IsCommandedActorConditionData().ToConditionFloat(comparisonValue: 0, or: true),

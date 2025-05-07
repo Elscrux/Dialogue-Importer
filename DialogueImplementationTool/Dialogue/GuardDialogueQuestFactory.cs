@@ -13,7 +13,7 @@ public sealed class GuardDialogueQuestFactory(IDialogueContext context) : IGener
             Name,
             () => new Quest(context.GetNextFormKey(), context.Release) {
                 EditorID = Name,
-                Priority = 30,
+                Priority = 0,
                 Filter = context.Quest.Filter,
                 DialogConditions = [
                     new IsGuardConditionData().ToConditionFloat(),
