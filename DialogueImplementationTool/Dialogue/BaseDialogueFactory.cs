@@ -114,7 +114,7 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
             Context.Issues.Add($"{topicInfo.Speaker.NameNoSpaces}: Response \"{response.FullResponse}\" has notes.");
         }
         foreach (var note in topicInfo.Prompt.Notes().Concat(topicInfo.Responses.SelectMany(r => r.Notes()))) {
-            Context.Issues.Add($"Note: {note.Text} ({string.Join(", ", note.Colors)})");
+            Context.Issues.Add($"Note: {note.Text}");
         }
 
         return responses;
