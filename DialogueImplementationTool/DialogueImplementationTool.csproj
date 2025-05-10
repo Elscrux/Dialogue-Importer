@@ -73,7 +73,7 @@
         <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\EmotionChecker.cs">
-        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+        <DependentUpon>IConversationProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\GoodbyeChecker.cs">
         <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
@@ -148,7 +148,7 @@
         <DependentUpon>IConversationProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\TopicInfoNoteExtractor.cs">
-        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+        <DependentUpon>IDialogueTopicProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Services\NullEmotionClassifier.cs">
         <DependentUpon>IEmotionClassifier.cs</DependentUpon>
@@ -196,7 +196,7 @@
         <DependentUpon>IDialogueResponseProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\DeadAliveChecker.cs">
-        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+        <DependentUpon>IDialogueTopicProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\LocationChecker.cs">
         <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
