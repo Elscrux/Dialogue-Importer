@@ -69,10 +69,10 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
 
         var actionLockKeywords = conversation.GetAllKeywordTopicInfos(
             ActionLockRegex,
-            info => info.Responses.Count == 0 ? [] : info.Responses[^1].EndNotesAndStartIfResponseEmpty());
+            info => info.Responses.Count == 0 ? [] : info.Responses.SelectMany(x => x.EndNotesAndStartIfResponseEmpty()));
         var actionUnlockKeywords = conversation.GetAllKeywordTopicInfos(
             ActionUnlockRegex,
-            info => info.Responses.Count == 0 ? [] : info.Responses[^1].EndNotesAndStartIfResponseEmpty());
+            info => info.Responses.Count == 0 ? [] : info.Responses.SelectMany(x => x.EndNotesAndStartIfResponseEmpty()));
 
         var actionKeywords = actionLockKeywords.Select(x => (Match: x, Lock: true))
             .Concat(actionUnlockKeywords.Select(x => (Match: x, Lock: false)))
@@ -173,8 +173,10 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
                 foreach (var (lockMatch, _) in grouping.Distinct()) {
                     // Check for any keywords in note, to catch something like [unlock HERE, NOW, MERGE]
                     // Remove [Lock HERE] or [Unlock HERE]
-                    lockMatch.TopicInfo.Responses[^1].RemoveNote(lockMatch.Note);
-                    lockMatch.TopicInfo.RemoveRedundantResponses();
+                    foreach (var response in lockMatch.TopicInfo.Responses) {
+                        response.RemoveNote(lockMatch.Note);
+                        lockMatch.TopicInfo.RemoveRedundantResponses();
+                    }
                     lockMatch.TopicInfo.Script.StartScriptLines.Add($"; {locking} {keyword}");
                     lockMatch.TopicInfo.Script.StartScriptLines.Add($"GetOwningQuest().SetStage({stage})");
                 }
