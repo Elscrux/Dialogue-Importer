@@ -1,5 +1,4 @@
-﻿using DialogueImplementationTool.Converter;
-using DialogueImplementationTool.Dialogue.Model;
+﻿using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Dialogue.Processor;
 using FluentAssertions;
 using Mutagen.Bethesda.Skyrim;
