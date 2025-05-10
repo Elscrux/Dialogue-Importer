@@ -94,7 +94,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new PlayerIsRaceChecker(),
             new PlayerIsVampireChecker(),
             new PlayerIsWerewolfChecker(),
-            new SuccessFailureSeparator(context),
+            new SuccessFailureSeparator(new SkillCheckUtils(_context)),
             new DeadAliveChecker(_context),
             new RandomChecker(),
             new BelongsToPreviousChecker(),
