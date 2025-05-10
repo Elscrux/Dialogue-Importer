@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.RegularExpressions;
 using DialogueImplementationTool.Dialogue.Speaker;
@@ -9,10 +10,10 @@ using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) : IConversationProcessor {
-    private const string LockFillerPart = "(?:(?:-|all) +)";
-    private const string DialogSynonymPart = "(?:(?:option|dialog(ue)?) )?";
-    private const string Locked = "locked";
-    private const string Unlocked = "unlocked";
+    [StringSyntax("Regex")] private const string LockFillerPart = "(?:(?:-|all) +)";
+    [StringSyntax("Regex")] private const string DialogSynonymPart = "(?:(?:option|dialog(ue)?) )?";
+    [StringSyntax("Regex")] private const string Locked = "locked";
+    [StringSyntax("Regex")] private const string Unlocked = "unlocked";
 
     // [DONE], [HERE]
     [GeneratedRegex(KeywordUtils.KeywordRegexPart)]
@@ -33,25 +34,29 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
     private static partial Regex UnlockedRegex { get; }
 
     // [unlocked HERE]
-    [GeneratedRegex($"(?i)^{Locked}:? +{LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}|^{KeywordUtils.KeywordRegexPart}(?i):? *{LockFillerPart}?{Locked}")]
+    [GeneratedRegex(
+        $"(?i)^{Locked}:? +{LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}|^{KeywordUtils.KeywordRegexPart}(?i):? *{LockFillerPart}?{Locked}")]
     private static partial Regex StatusLockedRegex { get; }
 
     // [locked HERE]
-    [GeneratedRegex($"(?i)^{Unlocked}:? +{LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}|^{KeywordUtils.KeywordRegexPart}(?i):? *{LockFillerPart}?{Unlocked}")]
+    [GeneratedRegex(
+        $"(?i)^{Unlocked}:? +{LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}|^{KeywordUtils.KeywordRegexPart}(?i):? *{LockFillerPart}?{Unlocked}")]
     private static partial Regex StatusUnlockedRegex { get; }
 
     // [lock all HERE] [remove HERE]
-    [GeneratedRegex($"(?i)^(?:lock(?:s)?|remove(?:s)?):? {DialogSynonymPart}{LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
+    [GeneratedRegex(
+        $"(?i)^(?:lock(?:s)?|remove(?:s)?):? {DialogSynonymPart}{LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
     private static partial Regex ActionLockRegex { get; }
 
     // [unlock HERE] [add HERE]
-    [GeneratedRegex($"(?i)^(?:unlock(?:s)?|add(?:s)?):? {DialogSynonymPart}{LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
+    [GeneratedRegex(
+        $"(?i)^(?:unlock(?:s)?|add(?:s)?):? {DialogSynonymPart}{LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
     private static partial Regex ActionUnlockRegex { get; }
 
     public void Process(Conversation conversation) {
         var speakerStages = new Dictionary<FormKey, (ushort StartStage, ushort NextStage)>();
 
-         var simplePromptKeywords = conversation.GetAllKeywordTopicInfos(
+        var simplePromptKeywords = conversation.GetAllKeywordTopicInfos(
             OnlyKeywordRegex,
             info => info.Prompt.StartNotes);
 
@@ -168,7 +173,8 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
                     ]
                 };
                 context.Quest.Stages.Add(questStage);
-                speakerStages[speaker.FormLink.FormKey] = (speakerStages[speaker.FormLink.FormKey].StartStage, (ushort) (stage + 1));
+                speakerStages[speaker.FormLink.FormKey] =
+                    (speakerStages[speaker.FormLink.FormKey].StartStage, (ushort) (stage + 1));
 
                 foreach (var (lockMatch, _) in grouping.Distinct()) {
                     // Check for any keywords in note, to catch something like [unlock HERE, NOW, MERGE]

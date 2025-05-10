@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.RegularExpressions;
 using DialogueImplementationTool.Dialogue.Model;
@@ -7,9 +8,9 @@ using DialogueImplementationTool.Extension;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed partial class KeywordLinker : IConversationProcessor {
-    private const string FillerRegexPart = @"[^\]]*";
-    private const string MergeRegexPart = "(?:merge|go|back) ";
-    private const string OptionsAfterRegexPart = "(?:options after )";
+    [StringSyntax("Regex")] private const string FillerRegexPart = @"[^\]]*";
+    [StringSyntax("Regex")] private const string MergeRegexPart = "(?:merge|go|back) ";
+    [StringSyntax("Regex")] private const string OptionsAfterRegexPart = "(?:options after )";
 
     // [DONE], [HERE]
     [GeneratedRegex($"^{KeywordUtils.KeywordRegexPart}$")]

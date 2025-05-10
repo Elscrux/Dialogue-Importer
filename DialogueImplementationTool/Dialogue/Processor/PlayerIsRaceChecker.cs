@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.RegularExpressions;
 using DialogueImplementationTool.Dialogue.Model;
@@ -9,16 +10,16 @@ using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed partial class PlayerIsRaceChecker : IDialogueTopicProcessor {
-    private const string ArgonianRegexPart = "(Argonian)";
-    private const string AltmerRegexPart = "(Altmer|High Elf|Highelf)";
-    private const string BosmerRegexPart = "(Bosmer|Wood Elf|Woodelf)";
-    private const string BretonRegexPart = "(Breton)";
-    private const string DunmerRegexPart = "(Dunmer|Dark Elf|Darkelf)";
-    private const string ImperialRegexPart = "(Imperial)";
-    private const string KhajiitRegexPart = "(Khajiit)";
-    private const string NordRegexPart = "(Nord)";
-    private const string OrcRegexPart = "(Orc|Orsimer)";
-    private const string RedguardRegexPart = "(Redguard)";
+    [StringSyntax("Regex")] private const string ArgonianRegexPart = "(Argonian)";
+    [StringSyntax("Regex")] private const string AltmerRegexPart = "(Altmer|High Elf|Highelf)";
+    [StringSyntax("Regex")] private const string BosmerRegexPart = "(Bosmer|Wood Elf|Woodelf)";
+    [StringSyntax("Regex")] private const string BretonRegexPart = "(Breton)";
+    [StringSyntax("Regex")] private const string DunmerRegexPart = "(Dunmer|Dark Elf|Darkelf)";
+    [StringSyntax("Regex")] private const string ImperialRegexPart = "(Imperial)";
+    [StringSyntax("Regex")] private const string KhajiitRegexPart = "(Khajiit)";
+    [StringSyntax("Regex")] private const string NordRegexPart = "(Nord)";
+    [StringSyntax("Regex")] private const string OrcRegexPart = "(Orc|Orsimer)";
+    [StringSyntax("Regex")] private const string RedguardRegexPart = "(Redguard)";
 
     private const string MergedRacesRegexPart =
         $"{ArgonianRegexPart}|{AltmerRegexPart}|{BosmerRegexPart}|{BretonRegexPart}|{DunmerRegexPart}"

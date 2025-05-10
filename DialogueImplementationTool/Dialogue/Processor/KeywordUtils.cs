@@ -1,5 +1,6 @@
-﻿namespace DialogueImplementationTool.Dialogue.Processor;
+﻿using System.Diagnostics.CodeAnalysis;
+namespace DialogueImplementationTool.Dialogue.Processor;
 
 public static class KeywordUtils {
-    public const string KeywordRegexPart = @"([A-Z_\d]{2,})";
+    [StringSyntax("Regex")] public const string KeywordRegexPart = @"([A-Z_\d]{2,})";
 }
