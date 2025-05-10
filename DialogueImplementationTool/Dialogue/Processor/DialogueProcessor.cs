@@ -76,6 +76,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
         ];
 
         TopicInfoProcessors = [
+            new TopicInfoNoteExtractor(),
             new ActivePassiveChecker(),
             new TalkedToChecker(_context),
             new OffersServicesChecker(),
@@ -91,7 +92,6 @@ public sealed class DialogueProcessor : IDialogueProcessor {
         ];
 
         TopicProcessors = [
-            new TopicInfoNoteExtractor(),
             new PlayerIsSexChecker(),
             new PlayerIsRaceChecker(),
             new PlayerIsVampireChecker(),

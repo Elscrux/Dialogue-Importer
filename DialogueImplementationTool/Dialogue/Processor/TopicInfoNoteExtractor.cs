@@ -6,21 +6,19 @@ using DialogueImplementationTool.Dialogue.Model;
 using Noggog;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
-public sealed class TopicInfoNoteExtractor : IDialogueTopicProcessor {
-    public void Process(DialogueTopic topic) {
-        foreach (var topicInfo in topic.TopicInfos) {
-            ProcessNotes(
-                topicInfo,
-                NoteUtils.StartNoteRegex,
-                StringExt.TrimStart,
-                topicInfo.Prompt.StartNotes);
+public sealed class TopicInfoNoteExtractor : IDialogueTopicInfoProcessor {
+    public void Process(DialogueTopicInfo topicInfo) {
+        ProcessNotes(
+            topicInfo,
+            NoteUtils.StartNoteRegex,
+            StringExt.TrimStart,
+            topicInfo.Prompt.StartNotes);
 
-            ProcessNotes(
-                topicInfo,
-                NoteUtils.EndNoteRegex,
-                StringExt.TrimEnd,
-                topicInfo.Prompt.EndsNotes);
-        }
+        ProcessNotes(
+            topicInfo,
+            NoteUtils.EndNoteRegex,
+            StringExt.TrimEnd,
+            topicInfo.Prompt.EndsNotes);
     }
 
     private static void ProcessNotes(

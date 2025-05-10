@@ -148,7 +148,7 @@
         <DependentUpon>IConversationProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\TopicInfoNoteExtractor.cs">
-        <DependentUpon>IDialogueTopicProcessor.cs</DependentUpon>
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
       <Compile Update="Services\NullEmotionClassifier.cs">
         <DependentUpon>IEmotionClassifier.cs</DependentUpon>
