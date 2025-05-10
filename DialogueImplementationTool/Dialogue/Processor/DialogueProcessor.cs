@@ -82,6 +82,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new TimeChecker(),
             new SayOnceChecker(),
             new DispositionChecker(),
+            new GoldChecker(),
             new GoodbyeChecker(),
             new TopicInfoTrimmer(),
             new TopicInfoInvalidStringFixer(),

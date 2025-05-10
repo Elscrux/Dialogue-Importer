@@ -432,6 +432,9 @@
       <Compile Update="Dialogue\Processor\DispositionChecker.cs">
         <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\Processor\GoldChecker.cs">
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>
