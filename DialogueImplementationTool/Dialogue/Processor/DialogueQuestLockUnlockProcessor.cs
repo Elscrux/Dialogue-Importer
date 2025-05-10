@@ -10,6 +10,7 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 
 public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) : IConversationProcessor {
     private const string LockFillerPart = "(?:(?:-|all) +)";
+    private const string DialogSynonymPart = "(?:(?:option|dialog(ue)?) )?";
     private const string Locked = "locked";
     private const string Unlocked = "unlocked";
 
@@ -40,11 +41,11 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
     private static partial Regex StatusUnlockedRegex { get; }
 
     // [lock all HERE] [remove HERE]
-    [GeneratedRegex($"(?i)^(?:lock(?:s)?|remove(?:s)?):? {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
+    [GeneratedRegex($"(?i)^(?:lock(?:s)?|remove(?:s)?):? {DialogSynonymPart}{LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
     private static partial Regex ActionLockRegex { get; }
 
     // [unlock HERE] [add HERE]
-    [GeneratedRegex($"(?i)^(?:unlock(?:s)?|add(?:s)?):? {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
+    [GeneratedRegex($"(?i)^(?:unlock(?:s)?|add(?:s)?):? {DialogSynonymPart}{LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}")]
     private static partial Regex ActionUnlockRegex { get; }
 
     public void Process(Conversation conversation) {
