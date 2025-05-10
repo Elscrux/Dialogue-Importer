@@ -5,7 +5,7 @@ using DialogueImplementationTool.Parser;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed partial class BackToDialogueRemover : IDialogueResponseProcessor {
-    [GeneratedRegex("(?:return|back|go) to(?: (root|top|main))?( level)? dialog(ue)?( options)?", RegexOptions.IgnoreCase)]
+    [GeneratedRegex("(return|back|go) to(( (root|top|main))?( level)? dialog(ue)?( options)?| (root))", RegexOptions.IgnoreCase)]
     private static partial Regex Regex { get; }
 
     public void Process(DialogueResponse response, IReadOnlyList<FormattedText> textSnippets) {
