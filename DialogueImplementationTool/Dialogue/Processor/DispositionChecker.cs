@@ -9,6 +9,8 @@ public sealed partial class DispositionChecker : IDialogueTopicInfoProcessor {
     public void Process(DialogueTopicInfo topicInfo) {
         if (topicInfo.Responses.Count == 0) return;
 
+        topicInfo.Prompt.StartNotes.RemoveAll(CheckNote);
+        topicInfo.Prompt.EndsNotes.RemoveAll(CheckNote);
         topicInfo.Responses[0].StartNotes.RemoveAll(CheckNote);
 
         bool CheckNote(Note note) {
