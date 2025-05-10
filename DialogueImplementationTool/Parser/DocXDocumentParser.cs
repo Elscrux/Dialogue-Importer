@@ -107,7 +107,7 @@ public sealed class DocXDocumentParser
             var paragraphEnumerator = new ParagraphEnumerator(list.Items[0], list.Items[^1]);
             if (!paragraphEnumerator.MoveNext()) return branches;
 
-            var topicInfos = GetTopicInfos(processor, paragraphEnumerator).ToList();
+            var topicInfos = GetTopicInfos(processor, paragraphEnumerator, "").ToList();
             var currentBranch = new DialogueTopic { TopicInfos = topicInfos };
             branches.Add(currentBranch);
 
@@ -171,24 +171,25 @@ public sealed class DocXDocumentParser
         var prompt = enumerator.Current.Text;
 
         if (!enumerator.MoveNext() || enumerator.Current.IndentLevel != startingIndentation + 1) {
-            return new DialogueTopic { TopicInfos = [new DialogueTopicInfo { Prompt = prompt }] };
+            var topicInfo = new DialogueTopicInfo { Prompt = prompt };
+            processor.Process(topicInfo);
+            return new DialogueTopic { TopicInfos = [topicInfo] };
         }
 
-        var list = new List<DialogueTopicInfo>();
-        foreach (var topicInfo in GetTopicInfos(processor, enumerator)) {
-            topicInfo.Prompt = prompt;
-            list.Add(topicInfo);
-        }
+        var list = GetTopicInfos(processor, enumerator, prompt).ToList();
 
         return new DialogueTopic { TopicInfos = list };
     }
 
-    private IEnumerable<DialogueTopicInfo> GetTopicInfos(IDialogueProcessor processor, ParagraphEnumerator enumerator) {
+    private IEnumerable<DialogueTopicInfo> GetTopicInfos(
+        IDialogueProcessor processor,
+        ParagraphEnumerator enumerator,
+        string prompt) {
         var startingIndentation = enumerator.Current.IndentLevel;
         var abort = false;
 
         while (!abort && enumerator.Current.IndentLevel == startingIndentation) {
-            var topicInfo = new DialogueTopicInfo();
+            var topicInfo = new DialogueTopicInfo { Prompt = new DialogueText { Text = prompt } };
 
             //Add responses
             var currentIndentation = startingIndentation;
