@@ -5,15 +5,20 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed class TimeChecker : IDialogueTopicInfoProcessor {
     public void Process(DialogueTopicInfo topicInfo) {
+        topicInfo.Prompt.StartNotes.RemoveAll(CheckNote);
+        topicInfo.Prompt.EndsNotes.RemoveAll(CheckNote);
         foreach (var response in topicInfo.Responses) {
-            foreach (var note in response.Notes()) {
-                var conditions = TimeConditionConverter.Convert(note.Text).ToList();
-                if (conditions.Count == 0) continue;
+            response.StartNotes.RemoveAll(CheckNote);
+            response.EndsNotes.RemoveAll(CheckNote);
+        }
 
-                topicInfo.ExtraConditions.AddRange(conditions);
+        bool CheckNote(Note note) {
+            var conditions = TimeConditionConverter.Convert(note.Text).ToList();
+            if (conditions.Count == 0) return false;
 
-                response.RemoveNote(note);
-            }
+            topicInfo.ExtraConditions.AddRange(conditions);
+
+            return true;
         }
     }
 }
