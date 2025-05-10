@@ -9,7 +9,7 @@ using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) : IConversationProcessor {
-    private const string LockFillerPart = "(?:(?:-|all) )";
+    private const string LockFillerPart = "(?:(?:-|all) +)";
     private const string Locked = "locked";
     private const string Unlocked = "unlocked";
 
@@ -32,11 +32,11 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
     private static partial Regex UnlockedRegex { get; }
 
     // [unlocked HERE]
-    [GeneratedRegex($"(?i)^{Locked}:? {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}|^{KeywordUtils.KeywordRegexPart}(?i):? {LockFillerPart}?{Locked}")]
+    [GeneratedRegex($"(?i)^{Locked}:? +{LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}|^{KeywordUtils.KeywordRegexPart}(?i):? *{LockFillerPart}?{Locked}")]
     private static partial Regex StatusLockedRegex { get; }
 
     // [locked HERE]
-    [GeneratedRegex($"(?i)^{Unlocked}:? {LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}|^{KeywordUtils.KeywordRegexPart}(?i):? {LockFillerPart}?{Unlocked}")]
+    [GeneratedRegex($"(?i)^{Unlocked}:? +{LockFillerPart}?(?-i){KeywordUtils.KeywordRegexPart}|^{KeywordUtils.KeywordRegexPart}(?i):? *{LockFillerPart}?{Unlocked}")]
     private static partial Regex StatusUnlockedRegex { get; }
 
     // [lock all HERE] [remove HERE]
