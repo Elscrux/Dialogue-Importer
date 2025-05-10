@@ -140,4 +140,12 @@ public static class TestSamples {
 
         return GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 2);
     }
+
+    public static GeneratedDialogue
+        GetMaenlornDialogue(TestConstants testConstants) {
+        var docXDocumentParser = new DocXDocumentParser(
+            Path.GetFullPath("../../../Samples/Documents/[Locked] Maenlorn [dialogue].docx"));
+
+        return GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 2);
+    }
 }

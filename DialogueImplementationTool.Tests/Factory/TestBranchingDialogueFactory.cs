@@ -401,4 +401,77 @@ public sealed class TestBranchingDialogueFactory {
         thirdTopicInfo.TopicInfos[0].Responses.Should().HaveCount(6);
         thirdTopicInfo.TopicInfos[0].Responses[^1].HasNote("back to root").Should().BeFalse();
     }
+
+    [Fact]
+    public void TestMaenlornDialogue() {
+        // Import
+        var dialogue = TestSamples.GetMaenlornDialogue(_testConstants);
+
+        // Process
+        Conversation conversation = [dialogue];
+        _testConstants.Quest.EditorID = "DialogueQuest";
+        _testConstants.DialogueProcessor.Process(conversation);
+
+        // Check
+        conversation[0].Topics.Should().ContainSingle();
+        conversation[0].Topics[0].TopicInfos.Should().ContainSingle();
+        conversation[0].Topics[0].TopicInfos[0].Links.Should().HaveCount(6);
+        conversation[0].Topics[0].TopicInfos[0].InvisibleContinue.Should().BeFalse();
+
+        var firstLink = conversation[0].Topics[0].TopicInfos[0].Links[0];
+        firstLink.TopicInfos.Should().ContainSingle();
+        firstLink.TopicInfos[0].Responses.Should().ContainSingle();
+        firstLink.TopicInfos[0].Responses[0].FullResponse.Should().Be(
+            "Ahaha! I do love the realist answer. Though, riddles often have a way of bending the reality they present, don't they?");
+        firstLink.TopicInfos[0].InvisibleContinue.Should().BeTrue();
+        firstLink.TopicInfos[0].Links.Should().ContainSingle();
+
+        var secondLink = firstLink.TopicInfos[0].Links[0];
+        secondLink.TopicInfos.Should().ContainSingle();
+        secondLink.TopicInfos[0].Responses.Should().ContainSingle();
+        secondLink.TopicInfos[0].Responses[0].FullResponse.Should()
+            .Be("The beggar, the thief, the warrior, and the king are all one in the same! Silly, isn't it?");
+        secondLink.TopicInfos[0].InvisibleContinue.Should().BeTrue();
+        secondLink.TopicInfos[0].Links.Should().ContainSingle();
+
+        var thirdLink = secondLink.TopicInfos[0].Links[0];
+        thirdLink.TopicInfos.Should().ContainSingle();
+        thirdLink.TopicInfos[0].Responses.Should().HaveCount(2);
+        thirdLink.TopicInfos[0].Responses[0].FullResponse.Should()
+            .Be("The Adventures of Eslaf Erol, a classic tale of rags to riches.");
+        thirdLink.TopicInfos[0].Responses[1].FullResponse.Should().Be("It reminds us of the importance of family.");
+        thirdLink.TopicInfos[0].InvisibleContinue.Should().BeFalse();
+        thirdLink.TopicInfos[0].Links.Should().HaveCount(2);
+
+        var fourthLink = thirdLink.TopicInfos[0].Links[0];
+        fourthLink.TopicInfos.Should().ContainSingle();
+        fourthLink.TopicInfos[0].Responses.Should().ContainSingle();
+        fourthLink.TopicInfos[0].Responses[0].FullResponse.Should().Be(
+            "Many go through life without mother or father, brother or sister... All that matters is the family you have chosen.");
+        fourthLink.TopicInfos[0].InvisibleContinue.Should().BeTrue();
+        fourthLink.TopicInfos[0].Links.Should().ContainSingle();
+
+        var fifthLink = fourthLink.TopicInfos[0].Links[0];
+        fifthLink.TopicInfos.Should().ContainSingle();
+        fifthLink.TopicInfos[0].Responses.Should().ContainSingle();
+        fifthLink.TopicInfos[0].Responses[0].FullResponse.Should().Be("No one is ever truly alone. Remember that.");
+        fifthLink.TopicInfos[0].InvisibleContinue.Should().BeFalse();
+        fifthLink.TopicInfos[0].Links.Should().HaveCount(2);
+
+        var sixthLink = fifthLink.TopicInfos[0].Links[0];
+        sixthLink.TopicInfos.Should().ContainSingle();
+        sixthLink.TopicInfos[0].Responses.Should().ContainSingle();
+        sixthLink.TopicInfos[0].Responses[0].FullResponse.Should().Be("Of course you aren't.");
+        sixthLink.TopicInfos[0].InvisibleContinue.Should().BeTrue();
+        sixthLink.TopicInfos[0].Links.Should().ContainSingle();
+
+        var seventhLink = sixthLink.TopicInfos[0].Links[0];
+        seventhLink.TopicInfos.Should().ContainSingle();
+        seventhLink.TopicInfos[0].Responses.Should().HaveCount(2);
+        seventhLink.TopicInfos[0].Responses[0].FullResponse.Should()
+            .Be("What brings you here, then, I wonder? Your story interests me.");
+        seventhLink.TopicInfos[0].Responses[1].FullResponse.Should().Be("When you have a moment, I would love to hear it.");
+        seventhLink.TopicInfos[0].InvisibleContinue.Should().BeFalse();
+        seventhLink.TopicInfos[0].Links.Should().HaveCount(4);
+    }
 }
