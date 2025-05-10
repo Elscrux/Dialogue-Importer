@@ -91,6 +91,12 @@ public sealed partial class KeywordLinker : IConversationProcessor {
         }
 
         void PerformLinking(DialogueTopicInfo linkTopicInfo, string keyword, Action<DialogueTopicInfo> removeNote) {
+            while (linkTopicInfo is {
+                InvisibleContinue: true,
+                Links: [{ TopicInfos: [{} invisibleContinue] }]
+            }) {
+                linkTopicInfo = invisibleContinue;
+            }
             if (linkTopicInfo.Links.Count > 0) {
                 Console.WriteLine($"Keyword {keyword} already has links in dialogue {linkTopicInfo.Prompt.FullText}");
                 return;
@@ -104,9 +110,11 @@ public sealed partial class KeywordLinker : IConversationProcessor {
             var response = destination.TopicInfo.Responses.FirstOrDefault(r => r.HasNote(x => x == keyword));
             while (response is null && destination.TopicInfo is {
                 InvisibleContinue: true,
-                Links: [{ TopicInfos: [{} invisibleContinue] }]
+                Links: [{ TopicInfos: [{} invisibleContinue] } topic]
             }) {
                 response = invisibleContinue.Responses.FirstOrDefault(r => r.HasNote(x => x == keyword));
+                destination.Topic = topic;
+                destination.TopicInfo = invisibleContinue;
             }
 
             if (response is null) {
