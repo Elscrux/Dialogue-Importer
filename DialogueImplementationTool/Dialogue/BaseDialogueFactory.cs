@@ -138,6 +138,7 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
         if (!hasStart && !hasEnd) return;
 
         var propertyLines = script.Properties
+            .DistinctBy(x => x.ScriptProperty.Name)
             .Select(property => $"{property.ScriptName} Property {property.ScriptProperty.Name} Auto")
             .ToList();
 
@@ -184,7 +185,10 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
                 new ScriptEntry {
                     Name = scriptName,
                     Flags = ScriptEntry.Flag.Local,
-                    Properties = script.Properties.Select(x => x.ScriptProperty).ToExtendedList()
+                    Properties = script.Properties
+                        .Select(x => x.ScriptProperty)
+                        .DistinctBy(x => x.Name)
+                        .ToExtendedList()
                 }
             ],
             ScriptFragments = scriptFragments,
