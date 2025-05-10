@@ -86,6 +86,8 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new GoodbyeChecker(),
             new TopicInfoTrimmer(),
             new TopicInfoInvalidStringFixer(),
+            new AutoPassChecker(new SkillCheckUtils(_context)),
+            new AutoFailChecker(),
         ];
 
         TopicProcessors = [

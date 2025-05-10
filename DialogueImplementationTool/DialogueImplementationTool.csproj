@@ -435,6 +435,12 @@
       <Compile Update="Dialogue\Processor\GoldChecker.cs">
         <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\Processor\AutoFailChecker.cs">
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Dialogue\Processor\AutoPassChecker.cs">
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>
