@@ -371,4 +371,34 @@ public sealed class TestBranchingDialogueFactory {
         thirdLink.TopicInfos[0].SharedInfo.Should().NotBeNull();
         thirdLink.TopicInfos[0].Links.Should().BeEmpty();
     }
+
+    [Fact]
+    public void TestMediAtMuhayDialogue() {
+        // Import
+        var dialogue = TestSamples.GetMediAtMuhayDialogue(_testConstants);
+
+        // Process
+        Conversation conversation = [dialogue];
+        _testConstants.Quest.EditorID = "DialogueQuest";
+        _testConstants.DialogueProcessor.Process(conversation);
+
+        // Check
+        conversation[0].Topics.Should().HaveCount(3);
+        conversation[0].Topics[0].TopicInfos.Should().ContainSingle();
+        var firstTopicInfo = conversation[0].Topics[0].TopicInfos[0];
+        firstTopicInfo.Responses.Should().HaveCount(5);
+        firstTopicInfo.Responses[1].HasNote(x => x == "unlock BUREAU").Should().BeFalse();
+
+        var secondTopicInfo = conversation[0].Topics[1];
+        secondTopicInfo.TopicInfos.Should().ContainSingle();
+        secondTopicInfo.TopicInfos[0].Prompt.Notes().Should().BeEmpty();
+        secondTopicInfo.TopicInfos[0].Responses.Should().HaveCount(4);
+        secondTopicInfo.TopicInfos[0].Responses[^1].HasNote("back to root").Should().BeFalse();
+
+        var thirdTopicInfo = conversation[0].Topics[2];
+        thirdTopicInfo.TopicInfos.Should().ContainSingle();
+        thirdTopicInfo.TopicInfos[0].Prompt.Notes().Should().BeEmpty();
+        thirdTopicInfo.TopicInfos[0].Responses.Should().HaveCount(6);
+        thirdTopicInfo.TopicInfos[0].Responses[^1].HasNote("back to root").Should().BeFalse();
+    }
 }

@@ -132,4 +132,12 @@ public static class TestSamples {
 
         return GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 0);
     }
+
+    public static GeneratedDialogue
+        GetMediAtMuhayDialogue(TestConstants testConstants) {
+        var docXDocumentParser = new DocXDocumentParser(
+            Path.GetFullPath("../../../Samples/Documents/[Locked] Medi at-Muhay [standard dialogue].docx"));
+
+        return GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 2);
+    }
 }
