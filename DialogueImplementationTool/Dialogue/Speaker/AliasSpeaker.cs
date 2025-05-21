@@ -12,7 +12,7 @@ public sealed class AliasSpeaker : ISpeaker, IEquatable<AliasSpeaker> {
 
     public AliasSpeaker(IFormLinkGetter formLink, string name, int aliasIndex = -1, string? editorId = null) {
         if (!formLink.IsNull && formLink.Type != typeof(INpcGetter)) {
-            throw new ArgumentException("Only INpcGetters are supported for AliasSpeakers");
+            throw new ArgumentException($"{formLink.FormKey} is {formLink.Type} - Only INpcGetters are supported for AliasSpeakers");
         }
 
         FormLink = formLink;
