@@ -1,6 +1,7 @@
 using System;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 namespace DialogueImplementationTool.Dialogue.Speaker;
 
 public sealed class AliasSpeaker : ISpeaker, IEquatable<AliasSpeaker> {
@@ -11,7 +12,7 @@ public sealed class AliasSpeaker : ISpeaker, IEquatable<AliasSpeaker> {
     public string? EditorID { get; }
 
     public AliasSpeaker(IFormLinkGetter formLink, string name, int aliasIndex = -1, string? editorId = null) {
-        if (!formLink.IsNull && formLink.Type != typeof(INpcGetter)) {
+        if (!formLink.IsNull && !formLink.Type.InheritsFrom(typeof(INpcGetter))) {
             throw new ArgumentException($"{formLink.FormKey} is {formLink.Type} - Only INpcGetters are supported for AliasSpeakers");
         }
 
