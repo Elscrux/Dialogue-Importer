@@ -41,7 +41,7 @@ public sealed partial class UISpeakerSelection(
             var speaker = speakers.FirstOrDefault(s => s.Name == automaticSpeaker.Name);
             if (speaker is null) continue;
 
-            speaker.FormLink = automaticSpeaker.FormLink;
+            speaker.FormKey = automaticSpeaker.FormLink.FormKey;
             speaker.EditorID = automaticSpeaker.EditorID;
         }
 
@@ -67,7 +67,7 @@ public sealed partial class UISpeakerSelection(
             foreach (var selection in speakers) {
                 if (!savedSelections.TryGetValue(selection.Name, out var aliasSelectionDto)) return false;
 
-                selection.FormLink = aliasSelectionDto.FormLink;
+                selection.FormKey = aliasSelectionDto.FormLink.FormKey;
                 selection.EditorID = aliasSelectionDto.EditorID;
             }
 

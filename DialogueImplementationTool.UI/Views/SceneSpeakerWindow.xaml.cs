@@ -26,7 +26,7 @@ public partial class SceneSpeakerWindow {
         // Assign the closest existing favorites
         foreach (var speaker in SceneSpeakers) {
             var matchingSpeaker = SpeakerFavoritesSelection.GetClosestSpeaker(speaker.Name);
-            if (matchingSpeaker is not null) speaker.FormLink = matchingSpeaker.FormLink;
+            if (matchingSpeaker is not null) speaker.FormKey = matchingSpeaker.FormLink.FormKey;
         }
 
         DataContext = this;

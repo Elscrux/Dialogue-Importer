@@ -1,5 +1,4 @@
-﻿using System.Reactive.Linq;
-using DialogueImplementationTool.Dialogue.Speaker;
+﻿using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Services;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
@@ -15,12 +14,15 @@ public sealed class AliasSpeakerSelection : ReactiveObject {
         string name) {
         Name = ISpeaker.GetSpeakerName(name);
 
-        this.WhenAnyValue(x => x.FormLink)
-            .Where(link => !link.IsNull)
-            .Subscribe(link => speakerFavoritesSelection.AddSpeaker(new NpcSpeaker(linkCache, link)));
+        this.WhenAnyValue(x => x.FormKey)
+            .Subscribe(formKey => {
+                var formLink = new FormLinkInformation(formKey, typeof(INpcGetter));
+                speakerFavoritesSelection.AddSpeaker(new NpcSpeaker(linkCache, formLink));
+            });
     }
 
     public string Name { get; set; }
-    [Reactive] public IFormLinkGetter FormLink { get; set; } = new FormLinkInformation(FormKey.Null, typeof(INpcGetter));
+    public IFormLinkGetter FormLink => new FormLinkInformation(FormKey, typeof(INpcGetter));
+    [Reactive] public FormKey FormKey { get; set; } = FormKey.Null;
     public string? EditorID { get; set; }
 }

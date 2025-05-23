@@ -44,7 +44,7 @@
                                     dd:DragDrop.DropHandler="{StaticResource FormKeyPickerDropTarget}"
                                     dd:DragDrop.ShowAlwaysDropTargetAdorner="True"
                                     dd:DragDrop.UseDefaultEffectDataTemplate="True"
-                                    FormKey="{Binding FormLink, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                    FormKey="{Binding FormKey, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                     EditorID="{Binding EditorID, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                     LinkCache="{Binding LinkCache, RelativeSource={RelativeSource FindAncestor, AncestorType=views:SceneSpeakerWindow}}"
                                     ScopedTypes="{Binding ScopedTypes, RelativeSource={RelativeSource FindAncestor, AncestorType=views:SceneSpeakerWindow}}"/>
