@@ -229,10 +229,6 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
         var topicInfo = sharedInfo.ResponseDataTopicInfo;
         Speaker = topicInfo.Speaker;
         Responses.Clear();
-        SayOnce = topicInfo.SayOnce;
-        Goodbye = topicInfo.Goodbye;
-        Random = topicInfo.Random;
-        ResetHours = topicInfo.ResetHours;
 
         SharedInfo = sharedInfo;
     }
