@@ -60,7 +60,7 @@ public sealed class SharedInfo {
 
             var responses = new DialogResponses(modContext.GetNextFormKey(), modContext.Release) {
                 EditorID = Naming.GetFirstFreeIndex(
-                    i => $"{quest.EditorID}{ResponseDataTopicInfo.Speaker.NameNoSpaces}Shared{i}",
+                    i => Naming.ToEditorIDString($"{quest.EditorID}{ResponseDataTopicInfo.Speaker.NameNoSpaces}Shared{i}"),
                     name => !modContext.LinkCache.TryResolve<IDialogResponsesGetter>(name, out _),
                     1),
                 Responses = dialogResponses.ToExtendedList(),

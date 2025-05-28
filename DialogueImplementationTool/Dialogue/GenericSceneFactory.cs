@@ -39,7 +39,7 @@ public class GenericSceneFactory(IDialogueContext context) : SceneFactory(contex
             .Order()
             .ToList();
 
-        var baseName = $"{Context.Quest.EditorID}Scene{string.Join(string.Empty, npcNames)}";
+        var baseName = Naming.ToEditorIDString($"{Context.Quest.EditorID}Scene{string.Join(string.Empty, npcNames)}");
         var questEditorId = Naming.GetFirstFreeIndex(
             i => baseName + i,
             name => !Context.LinkCache.TryResolve<IQuestGetter>(name, out _),

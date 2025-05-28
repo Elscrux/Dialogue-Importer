@@ -38,7 +38,7 @@ public sealed partial class UISpeakerSelection(
         // Try set automatically
         var automaticSpeakers = _automaticSpeakerSelection.GetSpeakers<AliasSpeaker>(speakerNames);
         foreach (var automaticSpeaker in automaticSpeakers) {
-            var speaker = speakers.FirstOrDefault(s => s.Name == automaticSpeaker.Name);
+            var speaker = speakers.FirstOrDefault(s => s.Name == automaticSpeaker.NameNoSpaces || s.Name == automaticSpeaker.Name);
             if (speaker is null) continue;
 
             speaker.FormKey = automaticSpeaker.FormLink.FormKey;

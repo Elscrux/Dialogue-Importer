@@ -20,6 +20,7 @@ public sealed class AutomaticSpeakerSelection(
             : (formLink, _, _) => (new NpcSpeaker(linkCache, formLink) as T)!;
 
         foreach (var speakerName in speakerNames) {
+            // Skip short names, they cannot be reliably linked, usually this is just the starting letter of the name
             if (speakerName.Length < 3) continue;
 
             // Try to find the NPC by the editor ID
