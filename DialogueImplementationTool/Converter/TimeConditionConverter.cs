@@ -22,8 +22,18 @@ public static partial class TimeConditionConverter {
         var startMinutes = int.TryParse(match.Groups[2].Value, out var s) ? s : 0;
         var endMinutes = int.TryParse(match.Groups[4].Value, out var e) ? e : 0;
 
-        yield return GetCondition(startHour, startMinutes, CompareOperator.GreaterThanOrEqualTo);
-        yield return GetCondition(endHour, endMinutes, CompareOperator.LessThanOrEqualTo);
+        if (startHour < endHour) {
+            // For example "02:00 - 22:00" is >= 02:00 AND <= 22:00
+            yield return GetCondition(startHour, startMinutes, CompareOperator.GreaterThanOrEqualTo);
+            yield return GetCondition(endHour, endMinutes, CompareOperator.LessThanOrEqualTo);
+        } else {
+            // For example "22:00 - 02:00" is >= 22:00 OR <= 02:00
+            var startCondition = GetCondition(startHour, startMinutes, CompareOperator.GreaterThanOrEqualTo);
+            startCondition.Flags |= Condition.Flag.OR;
+            yield return startCondition;
+            yield return GetCondition(endHour, endMinutes, CompareOperator.LessThanOrEqualTo);
+            
+        }
     }
 
     private static ConditionFloat GetCondition(int hour, int minutes, CompareOperator compareOperator) {
