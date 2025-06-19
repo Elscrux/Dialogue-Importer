@@ -92,13 +92,13 @@ public sealed class DialogueProcessor : IDialogueProcessor {
         ];
 
         TopicProcessors = [
+            new RandomChecker(), // Should be before the others so it can separate random responses before
             new PlayerIsSexChecker(),
             new PlayerIsRaceChecker(),
             new PlayerIsVampireChecker(),
             new PlayerIsWerewolfChecker(),
             new SuccessFailureSeparator(new SkillCheckUtils(_context)),
             new DeadAliveChecker(_context),
-            new RandomChecker(),
             new BelongsToPreviousChecker(),
             new RemoveEmptyTopicInfos(),
         ];
