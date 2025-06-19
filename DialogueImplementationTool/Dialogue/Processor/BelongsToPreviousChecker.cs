@@ -11,7 +11,10 @@ public sealed partial class BelongsToPreviousChecker : IDialogueTopicProcessor {
         var i = 1;
         while (i < topic.TopicInfos.Count) {
             var topicInfo = topic.TopicInfos[i];
-            if (topicInfo.Responses.Count == 0) continue;
+            if (topicInfo.Responses.Count == 0) {
+                i++;
+                continue;
+            }
 
             // Check if start note has a belongs to previous tag
             var previousNote = topicInfo.Responses[0].StartNotes.FirstOrDefault(n => PreviousRegex.IsMatch((string) n.Text));
