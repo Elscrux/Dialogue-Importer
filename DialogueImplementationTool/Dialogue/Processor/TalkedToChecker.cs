@@ -6,7 +6,7 @@ using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed partial class TalkedToChecker(IDialogueContext context) : IDialogueTopicInfoProcessor {
-    [GeneratedRegex("(?:PC|player )?\b(?:met|spoken|talked)\b(?:to )?(.+)")]
+    [GeneratedRegex(@"(?:PC|player )?\b(?:met|spoken|talked)\b(?:to )?(.+)")]
     private static partial Regex TalkedToRegex { get; }
 
     public void Process(DialogueTopicInfo topicInfo) {
