@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using DialogueImplementationTool.Dialogue.Model;
+using DialogueImplementationTool.Extension;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
@@ -36,11 +37,11 @@ public sealed partial class PlayerIsSexChecker : IDialogueTopicProcessor {
                 _ => throw new InvalidOperationException(),
             };
 
-            topicInfo.ExtraConditions.Add(new ConditionFloat {
-                Data = new GetPCIsSexConditionData {
+            topicInfo.ExtraConditions.Add(
+                new GetPCIsSexConditionData {
                     MaleFemaleGender = maleFemaleGender,
-                }
-            });
+                }.ToConditionFloat()
+            );
 
             return true;
         }
