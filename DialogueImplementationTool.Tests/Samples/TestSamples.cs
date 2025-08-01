@@ -59,6 +59,14 @@ public static class TestSamples {
             GetDialogue(testConstants, docXDocumentParser, DialogueType.Farewell, 3));
     }
 
+    public static GeneratedDialogue
+        GetYndylinDialogue(TestConstants testConstants) {
+        var docXDocumentParser = new DocXDocumentParser(
+            Path.GetFullPath("../../../Samples/Documents/[Locked] Yndylin - Standard Dialogue.docx"));
+
+        return GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 0);
+    }
+
     public static (GeneratedDialogue Greeting, GeneratedDialogue Dialogue) GetCraneShoreDialogue(
         TestConstants testConstants) {
         var docXDocumentParser = new DocXDocumentParser(

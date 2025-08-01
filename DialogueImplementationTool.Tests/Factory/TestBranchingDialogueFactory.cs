@@ -45,6 +45,43 @@ public sealed class TestBranchingDialogueFactory {
     }
 
     [Fact]
+    public void TestYndylinDialogue() {
+        // Import
+        var dialogueTopics = TestSamples.GetYndylinDialogue(_testConstants);
+
+        // Check
+        dialogueTopics.Topics.Should().HaveCount(2);
+ 
+        // Process
+        Conversation conversation = [dialogueTopics];
+        _testConstants.Quest.EditorID = "DialogueQuest";
+        _testConstants.DialogueProcessor.Process(conversation);
+
+        // Check
+        conversation[0].Topics[0].TopicInfos.Should().HaveCount(2);
+        var firstTopic = conversation[0].Topics[0].TopicInfos[0];
+        var secondTopic = conversation[0].Topics[0].TopicInfos[1];
+        firstTopic.Links.Should().ContainSingle();
+        secondTopic.Links.Should().ContainSingle();
+        firstTopic.Links[0].Should().BeEquivalentTo(secondTopic.Links[0]);
+        firstTopic.Links[0].TopicInfos.Should().ContainSingle();
+        var link = firstTopic.Links[0].TopicInfos[0];
+        link.Responses.Should().HaveCount(4);
+        link.Links.Should().HaveCount(3);
+        link.SharedInfo.Should().NotBeNull();
+
+        conversation[0].Topics[1].TopicInfos.Should().ContainSingle();
+        var secondTopicInfo = conversation[0].Topics[1].TopicInfos[0];
+        secondTopicInfo.Responses.Should().HaveCount(4);
+        secondTopicInfo.Links.Should().HaveCount(3);
+        secondTopicInfo.SharedInfo.Should().NotBeNull();
+        secondTopicInfo.SharedInfo.Should().BeEquivalentTo(link.SharedInfo);
+
+        // Implement
+        conversation.Create();
+    }
+
+    [Fact]
     public void TestCraneShoreDialogue() {
         // Import
         var (_, dialogue) = TestSamples.GetCraneShoreDialogue(_testConstants);
