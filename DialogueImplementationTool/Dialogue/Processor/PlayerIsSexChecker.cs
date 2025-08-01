@@ -4,6 +4,7 @@ using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Extension;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed partial class PlayerIsSexChecker : IDialogueTopicProcessor {
@@ -11,16 +12,70 @@ public sealed partial class PlayerIsSexChecker : IDialogueTopicProcessor {
     private static partial Regex PlayerSexRegex { get; }
 
     public void Process(DialogueTopic topic) {
-        foreach (var topicInfo in topic.TopicInfos) {
+        for (var topicIndex = 0; topicIndex < topic.TopicInfos.Count; topicIndex++) {
+            var topicInfo = topic.TopicInfos[topicIndex];
             foreach (var note in topicInfo.Prompt.Notes()) {
-                if (CheckNote(topicInfo, note)) {
+                var condition = GetCondition(note);
+
+                if (condition is not null) {
+                    topicInfo.ExtraConditions.Add(condition);
                     topicInfo.Prompt.RemoveNote(note);
                 }
             }
 
-            foreach (var note in topicInfo.AllNotes()) {
-                if (CheckNote(topicInfo, note)) {
-                    foreach (var response in topicInfo.Responses) {
+            var lastWasHit = false;
+            for (var i = 0; i < topicInfo.Responses.Count; i++) {
+                var response = topicInfo.Responses[i];
+                foreach (var note in response.Notes()) {
+                    var condition = GetCondition(note);
+
+                    if (condition is null) {
+                        lastWasHit = false;
+                    } else {
+                        if (lastWasHit) {
+                            // Second hit in a row - split off the responses
+                            var workingTopic = topic;
+                            var workingTopicInfo = topicInfo;
+
+                            var lastResponse = topicInfo.Responses[i - 1];
+                            var lastTopicInfo = topicInfo.CopyWith([lastResponse]);
+
+                            if (i > 1) {
+                                // If last response is not the first one, we need to split this off from the start of the topic info
+                                var lastUntilEndTopicInfo = topicInfo.CopyWith(topicInfo.Responses[(i - 1)..]);
+                                (workingTopic, workingTopicInfo) = topicInfo.SplitOffDialogue(lastUntilEndTopicInfo);
+                                workingTopic ??= topic;
+                            }
+
+                            if (topicInfo.Responses.Count > i) {
+                                // If there are more responses after the current one, we need to split off the next response via invisible continue
+                                var (_, splitOffTopicInfo) = workingTopicInfo.SplitOffDialogue(lastTopicInfo);
+
+                                var currentTopicInfo = splitOffTopicInfo.CopyWith([response]);
+                                currentTopicInfo.ExtraConditions.RemoveWhere(x => x.Data is GetPCIsSexConditionData);
+                                currentTopicInfo.ExtraConditions.Add(condition);
+
+                                // Add current topic info to the split off topic
+                                workingTopic.TopicInfos.Add(currentTopicInfo);
+
+                                // Remove current topic info from the split off topic info
+                                splitOffTopicInfo.Links[0].TopicInfos[0].Responses.RemoveAt(0);
+                            } else {
+                                // If this is the last response, we just split this into two separate topic infos
+                                workingTopic.TopicInfos.Remove(topicInfo);
+                                workingTopic.TopicInfos.Add(lastTopicInfo);
+
+                                var currentTopicInfo = lastTopicInfo.CopyWith([response]);
+                                currentTopicInfo.ExtraConditions.RemoveWhere(x => x.Data is GetPCIsSexConditionData);
+                                currentTopicInfo.ExtraConditions.Add(condition);
+
+                                workingTopic.TopicInfos.Add(currentTopicInfo);
+                            }
+                        } else {
+                            topicInfo.ExtraConditions.Add(condition);
+                        }
+
+                        lastWasHit = true;
                         response.RemoveNote(note);
                     }
                 }
@@ -28,7 +83,7 @@ public sealed partial class PlayerIsSexChecker : IDialogueTopicProcessor {
         }
     }
 
-    public bool CheckNote(DialogueTopicInfo topicInfo, Note note) {
+    public Condition? GetCondition(Note note) {
         var match = PlayerSexRegex.Match(note.Text);
         if (match.Success) {
             var maleFemaleGender = match.Groups[1].Value.ToLower() switch {
@@ -37,15 +92,11 @@ public sealed partial class PlayerIsSexChecker : IDialogueTopicProcessor {
                 _ => throw new InvalidOperationException(),
             };
 
-            topicInfo.ExtraConditions.Add(
-                new GetPCIsSexConditionData {
-                    MaleFemaleGender = maleFemaleGender,
-                }.ToConditionFloat()
-            );
-
-            return true;
+            return new GetPCIsSexConditionData {
+                MaleFemaleGender = maleFemaleGender,
+            }.ToConditionFloat();
         }
 
-        return false;
+        return null;
     }
 }
