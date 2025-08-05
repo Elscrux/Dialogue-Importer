@@ -67,7 +67,7 @@ public sealed partial class PythonEmotionClassifierProvider : ReactiveObject, IE
             _pythonEmotionClassifier = _emotionClassifierFactory(PythonDllPath);
             PythonState = LoadState.Loaded;
         } catch (Exception e) {
-            Console.WriteLine($"Failed to load emotion classifier: {e.Message}");
+            Console.WriteLine($"Failed to load emotion classifier: {e.StackTrace}");
             PythonState = LoadState.NotLoaded;
         }
     }
