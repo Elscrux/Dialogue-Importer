@@ -61,7 +61,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new StealingProcessor(),
             new TauntProcessor(),
             new TransformWerewolfProcessor(),
-            new TrespassingProcessor(),
+            new TrespassingProcessor(_context),
             new UseMeleeNonCombatProcessor(),
         ];
 

@@ -4,11 +4,12 @@ using DialogueImplementationTool.Extension;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
-public sealed class TrespassingProcessor : DialogueTypeProcessor {
+public sealed class TrespassingProcessor(IDialogueContext context) : DialogueTypeProcessor {
     protected override bool IsApplicable(DialogTopic.SubtypeEnum subtype) =>
         subtype is DialogTopic.SubtypeEnum.Trespass or DialogTopic.SubtypeEnum.TrespassAgainstNC;
 
     protected override IEnumerable<Condition> GetConditions(string description, DialogueTopicInfo topicInfo) {
+        GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new NewDialogueTopicFactory(context, 255));
         switch (description) {
             case "Trespassing first caught":
                 yield return new IsTrespassingConditionData { RunOnType = Condition.RunOnType.Target }.ToConditionFloat();

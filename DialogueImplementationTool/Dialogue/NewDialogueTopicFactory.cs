@@ -5,7 +5,7 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue;
 
-public sealed class NewDialogueTopicFactory(IDialogueContext context) : IGenericDialogueTopicFactory {
+public sealed class NewDialogueTopicFactory(IDialogueContext context, int? priority = null) : IGenericDialogueTopicFactory {
     public DialogTopic Create(IQuestGetter quest, DialogueTopicInfo topicInfo) {
         var category = GenericMetaData.GetCategory(topicInfo.MetaData);
         var subtype = GenericMetaData.GetSubtype(topicInfo.MetaData);
@@ -24,6 +24,9 @@ public sealed class NewDialogueTopicFactory(IDialogueContext context) : IGeneric
                 Subtype = subtype,
                 SubtypeName = subtype.ToRecordType(),
             };
+            if (priority.HasValue) {
+                dialogTopic.Priority = priority.Value;
+            }
             context.AddRecord(dialogTopic);
         } else {
             dialogTopic = context.GetTopic(matchingTopic.FormKey);
