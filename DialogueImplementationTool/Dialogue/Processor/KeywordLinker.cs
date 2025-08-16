@@ -95,6 +95,16 @@ public sealed partial class KeywordLinker : IConversationProcessor {
                 InvisibleContinue: true,
                 Links: [{ TopicInfos: [{} invisibleContinue] }]
             }) {
+                if (invisibleContinue.Responses[0].HasNote(keyword)) {
+                    // If the invisible continue has the keyword, the work is already done
+                    removeNotes.Add(() => {
+                        invisibleContinue.Responses[0].RemoveNote(keyword);
+                        invisibleContinue.RemoveRedundantResponses();
+                        removeNote(linkTopicInfo);
+                    });
+                    return;
+                }
+
                 linkTopicInfo = invisibleContinue;
             }
             if (linkTopicInfo.Links.Count > 0) {
