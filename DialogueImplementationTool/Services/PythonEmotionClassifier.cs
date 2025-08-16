@@ -34,6 +34,7 @@ public sealed class PythonEmotionClassifier : IDisposable, IEmotionClassifier {
             transformers.pipeline("text-classification", "michellejieli/emotion_text_classifier"),
             transformers.pipeline("text-classification", "jitesh/emotion-english"),
             transformers.pipeline("text-classification", "HarshV9/emotion-english-distilroberta-base"),
+            transformers.pipeline("text-classification", "bhadresh-savani/distilbert-base-uncased-emotion"),
         ];
     }
 
