@@ -23,16 +23,14 @@ public sealed partial class PlayerIsSexChecker : IDialogueTopicProcessor {
                 }
             }
 
-            var lastWasHit = false;
+            var lastWasHit = int.MinValue;
             for (var i = 0; i < topicInfo.Responses.Count; i++) {
                 var response = topicInfo.Responses[i];
                 foreach (var note in response.Notes()) {
                     var condition = GetCondition(note);
 
-                    if (condition is null) {
-                        lastWasHit = false;
-                    } else {
-                        if (lastWasHit) {
+                    if (condition is not null) {
+                        if (lastWasHit == i - 1) {
                             // Second hit in a row - split off the responses
                             var workingTopic = topic;
                             var workingTopicInfo = topicInfo;
@@ -47,7 +45,7 @@ public sealed partial class PlayerIsSexChecker : IDialogueTopicProcessor {
                                 workingTopic ??= topic;
                             }
 
-                            if (topicInfo.Responses.Count > i) {
+                            if (workingTopicInfo.Responses.Count > i + 1) {
                                 // If there are more responses after the current one, we need to split off the next response via invisible continue
                                 var (_, splitOffTopicInfo) = workingTopicInfo.SplitOffDialogue(lastTopicInfo);
 
@@ -62,20 +60,18 @@ public sealed partial class PlayerIsSexChecker : IDialogueTopicProcessor {
                                 splitOffTopicInfo.Links[0].TopicInfos[0].Responses.RemoveAt(0);
                             } else {
                                 // If this is the last response, we just split this into two separate topic infos
-                                workingTopic.TopicInfos.Remove(topicInfo);
-                                workingTopic.TopicInfos.Add(lastTopicInfo);
-
-                                var currentTopicInfo = lastTopicInfo.CopyWith([response]);
+                                var currentTopicInfo = workingTopicInfo.CopyWith([workingTopicInfo.Responses[^1]]);
                                 currentTopicInfo.ExtraConditions.RemoveWhere(x => x.Data is GetPCIsSexConditionData);
                                 currentTopicInfo.ExtraConditions.Add(condition);
 
+                                workingTopicInfo.Responses.RemoveAt(workingTopicInfo.Responses.Count - 1);
                                 workingTopic.TopicInfos.Add(currentTopicInfo);
                             }
                         } else {
                             topicInfo.ExtraConditions.Add(condition);
                         }
 
-                        lastWasHit = true;
+                        lastWasHit = i;
                         response.RemoveNote(note);
                     }
                 }
