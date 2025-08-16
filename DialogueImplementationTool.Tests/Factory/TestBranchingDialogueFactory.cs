@@ -511,4 +511,58 @@ public sealed class TestBranchingDialogueFactory {
         seventhLink.TopicInfos[0].InvisibleContinue.Should().BeFalse();
         seventhLink.TopicInfos[0].Links.Should().HaveCount(4);
     }
+
+    [Fact]
+    public void TestGelarSathrinDialogue() {
+        // Import
+        var dialogue = TestSamples.GetGelarSathrinDialogue(_testConstants);
+
+        // Process
+        Conversation conversation = [dialogue];
+        _testConstants.Quest.EditorID = "DialogueQuest";
+        _testConstants.DialogueProcessor.Process(conversation);
+
+        // Check
+        conversation[0].Topics.Should().HaveCount(4);
+        conversation[0].Topics[2].TopicInfos.Should().ContainSingle();
+
+        var thirdTopic = conversation[0].Topics[2].TopicInfos[0];
+        thirdTopic.Links.Should().HaveCount(6);
+        thirdTopic.InvisibleContinue.Should().BeFalse();
+
+        var thirdLink = thirdTopic.Links[2];
+        thirdLink.TopicInfos.Should().ContainSingle();
+        thirdLink.TopicInfos[0].SharedInfo.Should().NotBeNull();
+        thirdLink.TopicInfos[0].Responses.Should().HaveCount(2);
+        thirdLink.TopicInfos[0].InvisibleContinue.Should().BeFalse();
+        thirdLink.TopicInfos[0].Links.Should().HaveCount(6);
+
+        var fourthLink = thirdTopic.Links[3];
+        fourthLink.TopicInfos.Should().ContainSingle();
+        fourthLink.TopicInfos[0].SharedInfo.Should().NotBeNull();
+        fourthLink.TopicInfos[0].Responses.Should().HaveCount(2);
+        fourthLink.TopicInfos[0].InvisibleContinue.Should().BeTrue();
+        fourthLink.TopicInfos[0].Links.Should().ContainSingle();
+
+        var fourthLinkTopic = thirdTopic.Links[3].TopicInfos[0].Links[0];
+        fourthLinkTopic.TopicInfos.Should().ContainSingle();
+        fourthLinkTopic.TopicInfos[0].SharedInfo.Should().BeNull();
+        fourthLinkTopic.TopicInfos[0].Responses.Should().ContainSingle();
+        fourthLinkTopic.TopicInfos[0].InvisibleContinue.Should().BeFalse();
+        fourthLinkTopic.TopicInfos[0].Links.Should().HaveCount(6);
+
+        var fifthTopic = thirdTopic.Links[4];
+        fifthTopic.TopicInfos.Should().HaveCount(2);
+
+        fifthTopic.TopicInfos[0].SharedInfo.Should().BeNull();
+        fifthTopic.TopicInfos[0].Responses.Should().ContainSingle();
+        fifthTopic.TopicInfos[0].InvisibleContinue.Should().BeTrue();
+        fifthTopic.TopicInfos[0].Links.Should().ContainSingle();
+        fifthTopic.TopicInfos[0].Links[0].TopicInfos.Should().HaveCount(2);
+
+        fifthTopic.TopicInfos[0].SharedInfo.Should().BeNull();
+        fifthTopic.TopicInfos[1].Responses.Should().ContainSingle();
+        fifthTopic.TopicInfos[1].InvisibleContinue.Should().BeFalse();
+        fifthTopic.TopicInfos[1].Links.Should().HaveCount(6);
+    }
 }

@@ -156,4 +156,12 @@ public static class TestSamples {
 
         return GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 2);
     }
+
+    public static GeneratedDialogue
+        GetGelarSathrinDialogue(TestConstants testConstants) {
+        var docXDocumentParser = new DocXDocumentParser(
+            Path.GetFullPath("../../../Samples/Documents/Gelar Sathrin.docx"));
+
+        return GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 0);
+    }
 }
