@@ -17,11 +17,19 @@ public sealed partial class BackToOptionsLinker : IConversationProcessor {
             }
 
             // Links can contain an explicit back to options link
-            foreach (var topic in generatedDialogue.Topics.EnumerateLinks(true)) {
-                foreach (var info in topic.TopicInfos) {
-                    foreach (var link in info.Links) {
-                        AddBackToOptionsLink(link, info);
-                    }
+            foreach (var topic in generatedDialogue.Topics) {
+                Process(topic, null);
+            }
+        }
+    }
+
+    public void Process(DialogueTopic topic, DialogueTopicInfo? incomingLinkNotInvisibleContinue) {
+        foreach (var info in topic.TopicInfos) {
+            foreach (var link in info.Links) {
+                var linkNotInvisibleContinue = info.InvisibleContinue ? incomingLinkNotInvisibleContinue : info;
+                Process(link, linkNotInvisibleContinue);
+                if (linkNotInvisibleContinue is not null) {
+                    AddBackToOptionsLink(link, linkNotInvisibleContinue);
                 }
             }
         }
