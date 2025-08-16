@@ -87,6 +87,7 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
             }
 
             var dialogResponses = topicInfo.SharedInfo.GetResponseData(quest, Context, TopicInfos, GetConditions);
+            dialogResponses.Conditions.AddRange(topicInfo.ExtraConditions);
             dialogResponses.PreviousDialog = previousDialog;
             dialogResponses.Flags = flags;
 
