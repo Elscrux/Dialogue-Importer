@@ -7,6 +7,19 @@ namespace DialogueImplementationTool.Dialogue.Model;
 
 [DebuggerDisplay("{ToString()}")]
 public class DialogueResponse : DialogueText, IEqualityComparer<DialogueResponse> {
+    public static DialogueResponse FromResponse(DialogueResponse response) {
+        return new DialogueResponse {
+            Text = response.Text,
+            Response = response.Response,
+            ScriptNote = response.ScriptNote,
+            Emotion = response.Emotion,
+            EmotionValue = response.EmotionValue,
+            SpeakerIdle = response.SpeakerIdle,
+            StartNotes = [..response.StartNotes],
+            EndsNotes = [..response.EndsNotes],
+        };
+    }
+
     public string Response {
         get => Text;
         set => Text = value;

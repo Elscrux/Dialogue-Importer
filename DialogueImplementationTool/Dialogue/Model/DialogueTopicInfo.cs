@@ -79,7 +79,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
             Goodbye = Goodbye,
             InvisibleContinue = InvisibleContinue,
             Random = Random,
-            Responses = newResponses.ToList(),
+            Responses = newResponses.Select(DialogueResponse.FromResponse).ToList(),
             Links = Links.ToList(),
             ExtraConditions = ExtraConditions.ToList(),
             Script = new DialogueScript(Script),
