@@ -52,6 +52,7 @@ public sealed partial class PlayerIsSexChecker : IDialogueTopicProcessor {
                                 var currentTopicInfo = splitOffTopicInfo.CopyWith([response]);
                                 currentTopicInfo.ExtraConditions.RemoveWhere(x => x.Data is GetPCIsSexConditionData);
                                 currentTopicInfo.ExtraConditions.Add(condition);
+                                currentTopicInfo.RemoveNote(note);
 
                                 // Add current topic info to the split off topic
                                 workingTopic.TopicInfos.Add(currentTopicInfo);
@@ -63,6 +64,7 @@ public sealed partial class PlayerIsSexChecker : IDialogueTopicProcessor {
                                 var currentTopicInfo = workingTopicInfo.CopyWith([workingTopicInfo.Responses[^1]]);
                                 currentTopicInfo.ExtraConditions.RemoveWhere(x => x.Data is GetPCIsSexConditionData);
                                 currentTopicInfo.ExtraConditions.Add(condition);
+                                currentTopicInfo.RemoveNote(note);
 
                                 workingTopicInfo.Responses.RemoveAt(workingTopicInfo.Responses.Count - 1);
                                 workingTopic.TopicInfos.Add(currentTopicInfo);
