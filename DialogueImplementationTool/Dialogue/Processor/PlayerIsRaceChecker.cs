@@ -47,13 +47,13 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicProcessor {
     public void Process(DialogueTopic topic) {
         foreach (var topicInfo in topic.TopicInfos) {
             foreach (var note in topicInfo.Prompt.Notes()) {
-                if (CheckNote(topicInfo, note)) {
+                if (CheckNote(note)) {
                     topicInfo.Prompt.RemoveNote(note);
                 }
             }
 
             foreach (var note in topicInfo.AllNotes()) {
-                if (CheckNote(topicInfo, note)) {
+                if (CheckNote(note)) {
                     foreach (var response in topicInfo.Responses) {
                         response.RemoveNote(note);
                     }
@@ -62,12 +62,13 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicProcessor {
         }
     }
 
-    private static bool CheckNote(DialogueTopicInfo topicInfo, Note note) {
+    private static bool CheckNote(Note note) {
         var match = IsRaceRegex.Match(note.Text);
         if (!match.Success) return false;
 
         var text = note.Text;
         var negated = NegatedRegex.IsMatch(text);
+        var conditions = new List<Condition>();
         while (match.Success) {
             var matchingRace = match.Groups.Values.Skip(1).FirstOrDefault(x => x.Success);
             if (matchingRace is null) break;
@@ -75,44 +76,50 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicProcessor {
             var (regular, vampire) = RaceFormKeys[match.Groups.Values.IndexOf(matchingRace)];
 
             if (negated) {
-                AddNegatedConditions(topicInfo, regular, vampire);
+                AddNegatedConditions(regular, vampire);
             } else {
-                AddConditions(topicInfo, regular, vampire);
+                AddConditions(regular, vampire);
             }
 
             text = text.Replace(matchingRace.Value, string.Empty);
             match = IsRaceRegex.Match(text);
         }
 
+        if (!negated) {
+            // Add OR between block of all race conditions
+            foreach (var condition in conditions.Take(conditions.Count - 1)) {
+                condition.Flags |= Condition.Flag.OR;
+            }
+        }
+
         return true;
-    }
 
-    private static void AddConditions(DialogueTopicInfo topicInfo, FormKey regular, FormKey vampire) {
-        topicInfo.ExtraConditions.Add(new ConditionFloat {
-            Data = new GetPCIsRaceConditionData { Race = { Link = { FormKey = regular } } },
-            ComparisonValue = 1,
-            CompareOperator = CompareOperator.EqualTo,
-            Flags = Condition.Flag.OR,
-        });
+        void AddConditions(FormKey regular, FormKey vampire) {
+            conditions.Add(new ConditionFloat {
+                Data = new GetPCIsRaceConditionData { Race = { Link = { FormKey = regular } } },
+                ComparisonValue = 1,
+                CompareOperator = CompareOperator.EqualTo,
+            });
 
-        topicInfo.ExtraConditions.Add(new ConditionFloat {
-            Data = new GetPCIsRaceConditionData { Race = { Link = { FormKey = vampire } } },
-            ComparisonValue = 1,
-            CompareOperator = CompareOperator.EqualTo,
-        });
-    }
+            conditions.Add(new ConditionFloat {
+                Data = new GetPCIsRaceConditionData { Race = { Link = { FormKey = vampire } } },
+                ComparisonValue = 1,
+                CompareOperator = CompareOperator.EqualTo,
+            });
+        }
+        
+        void AddNegatedConditions(FormKey regular, FormKey vampire) {
+            conditions.Add(new ConditionFloat {
+                Data = new GetPCIsRaceConditionData { Race = { Link = { FormKey = regular } } },
+                ComparisonValue = 0,
+                CompareOperator = CompareOperator.EqualTo,
+            });
 
-    private static void AddNegatedConditions(DialogueTopicInfo topicInfo, FormKey regular, FormKey vampire) {
-        topicInfo.ExtraConditions.Add(new ConditionFloat {
-            Data = new GetPCIsRaceConditionData { Race = { Link = { FormKey = regular } } },
-            ComparisonValue = 0,
-            CompareOperator = CompareOperator.EqualTo,
-        });
-
-        topicInfo.ExtraConditions.Add(new ConditionFloat {
-            Data = new GetPCIsRaceConditionData { Race = { Link = { FormKey = vampire } } },
-            ComparisonValue = 0,
-            CompareOperator = CompareOperator.EqualTo,
-        });
+            conditions.Add(new ConditionFloat {
+                Data = new GetPCIsRaceConditionData { Race = { Link = { FormKey = vampire } } },
+                ComparisonValue = 0,
+                CompareOperator = CompareOperator.EqualTo,
+            });
+        }
     }
 }
