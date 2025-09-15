@@ -4,10 +4,10 @@ using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed partial class ActivePassiveChecker: IDialogueTopicInfoProcessor {
-    [GeneratedRegex("active", RegexOptions.IgnoreCase)]
+    [GeneratedRegex("^active", RegexOptions.IgnoreCase)]
     private static partial Regex ActiveRegex { get; }
 
-    [GeneratedRegex("passive", RegexOptions.IgnoreCase)]
+    [GeneratedRegex("^passive", RegexOptions.IgnoreCase)]
     private static partial Regex PassiveRegex { get; }
 
     public void Process(DialogueTopicInfo topicInfo) {
