@@ -176,7 +176,7 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
                 speakerStages[speaker.FormLink.FormKey] =
                     (speakerStages[speaker.FormLink.FormKey].StartStage, (ushort) (stage + 1));
 
-                foreach (var (lockMatch, _) in grouping.Distinct()) {
+                foreach (var (lockMatch, _) in grouping.Where(x => x.Lock == isLocking).Distinct()) {
                     // Check for any keywords in note, to catch something like [unlock HERE, NOW, MERGE]
                     // Remove [Lock HERE] or [Unlock HERE]
                     foreach (var response in lockMatch.TopicInfo.Responses) {
