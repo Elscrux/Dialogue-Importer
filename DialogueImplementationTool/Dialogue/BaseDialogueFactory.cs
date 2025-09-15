@@ -208,38 +208,9 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
     }
 
     public ExtendedList<Condition> GetConditions(DialogueTopicInfo topicInfo) {
-        var list = new ExtendedList<Condition>();
+        var speakerCondition = Context.GetSpeakerCondition(topicInfo.Speaker);
+        if (speakerCondition is null) return [..topicInfo.ExtraConditions];
 
-        if (topicInfo.Speaker is AliasSpeaker aliasSpeaker) {
-            list.Add(new GetIsAliasRefConditionData {
-                ReferenceAliasIndex = aliasSpeaker.AliasIndex,
-            }.ToConditionFloat());
-        } else if (Context.LinkCache.TryResolve<INpcGetter>(topicInfo.Speaker.FormLink.FormKey, out var npc)) {
-            list.Add(new GetIsIDConditionData {
-                Object = {
-                    Link = { FormKey = npc.FormKey }
-                }
-            }.ToConditionFloat());
-        } else if (Context.LinkCache.TryResolve<IFactionGetter>(topicInfo.Speaker.FormLink.FormKey, out var faction)) {
-            list.Add(new GetInFactionConditionData {
-                Faction = { Link = { FormKey = faction.FormKey } }
-            }.ToConditionFloat());
-        } else if (Context.LinkCache.TryResolve<IVoiceTypeGetter>(topicInfo.Speaker.FormLink.FormKey, out var voiceType)) {
-            list.Add(new GetIsVoiceTypeConditionData {
-                VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } }
-            }.ToConditionFloat());
-        } else if (Context.LinkCache.TryResolve<IFormListGetter>(topicInfo.Speaker.FormLink.FormKey, out var formList)) {
-            list.Add(new GetIsVoiceTypeConditionData {
-                VoiceTypeOrList = { Link = { FormKey = formList.FormKey } }
-            }.ToConditionFloat());
-        } else if (Context.LinkCache.TryResolve<ITalkingActivatorGetter>(topicInfo.Speaker.FormLink.FormKey, out var talkingActivator)) {
-            list.Add(new GetIsIDConditionData {
-                Object = { Link = { FormKey = talkingActivator.FormKey } }
-            }.ToConditionFloat());
-        }
-
-        list.AddRange(topicInfo.ExtraConditions);
-
-        return list;
+        return [speakerCondition, ..topicInfo.ExtraConditions];
     }
 }

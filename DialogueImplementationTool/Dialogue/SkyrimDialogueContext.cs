@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Dialogue.Speaker;
+using DialogueImplementationTool.Extension;
 using DialogueImplementationTool.Services;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
@@ -238,5 +239,47 @@ public sealed class SkyrimDialogueContext(
         where TMajorGetter : class, IMajorRecordGetter, IMajorRecordQueryableGetter {
         var context = environment.LinkCache.ResolveContext<TMajor, TMajorGetter>(formKeyGetter.FormKey);
         return context.GetOrAddAsOverride(mod);
+    }
+
+    public Condition? GetSpeakerCondition(ISpeaker speaker) {
+        if (speaker is AliasSpeaker aliasSpeaker) {
+            return new GetIsAliasRefConditionData {
+                ReferenceAliasIndex = aliasSpeaker.AliasIndex,
+            }.ToConditionFloat();
+        }
+
+        if (LinkCache.TryResolve<INpcGetter>(speaker.FormLink.FormKey, out var npc)) {
+            return new GetIsIDConditionData {
+                Object = {
+                    Link = { FormKey = npc.FormKey }
+                }
+            }.ToConditionFloat();
+        }
+
+        if (LinkCache.TryResolve<IFactionGetter>(speaker.FormLink.FormKey, out var faction)) {
+            return new GetInFactionConditionData {
+                Faction = { Link = { FormKey = faction.FormKey } }
+            }.ToConditionFloat();
+        }
+
+        if (LinkCache.TryResolve<IVoiceTypeGetter>(speaker.FormLink.FormKey, out var voiceType)) {
+            return new GetIsVoiceTypeConditionData {
+                VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } }
+            }.ToConditionFloat();
+        }
+
+        if (LinkCache.TryResolve<IFormListGetter>(speaker.FormLink.FormKey, out var formList)) {
+            return new GetIsVoiceTypeConditionData {
+                VoiceTypeOrList = { Link = { FormKey = formList.FormKey } }
+            }.ToConditionFloat();
+        }
+
+        if (LinkCache.TryResolve<ITalkingActivatorGetter>(speaker.FormLink.FormKey, out var talkingActivator)) {
+            return new GetIsIDConditionData {
+                Object = { Link = { FormKey = talkingActivator.FormKey } }
+            }.ToConditionFloat();
+        }
+
+        return null;
     }
 }
