@@ -82,6 +82,7 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                     SubtypeName = "CUST",
                     Responses = responses,
                 };
+                implementedDialogueTopicGetter = dialogTopic;
                 Context.AddRecord(dialogTopic);
 
                 // Set the starting topic
@@ -109,7 +110,9 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                     var nextIdentifier = GetIndex(topicInfo, rawTopic.Identifier, linkIndex + 1);
 
                     var currentLink = topicInfo.Links[linkIndex];
-                    var implementedLinkedTopic = Context.GetTopic(currentLink);
+                    var implementedLinkedTopic = currentLink.Equals(rawTopic.Topic)
+                        ? implementedDialogueTopicGetter
+                        :  Context.GetTopic(currentLink);
                     if (implementedLinkedTopic is null) {
                         // Topic not implemented yet
                         var linkedTopic = topicQueue.FirstOrDefault(x => currentLink.Equals(x.Topic));
