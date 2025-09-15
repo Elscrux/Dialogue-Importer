@@ -86,7 +86,7 @@ public sealed class SkyrimDialogueContext(
         return overrideTopic;
     }
 
-    public IDialogTopicGetter? GetTopic(DialogueTopic topic) {
+    public IDialogTopicGetter? GetTopic(DialogueTopic topic, Func<FormKey, DialogueTopic?> resolveIntermediateTopic) {
         foreach (var implementedTopic in environment.LinkCache.PriorityOrder.WinningOverrides<IDialogTopicGetter>()) {
             if (implementedTopic.Quest.FormKey != Quest.FormKey) continue;
 
@@ -142,19 +142,26 @@ public sealed class SkyrimDialogueContext(
                     var link = topicInfo.Links[i];
                     var linkedTopic = implementedTopicInfo.LinkTo[i].TryResolve(LinkCache);
 
-                    // Assume when the linked topic isn't implemented yet that it's probably the right one
-                    if (linkedTopic is null) continue;
+                    if (linkedTopic is null) {
+                        // In case the linked topic wasn't implemented yet, check the intermediate topic
+                        var intermediateTopic = resolveIntermediateTopic(implementedTopicInfo.LinkTo[i].FormKey);
 
-                    if (link.TopicInfos.Count != linkedTopic.Responses.Count) return false;
+                        // Assume when we can't find the topic at all that it's probably the right one
+                        if (intermediateTopic is null) continue;
 
-                    for (var j = 0; j < linkedTopic.Responses.Count; j++) {
-                        var linkedTopicInfo = linkedTopic.Responses[j];
-                        var linkTopicInfo = link.TopicInfos[j];
+                        if (!link.Equals(intermediateTopic)) return false;
+                    } else {
+                        if (link.TopicInfos.Count != linkedTopic.Responses.Count) return false;
 
-                        // Check responses
-                        if (linkedTopicInfo.ResponseData.IsNull != linkTopicInfo.SharedInfo is null) return false;
+                        for (var j = 0; j < linkedTopic.Responses.Count; j++) {
+                            var linkedTopicInfo = linkedTopic.Responses[j];
+                            var linkTopicInfo = link.TopicInfos[j];
 
-                        if (!CheckSharedInfo(linkTopicInfo, linkedTopicInfo)) return false;
+                            // Check responses
+                            if (linkedTopicInfo.ResponseData.IsNull != linkTopicInfo.SharedInfo is null) return false;
+
+                            if (!CheckSharedInfo(linkTopicInfo, linkedTopicInfo)) return false;
+                        }
                     }
                 }
             }

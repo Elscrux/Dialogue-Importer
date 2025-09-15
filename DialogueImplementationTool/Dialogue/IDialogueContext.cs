@@ -24,7 +24,7 @@ public interface IDialogueContext {
     void AddRecord<TMajorRecord>(TMajorRecord record) where TMajorRecord : IMajorRecord ;
     DialogTopic? GetTopic(string editorId);
     DialogTopic GetTopic(FormKey formKey);
-    IDialogTopicGetter? GetTopic(DialogueTopic topic);
+    IDialogTopicGetter? GetTopic(DialogueTopic topic, Func<FormKey, DialogueTopic?> resolveIntermediateTopic);
     IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IReadOnlyList<string> speakerNames);
     IFormLink<IQuestGetter> GetFavorDialogueQuest();
     DialogBranch? GetServiceBranch(ServiceType serviceType, FormKey defaultBranchFormKey);

@@ -70,7 +70,7 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
 
             var editorId = GetTopicEditorID(rawTopic.Identifier);
 
-            var implementedDialogueTopicGetter = Context.GetTopic(rawTopic.Topic);
+            var implementedDialogueTopicGetter = Context.GetTopic(rawTopic.Topic, ResolveIntermediateTopic);
             if (implementedDialogueTopicGetter is null) {
                 var dialogTopic = new DialogTopic(rawTopic.FormKey, Context.Release) {
                     EditorID = editorId,
@@ -112,7 +112,7 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                     var currentLink = topicInfo.Links[linkIndex];
                     var implementedLinkedTopic = currentLink.Equals(rawTopic.Topic)
                         ? implementedDialogueTopicGetter
-                        :  Context.GetTopic(currentLink);
+                        :  Context.GetTopic(currentLink, ResolveIntermediateTopic);
                     if (implementedLinkedTopic is null) {
                         // Topic not implemented yet
                         var linkedTopic = topicQueue.FirstOrDefault(x => currentLink.Equals(x.Topic));
@@ -189,6 +189,10 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                     char NumberChar() => (char) (48 + index);
                     char LetterChar() => (char) (64 + index);
                 }
+            }
+
+            DialogueTopic? ResolveIntermediateTopic(FormKey formKey) {
+                return topicQueue.FirstOrDefault(t => t.FormKey == formKey)?.Topic;
             }
         }
 
