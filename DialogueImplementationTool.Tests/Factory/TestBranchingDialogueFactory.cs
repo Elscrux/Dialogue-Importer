@@ -4,6 +4,7 @@ using DialogueImplementationTool.Tests.Samples;
 using FluentAssertions;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 namespace DialogueImplementationTool.Tests.Factory;
 
 public sealed class TestBranchingDialogueFactory {
@@ -564,5 +565,72 @@ public sealed class TestBranchingDialogueFactory {
         fifthTopic.TopicInfos[1].Responses.Should().ContainSingle();
         fifthTopic.TopicInfos[1].InvisibleContinue.Should().BeFalse();
         fifthTopic.TopicInfos[1].Links.Should().HaveCount(6);
+    }
+
+    [Fact]
+    public void TestIstiniaVasomoDialogue() {
+        // Import
+        var dialogue = TestSamples.GetIstiniaVasomoDialogue(_testConstants);
+
+        // Process
+        Conversation conversation = [dialogue];
+        _testConstants.Quest.EditorID = "DialogueQuest";
+        _testConstants.DialogueProcessor.Process(conversation);
+
+        // Check
+        conversation[0].Topics.Should().HaveCount(4);
+        conversation[0].Topics[0].TopicInfos.Should().ContainSingle();
+
+        var firstTopic = conversation[0].Topics[0].TopicInfos[0];
+        firstTopic.Links.Should().HaveCount(3);
+        firstTopic.InvisibleContinue.Should().BeFalse();
+
+        var firstLink = firstTopic.Links[0];
+        firstLink.TopicInfos.Should().ContainSingle();
+        firstLink.TopicInfos[0].SharedInfo.Should().BeNull();
+        firstLink.TopicInfos[0].Responses.Should().ContainSingle();
+        firstLink.TopicInfos[0].InvisibleContinue.Should().BeTrue();
+        firstLink.TopicInfos[0].Links.Should().ContainSingle();
+
+        var firstLinkLink = firstLink.TopicInfos[0].Links[0];
+        firstLinkLink.TopicInfos.Should().ContainSingle();
+        firstLinkLink.TopicInfos[0].SharedInfo.Should().NotBeNull();
+        firstLinkLink.TopicInfos[0].Responses.Should().ContainSingle();
+        firstLinkLink.TopicInfos[0].InvisibleContinue.Should().BeTrue();
+        firstLinkLink.TopicInfos[0].Links.Should().ContainSingle();
+
+        var firstLinkLinkLink = firstLinkLink.TopicInfos[0].Links[0];
+        firstLinkLinkLink.TopicInfos.Should().ContainSingle();
+        firstLinkLinkLink.TopicInfos[0].SharedInfo.Should().NotBeNull();
+        firstLinkLinkLink.TopicInfos[0].Responses.Should().ContainSingle();
+        firstLinkLinkLink.TopicInfos[0].InvisibleContinue.Should().BeTrue();
+        firstLinkLinkLink.TopicInfos[0].Links.Should().ContainSingle();
+
+        var firstLinkLinkLinkLink = firstLinkLinkLink.TopicInfos[0].Links[0];
+        firstLinkLinkLinkLink.TopicInfos.Should().ContainSingle();
+        firstLinkLinkLinkLink.TopicInfos[0].SharedInfo.Should().BeNull();
+        firstLinkLinkLinkLink.TopicInfos[0].Responses.Should().ContainSingle();
+        firstLinkLinkLinkLink.TopicInfos[0].InvisibleContinue.Should().BeFalse();
+        firstLinkLinkLinkLink.TopicInfos[0].Links.Should().BeEmpty();
+
+        // Implement
+        conversation.Create();
+
+        // Check that all invisible continues were implemented correctly
+        _testConstants.Mod.DialogTopics.Should().HaveCount(26);
+        var topicEditorIds = _testConstants.Mod.DialogTopics.Select(x => x.EditorID).WhereNotNull().ToArray();
+        topicEditorIds.Should().Contain(x => x.EndsWith("1TopicA"));
+        topicEditorIds.Should().Contain(x => x.EndsWith("1TopicA_"));
+        topicEditorIds.Should().Contain(x => x.EndsWith("1TopicA__"));
+        topicEditorIds.Should().Contain(x => x.EndsWith("1TopicA___"));
+        topicEditorIds.Should().NotContain(x => x.EndsWith("1TopicA____"));
+        topicEditorIds.Should().Contain(x => x.EndsWith("1TopicB"));
+        topicEditorIds.Should().Contain(x => x.EndsWith("1TopicB_"));
+        topicEditorIds.Should().Contain(x => x.EndsWith("1TopicB__"));
+        topicEditorIds.Should().NotContain(x => x.EndsWith("1TopicB___"));
+        topicEditorIds.Should().Contain(x => x.EndsWith("1TopicC"));
+        topicEditorIds.Should().Contain(x => x.EndsWith("1TopicC_"));
+        topicEditorIds.Should().Contain(x => x.EndsWith("1TopicC__"));
+        topicEditorIds.Should().NotContain(x => x.EndsWith("1TopicC___"));
     }
 }

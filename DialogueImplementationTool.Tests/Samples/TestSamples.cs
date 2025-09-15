@@ -164,4 +164,12 @@ public static class TestSamples {
 
         return GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 0);
     }
+
+    public static GeneratedDialogue
+        GetIstiniaVasomoDialogue(TestConstants testConstants) {
+        var docXDocumentParser = new DocXDocumentParser(
+            Path.GetFullPath("../../../Samples/Documents/Istinia Vasomo.docx"));
+
+        return GetDialogue(testConstants, docXDocumentParser, DialogueType.Dialogue, 0);
+    }
 }
