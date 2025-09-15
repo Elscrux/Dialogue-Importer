@@ -207,7 +207,13 @@ public sealed class DocXDocumentParser
             }
 
             if (count == 0) {
-                if (enumerator.MoveNext()) continue;
+                if (enumerator.MoveNext()) {
+                    if (!abort && enumerator.Current.IndentLevel == startingIndentation) continue;
+
+                    // In case we don't keep going, we need to yield the topicInfo we have so far
+                    processor.Process(topicInfo);
+                    yield return topicInfo;
+                }
 
                 break;
             }
