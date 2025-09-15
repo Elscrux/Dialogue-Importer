@@ -47,13 +47,13 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicProcessor {
     public void Process(DialogueTopic topic) {
         foreach (var topicInfo in topic.TopicInfos) {
             foreach (var note in topicInfo.Prompt.Notes()) {
-                if (CheckNote(note)) {
+                if (CheckNote(note, topicInfo)) {
                     topicInfo.Prompt.RemoveNote(note);
                 }
             }
 
             foreach (var note in topicInfo.AllNotes()) {
-                if (CheckNote(note)) {
+                if (CheckNote(note, topicInfo)) {
                     foreach (var response in topicInfo.Responses) {
                         response.RemoveNote(note);
                     }
@@ -62,7 +62,7 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicProcessor {
         }
     }
 
-    private static bool CheckNote(Note note) {
+    private static bool CheckNote(Note note, DialogueTopicInfo topicInfo) {
         var match = IsRaceRegex.Match(note.Text);
         if (!match.Success) return false;
 
@@ -91,6 +91,8 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicProcessor {
                 condition.Flags |= Condition.Flag.OR;
             }
         }
+
+        topicInfo.ExtraConditions.AddRange(conditions);
 
         return true;
 
