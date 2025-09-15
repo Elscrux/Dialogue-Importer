@@ -122,6 +122,10 @@ public sealed class SkyrimDialogueContext(
                 if (topicInfo.Random != implementedTopicInfo.Flags?.Flags.HasFlag(DialogResponses.Flag.Random)) return false;
                 if (topicInfo.SayOnce != implementedTopicInfo.Flags?.Flags.HasFlag(DialogResponses.Flag.SayOnce)) return false;
 
+                // Check speaker
+                var speakerCondition = GetSpeakerCondition(topicInfo.Speaker);
+                if (!implementedTopicInfo.Conditions.Contains(speakerCondition)) return false;
+
                 // Check conditions - expect exactly one condition for the speaker and the rest to be extra conditions
                 if (topicInfo.ExtraConditions.Any(c => !implementedTopicInfo.Conditions.Contains(c))) return false;
 
