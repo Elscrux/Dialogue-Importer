@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -12,6 +11,8 @@ using DialogueImplementationTool.Dialogue.Processor;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using SkiaSharp;
+using Xceed.Drawing;
 namespace DialogueImplementationTool.Parser;
 
 public sealed class OpenDocumentTextParser
@@ -322,14 +323,14 @@ public sealed class OpenDocumentTextParser
                         Color.Black);
 
                 //Format "#112233"
-                var r = Convert.ToInt32(formattedText.TextStyle.TextProperties.FontColor.Substring(1, 2), 16);
-                var g = Convert.ToInt32(formattedText.TextStyle.TextProperties.FontColor.Substring(3, 2), 16);
-                var b = Convert.ToInt32(formattedText.TextStyle.TextProperties.FontColor.Substring(5, 2), 16);
+                var r = Convert.ToByte(formattedText.TextStyle.TextProperties.FontColor.Substring(1, 2), 16);
+                var g = Convert.ToByte(formattedText.TextStyle.TextProperties.FontColor.Substring(3, 2), 16);
+                var b = Convert.ToByte(formattedText.TextStyle.TextProperties.FontColor.Substring(5, 2), 16);
 
                 return new FormattedText(
                     formattedText.Text,
                     formattedText.TextStyle.TextProperties.Bold is not null,
-                    Color.FromArgb(r, g, b));
+                    new Color(new SKColor(r, g, b)));
             default: return new FormattedText(text.Text, false, Color.Black);
         }
     }

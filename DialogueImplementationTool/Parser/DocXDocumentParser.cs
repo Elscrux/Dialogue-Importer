@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -11,6 +10,7 @@ using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Xceed.Document.NET;
+using Xceed.Drawing;
 using Xceed.Words.NET;
 using Note = DialogueImplementationTool.Dialogue.Model.Note;
 namespace DialogueImplementationTool.Parser;
@@ -154,13 +154,12 @@ public sealed class DocXDocumentParser
         var topicInfos = _doc.Lists[index]
             .Items
             .Where(p => p.IndentLevel == FirstIndentationLevel)
-            .Select(
-                p => {
-                    var topicInfo = new DialogueTopicInfo();
-                    topicInfo.Responses.Add(processor.BuildResponse(GetFormattedText(p)));
-                    processor.Process(topicInfo);
-                    return topicInfo;
-                })
+            .Select(p => {
+                var topicInfo = new DialogueTopicInfo();
+                topicInfo.Responses.Add(processor.BuildResponse(GetFormattedText(p)));
+                processor.Process(topicInfo);
+                return topicInfo;
+            })
             .ToList();
 
         return [new DialogueTopic { TopicInfos = topicInfos }];
@@ -208,8 +207,9 @@ public sealed class DocXDocumentParser
             }
 
             if (count == 0) {
-                enumerator.MoveNext();
-                continue;
+                if (enumerator.MoveNext()) continue;
+
+                break;
             }
 
             if (abort) {
@@ -270,7 +270,7 @@ public sealed class DocXDocumentParser
             .Select(text => new FormattedText(
                 text.text,
                 text.formatting?.Bold ?? false,
-                text.formatting?.FontColor ?? Color.Black))
+                text.formatting?.FontColor ?? Xceed.Drawing.Color.Black))
             .ToList();
     }
 }

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Text.RegularExpressions;
 using DialogueImplementationTool.Dialogue.Model;
 using Noggog;
+using Xceed.Drawing;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed class TopicInfoNoteExtractor : IDialogueTopicInfoProcessor {
@@ -17,7 +17,7 @@ public sealed class TopicInfoNoteExtractor : IDialogueTopicInfoProcessor {
         ProcessNotes(
             topicInfo,
             NoteUtils.EndNoteRegex,
-            StringExt.TrimEnd,
+            StringExt.TrimStringFromEnd,
             topicInfo.Prompt.EndsNotes);
     }
 

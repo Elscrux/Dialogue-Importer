@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using DialogueImplementationTool.Services;
 using Mutagen.Bethesda.Json;
@@ -34,7 +35,7 @@ public partial class FormKeyCache {
 
     public FormKeyCache(EnvironmentContext context) {
         var source = string.Join(", ", context.Environment.LoadOrder.ListedOrder.Select(mod => mod.ModKey.FileName.String));
-        var hashData = SHA256.HashData(source.ToBytes());
+        var hashData = SHA256.HashData(Encoding.UTF8.GetBytes(source));
         var hexString = hashData.ToHexString();
         _contextHash = hexString;
         _cache = LoadSelection();

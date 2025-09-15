@@ -10,6 +10,7 @@ using DialogueImplementationTool.UI.Services;
 using DialogueImplementationTool.UI.ViewModels;
 using DialogueImplementationTool.UI.Views;
 using Mutagen.Bethesda;
+using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Order.DI;
 namespace DialogueImplementationTool.UI;
@@ -92,7 +93,7 @@ public partial class App {
         var container = builder.Build();
 
         using var scope = container.BeginLifetimeScope();
-        var pathProvider = new PluginListingsPathProvider();
+        var pathProvider = new PluginListingsPathProvider(new DataDirectoryInjection(string.Empty));
         var path = pathProvider.Get(GameRelease.SkyrimSE);
         if (!File.Exists(path)) MessageBox.Show($"Make sure {path} exists.");
 

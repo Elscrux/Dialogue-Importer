@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Parser;
+using Xceed.Drawing;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed class ScriptNotesParser : IDialogueResponseProcessor {

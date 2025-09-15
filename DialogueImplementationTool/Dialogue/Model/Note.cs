@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
+using Xceed.Drawing;
 namespace DialogueImplementationTool.Dialogue.Model;
 
 public sealed class Note {

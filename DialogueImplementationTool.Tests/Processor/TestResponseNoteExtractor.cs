@@ -1,8 +1,8 @@
-﻿using System.Drawing;
-using DialogueImplementationTool.Dialogue.Model;
+﻿using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Dialogue.Processor;
 using DialogueImplementationTool.Parser;
 using FluentAssertions;
+using Xceed.Drawing;
 namespace DialogueImplementationTool.Tests.Processor;
 
 public sealed class TestResponseNoteExtractor {

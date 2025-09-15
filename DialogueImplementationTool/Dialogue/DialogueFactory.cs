@@ -131,10 +131,10 @@ public sealed class DialogueFactory(IDialogueContext context) : BaseDialogueFact
                             }
                         }
 
-                        responses[topicInfoIndex].LinkTo.Add(new FormLink<IDialogGetter>(linkedTopic.FormKey));
+                        responses[topicInfoIndex].LinkTo.Add(new FormLink<IDialogTopicGetter>(linkedTopic.FormKey));
                     } else {
                         // Use existing implemented topic
-                        responses[topicInfoIndex].LinkTo.Add(new FormLink<IDialogGetter>(implementedLinkedTopic.FormKey));
+                        responses[topicInfoIndex].LinkTo.Add(new FormLink<IDialogTopicGetter>(implementedLinkedTopic.FormKey));
 
                         // In case our identifier is shorter than the existing one,
                         // we need update it to keep the tree structure flat

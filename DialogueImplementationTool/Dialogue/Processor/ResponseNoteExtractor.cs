@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Parser;
 using Noggog;
+using Xceed.Drawing;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed partial class ResponseNoteExtractor : IDialogueResponseProcessor {
@@ -20,7 +20,7 @@ public sealed partial class ResponseNoteExtractor : IDialogueResponseProcessor {
             x => x);
         ProcessNotes(
             NoteUtils.EndNoteRegex,
-            StringExt.TrimEnd,
+            StringExt.TrimStringFromEnd,
             (s, i) => s[..^i],
             response.EndsNotes,
             x => x.Reverse());
