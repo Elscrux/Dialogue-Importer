@@ -104,7 +104,7 @@ public sealed class SharedInfoConverter : IConversationProcessor {
             if (commonSharedLine.SharedLines.TrueForAll(x => x.Users.TrueForAll(link => link.Last is not null))
              && firstShared.Users
                     .Skip(1)
-                    .All(x => x.TopicInfoUsingLine.Links.SequenceEqual(firstShared.Users[0].TopicInfoUsingLine.Links))) {
+                    .All(x => Equals(x.Next, firstShared.Users[0].Next))) {
                 // Split off for all users
                 foreach (var (topicUsingLine, _, _) in firstShared.Users) {
                     var matchingTopicInfo = topicUsingLine
