@@ -6,13 +6,13 @@ using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed partial class DeadAliveChecker(IDialogueContext context) : IDialogueTopicProcessor {
-    [GeneratedRegex("(?:if )?(.+) is (?:still )?alive")]
+    [GeneratedRegex("(?:if )?(.+) is (?:still )?(alive|not dead)")]
     private static partial Regex AliveRegex { get; }
 
-    [GeneratedRegex("(?:if )?(.+) is dead")]
+    [GeneratedRegex("(?:if )?(.+) is (dead|not alive)")]
     private static partial Regex DeadRegex { get; }
 
-    [GeneratedRegex("and|or|not", RegexOptions.IgnoreCase)]
+    [GeneratedRegex("and|or", RegexOptions.IgnoreCase)]
     private static partial Regex ComplexCondition { get; }
 
     public void Process(DialogueTopic topic) {
