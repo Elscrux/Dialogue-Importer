@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using DialogueImplementationTool.Dialogue.Model;
 namespace DialogueImplementationTool.Dialogue.Processor;
@@ -8,6 +9,8 @@ public sealed partial class BackToOptionsLinker : IConversationProcessor {
     private static partial Regex Regex { get; }
 
     public void Process(Conversation conversation) {
+        var seenTopics = new HashSet<DialogueTopic>();
+        
         foreach (var generatedDialogue in conversation) {
             // Just remove back to option links from base topic
             // Going back to options here is the default behavior
@@ -21,15 +24,17 @@ public sealed partial class BackToOptionsLinker : IConversationProcessor {
                 Process(topic, null);
             }
         }
-    }
 
-    public void Process(DialogueTopic topic, DialogueTopicInfo? incomingLinkNotInvisibleContinue) {
-        foreach (var info in topic.TopicInfos) {
-            foreach (var link in info.Links) {
-                var linkNotInvisibleContinue = info.InvisibleContinue ? incomingLinkNotInvisibleContinue : info;
-                Process(link, linkNotInvisibleContinue);
-                if (linkNotInvisibleContinue is not null) {
-                    AddBackToOptionsLink(link, linkNotInvisibleContinue);
+        void Process(DialogueTopic topic, DialogueTopicInfo? incomingLinkNotInvisibleContinue) {
+            if (!seenTopics.Add(topic)) return;
+
+            foreach (var info in topic.TopicInfos) {
+                foreach (var link in info.Links) {
+                    var linkNotInvisibleContinue = info.InvisibleContinue ? incomingLinkNotInvisibleContinue : info;
+                    Process(link, linkNotInvisibleContinue);
+                    if (linkNotInvisibleContinue is not null) {
+                        AddBackToOptionsLink(link, linkNotInvisibleContinue);
+                    }
                 }
             }
         }
