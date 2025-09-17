@@ -40,67 +40,75 @@ public sealed partial class DeadAliveChecker(IDialogueContext context) : IDialog
             }
 
             // Handle response notes
-            for (var i = 0; i < topicInfo.Responses.Count; i++) {
-                var response = topicInfo.Responses[i];
-                var responseNotes = response.Notes();
+            bool? lastIsAlive = null;
+            var conditionsPerResponse = topicInfo.Responses
+                .Select(response => {
+                    // Find notes referencing alive or dead conditions and create conditions
+                    var conditions = new List<Condition>();
 
-                // Find notes referencing alive or dead conditions and create conditions
-                var conditions = new List<Condition>();
-                var notes = responseNotes
-                    .Where(note => {
-                        if (ComplexCondition.IsMatch(note.Text)) return false;
+                    var alive = 0;
+                    var dead = 0;
+                    foreach (var note in response.Notes()) {
+                        if (ComplexCondition.IsMatch(note.Text)) continue;
 
                         var aliveMatch = AliveRegex.Match(note.Text);
-                        if (aliveMatch.Success) {
-                            conditions.Add(GetCondition(aliveMatch, CompareOperator.EqualTo, 0));
-                            return true;
+                        if (aliveMatch.Success || note.IsRepeatLast && lastIsAlive == true) {
+                            alive++;
+                            if (!note.IsRepeatLast) {
+                                conditions.Add(GetCondition(aliveMatch, CompareOperator.EqualTo, 0));
+                            }
+                            response.RemoveNote(note);
                         }
 
                         var deadMatch = DeadRegex.Match(note.Text);
-                        if (deadMatch.Success) {
-                            conditions.Add(GetCondition(deadMatch, CompareOperator.GreaterThanOrEqualTo, 1));
-                            return true;
-                        }
-
-                        return false;
-                    })
-                    .ToList();
-
-                if (notes.Count == 0) continue;
-
-                if (topicInfo.Responses.Count > 1) {
-                    // Split off response
-                    var splitOffTopicInfo = new DialogueTopicInfo {
-                        Speaker = topicInfo.Speaker,
-                        Responses = [response],
-                    };
-                    var (_, newTopicInfo) = topicInfo.SplitOffDialogue(splitOffTopicInfo);
-
-                    // Add lower priority empty topic info that skips ahead in case the condition is not met
-                    // Add empty topic to current list if the end was split off, otherwise add it to the split off topic
-                    if (Equals(newTopicInfo.Responses[0], topicInfo.Responses[0])) {
-                        var emptyTopic = topicInfo.CopyWith([new DialogueResponse()]);
-                        emptyTopic.MakeSharedInfo();
-                        topic.TopicInfos.Insert(topicInfoIndex + 1, emptyTopic);
-                    } else {
-                        var nextTopic = topicInfo.Links[0].TopicInfos;
-                        // Only add empty topic if there are other responses to link to
-                        if (nextTopic[0].Links.Count > 0) {
-                            var emptyTopic = nextTopic[0].CopyWith([new DialogueResponse()]);
-                            emptyTopic.MakeSharedInfo();
-                            nextTopic.Add(emptyTopic);
+                        if (deadMatch.Success || note.IsRepeatLast && lastIsAlive == false) {
+                            dead++;
+                            if (!note.IsRepeatLast) {
+                                conditions.Add(GetCondition(deadMatch, CompareOperator.GreaterThanOrEqualTo, 1));
+                            }
+                            response.RemoveNote(note);
                         }
                     }
 
-                    // Apply conditions to new topic
-                    newTopicInfo.ExtraConditions.AddRange(conditions);
+                    bool? isAlive = (alive == 0 && dead == 0)
+                        ? null
+                        : alive > dead;
+
+                    lastIsAlive = isAlive;
+
+                    return (isAlive, conditions);
+                })
+                .ToArray();
+
+            if (conditionsPerResponse.All(r => r.conditions.Count == 0)) continue;
+
+            var currentTopicGroup = 0;
+            var currentTopicInfoGroup = 0;
+            var lastAliveState = conditionsPerResponse[0].isAlive;
+            List<DialogueTopicInfo.GroupAssignment> groupAssignments =
+                [new(currentTopicGroup, currentTopicInfoGroup, conditionsPerResponse[0].conditions)];
+            for (var i = 1; i < conditionsPerResponse.Length; i++) {
+                var (currentAliveState, conditions) = conditionsPerResponse[i];
+
+                if (lastAliveState.HasValue != currentAliveState.HasValue) {
+                    // Nullability of last and current are different - must be new topic group
+                    currentTopicGroup++;
+                    currentTopicInfoGroup = 0;
+                } else if (currentAliveState != lastAliveState) {
+                    // Last and current are both not null and different - must be alternate topic infos in the same topic
+                    currentTopicInfoGroup++;
+
+                    // Don't use conditions - this will just be the fallback of the first so no conditions needed
+                    conditions = [];
                 }
 
-                // Remove notes from response
-                foreach (var note in notes) {
-                    response.RemoveNote(note);
-                }
+                groupAssignments.Add(
+                    new DialogueTopicInfo.GroupAssignment(currentTopicGroup, currentTopicInfoGroup, conditions));
+
+                lastAliveState = currentAliveState;
             }
+
+            topicInfo.SplitOffDialogueGroups(groupAssignments, topic);
         }
 
         Condition GetCondition(Match match, CompareOperator compareOperator, float comparisonValue) {
