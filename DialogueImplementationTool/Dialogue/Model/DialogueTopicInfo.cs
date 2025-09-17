@@ -93,9 +93,10 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
 
         while (currentInfo is { InvisibleContinue: true, Links: [{ TopicInfos: [var nextInfo] }] }) {
             yield return nextInfo;
+
             currentInfo = nextInfo;
         }
-    } 
+    }
 
     /// <summary>
     ///     Links dialogue to be played after this topic, linked with an invisible continue
@@ -213,6 +214,98 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
         }
     }
 
+    public record GroupAssignment(int TopicGroup, int TopicInfoGroup, IReadOnlyList<Condition> ExtraConditions);
+
+    /// <summary>
+    /// Splits off dialogue in a topic info based on group assignments.
+    /// - A [TopicGroup: 0, TopicInfoGroup: 0]
+    /// - B [TopicGroup: 0, TopicInfoGroup: 0]
+    /// - C [TopicGroup: 0, TopicInfoGroup: 1]
+    /// - D [TopicGroup: 1, TopicInfoGroup: 0]
+    /// - E [TopicGroup: 1, TopicInfoGroup: 1]
+    /// Will result in two topic infos:
+    /// - Topic 1 with topic infos AB and C, both linking to Topic 2
+    /// - Topic 2 with topic infos D and E, linking to the original links of the topic info
+    /// </summary>
+    /// <param name="groupAssignments"></param>
+    /// <param name="owningTopic"></param>
+    /// <exception cref="ArgumentException"></exception>
+    public void SplitOffDialogueGroups(IReadOnlyList<GroupAssignment> groupAssignments, DialogueTopic owningTopic) {
+        if (groupAssignments.Count != _responses.Count)
+            throw new ArgumentException("Group assignments must match the number of responses");
+
+        var topics = new List<List<(List<DialogueResponse> Responses, HashSet<Condition> ExtraConditions)>>();
+        for (var i = 0; i < groupAssignments.Count; i++) {
+            var groupAssignment = groupAssignments[i];
+            var response = _responses[i];
+
+            // Get topic info group
+            if (topics.Count <= groupAssignment.TopicGroup) topics.Add([]);
+            var topicInfoGroup = topics[groupAssignment.TopicGroup];
+
+            // Get response group
+            if (topicInfoGroup.Count <= groupAssignment.TopicInfoGroup) topicInfoGroup.Add(([], []));
+            var responseGroup = topicInfoGroup[groupAssignment.TopicInfoGroup];
+
+            // Add response and extra conditions
+            responseGroup.Responses.Add(response);
+            responseGroup.ExtraConditions.Add(groupAssignment.ExtraConditions);
+        }
+
+        var currentLinks = Links.ToList();
+        for (var i = topics.Count - 1; i >= 0; i--) {
+            var topicInfos = topics[i];
+
+            DialogueTopic topic;
+            if (i == 0) {
+                topic = owningTopic;
+                topic.TopicInfos.Remove(this);
+            } else {
+                topic = new DialogueTopic();
+            }
+
+            // Add topic infos to topic
+            foreach (var (responses, extraConditions) in topicInfos) {
+                DialogueTopicInfo topicInfo;
+                if (i == 0) {
+                    topicInfo = CopyWith(responses);
+                    topicInfo.ExtraConditions.Add(extraConditions);
+                    topicInfo.Links.SetTo(currentLinks);
+                } else {
+                    topicInfo = new DialogueTopicInfo {
+                        Speaker = Speaker,
+                        Responses = responses,
+                        ExtraConditions = extraConditions.ToList(),
+                        Links = currentLinks.ToList(),
+                    };
+                }
+
+                if (i < topics.Count - 1) {
+                    topicInfo.InvisibleContinue = true;
+                }
+
+                topic.TopicInfos.Add(topicInfo);
+            }
+
+            // If this is not the last topic and there is only one topic info which has extra conditions,
+            // add an empty topic info to allow skipping ahead
+            if (i < topics.Count - 1 && topic.TopicInfos is [{ ExtraConditions.Count: > 0 }]) {
+                var emptyTopic = new DialogueTopicInfo {
+                    Speaker = Speaker,
+                    Responses = [new DialogueResponse()],
+                    Links = currentLinks.ToList(),
+                    InvisibleContinue = true,
+                };
+                emptyTopic.MakeSharedInfo();
+
+                topic.TopicInfos.Add(emptyTopic);
+            }
+
+            // Make previous topics link to us as invisible continue
+            currentLinks = [topic];
+        }
+    }
+
     public void RemoveNote(Note note) {
         foreach (var response in Responses) {
             response.RemoveNote(note);
@@ -255,7 +348,8 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
 
         return Equals(SharedInfo, other.SharedInfo)
          && Speaker.FormLink.Equals(other.Speaker.FormLink)
-         && (Prompt.FullText == other.Prompt.FullText || Prompt.FullText == "(invis cont)" || other.Prompt.FullText == "(invis cont)")
+         && (Prompt.FullText == other.Prompt.FullText || Prompt.FullText == "(invis cont)"
+             || other.Prompt.FullText == "(invis cont)")
          && SayOnce == other.SayOnce
          && Goodbye == other.Goodbye
          && InvisibleContinue == other.InvisibleContinue
