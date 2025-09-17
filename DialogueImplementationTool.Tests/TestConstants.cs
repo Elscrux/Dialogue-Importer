@@ -12,6 +12,8 @@ namespace DialogueImplementationTool.Tests;
 public sealed class TestConstants {
     private const SkyrimRelease Release = SkyrimRelease.SkyrimSE;
 
+    public static readonly FormKey Speaker1FormKey = FormKey.Factory("111111:TestMod.esp");
+
     public TestConstants() {
         Environment = GameEnvironment.Typical
             .Builder<ISkyrimMod, ISkyrimModGetter>(GameRelease.SkyrimSE)
@@ -19,7 +21,7 @@ public sealed class TestConstants {
             .Build();
 
         Speaker1 = new NpcSpeaker(LinkCache,
-            new FormLinkInformation(FormKey.Factory("111111:TestMod.esp"), typeof(INpcGetter)));
+            new FormLinkInformation(Speaker1FormKey, typeof(INpcGetter)));
         Speaker2 = new NpcSpeaker(LinkCache,
             new FormLinkInformation(FormKey.Factory("222222:TestMod.esp"), typeof(INpcGetter)));
         Speaker3 = new NpcSpeaker(LinkCache,
