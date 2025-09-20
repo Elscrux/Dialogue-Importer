@@ -12,7 +12,7 @@ public sealed partial class DeadAliveChecker(IDialogueContext context) : IDialog
     [GeneratedRegex("(?:if )?(.+) is (dead|not alive)")]
     private static partial Regex DeadRegex { get; }
 
-    [GeneratedRegex("and|or", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(" (and|or) ", RegexOptions.IgnoreCase)]
     private static partial Regex ComplexCondition { get; }
 
     public void Process(DialogueTopic topic) {
