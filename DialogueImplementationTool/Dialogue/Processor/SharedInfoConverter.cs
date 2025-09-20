@@ -101,7 +101,10 @@ public sealed class SharedInfoConverter : IConversationProcessor {
 
             // when all topic infos that use a shared line link to the same next line(s) (or none at all), merge those again or make sure it never splits
             // exclude lines that don't have a previous line, because in this case they wouldn't be able to be linked to without an empty line as proxy in between
-            if (commonSharedLine.SharedLines.TrueForAll(x => x.Users.TrueForAll(link => link.Last is not null))
+            // also exclude lines that have end scripts, because we want to move those to the end of the dialogue, so we need a unique topic for each shared line
+            if (commonSharedLine.SharedLines.TrueForAll(x => x.Users.TrueForAll(link =>
+                    link.Last is not null
+                 && link.TopicInfoUsingLine.Script.EndScriptLines.Count == 0))
              && firstShared.Users
                     .Skip(1)
                     .All(x => Equals(x.Next, firstShared.Users[0].Next))) {
