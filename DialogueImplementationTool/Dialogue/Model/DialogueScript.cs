@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 namespace DialogueImplementationTool.Dialogue.Model;
 
 public sealed record ScriptPropertyName(ScriptProperty ScriptProperty, string ScriptName);
@@ -18,6 +19,21 @@ public sealed class DialogueScript : IEquatable<DialogueScript> {
     public List<string> StartScriptLines { get; init; } = [];
     public List<string> EndScriptLines { get; init; } = [];
     public List<ScriptPropertyName> Properties { get; init; } = [];
+
+    public bool IsEmpty =>
+        StartScriptLines.Count == 0
+     && EndScriptLines.Count == 0;
+
+    public void AddEndScriptLines(DialogueScript otherScript) {
+        EndScriptLines.AddRange(otherScript.EndScriptLines);
+        Properties.AddRange(otherScript.Properties.Where(p => otherScript.EndScriptLines.Any(l => l.Contains(p.ScriptProperty.Name))));
+    }
+
+    public void ClearUnusedProperties() {
+        Properties.RemoveWhere(p =>
+            !StartScriptLines.Any(l => l.Contains(p.ScriptProperty.Name))
+         && !EndScriptLines.Any(l => l.Contains(p.ScriptProperty.Name)));
+    }
 
     public bool Equals(DialogueScript? other) {
         if (ReferenceEquals(null, other)) return false;

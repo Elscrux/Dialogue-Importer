@@ -159,16 +159,22 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
                 if (nextRange.Count > 0) {
                     // If something comes after the split info, create a new topic for it
                     // currentTopic => nextTopic
+                    var nextTopicInfo = new DialogueTopicInfo {
+                        Speaker = currentInfo.Speaker,
+                        Responses = nextRange.ToList(),
+                    };
                     var nextTopic = new DialogueTopic {
                         TopicInfos = {
-                            new DialogueTopicInfo {
-                                Speaker = currentInfo.Speaker,
-                                Responses = nextRange.ToList(),
-                            },
+                            nextTopicInfo,
                         },
                     };
 
                     currentInfo.Append(nextTopic);
+
+                    // Add scripts from the current info to the next info
+                    nextTopicInfo.Script.AddEndScriptLines(currentInfo.Script);
+                    currentInfo.Script.EndScriptLines.Clear();
+                    currentInfo.Script.ClearUnusedProperties();
                 }
 
                 // Get rid of all lines that aren't part of the invisible continue
@@ -194,17 +200,27 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
                     // currentTopic => invisibleContTopic => nextTopic
 
                     // Build next topic from the remaining responses
-                    var nextTopic = new DialogueTopic {
-                        TopicInfos = [
-                            new DialogueTopicInfo {
-                                Speaker = currentInfo.Speaker,
-                                Responses = nextRange,
-                            },
-                        ],
+                    var nextTopicInfo = new DialogueTopicInfo {
+                        Speaker = currentInfo.Speaker,
+                        Responses = nextRange,
                     };
+                    var nextTopic = new DialogueTopic { TopicInfos = [nextTopicInfo] };
 
                     // Handle all the linking, flags etc.
                     invisibleContTopicInfo.Append(nextTopic);
+
+                    // Add scripts from the current info to the next info
+                    nextTopicInfo.Script.AddEndScriptLines(currentInfo.Script);
+                    currentInfo.Script.EndScriptLines.Clear();
+                    currentInfo.Script.ClearUnusedProperties();
+                } else {
+                    // Inserting the split info at the end of other responses
+                    // currentTopic => invisibleContTopic
+
+                    // Add scripts from the current info to the invisible continue
+                    invisibleContTopicInfo.Script.AddEndScriptLines(currentInfo.Script);
+                    currentInfo.Script.EndScriptLines.Clear();
+                    currentInfo.Script.ClearUnusedProperties();
                 }
 
                 // Get rid of all lines that aren't part of the base topic and are now part of the invisible continue or the next topic after that
