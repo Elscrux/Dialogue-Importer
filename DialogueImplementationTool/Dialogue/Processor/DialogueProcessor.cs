@@ -106,9 +106,10 @@ public sealed class DialogueProcessor : IDialogueProcessor {
         TopicListProcessors = [];
 
         ConversationProcessors = [
-            new BackToOptionsLinker(),
+            new RemoveRootOptionChecker(), // Needs to be before dialogue quest lock unlock processor
             new CollapseNoteOnlyResponse(), // Needs to be before KeywordLinker
             new KeywordLinker(),
+            new BackToOptionsLinker(),
             new SameResponseChecker(),
             new SharedInfoConverter(),
             new CollapseEmptyInvisibleContinues(),
@@ -119,12 +120,12 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new RumorServiceChecker(),
             new VendorServiceChecker(),
             new RentRoomServiceChecker(),
-            new RemoveRootOptionChecker(), // Needs to be before dialogue quest lock unlock processor
             new EmotionChecker(_emotionClassifierProvider.EmotionClassifier),
         ];
 
         if (context.Quest.IsDialogueQuest()) {
-            ConversationProcessors.Add(new DialogueQuestLockUnlockProcessor(context));
+            var removeRootOptionChecker = ConversationProcessors.FindIndex(p => p is RemoveRootOptionChecker);
+            ConversationProcessors.Insert(removeRootOptionChecker + 1, new DialogueQuestLockUnlockProcessor(context));
         }
     }
 
