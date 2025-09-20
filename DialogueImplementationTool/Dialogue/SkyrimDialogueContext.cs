@@ -86,18 +86,21 @@ public sealed class SkyrimDialogueContext(
         return overrideTopic;
     }
 
-    public IDialogTopicGetter? GetTopic(DialogueTopic topic, Func<FormKey, DialogueTopic?> resolveIntermediateTopic) {
+    public IDialogTopicGetter? GetTopic(
+        DialogueTopic dialogueTopic,
+        Func<FormKey, DialogueTopic?> resolveIntermediateTopic,
+        DialogueTopicInfo? currentWipTopicInfo = null) {
         foreach (var implementedTopic in environment.LinkCache.PriorityOrder.WinningOverrides<IDialogTopicGetter>()) {
             if (implementedTopic.Quest.FormKey != Quest.FormKey) continue;
 
-            if (Matches(implementedTopic)) {
+            if (CheckTopic(dialogueTopic, implementedTopic)) {
                 return implementedTopic;
             }
         }
 
         return null;
 
-        bool Matches(IDialogTopicGetter implementedTopic) {
+        bool CheckTopic(DialogueTopic topic, IDialogTopicGetter implementedTopic, int depth = 0) {
             var playerText = topic.GetPlayerFullText();
             if (playerText != string.Empty && playerText != "(invis cont)"
              && playerText != implementedTopic.Name?.String) return false;
@@ -136,6 +139,45 @@ public sealed class SkyrimDialogueContext(
                 if (!CheckSharedInfo(topicInfo, implementedTopicInfo)) return false;
 
                 // Check links
+                if (!CheckLinks(topicInfo, implementedTopicInfo)) return false;
+            }
+
+            return true;
+
+            bool CheckResponses(DialogueTopicInfo topicInfo, IDialogResponsesGetter implementedTopicInfo) {
+                for (var responseIndex = 0; responseIndex < topicInfo.Responses.Count; responseIndex++) {
+                    var response = topicInfo.Responses[responseIndex];
+                    var implementedResponse = implementedTopicInfo.Responses[responseIndex];
+
+                    if (!string.Equals(response.FullResponse, implementedResponse.Text.String, StringComparison.Ordinal))
+                        return false;
+                }
+
+                return true;
+            }
+
+            bool CheckSharedInfo(DialogueTopicInfo topicInfo, IDialogResponsesGetter implementedTopicInfo) {
+                if (topicInfo.SharedInfo is null) {
+                    if (topicInfo.Responses.Count != implementedTopicInfo.Responses.Count) return false;
+
+                    if (!CheckResponses(topicInfo, implementedTopicInfo)) return false;
+                } else if (!LinkCache.TryResolve<IDialogResponsesGetter>(
+                        implementedTopicInfo.ResponseData.FormKey,
+                        out var sharedInfo)
+                 || sharedInfo.Responses.Count != topicInfo.SharedInfo.ResponseDataTopicInfo.Responses.Count
+                 || !sharedInfo.Responses.Select(x => x.Text.String)
+                        .SequenceEqual(topicInfo.SharedInfo.ResponseDataTopicInfo.Responses.Select(x => x.FullResponse))) {
+                    return false;
+                }
+
+                return true;
+            }
+
+            bool CheckLinks(DialogueTopicInfo topicInfo, IDialogResponsesGetter implementedTopicInfo) {
+                // Prevent infinite recursion
+                if (depth > 1) return true;
+
+                if (topicInfo.Equals(currentWipTopicInfo)) return true;
                 if (topicInfo.Links.Count != implementedTopicInfo.LinkTo.Count) return false;
 
                 for (var i = 0; i < topicInfo.Links.Count; i++) {
@@ -151,51 +193,12 @@ public sealed class SkyrimDialogueContext(
 
                         if (!link.Equals(intermediateTopic)) return false;
                     } else {
-                        if (link.TopicInfos.Count != linkedTopic.Responses.Count) return false;
-
-                        for (var j = 0; j < linkedTopic.Responses.Count; j++) {
-                            var linkedTopicInfo = linkedTopic.Responses[j];
-                            var linkTopicInfo = link.TopicInfos[j];
-
-                            // Check responses
-                            if (linkedTopicInfo.ResponseData.IsNull != linkTopicInfo.SharedInfo is null) return false;
-
-                            if (!CheckSharedInfo(linkTopicInfo, linkedTopicInfo)) return false;
-                        }
+                        if (!CheckTopic(link, linkedTopic, depth + 1)) return false;
                     }
                 }
+
+                return true;
             }
-
-            return true;
-        }
-
-        bool CheckResponses(DialogueTopicInfo topicInfo, IDialogResponsesGetter implementedTopicInfo) {
-            for (var responseIndex = 0; responseIndex < topicInfo.Responses.Count; responseIndex++) {
-                var response = topicInfo.Responses[responseIndex];
-                var implementedResponse = implementedTopicInfo.Responses[responseIndex];
-
-                if (!string.Equals(response.FullResponse, implementedResponse.Text.String, StringComparison.Ordinal))
-                    return false;
-            }
-
-            return true;
-        }
-
-        bool CheckSharedInfo(DialogueTopicInfo topicInfo, IDialogResponsesGetter implementedTopicInfo) {
-            if (topicInfo.SharedInfo is null) {
-                if (topicInfo.Responses.Count != implementedTopicInfo.Responses.Count) return false;
-
-                if (!CheckResponses(topicInfo, implementedTopicInfo)) return false;
-            } else if (!LinkCache.TryResolve<IDialogResponsesGetter>(
-                    implementedTopicInfo.ResponseData.FormKey,
-                    out var sharedInfo)
-             || sharedInfo.Responses.Count != topicInfo.SharedInfo.ResponseDataTopicInfo.Responses.Count
-             || !sharedInfo.Responses.Select(x => x.Text.String)
-                    .SequenceEqual(topicInfo.SharedInfo.ResponseDataTopicInfo.Responses.Select(x => x.FullResponse))) {
-                return false;
-            }
-
-            return true;
         }
     }
 
