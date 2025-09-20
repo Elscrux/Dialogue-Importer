@@ -257,20 +257,26 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
             var topicInfos = topics[i];
 
             DialogueTopic topic;
+            var owningTopicIndex = 0;
             if (i == 0) {
                 topic = owningTopic;
+                owningTopicIndex = owningTopic.TopicInfos.IndexOf(this);
                 topic.TopicInfos.Remove(this);
             } else {
                 topic = new DialogueTopic();
             }
 
             // Add topic infos to topic
-            foreach (var (responses, extraConditions) in topicInfos) {
+            for (var j = 0; j < topicInfos.Count; j++) {
+                var (responses, extraConditions) = topicInfos[j];
                 DialogueTopicInfo topicInfo;
                 if (i == 0) {
                     topicInfo = CopyWith(responses);
                     topicInfo.ExtraConditions.Add(extraConditions);
                     topicInfo.Links.SetTo(currentLinks);
+
+                    // Insert to make sure it stays in the same order the owning topic had before
+                    topic.TopicInfos.Insert(owningTopicIndex + j, topicInfo);
                 } else {
                     topicInfo = new DialogueTopicInfo {
                         Speaker = Speaker,
@@ -278,13 +284,13 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
                         ExtraConditions = extraConditions.ToList(),
                         Links = currentLinks.ToList(),
                     };
+
+                    topic.TopicInfos.Add(topicInfo);
                 }
 
                 if (i < topics.Count - 1) {
                     topicInfo.InvisibleContinue = true;
                 }
-
-                topic.TopicInfos.Add(topicInfo);
             }
 
             // If this is not the last topic and there is only one topic info which has extra conditions,
@@ -298,7 +304,11 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
                 };
                 emptyTopic.MakeSharedInfo();
 
-                topic.TopicInfos.Add(emptyTopic);
+                if (i == 0) {
+                    topic.TopicInfos.Insert(owningTopicIndex + 1, emptyTopic);
+                } else {
+                    topic.TopicInfos.Add(emptyTopic);
+                }
             }
 
             // Make previous topics link to us as invisible continue
