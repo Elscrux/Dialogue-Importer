@@ -73,7 +73,7 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
     [Reactive] public bool HasNpcSelected { get; set; }
 
     public IterableDialogueConfigVM(
-        EnvironmentContext context,
+        IEnvironmentContext context,
         IDocumentIterator documentParser,
         AutomaticSpeakerSelection automaticSpeakerSelection,
         ISpeakerFavoritesSelection speakerFavoritesSelection) {
@@ -279,7 +279,7 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
         // Cleanup document name
         documentName = UnnecessaryDocumentNameParts.Replace(documentName, string.Empty).Trim();
 
-        var speakers = automaticSpeakerSelection.GetSpeakers<ISpeaker>([documentName]);
+        var speakers = automaticSpeakerSelection.GetSpeakers<ISpeaker>([documentName], false);
         if (speakers.Count == 1) {
             SpeakerFormKey = speakers[0].FormLink.FormKey;
         }

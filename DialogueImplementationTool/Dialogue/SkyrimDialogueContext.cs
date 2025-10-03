@@ -15,36 +15,33 @@ using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue;
 
 public sealed class SkyrimDialogueContext(
-    string prefix,
-    IGameEnvironment<ISkyrimMod, ISkyrimModGetter> environment,
-    ISkyrimMod mod,
+    IPrefixProvider prefixProvider,
+    IEnvironmentContext environmentContext,
     IQuest quest,
+    AutomaticSpeakerSelection automaticSpeakerSelection,
     ISpeakerSelection speakerSelection,
     AutoApplyProvider autoApplyProvider,
-    ISpeakerFavoritesSelection speakerFavoritesSelection,
     IFormKeySelection formKeySelection)
     : IDialogueContext {
-    private readonly AutomaticSpeakerSelection _automaticSpeakerSelection =
-        new(environment.LinkCache, speakerFavoritesSelection);
     private FormLink<IQuestGetter>? _favorDialogueQuest;
 
-    public string Prefix { get; } = prefix;
+    public string Prefix => prefixProvider.Prefix;
     public SkyrimRelease Release => SkyrimRelease.SkyrimSE;
-    public IGameEnvironment Environment { get; } = environment;
-    public ILinkCache LinkCache { get; } = environment.LinkCache;
+    public IGameEnvironment Environment { get; } = environmentContext.Environment;
+    public ILinkCache LinkCache { get; } = environmentContext.LinkCache;
     public IQuest Quest { get; } = quest;
-    public IMod Mod { get; } = mod;
+    public IMod Mod { get; } = environmentContext.Mod;
     public Dictionary<string, string> Scripts { get; } = [];
     public AutoApplyProvider AutoApplyProvider { get; } = autoApplyProvider;
     public List<string> Issues { get; } = [];
 
     public FormKey GetNextFormKey() {
-        return mod.GetNextFormKey();
+        return environmentContext.Mod.GetNextFormKey();
     }
 
     public void AddRecord<TMajorRecord>(TMajorRecord record)
         where TMajorRecord : IMajorRecord {
-        var group = mod.GetTopLevelGroup<TMajorRecord>();
+        var group = environmentContext.Mod.GetTopLevelGroup<TMajorRecord>();
         if (!group.ContainsKey(record.FormKey)) {
             group.Add(record);
         }
@@ -61,26 +58,26 @@ public sealed class SkyrimDialogueContext(
             return record;
         }
 
-        var recordContext = environment.LinkCache.ResolveContext<TMajorRecord, TMajorRecordGetter>(recordGetter.FormKey);
-        return recordContext.GetOrAddAsOverride(mod);
+        var recordContext = environmentContext.LinkCache.ResolveContext<TMajorRecord, TMajorRecordGetter>(recordGetter.FormKey);
+        return recordContext.GetOrAddAsOverride(environmentContext.Mod);
     }
 
     public DialogTopic? GetTopic(string editorId) {
-        if (!environment.LinkCache.TryResolveIdentifier<IDialogTopicGetter>(editorId, out var formKey)) return null;
+        if (!environmentContext.LinkCache.TryResolveIdentifier<IDialogTopicGetter>(editorId, out var formKey)) return null;
 
         return GetTopic(formKey);
     }
 
     public DialogTopic GetTopic(FormKey formKey) {
-        var topic = environment.LinkCache.ResolveContext<DialogTopic, IDialogTopicGetter>(formKey);
+        var topic = environmentContext.LinkCache.ResolveContext<DialogTopic, IDialogTopicGetter>(formKey);
 
-        var overrideTopic = topic.GetOrAddAsOverride(mod);
+        var overrideTopic = topic.GetOrAddAsOverride(environmentContext.Mod);
 
         // Add responses
         foreach (var response in topic.Record.Responses) {
             var responseContext =
-                environment.LinkCache.ResolveContext<IDialogResponses, IDialogResponsesGetter>(response.FormKey);
-            responseContext.GetOrAddAsOverride(mod);
+                environmentContext.LinkCache.ResolveContext<IDialogResponses, IDialogResponsesGetter>(response.FormKey);
+            responseContext.GetOrAddAsOverride(environmentContext.Mod);
         }
 
         return overrideTopic;
@@ -90,7 +87,7 @@ public sealed class SkyrimDialogueContext(
         DialogueTopic dialogueTopic,
         Func<FormKey, DialogueTopic?> resolveIntermediateTopic,
         DialogueTopicInfo? currentWipTopicInfo = null) {
-        foreach (var implementedTopic in environment.LinkCache.PriorityOrder.WinningOverrides<IDialogTopicGetter>()) {
+        foreach (var implementedTopic in environmentContext.LinkCache.PriorityOrder.WinningOverrides<IDialogTopicGetter>()) {
             if (implementedTopic.Quest.FormKey != Quest.FormKey) continue;
 
             if (CheckTopic(dialogueTopic, implementedTopic)) {
@@ -204,7 +201,7 @@ public sealed class SkyrimDialogueContext(
 
     public IReadOnlyList<AliasSpeaker> GetAliasSpeakers(IReadOnlyList<string> speakerNames) {
         if (AutoApplyProvider.AutoApply) {
-            var automaticSpeakers = _automaticSpeakerSelection.GetSpeakers<AliasSpeaker>(speakerNames);
+            var automaticSpeakers = automaticSpeakerSelection.GetSpeakers<AliasSpeaker>(speakerNames);
             if (automaticSpeakers.Count == speakerNames.Count) return automaticSpeakers;
         }
 
@@ -214,8 +211,7 @@ public sealed class SkyrimDialogueContext(
     public IFormLink<IQuestGetter> GetFavorDialogueQuest() {
         if (_favorDialogueQuest is not null) return _favorDialogueQuest;
 
-        var formKey =
-            formKeySelection.GetFormKey<IQuestGetter>(
+        var formKey = formKeySelection.GetFormKey<IQuestGetter>(
                 "Select the favor dialogue quest",
                 "Favor Dialogue Quest",
                 Skyrim.Quest.DialogueFavorGeneric.FormKey);
@@ -226,12 +222,12 @@ public sealed class SkyrimDialogueContext(
 
     public DialogBranch GetServiceBranch(ServiceType serviceType, FormKey defaultBranchFormKey) {
         var formKey = formKeySelection.GetFormKey<IDialogBranchGetter>(
-                $"Select the {serviceType} branch",
-                serviceType.ToString(),
-                defaultBranchFormKey);
+            $"Select the {serviceType} branch",
+            serviceType.ToString(),
+            defaultBranchFormKey);
 
-        var context = environment.LinkCache.ResolveContext<DialogBranch, IDialogBranchGetter>(formKey);
-        return context.GetOrAddAsOverride(mod);
+        var context = environmentContext.LinkCache.ResolveContext<DialogBranch, IDialogBranchGetter>(formKey);
+        return context.GetOrAddAsOverride(environmentContext.Mod);
     }
 
     public TMajor SelectRecord<TMajor, TMajorGetter>(string prompt)
@@ -245,15 +241,15 @@ public sealed class SkyrimDialogueContext(
         where TMajorGetter : class, IMajorRecordQueryableGetter {
         var formKey = formKeySelection.GetFormKey<TMajorGetter>($"Select: {prompt}", prompt, defaultFormKey);
 
-        var context = environment.LinkCache.ResolveContext<TMajor, TMajorGetter>(formKey);
-        return context.GetOrAddAsOverride(mod);
+        var context = environmentContext.LinkCache.ResolveContext<TMajor, TMajorGetter>(formKey);
+        return context.GetOrAddAsOverride(environmentContext.Mod);
     }
 
     public TMajor GetOrAddOverride<TMajor, TMajorGetter>(IFormKeyGetter formKeyGetter)
         where TMajor : class, TMajorGetter, IMajorRecord
         where TMajorGetter : class, IMajorRecordGetter, IMajorRecordQueryableGetter {
-        var context = environment.LinkCache.ResolveContext<TMajor, TMajorGetter>(formKeyGetter.FormKey);
-        return context.GetOrAddAsOverride(mod);
+        var context = environmentContext.LinkCache.ResolveContext<TMajor, TMajorGetter>(formKeyGetter.FormKey);
+        return context.GetOrAddAsOverride(environmentContext.Mod);
     }
 
     public Condition? GetSpeakerCondition(ISpeaker speaker) {

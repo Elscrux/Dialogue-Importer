@@ -41,18 +41,18 @@ public sealed class TestConstants {
 
     public ILinkCache<ISkyrimMod, ISkyrimModGetter> LinkCache => Environment.LinkCache;
 
+    public IPrefixProvider PrefixProvider { get; set; } = new InjectedPrefixProvider();
     public ISpeakerSelection SpeakerSelection { get; set; } = new InjectedSpeakerSelection(new Dictionary<string, ISpeaker>());
 
     public IFormKeySelection FormKeySelection { get; set; } = new InjectedFormKeySelection();
 
     public SkyrimDialogueContext SkyrimDialogueContext => new(
-        string.Empty,
-        Environment,
-        Mod,
+        PrefixProvider,
+        new InjectedEnvironmentContext(Environment, Mod),
         Quest,
+        new AutomaticSpeakerSelection(LinkCache, PrefixProvider, new SpeakerFavoritesSelection(PrefixProvider)),
         SpeakerSelection,
         new AutoApplyProvider(),
-        new SpeakerFavoritesSelection(),
         FormKeySelection);
 
     public Quest Quest { get; }

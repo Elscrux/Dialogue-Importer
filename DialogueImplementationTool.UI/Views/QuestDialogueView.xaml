@@ -1,0 +1,71 @@
+﻿<UserControl x:Class="DialogueImplementationTool.UI.Views.QuestDialogueView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:DialogueImplementationTool.UI.Views"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:viewModels="clr-namespace:DialogueImplementationTool.UI.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance viewModels:QuestDialogueVM}"
+             x:Name="Window"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Expander DockPanel.Dock="Top"
+              IsExpanded="True"
+              Header="{Binding}">
+        <Expander.HeaderTemplate>
+            <DataTemplate>
+                <Grid>
+                    <TextBlock
+                        Grid.Column="0"
+                        Text="{Binding Quest.EditorID}"/>
+                    
+                    <Button Click="Delete"
+                            Margin="5,0"
+                            HorizontalAlignment="Right">
+                        <iconPacks:PackIconBoxIcons
+                            Kind="RegularTrash"
+                            Foreground="Red"
+                            VerticalAlignment="Center"/>
+                    </Button>
+                </Grid>
+            </DataTemplate>
+        </Expander.HeaderTemplate>
+
+        <StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Button
+                    Content="+ File"
+                    FontSize="12"
+                    Margin="2,0"
+                    Background="#574eb9"
+                    Click="SelectFile_OnClick"/>
+
+                <Button
+                    Content="+ Folder"
+                    FontSize="12"
+                    Margin="2,0"
+                    Background="#574eb9"
+                    HorizontalAlignment="Left"
+                    Click="SelectFolder_OnClick"/>
+            </StackPanel>
+
+            <ListView DockPanel.Dock="Top"
+                      x:Name="DocumentListView"
+                      ItemsSource="{Binding Documents}">
+                <ListView.InputBindings>
+                    <KeyBinding
+                        Key="Delete"
+                        Command="{Binding DeleteDocuments}"
+                        CommandParameter="{Binding ElementName=DocumentListView, Path=SelectedItems}"/>
+                </ListView.InputBindings>
+
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <local:DocumentView DataContext="{Binding}"/>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackPanel>
+    </Expander>
+</UserControl>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using DialogueImplementationTool.Dialogue.Speaker;
@@ -7,9 +8,11 @@ using ReactiveUI;
 namespace DialogueImplementationTool.Services;
 
 public sealed class SpeakerFavoritesSelection : ReactiveObject, ISpeakerFavoritesSelection {
+    private readonly IPrefixProvider _prefixProvider;
     private readonly ObservableCollection<ISpeaker> _speakers = [];
 
-    public SpeakerFavoritesSelection() {
+    public SpeakerFavoritesSelection(IPrefixProvider prefixProvider) {
+        _prefixProvider = prefixProvider;
         Speakers = new ReadOnlyObservableCollection<ISpeaker>(_speakers);
     }
 
@@ -26,16 +29,18 @@ public sealed class SpeakerFavoritesSelection : ReactiveObject, ISpeakerFavorite
         return Speakers.FirstOrDefault(s => s.FormLink.FormKey == formKey);
     }
 
-    public ISpeaker? GetClosestSpeaker(string name) {
-        var closestSpeaker = Speakers.MinBy(
-            s => {
-                var index = s.EditorID?.IndexOf(name, StringComparison.Ordinal);
-                return index is null or -1 ? int.MaxValue : index;
-            });
+    public IEnumerable<ISpeaker> GetClosestSpeakers(string name) {
+        return Speakers
+            .Select(s => (Speakers: s, Index: s.EditorID?.IndexOf(name, StringComparison.Ordinal)))
+            .Where(x => x.Index is not null and not -1)
+            .OrderBy(x => {
+                // Reward matches that start with the prefix
+                if (x.Speakers.EditorID?.StartsWith(_prefixProvider.Prefix) is true) {
+                    x.Index -= _prefixProvider.Prefix.Length;
+                }
 
-        // Check if the closest speaker is a match
-        if (closestSpeaker?.EditorID?.IndexOf(name, StringComparison.Ordinal) is null or -1) return null;
-
-        return closestSpeaker;
+                return x.Index;
+            })
+            .Select(x => x.Speakers);
     }
 }

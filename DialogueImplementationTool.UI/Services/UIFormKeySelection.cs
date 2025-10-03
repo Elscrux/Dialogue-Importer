@@ -1,12 +1,15 @@
 ﻿using System.Windows;
+using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Services;
 using DialogueImplementationTool.UI.Views;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
+using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.UI.Services;
 
 public sealed class UIFormKeySelection(
-    EnvironmentContext environmentContext,
+    IEnvironmentContext environmentContext,
+    AutomaticSpeakerSelection automaticSpeakerSelection,
     AutoApplyProvider autoApplyProvider,
     FormKeyCache formKeyCache)
     : IFormKeySelection {
@@ -26,11 +29,23 @@ public sealed class UIFormKeySelection(
     private FormKey GetFormKeyImpl<TMajor>(string title, string identifier, FormKey defaultFormKey)
         where TMajor : IMajorRecordQueryableGetter {
         if (formKeyCache.TryGetFormKey<TMajor>(identifier, out var formKey)) {
-            defaultFormKey = formKey;
+            if (CanSkipPrompt()) return formKey;
 
-            // Don't prompt if it should auto apply, or if it's already been opened before
-            if (autoApplyProvider.AutoApply || _openedIdentifiers.Contains(identifier)) {
-                return formKey;
+            defaultFormKey = formKey;
+        }
+
+        if (typeof(INpcGetter).IsAssignableFrom(typeof(TMajor))) {
+            var closestSpeakers = automaticSpeakerSelection
+                .GetSpeakers<NpcSpeaker>([identifier], false)
+                .ToArray();
+
+            switch (closestSpeakers) {
+                case [var closestSpeaker] when CanSkipPrompt():
+                    return closestSpeaker.FormLink.FormKey;
+                case [var closestSpeaker, ..]:
+                    // Otherwise, default to the closest speaker
+                    defaultFormKey = closestSpeaker.FormLink.FormKey;
+                    break;
             }
         }
 
@@ -51,5 +66,8 @@ public sealed class UIFormKeySelection(
         });
 
         return formKey;
+
+        // Don't prompt if it should auto apply, or if it's already been opened before
+        bool CanSkipPrompt() => autoApplyProvider.AutoApply || _openedIdentifiers.Contains(identifier);
     }
 }

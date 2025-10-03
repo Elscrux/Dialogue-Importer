@@ -9,99 +9,73 @@
         x:Class="DialogueImplementationTool.UI.Views.MainWindow"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance viewModels:MainWindowVM}"
+        x:Name="Window"
         Title="Select a quest"
         Height="800" Width="800"
         MinHeight="800" MinWidth="800">
-    <DockPanel>
-        <DockPanel.Resources>
-            <converters:LoadStateToBrushConverter x:Key="LoadStateToBrushConverter"/>
-            <converters:LoadStateToTextConverter x:Key="LoadStateToTextConverter"/>
-        </DockPanel.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-        <Menu DockPanel.Dock="Top">
-            <MenuItem Header="Open Output Folder"
-                      Click="OpenFolder_OnClick"
-                      HorizontalAlignment="Left" VerticalAlignment="Top"/>
-        </Menu>
+        <DockPanel Grid.Row="0">
+            <DockPanel.Resources>
+                <converters:LoadStateToBrushConverter x:Key="LoadStateToBrushConverter"/>
+                <converters:LoadStateToTextConverter x:Key="LoadStateToTextConverter"/>
+            </DockPanel.Resources>
 
-        <Grid DockPanel.Dock="Top">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="Open Output Folder"
+                          Click="OpenFolder_OnClick"
+                          HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            </Menu>
 
-            <Label Grid.Column="0"
-                   Target="PrefixTextBox"
-                   Content="Mod Prefix"/>
-
-            <TextBox x:Name="PrefixTextBox"
-                     Grid.Column="1"
-                     Margin="2"
-                     Text="{Binding Prefix}"/>
-        </Grid>
-
-        <Grid DockPanel.Dock="Top">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-
-            <Label Grid.Column="0"
-                   Target="PythonDllPathTextBox"
-                   Content="Path to Python Dll"/>
-
-            <TextBox x:Name="PythonDllPathTextBox"
-                     Grid.Column="1"
-                     IsReadOnly="True"
-                     Margin="2"
-                     Text="{Binding PythonEmotionClassifierProvider.PythonDllPath}"/>
-
-            <TextBlock Grid.Column="2"
-                       VerticalAlignment="Center"
-                       Text="{Binding PythonEmotionClassifierProvider.PythonState, Converter={StaticResource LoadStateToTextConverter}}"
-                       Background="{Binding PythonEmotionClassifierProvider.PythonState, Converter={StaticResource LoadStateToBrushConverter}}"/>
-
-            <Button Grid.Column="3"
-                    Content="Select"
-                    Click="SelectionPythonPath_OnClick"/>
-        </Grid>
-
-        <plugins:FormKeyPicker DockPanel.Dock="Top"
-                               FormKey="{Binding QuestFormKey}"
-                               LinkCache="{Binding EnvironmentContext.LinkCache, Mode=OneWay}"
-                               ScopedTypes="{Binding QuestTypes, Mode=OneWay}"/>
-
-        <Grid DockPanel.Dock="Top"
-              Visibility="{Binding ValidQuest, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-
-            <Grid Grid.Row="0" VerticalAlignment="Bottom">
+            <Grid DockPanel.Dock="Top">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
 
-                <Button Grid.Column="0"
-                        Content="+ File"
-                        FontSize="18"
-                        Margin="5"
-                        Background="#574eb9"
-                        Click="SelectFile_OnClick"/>
-                <Button Grid.Column="1"
-                        Content="+ Folder"
-                        FontSize="18"
-                        Margin="5"
-                        Background="#574eb9"
-                        Click="SelectFolder_OnClick"/>
+                <Label Grid.Column="0"
+                       Target="PrefixTextBox"
+                       Content="Mod Prefix"/>
+
+                <TextBox x:Name="PrefixTextBox"
+                         Grid.Column="1"
+                         Margin="2"
+                         Text="{Binding Prefix}"/>
             </Grid>
 
-            <Grid Grid.Row="1" VerticalAlignment="Bottom">
+            <Grid DockPanel.Dock="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.Column="0"
+                       Target="PythonDllPathTextBox"
+                       Content="Path to Python Dll"/>
+
+                <TextBox x:Name="PythonDllPathTextBox"
+                         Grid.Column="1"
+                         IsReadOnly="True"
+                         Margin="2"
+                         Text="{Binding PythonEmotionClassifierProvider.PythonDllPath, FallbackValue='Loading'}"/>
+
+                <TextBlock Grid.Column="2"
+                           VerticalAlignment="Center"
+                           Text="{Binding PythonEmotionClassifierProvider.PythonState, Converter={StaticResource LoadStateToTextConverter}}"
+                           Background="{Binding PythonEmotionClassifierProvider.PythonState, Converter={StaticResource LoadStateToBrushConverter}}"/>
+
+                <Button Grid.Column="3"
+                        Content="Select"
+                        Click="SelectionPythonPath_OnClick"/>
+            </Grid>
+
+            <Grid DockPanel.Dock="Top">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
@@ -121,41 +95,49 @@
                         Margin="5"/>
             </Grid>
 
-            <DockPanel Grid.Row="2">
-                
-                <Expander DockPanel.Dock="Bottom"
-                          Header="Warnings">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
+            <StackPanel DockPanel.Dock="Top"
+                        Orientation="Horizontal">
+                <plugins:FormKeyPicker
+                    x:Name="QuestPicker"
+                    MinWidth="400"
+                    LinkCache="{Binding EnvironmentContext.LinkCache, Mode=OneWay}"
+                    ScopedTypes="{Binding QuestTypes, Mode=OneWay}"/>
 
-                        <Button Grid.Row="0"
-                                Content="Copy"
-                                Command="{Binding CopyWarnings}"/>
-                        <ListView Grid.Row="1"
-                                  ItemsSource="{Binding Warnings}"/>
-                    </Grid>
-                </Expander>
+                <Button
+                    VerticalAlignment="Top"
+                    Margin="5, 0"
+                    Content="+ Quest"
+                    FontSize="14"
+                    Background="#574eb9"
+                    Click="AddQuest_OnClick"/>
+            </StackPanel>
 
-                <ListView DockPanel.Dock="Top"
-                          x:Name="DocumentListView"
-                          ItemsSource="{Binding Documents}">
-                    <ListView.InputBindings>
-                        <KeyBinding
-                            Key="Delete"
-                            Command="{Binding DeleteDocuments}"
-                            CommandParameter="{Binding ElementName=DocumentListView, Path=SelectedItems}"/>
-                    </ListView.InputBindings>
+            <ListView
+                DockPanel.Dock="Top"
+                ItemsSource="{Binding QuestDialogueVMs}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <views:QuestDialogueView DataContext="{Binding}"/>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
 
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <views:DocumentView DataContext="{Binding}"/>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
-            </DockPanel>
-        </Grid>
-    </DockPanel>
+        </DockPanel>
+
+        <Expander Grid.Row="1"
+                  Header="Warnings">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+
+                <Button Grid.Row="0"
+                        Content="Copy"
+                        Command="{Binding CopyWarnings}"/>
+                <ListView Grid.Row="1"
+                          ItemsSource="{Binding Warnings}"/>
+            </Grid>
+        </Expander>
+    </Grid>
 </Window>

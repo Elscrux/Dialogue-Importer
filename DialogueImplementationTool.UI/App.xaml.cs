@@ -2,6 +2,7 @@
 using System.IO.Abstractions;
 using System.Windows;
 using Autofac;
+using DialogueImplementationTool.Dialogue;
 using DialogueImplementationTool.Dialogue.Processor;
 using DialogueImplementationTool.Parser;
 using DialogueImplementationTool.Script;
@@ -41,6 +42,9 @@ public partial class App {
         builder.RegisterType<DialogueProcessor>()
             .AsSelf();
 
+        builder.RegisterType<QuestDialogueVM>()
+            .AsSelf();
+
         builder.RegisterType<DocumentVM>()
             .AsSelf();
 
@@ -69,11 +73,23 @@ public partial class App {
             .SingleInstance();
 
         builder.RegisterType<AutomaticSpeakerSelection>()
+            .AsSelf();
+
+        builder.RegisterType<UISpeakerSelection>()
             .AsSelf()
             .As<ISpeakerSelection>();
 
+        builder.RegisterType<InjectedPrefixProvider>()
+            .As<IPrefixProvider>()
+            .SingleInstance();
+
+        builder.RegisterType<SkyrimDialogueContext>()
+            .AsSelf()
+            .As<IDialogueContext>();
+
         builder.RegisterType<SpeakerFavoritesSelection>()
-            .As<ISpeakerFavoritesSelection>();
+            .As<ISpeakerFavoritesSelection>()
+            .InstancePerLifetimeScope();
 
         builder.RegisterType<OpenDocumentTextParser>();
         builder.RegisterType<DocXDocumentParser>();
@@ -83,10 +99,10 @@ public partial class App {
             .SingleInstance();
 
         builder.RegisterType<EnvironmentContext>()
-            .As<EnvironmentContext>()
+            .As<IEnvironmentContext>()
             .SingleInstance();
 
-        builder.Register(x => x.Resolve<EnvironmentContext>().Environment.LinkCache)
+        builder.Register(x => x.Resolve<IEnvironmentContext>().Environment.LinkCache)
             .As<ILinkCache>()
             .SingleInstance();
 

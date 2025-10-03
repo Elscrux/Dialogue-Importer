@@ -33,7 +33,7 @@ public partial class FormKeyCache {
         },
     };
 
-    public FormKeyCache(EnvironmentContext context) {
+    public FormKeyCache(IEnvironmentContext context) {
         var source = string.Join(", ", context.Environment.LoadOrder.ListedOrder.Select(mod => mod.ModKey.FileName.String));
         var hashData = SHA256.HashData(Encoding.UTF8.GetBytes(source));
         var hexString = hashData.ToHexString();

@@ -6,7 +6,7 @@ using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Services;
 
-public sealed class EnvironmentContext {
+public sealed class EnvironmentContext : IEnvironmentContext {
     public ILinkCache<ISkyrimMod, ISkyrimModGetter> LinkCache => Environment.LinkCache;
     public IGameEnvironment<ISkyrimMod, ISkyrimModGetter> Environment { get; }
     public SkyrimMod Mod { get; }

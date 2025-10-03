@@ -10,7 +10,7 @@ public sealed class PapyrusCompilerWrapper {
     public string FlagsFilePath { get; }
     public string SourceDirectoryPath { get; }
 
-    public PapyrusCompilerWrapper(EnvironmentContext environmentContext) {
+    public PapyrusCompilerWrapper(IEnvironmentContext environmentContext) {
         var gameDirectory = environmentContext.Environment.DataFolderPath.Directory;
         if (!gameDirectory.HasValue) throw new DirectoryNotFoundException("Game directory not found");
 

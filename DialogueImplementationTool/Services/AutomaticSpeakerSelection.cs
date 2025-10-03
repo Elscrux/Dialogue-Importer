@@ -1,19 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using DialogueImplementationTool.Dialogue.Speaker;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 namespace DialogueImplementationTool.Services;
 
 public sealed class AutomaticSpeakerSelection(
     ILinkCache linkCache,
+    IPrefixProvider prefixProvider,
     ISpeakerFavoritesSelection speakerFavoritesSelection)
     : ISpeakerSelection {
-    public IReadOnlyList<T> GetSpeakers<T>(IReadOnlyList<string> speakerNames) where T : class, ISpeaker {
-        var aliasSpeakers = new List<T>();
-        
+    public IReadOnlyList<T> GetSpeakers<T>(IReadOnlyList<string> speakerNames)
+        where T : class, ISpeaker {
+        return GetSpeakers<T>(speakerNames, true);
+    }
+
+    public IReadOnlyList<T> GetSpeakers<T>(IReadOnlyList<string> speakerNames, bool exactMatch)
+        where T : class, ISpeaker {
+        var speakers = new List<T>();
+
         // Depending on type of T, switch constructor
         Func<IFormLinkGetter, string, string?, T> createSpeaker = typeof(T) == typeof(AliasSpeaker)
             ? (formLink, name, editorId) => (new AliasSpeaker(formLink, name, editorId: editorId) as T)!
@@ -24,30 +33,49 @@ public sealed class AutomaticSpeakerSelection(
             if (speakerName.Length < 3) continue;
 
             // Try to find the NPC by the editor ID
-            var count = 0;
-            INpcGetter? currentNpc = null;
-            foreach (var npc in linkCache.PriorityOrder.WinningOverrides<INpcGetter>()) {
-                if (npc.EditorID is null) continue;
-                if (!npc.EditorID.Contains(speakerName, StringComparison.OrdinalIgnoreCase)
-                 && (npc.Name?.String is null || !npc.Name.String.Contains(speakerName, StringComparison.OrdinalIgnoreCase))) continue;
+            var npcs = linkCache.PriorityOrder.WinningOverrides<INpcGetter>()
+                .Where(npc => NameMatches(npc.EditorID, speakerName) || NameMatches(npc.Name?.String, speakerName));
 
-                count++;
-                if (count > 1) break;
+            if (!npcs.CountGreaterThan(1)) {
+                var npc = npcs.FirstOrDefault();
+                if (npc is null) continue;
 
-                currentNpc = npc;
-            }
-
-            if (count == 1 && currentNpc is not null) {
-                aliasSpeakers.Add(createSpeaker(currentNpc.ToLinkGetter(), speakerName, currentNpc.EditorID));
+                speakers.Add(createSpeaker(npc.ToLinkGetter(), speakerName, npc.EditorID));
             } else {
                 // Try to find the NPC in the speaker favorites
-                var closestSpeaker = speakerFavoritesSelection.GetClosestSpeaker(speakerName);
+                var closestSpeaker = speakerFavoritesSelection.GetClosestSpeakers(speakerName).FirstOrDefault();
                 if (closestSpeaker is not null) {
-                    aliasSpeakers.Add(createSpeaker(closestSpeaker.FormLink, speakerName, closestSpeaker.EditorID));
+                    speakers.Add(createSpeaker(closestSpeaker.FormLink, speakerName, closestSpeaker.EditorID));
+                } else {
+                    // Only attempt to find the best possible match when an exact match is not required
+                    if (exactMatch) continue;
+
+                    var minimumNpc = npcs
+                        .MinBy(npc => {
+                            var index = npc.EditorID?.IndexOf(speakerName, StringComparison.Ordinal);
+                            if (index is null or -1) return int.MaxValue;
+
+                            // Reward matches that start with the prefix
+                            if (npc.EditorID?.StartsWith(prefixProvider.Prefix) is true) {
+                                index -= prefixProvider.Prefix.Length + 1;
+                            }
+
+                            return index;
+                        });
+
+                    if (minimumNpc?.EditorID?.Contains((speakerName), StringComparison.OrdinalIgnoreCase) is true) {
+                        speakers.Add(createSpeaker(minimumNpc.ToLinkGetter(), speakerName, minimumNpc.EditorID));
+                    }
                 }
             }
         }
 
-        return aliasSpeakers;
+        return speakers;
+    }
+
+    private static bool NameMatches(string? name, string reference) {
+        if (name is null) return false;
+
+        return name.Contains(reference, StringComparison.OrdinalIgnoreCase);
     }
 }

@@ -19,7 +19,7 @@ public sealed class DocumentVM : ViewModel {
     private readonly ScriptWriter _scriptWriter;
     private readonly Func<IDocumentIterator, IterableDialogueConfigVM> _iterableDialogueConfigVMFactory;
     private readonly Action<DocumentVM> _deleteDocument;
-    private readonly Action<DocumentVM, bool> _onImplementationComplete;
+    private readonly IDocumentImplementedListener[] _onImplementationComplete;
     private readonly Func<IDialogueContext, DialogueProcessor> _dialogueProcessorFactory;
     private readonly DialogueSelectionsCache _dialogueSelectionsCache;
 
@@ -40,7 +40,7 @@ public sealed class DocumentVM : ViewModel {
         ScriptWriter scriptWriter,
         Func<IDocumentIterator, IterableDialogueConfigVM> iterableDialogueConfigVMFactory,
         Action<DocumentVM> deleteDocument,
-        Action<DocumentVM, bool> onImplementationComplete,
+        IDocumentImplementedListener[] onImplementationComplete,
         Func<IDialogueContext, DialogueProcessor> dialogueProcessorFactory) {
         _documentParser = documentParser;
         Context = context;
@@ -95,7 +95,10 @@ public sealed class DocumentVM : ViewModel {
         }
 
         Status = DocumentStatus.Implemented;
-        _onImplementationComplete(this, autoApply);
+
+        foreach (var documentImplementedListener in _onImplementationComplete) {
+            documentImplementedListener.OnDocumentImplemented(this, autoApply);
+        }
     }
 
     public void LaunchParserConfig() {
