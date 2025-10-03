@@ -52,7 +52,7 @@ public sealed partial class PythonEmotionClassifierProvider : ReactiveObject, IE
                 .FirstOrDefault(File.Exists);
             if (filePath is null) continue;
 
-            Observable.Start(() => RefreshPython(filePath), RxApp.MainThreadScheduler).Subscribe();
+            Observable.Start(() => RefreshPython(filePath), RxApp.TaskpoolScheduler).Subscribe();
             break;
         }
     }
