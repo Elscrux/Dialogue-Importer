@@ -26,6 +26,7 @@ public sealed partial class UISpeakerSelection(
     public IReadOnlyList<T> GetSpeakers<T>(IReadOnlyList<string> speakerNames) where T : class, ISpeaker {
         var speakerSelections = new ObservableCollection<AliasSpeakerSelection>(speakerNames
             .Select(s => new AliasSpeakerSelection(linkCache, speakerFavoritesSelection, s))
+            .OrderBy(s => s.Name)
             .ToList());
 
         // Try load from file
