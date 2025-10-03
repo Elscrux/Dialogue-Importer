@@ -17,7 +17,9 @@ public sealed class UIFormKeySelection(
         where TMajor : IMajorRecordQueryableGetter {
         // Only show one form key selection window at a time
         lock (_lock) {
-            return GetFormKeyImpl<TMajor>(title, identifier, defaultFormKey);
+            var formKey = GetFormKeyImpl<TMajor>(title, identifier, defaultFormKey);
+            formKeyCache.Set<TMajor>(identifier, formKey);
+            return formKey;
         }
     }
 
@@ -48,7 +50,6 @@ public sealed class UIFormKeySelection(
             FormKeySelectionWindow GetSelection() => new(title, environmentContext.LinkCache, [typeof(TMajor)], defaultFormKey);
         });
 
-        formKeyCache.Set<TMajor>(identifier, formKey);
         return formKey;
     }
 }
