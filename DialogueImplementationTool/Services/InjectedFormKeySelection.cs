@@ -11,6 +11,6 @@ public sealed class InjectedFormKeySelection : IFormKeySelection {
         _injectedEntries = injectedEntries;
     }
 
-    public FormKey GetFormKey<TMajor>(string title, FormKey defaultFormKey) 
-        where TMajor : IMajorRecordQueryableGetter => _injectedEntries.GetValueOrDefault(title, defaultFormKey);
+    public FormKey GetFormKey<TMajor>(string title, string identifier, FormKey defaultFormKey) 
+        where TMajor : IMajorRecordQueryableGetter => _injectedEntries.GetValueOrDefault(identifier, defaultFormKey);
 }

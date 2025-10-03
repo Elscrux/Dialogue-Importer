@@ -11,23 +11,23 @@ public sealed class UIFormKeySelection(
     FormKeyCache formKeyCache)
     : IFormKeySelection {
     private readonly Lock _lock = new();
-    private readonly HashSet<string> _openedTitles = [];
+    private readonly HashSet<string> _openedIdentifiers = [];
 
-    public FormKey GetFormKey<TMajor>(string title, FormKey defaultFormKey)
+    public FormKey GetFormKey<TMajor>(string title, string identifier, FormKey defaultFormKey)
         where TMajor : IMajorRecordQueryableGetter {
         // Only show one form key selection window at a time
         lock (_lock) {
-            return GetFormKeyImpl<TMajor>(title, defaultFormKey);
+            return GetFormKeyImpl<TMajor>(title, identifier, defaultFormKey);
         }
     }
 
-    private FormKey GetFormKeyImpl<TMajor>(string title, FormKey defaultFormKey)
+    private FormKey GetFormKeyImpl<TMajor>(string title, string identifier, FormKey defaultFormKey)
         where TMajor : IMajorRecordQueryableGetter {
-        if (formKeyCache.TryGetFormKey<TMajor>(title, out var formKey)) {
+        if (formKeyCache.TryGetFormKey<TMajor>(identifier, out var formKey)) {
             defaultFormKey = formKey;
 
             // Don't prompt if it should auto apply, or if it's already been opened before
-            if (autoApplyProvider.AutoApply || _openedTitles.Contains(title)) {
+            if (autoApplyProvider.AutoApply || _openedIdentifiers.Contains(identifier)) {
                 return formKey;
             }
         }
@@ -35,7 +35,7 @@ public sealed class UIFormKeySelection(
         formKey = Application.Current.Dispatcher.Invoke(() => {
             var formKeySelection = GetSelection();
             formKeySelection.ShowDialog();
-            _openedTitles.Add(title);
+            _openedIdentifiers.Add(identifier);
 
             while (formKeySelection.FormKey == FormKey.Null) {
                 MessageBox.Show("You must select a form key");
@@ -48,7 +48,7 @@ public sealed class UIFormKeySelection(
             FormKeySelectionWindow GetSelection() => new(title, environmentContext.LinkCache, [typeof(TMajor)], defaultFormKey);
         });
 
-        formKeyCache.Set<TMajor>(title, formKey);
+        formKeyCache.Set<TMajor>(identifier, formKey);
         return formKey;
     }
 }

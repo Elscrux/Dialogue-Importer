@@ -9,7 +9,7 @@ namespace DialogueImplementationTool.Tests.Processor;
 public sealed class TestDeadAliveChecker {
     private readonly TestConstants _testConstants = new() {
         FormKeySelection = new InjectedFormKeySelection(new Dictionary<string, FormKey> {
-            { "Select: X", TestConstants.Speaker1FormKey }
+            { "X", TestConstants.Speaker1FormKey }
         })
     };
 
