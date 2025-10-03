@@ -38,6 +38,7 @@
                     Content="+ File"
                     FontSize="12"
                     Margin="2,0"
+                    Padding="10, 5"
                     Background="#574eb9"
                     Click="SelectFile_OnClick"/>
 
@@ -45,6 +46,7 @@
                     Content="+ Folder"
                     FontSize="12"
                     Margin="2,0"
+                    Padding="10, 5"
                     Background="#574eb9"
                     HorizontalAlignment="Left"
                     Click="SelectFolder_OnClick"/>
