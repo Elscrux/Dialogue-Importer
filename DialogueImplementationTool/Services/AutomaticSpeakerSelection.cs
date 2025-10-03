@@ -42,15 +42,15 @@ public sealed class AutomaticSpeakerSelection(
 
                 speakers.Add(createSpeaker(npc.ToLinkGetter(), speakerName, npc.EditorID));
             } else {
+                // Only attempt to find the closest match when an exact match is not required
+                if (exactMatch) continue;
+
                 // Try to find the NPC in the speaker favorites
                 var closestSpeaker = speakerFavoritesSelection.GetClosestSpeakers(speakerName).FirstOrDefault();
                 if (closestSpeaker is not null) {
                     speakers.Add(createSpeaker(closestSpeaker.FormLink, speakerName, closestSpeaker.EditorID));
                 } else {
-                    // Only attempt to find the best possible match when an exact match is not required
-                    if (exactMatch) continue;
-
-                    var minimumNpc = npcs
+                    var closestNpc = npcs
                         .MinBy(npc => {
                             var index = npc.EditorID?.IndexOf(speakerName, StringComparison.Ordinal);
                             if (index is null or -1) return int.MaxValue;
@@ -63,8 +63,8 @@ public sealed class AutomaticSpeakerSelection(
                             return index;
                         });
 
-                    if (minimumNpc?.EditorID?.Contains((speakerName), StringComparison.OrdinalIgnoreCase) is true) {
-                        speakers.Add(createSpeaker(minimumNpc.ToLinkGetter(), speakerName, minimumNpc.EditorID));
+                    if (closestNpc?.EditorID?.Contains((speakerName), StringComparison.OrdinalIgnoreCase) is true) {
+                        speakers.Add(createSpeaker(closestNpc.ToLinkGetter(), speakerName, closestNpc.EditorID));
                     }
                 }
             }
