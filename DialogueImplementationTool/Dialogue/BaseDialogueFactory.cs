@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Dialogue.Processor;
-using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Extension;
 using DialogueImplementationTool.Parser;
 using Mutagen.Bethesda.Plugins;

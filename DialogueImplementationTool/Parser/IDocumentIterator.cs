@@ -62,7 +62,7 @@ public interface IDocumentIterator : IDocumentParser {
                 speaker = new NpcSpeaker(context.LinkCache, selection.Speaker);
             }
 
-            //Set speaker for all linked topics
+            // Set speaker for all linked topics
             foreach (var topic in topics.EnumerateLinks(true)) {
                 foreach (var topicInfo in topic.TopicInfos) {
                     topicInfo.Speaker = speaker;
