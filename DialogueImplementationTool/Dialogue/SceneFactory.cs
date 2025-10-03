@@ -18,8 +18,7 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
         // NPC A: [some note] some text.
         // => [some note] some text.        | Speaker: NPC A
         // => some text.                    | Speaker: NPC A, Note: [some note]
-        var noteExtractorIndex = dialogueProcessor.ResponseProcessors.FindIndex(p => p is ResponseNoteExtractor);
-        dialogueProcessor.ResponseProcessors.Insert(noteExtractorIndex, new SceneResponseProcessor());
+        dialogueProcessor.TopicInfoProcessors.Insert(0, new SceneResponseProcessor());
 
         var processor = base.ConfigureProcessor(dialogueProcessor);
         return new FuncDialogueProcessor(processor) {

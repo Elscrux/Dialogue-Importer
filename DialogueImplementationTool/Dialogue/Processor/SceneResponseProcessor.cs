@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using DialogueImplementationTool.Dialogue.Model;
-using DialogueImplementationTool.Parser;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
-public sealed partial class SceneResponseProcessor : IDialogueResponseProcessor {
+public sealed partial class SceneResponseProcessor : IDialogueTopicInfoProcessor {
     public const string SceneNotePrefix = "SPEAKER=";
 
     [GeneratedRegex(@"^([^[:]+):\s*(.+)")]
@@ -18,12 +16,16 @@ public sealed partial class SceneResponseProcessor : IDialogueResponseProcessor 
         return null;
     }
 
-    public void Process(DialogueResponse response, IReadOnlyList<FormattedText> textSnippets) {
-        // Extract the speaker and save the name in prompt 
-        var match = SceneLineRegex.Match(response.Response);
-        if (!match.Success) return;
+    public void Process(DialogueTopicInfo topicInfo) {
+        if (!topicInfo.Prompt.IsEmpty()) return;
 
-        response.StartNotes.Add(new Note { Text = SceneNotePrefix + match.Groups[1].Value });
-        response.Response = match.Groups[2].Value;
+        foreach (var response in topicInfo.Responses) {
+            // Extract the speaker and save the name in prompt 
+            var match = SceneLineRegex.Match(response.Response);
+            if (!match.Success) continue;
+
+            response.StartNotes.Add(new Note { Text = SceneNotePrefix + match.Groups[1].Value });
+            response.Response = match.Groups[2].Value;
+        }
     }
 }
