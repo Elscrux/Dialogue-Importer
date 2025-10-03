@@ -13,7 +13,6 @@ namespace DialogueImplementationTool.Services;
 public sealed class PythonEmotionClassifier : IDisposable, IEmotionClassifier {
     private static readonly Emotion[] Emotions = Enum.GetValues<Emotion>();
     private static readonly ConcurrentBag<(dynamic Pipeline, Dictionary<string, EmotionResult> Emotions)> Outliers = [];
-    private readonly Py.GILState _gilState;
     private readonly List<dynamic> _pipelines;
 
     private readonly Dictionary<string, EmotionValue> _speakerEmotions = LoadSpeakers();
@@ -24,8 +23,9 @@ public sealed class PythonEmotionClassifier : IDisposable, IEmotionClassifier {
         Environment.SetEnvironmentVariable("PYTHONNET_PYDLL", pythonDllPath);
 
         PythonEngine.Initialize();
-        _gilState = Py.GIL();
+        PythonEngine.BeginAllowThreads();
 
+        using var gil = Py.GIL();
         dynamic transformers = Py.Import("transformers");
         _pipelines = [
             transformers.pipeline("text-classification", "j-hartmann/emotion-english-distilroberta-base"),
@@ -41,7 +41,6 @@ public sealed class PythonEmotionClassifier : IDisposable, IEmotionClassifier {
     public string PythonDllPath { get; }
 
     public void Dispose() {
-        _gilState.Dispose();
         PythonEngine.Shutdown();
     }
 
@@ -85,12 +84,13 @@ public sealed class PythonEmotionClassifier : IDisposable, IEmotionClassifier {
     private static string EmotionsPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Emotions", "emotions.cache");
 
     private static Classification GetAverageEmotion(IEnumerable<dynamic> pipelines, string text) {
+        using var gil = Py.GIL();
+
         var classifications = pipelines
-            .Select(
-                pipeline => {
-                    Classification classification = GetClassification(pipeline, text);
-                    return (classification.Emotion, classification.Score, pipeline);
-                })
+            .Select(pipeline => {
+                Classification classification = GetClassification(pipeline, text);
+                return (classification.Emotion, classification.Score, pipeline);
+            })
             .ToList();
 
         var emotionPerCount = Emotions.ToDictionary(
