@@ -61,6 +61,8 @@ public sealed class CsvDocumentParser(
 
         return csvReader.GetRecords<GenericDialogue>()
             .Select(genericDialogue => {
+                if (genericDialogue.Category.IsNullOrWhitespace()) return null;
+
                 if (genericDialogue.Line.IsNullOrEmpty()) {
                     genericDialogue = genericDialogue with { Line = " " };
                 }
@@ -94,6 +96,7 @@ public sealed class CsvDocumentParser(
 
                 return topic;
             })
+            .WhereNotNull()
             .ToList();
     }
 
