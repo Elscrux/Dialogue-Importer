@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
+using System.Windows;
 using CsvHelper;
 using CsvHelper.Configuration;
 using DialogueImplementationTool.Converter;
@@ -24,7 +25,28 @@ public sealed class CsvDocumentParser(
     public string FilePath { get; } = path;
 
     public List<DialogueTopic> ParseGenericDialogue(IDialogueProcessor processor) {
-        using var streamReader = new StreamReader(FilePath);
+        StreamReader? streamReader = null;
+        var tryLoading = true;
+        while (tryLoading)
+            try {
+                streamReader = new StreamReader(FilePath);
+                tryLoading = false;
+            } catch (Exception e) {
+                switch (MessageBox.Show(e.Message)) {
+                    case MessageBoxResult.None:
+                    case MessageBoxResult.Cancel:
+                    case MessageBoxResult.No:
+                        tryLoading = false;
+                        break;
+                    case MessageBoxResult.OK:
+                    case MessageBoxResult.Yes:
+                        break;
+                    default: throw new InvalidOperationException();
+                }
+            }
+
+        if (streamReader is null) return [];
+
         var isPreHeader = true;
         var csvConfiguration = new CsvConfiguration(CultureInfo.InvariantCulture) {
             HeaderValidated = null,
