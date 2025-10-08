@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Extension;
-using Mutagen.Bethesda.FormKeys.SkyrimSE;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
@@ -13,7 +13,7 @@ public sealed class CustomProcessor(IDialogueContext context) : DialogueTypeProc
         var voiceType = GenericMetaData.GetVoiceType(topicInfo.MetaData);
 
         switch (description) {
-            case "NPC returns the dropped item to the player":
+            case "NPC returns the dropped item to the player": {
                 var questFactory = new WIRemoveItemReturnQuestFactory(context, voiceType);
                 GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData, questFactory);
                 GenericMetaData.SetPostProcessor(topicInfo.MetaData, new WIRemoveItemReturnPostProcessor(context));
@@ -28,64 +28,85 @@ public sealed class CustomProcessor(IDialogueContext context) : DialogueTypeProc
                 }.ToConditionFloat();
 
                 break;
+            }
             case "Player casts Calm on NPC": {
-                var dialogTopic =
-                    context.GetOrAddOverride<DialogTopic, IDialogTopicGetter>(Skyrim.DialogTopic
-                        .WICastMagicNonHostileSpellCalmTopic);
-                GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new ExistingDialogueTopicFactory(dialogTopic));
+                var questFactory = new CustomWICastMagicReactionFactory(
+                    context,
+                    "Calm",
+                    "NPC reacts to calm being cast on them",
+                    FormKey.Factory("05EBDC:BSAssets.esm"),
+                    [new GetIsVoiceTypeConditionData {
+                        VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
+                    }.ToConditionFloat()]);
 
-                yield return new GetIsVoiceTypeConditionData {
-                    VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
-                }.ToConditionFloat();
+                GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData, questFactory);
+                GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new SceneWithOneDialogTopicFactory(context, 0));
 
+                yield return NullCondition;
                 break;
             }
             case "Player casts Courage on NPC": {
-                var dialogTopic =
-                    context.GetOrAddOverride<DialogTopic, IDialogTopicGetter>(Skyrim.DialogTopic
-                        .WICastMagicNonHostileSpellCourageTopic);
-                GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new ExistingDialogueTopicFactory(dialogTopic));
+                var questFactory = new CustomWICastMagicReactionFactory(
+                    context,
+                    "Courage",
+                    "NPC reacts to courage being cast on them",
+                    FormKey.Factory("05EBE0:BSAssets.esm"),
+                    [new GetIsVoiceTypeConditionData {
+                        VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
+                    }.ToConditionFloat()]);
 
-                yield return new GetIsVoiceTypeConditionData {
-                    VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
-                }.ToConditionFloat();
+                GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData, questFactory);
+                GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new SceneWithOneDialogTopicFactory(context, 0));
 
+                yield return NullCondition;
                 break;
             }
             case "Player casts Healing spell on NPC": {
-                var dialogTopic =
-                    context.GetOrAddOverride<DialogTopic, IDialogTopicGetter>(Skyrim.DialogTopic
-                        .WICastMagicNonHostileSpellHealingTopic);
-                GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new ExistingDialogueTopicFactory(dialogTopic));
+                var questFactory = new CustomWICastMagicReactionFactory(
+                    context,
+                    "Healing",
+                    "NPC reacts to healing being cast on them",
+                    FormKey.Factory("05EBE1:BSAssets.esm"),
+                    [new GetIsVoiceTypeConditionData {
+                        VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
+                    }.ToConditionFloat()]);
 
-                yield return new GetIsVoiceTypeConditionData {
-                    VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
-                }.ToConditionFloat();
+                GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData, questFactory);
+                GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new SceneWithOneDialogTopicFactory(context, 0));
 
+                yield return NullCondition;
                 break;
             }
             case "Player casts Stealth spell on NPC": {
-                var dialogTopic =
-                    context.GetOrAddOverride<DialogTopic, IDialogTopicGetter>(Skyrim.DialogTopic
-                        .WICastMagicNonHostileSpellStealthTopic);
-                GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new ExistingDialogueTopicFactory(dialogTopic));
+                var questFactory = new CustomWICastMagicReactionFactory(
+                    context,
+                    "Stealth",
+                    "NPC reacts to stealth being cast on them",
+                    FormKey.Factory("05EBE2:BSAssets.esm"),
+                    [new GetIsVoiceTypeConditionData {
+                        VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
+                    }.ToConditionFloat()]);
 
-                yield return new GetIsVoiceTypeConditionData {
-                    VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
-                }.ToConditionFloat();
+                GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData, questFactory);
+                GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new SceneWithOneDialogTopicFactory(context, 0));
 
+                yield return NullCondition;
                 break;
             }
             case "Player casts other non-hostile spell on NPC": {
-                var dialogTopic =
-                    context.GetOrAddOverride<DialogTopic, IDialogTopicGetter>(Skyrim.DialogTopic
-                        .WICastMagicNonHostileSpellWeirdTopic);
-                GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new ExistingDialogueTopicFactory(dialogTopic));
+                var questFactory = new CustomWICastMagicReactionFactory(
+                    context,
+                    "Weird",
+                    "NPC reacts to weird spell being cast on them",
+                    FormKey.Factory("05EBE3:BSAssets.esm"),
+                    [new GetIsVoiceTypeConditionData {
+                        VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
+                    }.ToConditionFloat()]);
 
-                yield return new GetIsVoiceTypeConditionData {
-                    VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
-                }.ToConditionFloat();
+                GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData, questFactory);
+                GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new SceneWithOneDialogTopicFactory(context, 0));
 
+                yield return NullCondition;
                 break;
             }
         }

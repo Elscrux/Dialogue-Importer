@@ -456,6 +456,9 @@
       <Compile Update="Services\InjectedEnvironmentContext.cs">
         <DependentUpon>IEnvironmentContext.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\CustomWICastMagicReactionFactory.cs">
+        <DependentUpon>IGenericDialogueQuestFactory.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>
