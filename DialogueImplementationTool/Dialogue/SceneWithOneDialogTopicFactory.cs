@@ -43,6 +43,6 @@ public sealed class SceneWithOneDialogTopicFactory(IDialogueContext context, uin
                 };
             });
 
-        return context.GetOrAddOverride<DialogTopic, IDialogTopicGetter>(scene.Actions[0].Topic);
+        return context.GetTopic(scene.Actions[0].Topic.FormKey);
     }
 }
