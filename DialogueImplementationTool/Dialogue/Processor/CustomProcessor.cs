@@ -42,7 +42,9 @@ public sealed class CustomProcessor(IDialogueContext context) : DialogueTypeProc
                 GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData, questFactory);
                 GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new SceneWithOneDialogTopicFactory(context, 0));
 
-                yield return NullCondition;
+                yield return new GetIsVoiceTypeConditionData {
+                    VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
+                }.ToConditionFloat();
                 break;
             }
             case "Player casts Courage on NPC": {
@@ -58,7 +60,9 @@ public sealed class CustomProcessor(IDialogueContext context) : DialogueTypeProc
                 GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData, questFactory);
                 GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new SceneWithOneDialogTopicFactory(context, 0));
 
-                yield return NullCondition;
+                yield return new GetIsVoiceTypeConditionData {
+                    VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
+                }.ToConditionFloat();
                 break;
             }
             case "Player casts Healing spell on NPC": {
@@ -74,7 +78,9 @@ public sealed class CustomProcessor(IDialogueContext context) : DialogueTypeProc
                 GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData, questFactory);
                 GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new SceneWithOneDialogTopicFactory(context, 0));
 
-                yield return NullCondition;
+                yield return new GetIsVoiceTypeConditionData {
+                    VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
+                }.ToConditionFloat();
                 break;
             }
             case "Player casts Stealth spell on NPC": {
@@ -90,7 +96,9 @@ public sealed class CustomProcessor(IDialogueContext context) : DialogueTypeProc
                 GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData, questFactory);
                 GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new SceneWithOneDialogTopicFactory(context, 0));
 
-                yield return NullCondition;
+                yield return new GetIsVoiceTypeConditionData {
+                    VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
+                }.ToConditionFloat();
                 break;
             }
             case "Player casts other non-hostile spell on NPC": {
@@ -106,7 +114,9 @@ public sealed class CustomProcessor(IDialogueContext context) : DialogueTypeProc
                 GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData, questFactory);
                 GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new SceneWithOneDialogTopicFactory(context, 0));
 
-                yield return NullCondition;
+                yield return new GetIsVoiceTypeConditionData {
+                    VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
+                }.ToConditionFloat();
                 break;
             }
         }
