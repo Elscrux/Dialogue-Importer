@@ -7,11 +7,11 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed class DialogueProcessor : IDialogueProcessor {
     private readonly IDialogueContext _context;
-    private readonly IEmotionClassifierProvider _emotionClassifierProvider;
+    private readonly IEmotionClassifier _emotionClassifier;
 
-    public DialogueProcessor(IDialogueContext context, IEmotionClassifierProvider emotionClassifierProvider) {
+    public DialogueProcessor(IDialogueContext context, IEmotionClassifier emotionClassifier) {
         _context = context;
-        _emotionClassifierProvider = emotionClassifierProvider;
+        _emotionClassifier = emotionClassifier;
 
         GenericDialogueProcessors = [
             new GenericLineInvalidStringFixer(),
@@ -120,7 +120,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new RumorServiceChecker(),
             new VendorServiceChecker(),
             new RentRoomServiceChecker(),
-            new EmotionChecker(_emotionClassifierProvider.EmotionClassifier),
+            new EmotionChecker(_emotionClassifier),
         ];
 
         if (context.Quest.IsDialogueQuest()) {
@@ -147,7 +147,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
     // Runs at the very end
     public List<IConversationProcessor> ConversationProcessors { get; }
 
-    public DialogueProcessor Clone() => new(_context, _emotionClassifierProvider);
+    public DialogueProcessor Clone() => new(_context, _emotionClassifier);
 
     public void Process(GenericDialogue genericDialogue, DialogueTopicInfo topicInfo) {
         foreach (var processor in GenericDialogueProcessors) {

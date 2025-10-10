@@ -6,43 +6,25 @@ using System.Linq;
 using Mutagen.Bethesda.Skyrim;
 using Newtonsoft.Json;
 using Noggog;
-using Python.Runtime;
-using Classification = ((string Text, Mutagen.Bethesda.Skyrim.Emotion Actual) Emotion, float Score);
+using TransformersSharp.Pipelines;
+using Classification = ((string Text, Mutagen.Bethesda.Skyrim.Emotion Actual) Emotion, double Score);
 namespace DialogueImplementationTool.Services;
 
-public sealed class PythonEmotionClassifier : IDisposable, IEmotionClassifier {
+public sealed class TransformersEmotionClassifier : IEmotionClassifier {
     private static readonly Emotion[] Emotions = Enum.GetValues<Emotion>();
-    private static readonly ConcurrentBag<(dynamic Pipeline, Dictionary<string, EmotionResult> Emotions)> Outliers = [];
-    private readonly List<dynamic> _pipelines;
+    private static readonly ConcurrentBag<(TextClassificationPipeline Pipeline, Dictionary<string, EmotionResult> Emotions)> Outliers = [];
+
+    private readonly List<TextClassificationPipeline> _pipelines = [
+        TextClassificationPipeline.FromModel("j-hartmann/emotion-english-distilroberta-base"),
+        TextClassificationPipeline.FromModel("j-hartmann/emotion-english-roberta-large"),
+        TextClassificationPipeline.FromModel("SamLowe/roberta-base-go_emotions"),
+        TextClassificationPipeline.FromModel("michellejieli/emotion_text_classifier"),
+        TextClassificationPipeline.FromModel("jitesh/emotion-english"),
+        TextClassificationPipeline.FromModel("HarshV9/emotion-english-distilroberta-base"),
+        TextClassificationPipeline.FromModel("bhadresh-savani/distilbert-base-uncased-emotion"),
+    ];
 
     private readonly Dictionary<string, EmotionValue> _speakerEmotions = LoadSpeakers();
-
-    public PythonEmotionClassifier(string pythonDllPath) {
-        Console.WriteLine($"Starting Python with {pythonDllPath}...");
-        PythonDllPath = pythonDllPath;
-        Environment.SetEnvironmentVariable("PYTHONNET_PYDLL", pythonDllPath);
-
-        PythonEngine.Initialize();
-        PythonEngine.BeginAllowThreads();
-
-        using var gil = Py.GIL();
-        dynamic transformers = Py.Import("transformers");
-        _pipelines = [
-            transformers.pipeline("text-classification", "j-hartmann/emotion-english-distilroberta-base"),
-            transformers.pipeline("text-classification", "j-hartmann/emotion-english-roberta-large"),
-            transformers.pipeline("text-classification", "SamLowe/roberta-base-go_emotions"),
-            transformers.pipeline("text-classification", "michellejieli/emotion_text_classifier"),
-            transformers.pipeline("text-classification", "jitesh/emotion-english"),
-            transformers.pipeline("text-classification", "HarshV9/emotion-english-distilroberta-base"),
-            transformers.pipeline("text-classification", "bhadresh-savani/distilbert-base-uncased-emotion"),
-        ];
-    }
-
-    public string PythonDllPath { get; }
-
-    public void Dispose() {
-        PythonEngine.Shutdown();
-    }
 
     public EmotionValue Classify(string text) {
         if (_speakerEmotions.TryGetValue(text, out var emotionValue)) return emotionValue;
@@ -83,9 +65,7 @@ public sealed class PythonEmotionClassifier : IDisposable, IEmotionClassifier {
 
     private static string EmotionsPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Emotions", "emotions.cache");
 
-    private static Classification GetAverageEmotion(IEnumerable<dynamic> pipelines, string text) {
-        using var gil = Py.GIL();
-
+    private static Classification GetAverageEmotion(IEnumerable<TextClassificationPipeline> pipelines, string text) {
         var classifications = pipelines
             .Select(pipeline => {
                 Classification classification = GetClassification(pipeline, text);
@@ -111,7 +91,7 @@ public sealed class PythonEmotionClassifier : IDisposable, IEmotionClassifier {
     }
 
     private static void ReportOutliers(
-        Dictionary<Emotion, List<((string Text, Emotion Actual) Emotion, float Score, dynamic pipeline)>> dictionary,
+        Dictionary<Emotion, List<((string Text, Emotion Actual) Emotion, double Score, TextClassificationPipeline pipeline)>> dictionary,
         Emotion maxEmotion) {
         foreach (var (key, value) in dictionary) {
             var isMatch = key == maxEmotion;
@@ -197,10 +177,10 @@ public sealed class PythonEmotionClassifier : IDisposable, IEmotionClassifier {
         };
     }
 
-    private static Classification GetClassification(dynamic pipeline, string text) {
-        var result = pipeline(text);
-        string label = result[0]["label"];
-        float score = result[0]["score"];
+    private static Classification GetClassification(TextClassificationPipeline pipeline, string text) {
+        var result = pipeline.Classify(text);
+        var label = result[0].Label;
+        var score = result[0].Score;
 
         return ((label, GetEmotion(label)), score);
     }

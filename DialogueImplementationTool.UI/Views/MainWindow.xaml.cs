@@ -16,16 +16,6 @@ public partial class MainWindow {
         DataContext = _vm = vm;
     }
 
-    private void SelectionPythonPath_OnClick(object sender, RoutedEventArgs e) {
-        const string filter = "*.dll";
-        var fileDialog = new OpenFileDialog {
-            Multiselect = false,
-            Filter = $"Library({filter})|{filter}",
-        };
-
-        if (fileDialog.ShowDialog() is true) _vm.PythonEmotionClassifierProvider?.RefreshPython(fileDialog.FileName);
-    }
-
     private void OpenOutput() {
         _vm.OutputPathProvider.CreateIfMissing();
 

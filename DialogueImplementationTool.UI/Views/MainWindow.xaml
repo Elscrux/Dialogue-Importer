@@ -20,11 +20,6 @@
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0">
-            <DockPanel.Resources>
-                <converters:LoadStateToBrushConverter x:Key="LoadStateToBrushConverter"/>
-                <converters:LoadStateToTextConverter x:Key="LoadStateToTextConverter"/>
-            </DockPanel.Resources>
-
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="Open Output Folder"
                           Click="OpenFolder_OnClick"
@@ -45,34 +40,6 @@
                          Grid.Column="1"
                          Margin="2"
                          Text="{Binding Prefix}"/>
-            </Grid>
-
-            <Grid DockPanel.Dock="Top">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <Label Grid.Column="0"
-                       Target="PythonDllPathTextBox"
-                       Content="Path to Python Dll"/>
-
-                <TextBox x:Name="PythonDllPathTextBox"
-                         Grid.Column="1"
-                         IsReadOnly="True"
-                         Margin="2"
-                         Text="{Binding PythonEmotionClassifierProvider.PythonDllPath, FallbackValue='Loading'}"/>
-
-                <TextBlock Grid.Column="2"
-                           VerticalAlignment="Center"
-                           Text="{Binding PythonEmotionClassifierProvider.PythonState, Converter={StaticResource LoadStateToTextConverter}}"
-                           Background="{Binding PythonEmotionClassifierProvider.PythonState, Converter={StaticResource LoadStateToBrushConverter}}"/>
-
-                <Button Grid.Column="3"
-                        Content="Select"
-                        Click="SelectionPythonPath_OnClick"/>
             </Grid>
 
             <Grid DockPanel.Dock="Top">

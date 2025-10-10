@@ -16,7 +16,6 @@ public sealed class MainWindowVM : ViewModel, IDocumentImplementedListener {
 
     public OutputPathProvider OutputPathProvider { get; }
     public IEnvironmentContext EnvironmentContext { get; }
-    public PythonEmotionClassifierProvider? PythonEmotionClassifierProvider { get; private set; }
 
     public IEnumerable<Type> QuestTypes { get; } = [typeof(IQuestGetter)];
 
@@ -31,12 +30,10 @@ public sealed class MainWindowVM : ViewModel, IDocumentImplementedListener {
     public MainWindowVM(
         IPrefixProvider prefixProvider,
         IEnvironmentContext environmentContext,
-        PythonEmotionClassifierProvider pythonEmotionClassifierProvider,
         OutputPathProvider outputPathProvider,
         Func<IQuest, QuestDialogueVM> questDialogueVMFactory) {
         Prefix = prefixProvider.Prefix;
         EnvironmentContext = environmentContext;
-        PythonEmotionClassifierProvider = pythonEmotionClassifierProvider;
         _questDialogueVMFactory = questDialogueVMFactory;
         OutputPathProvider = outputPathProvider;
 

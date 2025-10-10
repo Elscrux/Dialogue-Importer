@@ -29,7 +29,7 @@ public partial class App {
         builder.RegisterInstance(new FileSystem())
             .As<IFileSystem>();
 
-        builder.RegisterType<PythonEmotionClassifier>()
+        builder.RegisterType<TransformersEmotionClassifier>()
             .AsSelf()
             .As<IEmotionClassifier>()
             .SingleInstance();
@@ -49,11 +49,6 @@ public partial class App {
             .AsSelf();
 
         builder.RegisterType<OutputPathProvider>()
-            .SingleInstance();
-
-        builder.RegisterType<PythonEmotionClassifierProvider>()
-            .As<IEmotionClassifierProvider>()
-            .AsSelf()
             .SingleInstance();
 
         builder.RegisterType<AutoApplyProvider>()

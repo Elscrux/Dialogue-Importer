@@ -16,8 +16,8 @@
       <PackageReference Include="Mutagen.Bethesda.Json" Version="0.52.0-alpha.60" />
       <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.52.0-alpha.60" />
       <PackageReference Include="Mutagen.Bethesda.WPF" Version="0.52.0-alpha.60" />
-      <PackageReference Include="pythonnet" Version="3.1.0-preview2024-09-06" />
       <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
+      <PackageReference Include="TransformersSharp" Version="1.0.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -153,7 +153,7 @@
       <Compile Update="Services\NullEmotionClassifier.cs">
         <DependentUpon>IEmotionClassifier.cs</DependentUpon>
       </Compile>
-      <Compile Update="Services\PythonEmotionClassifier.cs">
+      <Compile Update="Services\TransformersEmotionClassifier.cs">
         <DependentUpon>IEmotionClassifier.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\DialogueQuestLockUnlockProcessor.cs">
@@ -200,12 +200,6 @@
       </Compile>
       <Compile Update="Dialogue\Processor\LocationChecker.cs">
         <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Services\PythonEmotionClassifierProvider.cs">
-        <DependentUpon>IEmotionClassifierProvider.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Services\InjectedEmotionClassifier.cs">
-        <DependentUpon>IEmotionClassifierProvider.cs</DependentUpon>
       </Compile>
       <Compile Update="Dialogue\Processor\EmptyBracesRemover.cs">
         <DependentUpon>IDialogueResponseProcessor.cs</DependentUpon>
