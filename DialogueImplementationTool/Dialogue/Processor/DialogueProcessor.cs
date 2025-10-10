@@ -13,7 +13,10 @@ public sealed class DialogueProcessor : IDialogueProcessor {
         _context = context;
         _emotionClassifier = emotionClassifier;
 
+        var emotionChecker = new EmotionChecker(_emotionClassifier);
+
         GenericDialogueProcessors = [
+            emotionChecker,
             new GenericLineInvalidStringFixer(),
             new GenericLineTrimmer(),
             new PlayerRaceProcessor(),
@@ -120,7 +123,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new RumorServiceChecker(),
             new VendorServiceChecker(),
             new RentRoomServiceChecker(),
-            new EmotionChecker(_emotionClassifier),
+            emotionChecker,
         ];
 
         if (context.Quest.IsDialogueQuest()) {

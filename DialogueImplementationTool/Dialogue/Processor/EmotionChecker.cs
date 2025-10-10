@@ -1,10 +1,11 @@
 ﻿using System.Linq;
 using DialogueImplementationTool.Dialogue.Model;
+using DialogueImplementationTool.Parser;
 using DialogueImplementationTool.Services;
 using Noggog;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
-public sealed class EmotionChecker(IEmotionClassifier emotionClassifier) : IConversationProcessor {
+public sealed class EmotionChecker(IEmotionClassifier emotionClassifier) : IGenericDialogueProcessor, IConversationProcessor {
     public void Process(Conversation conversation) {
         foreach (var topic in conversation.SelectMany(x => x.Topics).SelectMany(x => x.EnumerateLinks(true))) {
             foreach (var topicInfo in topic.TopicInfos) {
@@ -12,6 +13,8 @@ public sealed class EmotionChecker(IEmotionClassifier emotionClassifier) : IConv
             }
         }
     }
+
+    public void Process(GenericDialogue genericDialogue, DialogueTopicInfo topicInfo) => Process(topicInfo);
 
     public void Process(DialogueTopicInfo topicInfo) {
         if (topicInfo.SharedInfo is not null) {
