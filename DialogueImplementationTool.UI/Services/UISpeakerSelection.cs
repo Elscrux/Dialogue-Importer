@@ -6,11 +6,199 @@ using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Services;
 using DialogueImplementationTool.UI.Models;
 using DialogueImplementationTool.UI.Views;
+using Loqui;
 using Mutagen.Bethesda.Json;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
+using Mutagen.Bethesda.Plugins.Records;
 using Newtonsoft.Json;
+using Noggog;
 namespace DialogueImplementationTool.UI.Services;
+
+public sealed class FormKeyJsonConverter : JsonConverter
+{
+    public override bool CanConvert(Type objectType)
+    {
+        if (objectType == typeof(FormKey)) return true;
+        if (objectType == typeof(FormKey?)) return true;
+        if (objectType == typeof(FormLinkInformation)) return true;
+        if (typeof(IFormLinkGetter).IsAssignableFrom(objectType)) return true;
+        return false;
+    }
+
+    public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+    {
+        var obj = reader.Value;
+        if (obj == null)
+        {
+            if (objectType == typeof(FormKey))
+            {
+                return FormKey.Null;
+            }
+            if (objectType == typeof(FormKey?))
+            {
+                return null;
+            }
+            if (!objectType.Name.Contains("FormLink"))
+            {
+                throw new ArgumentException();
+            }
+
+            if (IsNullableLink(objectType))
+            {
+                return Activator.CreateInstance(
+                    typeof(FormLinkNullable<>).MakeGenericType(objectType.GenericTypeArguments[0]));
+            }
+            else
+            {
+                return Activator.CreateInstance(
+                    typeof(FormLink<>).MakeGenericType(objectType.GenericTypeArguments[0]),
+                    FormKey.Null);
+            }
+        }
+        else
+        {
+            var str = obj.ToString();
+
+            if (objectType == typeof(FormKey))
+            {
+                if (str.IsNullOrWhitespace())
+                {
+                    return FormKey.Null;
+                }
+                else
+                {
+                    return FormKey.Factory(str);
+                }
+            }
+            else if (objectType == typeof(FormKey?))
+            {
+                if (str.IsNullOrWhitespace())
+                {
+                    return default(FormKey?);
+                }
+                else
+                {
+                    return FormKey.Factory(str);
+                }
+            }
+
+            if (!objectType.Name.Contains("FormLink"))
+            {
+                throw new ArgumentException();
+            }
+
+            if (objectType.IsGenericType)
+            {
+                FormKey key;
+                if (str.IsNullOrWhitespace())
+                {
+                    key = FormKey.Null;
+                    if (objectType.GenericTypeArguments.Length == 0)
+                    {
+                        throw new ArgumentException("Empty string to parse to a generic type without a given type argument is not supported");
+                    }
+                    else
+                    {
+                        return GetFormLink(objectType.GenericTypeArguments[0], key);
+                    }
+                }
+                
+                (key, var regis) = ParseFormKeyAndType(str);
+                
+                var type = objectType.GenericTypeArguments.Length == 0
+                    ? regis.GetterType
+                    : objectType.GenericTypeArguments[0];
+                
+                return GetFormLink(type, key);
+            }
+            else
+            {
+                if (str.IsNullOrWhitespace() || str == "Null")
+                {
+                    return new FormLinkInformation(FormKey.Null, typeof(IMajorRecordGetter));
+                }
+                
+                var (key, regis) = ParseFormKeyAndType(str);
+                
+                return new FormLinkInformation(
+                    key,
+                    regis.GetterType);
+            }
+        }
+        
+        (FormKey FormKey, ILoquiRegistration Registration) ParseFormKeyAndType(string str) {
+            var span = str.AsSpan();
+            var startIndex = span.IndexOf('<');
+            if (startIndex == -1)
+            {
+                throw new ArgumentException();
+            }
+            
+            var endIndex = span.IndexOf('>');
+            if (endIndex == -1)
+            {
+                throw new ArgumentException();
+            }
+            
+            var key = FormKey.Factory(span[..startIndex]);
+            var typeName = span.Slice(startIndex + 1, endIndex - 1 - startIndex).ToString();
+            
+            var lastPeriod = typeName.LastIndexOf('.');
+            if (lastPeriod != -1 && typeName[(lastPeriod + 1)..] == "MajorRecord")
+            {
+                typeName = "Mutagen.Bethesda.Plugins.Records.MajorRecord";
+            }
+            else if (!typeName.StartsWith("Mutagen.Bethesda."))
+            {
+                typeName = "Mutagen.Bethesda." + typeName;
+            }
+            var regis = LoquiRegistration.GetRegisterByFullName(typeName);
+            if (regis == null)
+            {
+                throw new ArgumentException($"Unknown object type: {typeName}");
+            }
+            
+            return (key, regis);
+        }
+        
+        object? GetFormLink(Type type, FormKey key) {
+            if (IsNullableLink(objectType))
+            {
+                return Activator.CreateInstance(
+                    typeof(FormLinkNullable<>).MakeGenericType(type),
+                    key);
+            }
+            else
+            {
+                return Activator.CreateInstance(
+                    typeof(FormLink<>).MakeGenericType(type),
+                    key);
+            }
+        }
+    }
+
+    private bool IsNullableLink(Type type)
+    {
+        return type.Name.AsSpan()[..^2].EndsWith("Nullable", StringComparison.Ordinal);
+    }
+
+    public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+    {
+        if (value == null) return;
+        switch (value)
+        {
+            case FormKey fk:
+                writer.WriteValue(fk.ToString());
+                break;
+            case IFormLinkIdentifier ident:
+                writer.WriteValue(IFormLinkIdentifier.GetString(ident, simpleType: true));
+                break;
+            default:
+                throw new ArgumentException();
+        }
+    }
+}
 
 sealed record AliasSelectionDto(IFormLinkGetter FormLink, string? EditorID);
 
@@ -23,7 +211,8 @@ public sealed partial class UISpeakerSelection(
 
     private Dictionary<string, Dictionary<string, AliasSelectionDto>>? _savedSceneSelections;
 
-    public IReadOnlyList<T> GetSpeakers<T>(IReadOnlyList<string> speakerNames) where T : class, ISpeaker {
+    public IReadOnlyList<T> GetSpeakers<T>(IReadOnlyList<string> speakerNames)
+        where T : class, ISpeaker {
         var speakerSelections = new ObservableCollection<AliasSpeakerSelection>(speakerNames
             .Select(s => new AliasSpeakerSelection(linkCache, speakerFavoritesSelection, s))
             .OrderBy(s => s.Name)
@@ -47,7 +236,8 @@ public sealed partial class UISpeakerSelection(
         // Otherwise, try at least setting recognized speakers automatically
         var automaticSpeakerSuggestions = automaticSpeakerSelection.GetSpeakers<T>(speakerNames, false);
         foreach (var automaticSpeaker in automaticSpeakerSuggestions) {
-            var speaker = speakerSelections.FirstOrDefault(s => s.Name == automaticSpeaker.NameNoSpaces || s.Name == automaticSpeaker.Name);
+            var speaker = speakerSelections.FirstOrDefault(s =>
+                s.Name == automaticSpeaker.NameNoSpaces || s.Name == automaticSpeaker.Name);
             if (speaker is null) continue;
 
             speaker.FormKey = automaticSpeaker.FormLink.FormKey;
@@ -105,7 +295,7 @@ public sealed partial class UISpeakerSelection(
 
             _savedSceneSelections ??= LoadFromFile();
             _savedSceneSelections ??= new Dictionary<string, Dictionary<string, AliasSelectionDto>>();
-            _savedSceneSelections.Add(string.Join('|', speakerNames), selections);
+            _savedSceneSelections.TryAdd(string.Join('|', speakerNames), selections);
 
             var text = JsonConvert.SerializeObject(_savedSceneSelections, _serializerSettings);
             var directoryName = Path.GetDirectoryName(SelectionsPath);
@@ -132,7 +322,7 @@ public sealed partial class UISpeakerSelection(
         Formatting = Formatting.Indented,
         TypeNameHandling = TypeNameHandling.Auto,
         Converters = {
-            JsonConvertersMixIn.FormKey,
+            new FormKeyJsonConverter(),
             JsonConvertersMixIn.ModKey,
         },
     };
