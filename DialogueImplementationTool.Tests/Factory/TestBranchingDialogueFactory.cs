@@ -352,10 +352,10 @@ public sealed class TestBranchingDialogueFactory {
         // [unlock all BRAVE] [lock all FEAR, REASON]
         var links = conversation[2].Topics[0].TopicInfos[0].Links[0].TopicInfos[0].Links;
         links.Should().HaveCount(2);
-        links[0].TopicInfos[0].Links[0].TopicInfos[0].Links[0].TopicInfos[0].Script.StartScriptLines.Should().HaveCount(6);
+        links[0].TopicInfos[0].Script.StartScriptLines.Should().HaveCount(6);
 
         // [unlock all BRAVE in Adila and Marille's dialogue] [lock all FEAR, REASON]
-        links[1].TopicInfos[0].Links[0].TopicInfos[0].Links[0].TopicInfos[0].Script.StartScriptLines.Should().HaveCount(6);
+        links[1].TopicInfos[0].Script.StartScriptLines.Should().HaveCount(6);
     }
 
     [Fact]
