@@ -35,9 +35,7 @@ public sealed class CustomProcessor(IDialogueContext context) : DialogueTypeProc
                     "Calm",
                     "NPC reacts to calm being cast on them",
                     FormKey.Factory("05EBDC:BSAssets.esm"),
-                    [new GetIsVoiceTypeConditionData {
-                        VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
-                    }.ToConditionFloat()]);
+                    []);
 
                 GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData, questFactory);
                 GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new SceneWithOneDialogTopicFactory(context, 0));
@@ -53,9 +51,7 @@ public sealed class CustomProcessor(IDialogueContext context) : DialogueTypeProc
                     "Courage",
                     "NPC reacts to courage being cast on them",
                     FormKey.Factory("05EBE0:BSAssets.esm"),
-                    [new GetIsVoiceTypeConditionData {
-                        VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
-                    }.ToConditionFloat()]);
+                    []);
 
                 GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData, questFactory);
                 GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new SceneWithOneDialogTopicFactory(context, 0));
@@ -71,9 +67,7 @@ public sealed class CustomProcessor(IDialogueContext context) : DialogueTypeProc
                     "Healing",
                     "NPC reacts to healing being cast on them",
                     FormKey.Factory("05EBE1:BSAssets.esm"),
-                    [new GetIsVoiceTypeConditionData {
-                        VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
-                    }.ToConditionFloat()]);
+                    []);
 
                 GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData, questFactory);
                 GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new SceneWithOneDialogTopicFactory(context, 0));
@@ -89,9 +83,7 @@ public sealed class CustomProcessor(IDialogueContext context) : DialogueTypeProc
                     "Stealth",
                     "NPC reacts to stealth being cast on them",
                     FormKey.Factory("05EBE2:BSAssets.esm"),
-                    [new GetIsVoiceTypeConditionData {
-                        VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
-                    }.ToConditionFloat()]);
+                    []);
 
                 GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData, questFactory);
                 GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new SceneWithOneDialogTopicFactory(context, 0));
@@ -107,9 +99,7 @@ public sealed class CustomProcessor(IDialogueContext context) : DialogueTypeProc
                     "Weird",
                     "NPC reacts to weird spell being cast on them",
                     FormKey.Factory("05EBE3:BSAssets.esm"),
-                    [new GetIsVoiceTypeConditionData {
-                        VoiceTypeOrList = { Link = { FormKey = voiceType.FormKey } },
-                    }.ToConditionFloat()]);
+                    []);
 
                 GenericMetaData.SetGenericQuestFactory(topicInfo.MetaData, questFactory);
                 GenericMetaData.SetGenericDialogTopicFactory(topicInfo.MetaData, new SceneWithOneDialogTopicFactory(context, 0));
