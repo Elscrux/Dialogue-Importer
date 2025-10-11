@@ -59,5 +59,5 @@ public sealed class TestConstants {
     public NpcSpeaker Speaker1 { get; }
     public NpcSpeaker Speaker2 { get; }
     public NpcSpeaker Speaker3 { get; }
-    public DialogueProcessor DialogueProcessor => new(SkyrimDialogueContext, new NullEmotionClassifier());
+    public DialogueProcessor DialogueProcessor => new(SkyrimDialogueContext, new CachedEmotionClassifier(() => new NullEmotionClassifier()));
 }
