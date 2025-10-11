@@ -179,6 +179,8 @@ public partial class DialogueQuestLockUnlockProcessor(IDialogueContext context) 
                 foreach (var (lockMatch, _) in grouping.Where(x => x.Lock == isLocking).Distinct()) {
                     // Check for any keywords in note, to catch something like [unlock HERE, NOW, MERGE]
                     // Remove [Lock HERE] or [Unlock HERE]
+                    // ReSharper disable once ForCanBeConvertedToForeach
+                    // This needs to be a for-loop to allow modification of the collection
                     for (var i = 0; i < lockMatch.TopicInfo.Responses.Count; i++) {
                         var response = lockMatch.TopicInfo.Responses[i];
                         response.RemoveNote(lockMatch.Note);
