@@ -6,10 +6,6 @@ namespace DialogueImplementationTool.Dialogue;
 
 public sealed class GenericScene3x3Factory(IDialogueContext context) : GenericSceneFactory(context) {
     public override IDialogueProcessor ConfigureProcessor(DialogueProcessor dialogueProcessor) {
-        // This currently doesn't work because the dialog lines are responses in one topic info and are split
-        // in case there are multiple dead or alive checks.
-        dialogueProcessor.TopicProcessors.RemoveWhere(p => p is DeadAliveChecker);
-
         // Remove trailing colons from prompts (speaker names)
         dialogueProcessor.TopicInfoProcessors.Add(new CustomTopicInfoTrimmer(":"));
         // Skip pre-processing of regular scene factory
