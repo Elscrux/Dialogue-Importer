@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Mutagen.Bethesda.Skyrim;
-using Newtonsoft.Json;
 using Noggog;
 using TransformersSharp.Pipelines;
 using Classification = ((string Text, Mutagen.Bethesda.Skyrim.Emotion Actual) Emotion, double Score);
@@ -24,46 +22,14 @@ public sealed class TransformersEmotionClassifier : IEmotionClassifier {
         TextClassificationPipeline.FromModel("bhadresh-savani/distilbert-base-uncased-emotion"),
     ];
 
-    private readonly Dictionary<string, EmotionValue> _speakerEmotions = LoadSpeakers();
-
     public EmotionValue Classify(string text) {
-        if (_speakerEmotions.TryGetValue(text, out var emotionValue)) return emotionValue;
-
         var classification = GetAverageEmotion(_pipelines, text);
 
         var emotion = classification.Emotion.Actual;
-        emotionValue = emotion == Emotion.Neutral
+        return emotion == Emotion.Neutral
             ? new EmotionValue(Emotion.Neutral, 50)
             : new EmotionValue(emotion, (uint) classification.Score);
-
-        _speakerEmotions.Add(text, emotionValue);
-        SaveSpeakers();
-        return emotionValue;
     }
-
-    private static Dictionary<string, EmotionValue> LoadSpeakers() {
-        if (!File.Exists(EmotionsPath)) return new Dictionary<string, EmotionValue>();
-
-        var text = File.ReadAllText(EmotionsPath);
-        var emotions = JsonConvert.DeserializeObject<Dictionary<string, EmotionValue>>(text);
-        if (emotions is null) return new Dictionary<string, EmotionValue>();
-
-        return emotions;
-    }
-
-    private void SaveSpeakers() {
-        var text = JsonConvert.SerializeObject(_speakerEmotions);
-        var directoryName = Path.GetDirectoryName(EmotionsPath);
-        if (directoryName is null) return;
-
-        if (!Directory.Exists(directoryName)) {
-            Directory.CreateDirectory(directoryName);
-        }
-
-        File.WriteAllText(EmotionsPath, text);
-    }
-
-    private static string EmotionsPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Emotions", "emotions.cache");
 
     private static Classification GetAverageEmotion(IEnumerable<TextClassificationPipeline> pipelines, string text) {
         var classifications = pipelines

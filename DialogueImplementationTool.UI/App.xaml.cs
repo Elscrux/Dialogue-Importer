@@ -34,6 +34,10 @@ public partial class App {
             .As<IEmotionClassifier>()
             .SingleInstance();
 
+        builder.RegisterType<CachedEmotionClassifier>()
+            .AsSelf()
+            .SingleInstance();
+
         builder.RegisterType<MainWindowVM>()
             .SingleInstance();
 

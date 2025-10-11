@@ -7,9 +7,9 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed class DialogueProcessor : IDialogueProcessor {
     private readonly IDialogueContext _context;
-    private readonly IEmotionClassifier _emotionClassifier;
+    private readonly CachedEmotionClassifier _emotionClassifier;
 
-    public DialogueProcessor(IDialogueContext context, IEmotionClassifier emotionClassifier) {
+    public DialogueProcessor(IDialogueContext context, CachedEmotionClassifier emotionClassifier) {
         _context = context;
         _emotionClassifier = emotionClassifier;
 

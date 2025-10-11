@@ -453,6 +453,9 @@
       <Compile Update="Dialogue\CustomWICastMagicReactionFactory.cs">
         <DependentUpon>IGenericDialogueQuestFactory.cs</DependentUpon>
       </Compile>
+      <Compile Update="Services\CachedEmotionClassifier.cs">
+        <DependentUpon>IEmotionClassifier.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

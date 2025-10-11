@@ -5,7 +5,7 @@ using DialogueImplementationTool.Services;
 using Noggog;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
-public sealed class EmotionChecker(IEmotionClassifier emotionClassifier) : IGenericDialogueProcessor, IConversationProcessor {
+public sealed class EmotionChecker(CachedEmotionClassifier emotionClassifier) : IGenericDialogueProcessor, IConversationProcessor {
     public void Process(Conversation conversation) {
         foreach (var topic in conversation.SelectMany(x => x.Topics).SelectMany(x => x.EnumerateLinks(true))) {
             foreach (var topicInfo in topic.TopicInfos) {
