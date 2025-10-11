@@ -18,7 +18,7 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
         // NPC A: [some note] some text.
         // => [some note] some text.        | Speaker: NPC A
         // => some text.                    | Speaker: NPC A, Note: [some note]
-        dialogueProcessor.TopicInfoProcessors.Insert(0, new SceneResponseProcessor());
+        dialogueProcessor.ResponseProcessors.Insert(0, new SceneResponseProcessor());
 
         var processor = base.ConfigureProcessor(dialogueProcessor);
         return new FuncDialogueProcessor(processor) {
