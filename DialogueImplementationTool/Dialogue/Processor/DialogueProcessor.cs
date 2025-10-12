@@ -158,7 +158,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
         }
     }
 
-    public void Process(DialogueResponse response, IReadOnlyList<FormattedText> textSnippets) {
+    public void Process(DialogueResponse response, IList<FormattedText> textSnippets) {
         foreach (var processor in ResponseProcessors) {
             processor.Process(response, textSnippets);
         }

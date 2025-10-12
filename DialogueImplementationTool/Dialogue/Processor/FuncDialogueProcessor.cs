@@ -11,8 +11,8 @@ public sealed class FuncDialogueProcessor(IDialogueProcessor processor) : IDialo
     public Action<DialogueTopicInfo, Action<DialogueTopicInfo>> PreProcessTopicInfo { get; init; }
         = (topicInfo, baseProcess) => baseProcess(topicInfo);
 
-    public Action<DialogueResponse, IReadOnlyList<FormattedText>,
-        Action<DialogueResponse, IReadOnlyList<FormattedText>>> ProcessResponse { get; init; }
+    public Action<DialogueResponse, IList<FormattedText>,
+        Action<DialogueResponse, IList<FormattedText>>> ProcessResponse { get; init; }
         = (response, textSnippets, baseProcess) => baseProcess(response, textSnippets);
 
     public Action<DialogueTopic, Action<DialogueTopic>> ProcessTopic { get; init; }
@@ -32,7 +32,7 @@ public sealed class FuncDialogueProcessor(IDialogueProcessor processor) : IDialo
         PreProcessTopicInfo(topicInfo, processor.Process);
     }
 
-    public void Process(DialogueResponse response, IReadOnlyList<FormattedText> textSnippets) {
+    public void Process(DialogueResponse response, IList<FormattedText> textSnippets) {
         ProcessResponse(response, textSnippets, processor.Process);
     }
 

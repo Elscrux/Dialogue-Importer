@@ -9,7 +9,7 @@ using Xceed.Drawing;
 namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed partial class ResponseNoteExtractor : IDialogueResponseProcessor {
-    public void Process(DialogueResponse response, IReadOnlyList<FormattedText> textSnippets) {
+    public void Process(DialogueResponse response, IList<FormattedText> textSnippets) {
         var processedSnippets = textSnippets.ToList();
 
         ProcessNotes(

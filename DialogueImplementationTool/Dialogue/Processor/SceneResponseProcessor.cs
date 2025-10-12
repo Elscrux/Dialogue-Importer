@@ -18,7 +18,7 @@ public sealed partial class SceneResponseProcessor : IDialogueResponseProcessor 
         return null;
     }
 
-    public void Process(DialogueResponse response, IReadOnlyList<FormattedText> textSnippets) {
+    public void Process(DialogueResponse response, IList<FormattedText> textSnippets) {
         // Extract the speaker and save the name in prompt 
         var match = SceneLineRegex.Match(response.Response);
         if (!match.Success) return;

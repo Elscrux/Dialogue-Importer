@@ -9,7 +9,7 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 public sealed class ScriptNotesParser : IDialogueResponseProcessor {
     private static readonly Color OrangeColor = Color.Orange;
 
-    public void Process(DialogueResponse response, IReadOnlyList<FormattedText> textSnippets) {
+    public void Process(DialogueResponse response, IList<FormattedText> textSnippets) {
         var scriptNotes = response.Notes()
             .Where(note => note.Colors.Any(color => AreColorsSimilar(color, OrangeColor, 20)))
             .ToList();
