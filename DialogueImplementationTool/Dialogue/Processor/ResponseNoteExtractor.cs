@@ -10,11 +10,9 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 
 public sealed partial class ResponseNoteExtractor : IDialogueResponseProcessor {
     public void Process(DialogueResponse response, IList<FormattedText> textSnippets) {
-        var processedSnippets = textSnippets.ToList();
-
         ProcessNotes(
             NoteUtils.StartNoteRegex,
-            StringExt.TrimStart,
+            (a, b) => a.TrimStart(b, StringComparison.Ordinal),
             (s, i) => s[i..],
             response.StartNotes,
             x => x);
@@ -30,8 +28,8 @@ public sealed partial class ResponseNoteExtractor : IDialogueResponseProcessor {
             Func<string, string, string> trim,
             Func<string, int, string> subString,
             List<Note> notes,
-            Func<IEnumerable<FormattedText>, IEnumerable<FormattedText>> orderSnippets) {
-            processedSnippets = orderSnippets(processedSnippets).ToList();
+            Func<IEnumerable<FormattedText>, IEnumerable<FormattedText>> changeOrder) {
+            var orderedSnippets = changeOrder(textSnippets).ToList();
 
             var match = regex.Match(response.Response);
             while (match.Success) {
@@ -44,7 +42,7 @@ public sealed partial class ResponseNoteExtractor : IDialogueResponseProcessor {
                 // Check which colors are used in matched text
                 var colors = new List<Color>();
                 var newSnippets = new List<FormattedText>();
-                foreach (var snippet in processedSnippets) {
+                foreach (var snippet in orderedSnippets) {
                     // Skip chars and add remaining snippet (parts)
                     if (charsToRemove == 0) {
                         newSnippets.Add(snippet);
@@ -63,7 +61,7 @@ public sealed partial class ResponseNoteExtractor : IDialogueResponseProcessor {
                     }
                 }
 
-                processedSnippets = newSnippets;
+                orderedSnippets = newSnippets;
 
                 // Add notes
                 notes.Add(new Note {
@@ -73,6 +71,9 @@ public sealed partial class ResponseNoteExtractor : IDialogueResponseProcessor {
 
                 match = regex.Match(response.Response);
             }
+
+            textSnippets.Clear();
+            textSnippets.AddRange(changeOrder(orderedSnippets));
         }
     }
 }

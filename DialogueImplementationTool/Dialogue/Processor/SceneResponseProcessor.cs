@@ -24,6 +24,23 @@ public sealed partial class SceneResponseProcessor : IDialogueResponseProcessor 
         if (!match.Success) return;
 
         response.StartNotes.Add(new Note { Text = SceneNotePrefix + match.Groups[1].Value });
+
+        // Remove the speaker from the response text
+        var originalLength = response.Response.Length;
+        var newLength = match.Groups[2].Value.Length;
+        var lengthToTrimFromStart = originalLength - newLength;
+        while (lengthToTrimFromStart > 0) {
+            if (textSnippets.Count == 0) break;
+
+            var first = textSnippets[0];
+            if (first.Text.Length <= lengthToTrimFromStart) {
+                lengthToTrimFromStart -= first.Text.Length;
+                textSnippets.RemoveAt(0);
+            } else {
+                textSnippets[0] = first with { Text = first.Text[(lengthToTrimFromStart)..] };
+            }
+        }
+
         response.Response = match.Groups[2].Value;
     }
 }
