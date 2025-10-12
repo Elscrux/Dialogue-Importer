@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 using DialogueImplementationTool.UI.ViewModels;
-using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 namespace DialogueImplementationTool.UI.Views;
 
 public partial class MainWindow {

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using DialogueImplementationTool.Dialogue.Model;
 using DialogueImplementationTool.Dialogue.Processor;
-using Noggog;
 namespace DialogueImplementationTool.Dialogue;
 
 public sealed class GenericScene3x3Factory(IDialogueContext context) : GenericSceneFactory(context) {
