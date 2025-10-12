@@ -37,7 +37,7 @@ public partial class QuestDialogueView : UserControl {
 
     private static IEnumerable<string> LoadDocuments(QuestDialogueVM questDialogueVM) {
         var folderDialog = new FolderBrowserDialog();
-        if (folderDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK) yield break;
+        if (folderDialog.ShowDialog() != DialogResult.OK) yield break;
 
         foreach (var file in Directory.EnumerateFiles(
                 folderDialog.SelectedPath,
