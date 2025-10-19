@@ -90,7 +90,6 @@ public partial class App {
             .As<ISpeakerFavoritesSelection>()
             .InstancePerLifetimeScope();
 
-        builder.RegisterType<OpenDocumentTextParser>();
         builder.RegisterType<DocXDocumentParser>();
         builder.RegisterType<CsvDocumentParser>();
 

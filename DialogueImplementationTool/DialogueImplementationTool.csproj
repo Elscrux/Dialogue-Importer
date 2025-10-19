@@ -8,7 +8,6 @@
 
     <ItemGroup>
       <PackageReference Include="Autofac" Version="8.4.0" />
-      <PackageReference Include="AODL" Version="1.2.0.1" />
       <PackageReference Include="CsvHelper" Version="33.1.0" />
       <PackageReference Include="DocX" Version="5.0.0" />
       <PackageReference Include="Mutagen.Bethesda.Autofac" Version="0.52.0-alpha.60" />
@@ -47,9 +46,6 @@
       </Compile>
       <Compile Update="Dialogue\SceneFactory.cs">
         <DependentUpon>BaseDialogueFactory.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Parser\OpenDocumentTextParser.cs">
-        <DependentUpon>IDocumentParser.cs</DependentUpon>
       </Compile>
       <Compile Update="Parser\DocXDocumentParser.cs">
         <DependentUpon>IDocumentParser.cs</DependentUpon>

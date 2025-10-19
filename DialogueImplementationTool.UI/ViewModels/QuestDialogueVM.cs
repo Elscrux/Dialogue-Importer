@@ -31,7 +31,6 @@ public sealed class QuestDialogueVM : ViewModel {
         ILifetimeScope lifetimeScope,
         IEnvironmentContext environmentContext,
         Func<IDocumentParser, IDialogueContext, Action<DocumentVM>, DocumentVM> documentVMFactory,
-        Func<string, OpenDocumentTextParser> openDocumentTextIteratorFactory,
         Func<string, DocXDocumentParser> docXIteratorFactory,
         Func<string, IDialogueContext, CsvDocumentParser> csvIteratorFactory) {
         _lifetimeScope = lifetimeScope;
@@ -39,7 +38,6 @@ public sealed class QuestDialogueVM : ViewModel {
         EnvironmentContext = environmentContext;
         _documentVMFactory = documentVMFactory;
         _documentParsers = new Dictionary<string, Func<string, IDocumentParser>> {
-            { ".odt", openDocumentTextIteratorFactory },
             { ".docx", docXIteratorFactory },
             { ".csv", path => csvIteratorFactory(path, GetContext(path)) },
         };
