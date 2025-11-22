@@ -161,7 +161,7 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
     public abstract void PreProcessSpeakers();
 
     private IReadOnlyList<AliasSpeaker> GetAliasSpeakers(List<DialogueTopic> topics) {
-        //Get speaker strings
+        // Get speaker strings
         var speakerNames = topics
             .SelectMany(topic => topic.TopicInfos)
             .Select(topicInfo => topicInfo.Prompt.FullText)
@@ -175,23 +175,25 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
             .Select(x => (x.Key, x.ToList()))
             .ToList();
 
-        // Limit alias speakers to one per form key
-        foreach (var (_, aliasSpeakers) in nameMappedSpeakers) {
-            if (aliasSpeakers.Count == 1) continue;
+        // Ensure the speaker names are updated to the alias names
+        // Especially when one alias is used for multiple speaker names this is important
+        for (var i = 0; i < speakerNames.Count; i++) {
+            var speakerName = speakerNames[i];
+            var alias = allAliasSpeakers[i];
 
-            foreach (var aliasSpeaker in aliasSpeakers.Skip(1)) {
-                var replacementName = aliasSpeakers[0].Name;
-                foreach (var topic in topics) {
-                    foreach (var topicInfo in topic.TopicInfos) {
-                        if (topicInfo.Prompt.FullText == aliasSpeaker.Name) {
-                            topicInfo.Prompt.Text = replacementName;
-                        }
-                    }
+            foreach (var topic in topics) {
+                foreach (var topicInfo in topic.TopicInfos) {
+                    if (topicInfo.Prompt.FullText != speakerName) continue;
+
+                    var (_, aliasSpeakers) = nameMappedSpeakers.Find(x => Equals(x.Key, alias.FormLink));
+                    if (aliasSpeakers is not [var speaker, ..]) continue;
+
+                    topicInfo.Prompt.Text = speaker.Name;
                 }
             }
         }
 
-        //Map speaker form keys
+        // Map speaker form keys
         return nameMappedSpeakers
             .Select(x => x.Item2[0])
             .ToArray();
