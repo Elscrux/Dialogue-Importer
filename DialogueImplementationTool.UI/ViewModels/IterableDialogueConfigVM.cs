@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.Linq.Expressions;
+using System.Reactive.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
 using DialogueImplementationTool.Dialogue;
@@ -194,28 +195,7 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
         });
 
         this.WhenAnyValue(v => v.Index)
-            .Subscribe(_ => {
-                IsNotFirstIndex = Index > 0;
-                IsNotLastIndex = Index < _documentParser.LastIndex;
-                if (DialogueSelections.Count <= Index) return;
-
-                if (DialogueSelections[Index].Speaker.IsNull) {
-                    // Keep current speaker for fresh dialogue and set in list
-                    DialogueSelections[Index].Speaker = SpeakerLink;
-                    DialogueSelections[Index].UseGetIsAliasRef = UseGetIsAliasRef;
-                } else {
-                    // Load speaker from list
-                    SpeakerFormKey = DialogueSelections[Index].Speaker.FormKey;
-                    UseGetIsAliasRef = DialogueSelections[Index].UseGetIsAliasRef;
-                }
-
-                GreetingSelected = DialogueSelections[Index].SelectedTypes.Contains(DialogueType.Greeting);
-                FarewellSelected = DialogueSelections[Index].SelectedTypes.Contains(DialogueType.Farewell);
-                IdleSelected = DialogueSelections[Index].SelectedTypes.Contains(DialogueType.Idle);
-                DialogueSelected = DialogueSelections[Index].SelectedTypes.Contains(DialogueType.Dialogue);
-                GenericSceneSelected = DialogueSelections[Index].SelectedTypes.Contains(DialogueType.GenericScene);
-                QuestSceneSelected = DialogueSelections[Index].SelectedTypes.Contains(DialogueType.QuestScene);
-            });
+            .Subscribe(_ => RefreshPreview());
 
         this.WhenAnyValue(v => v.SpeakerFormKey)
             .Subscribe(speaker => {
@@ -269,6 +249,28 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
                 });
         }
     }
+    private void RefreshPreview() {
+        IsNotFirstIndex = Index > 0;
+        IsNotLastIndex = Index < _documentParser.LastIndex;
+        if (DialogueSelections.Count <= Index) return;
+
+        if (DialogueSelections[Index].Speaker.IsNull) {
+            // Keep current speaker for fresh dialogue and set in list
+            DialogueSelections[Index].Speaker = SpeakerLink;
+            DialogueSelections[Index].UseGetIsAliasRef = UseGetIsAliasRef;
+        } else {
+            // Load speaker from list
+            SpeakerFormKey = DialogueSelections[Index].Speaker.FormKey;
+            UseGetIsAliasRef = DialogueSelections[Index].UseGetIsAliasRef;
+        }
+
+        GreetingSelected = DialogueSelections[Index].SelectedTypes.Contains(DialogueType.Greeting);
+        FarewellSelected = DialogueSelections[Index].SelectedTypes.Contains(DialogueType.Farewell);
+        IdleSelected = DialogueSelections[Index].SelectedTypes.Contains(DialogueType.Idle);
+        DialogueSelected = DialogueSelections[Index].SelectedTypes.Contains(DialogueType.Dialogue);
+        GenericSceneSelected = DialogueSelections[Index].SelectedTypes.Contains(DialogueType.GenericScene);
+        QuestSceneSelected = DialogueSelections[Index].SelectedTypes.Contains(DialogueType.QuestScene);
+    }
 
     [GeneratedRegex(@"\[[^\]]*\]|_s|'s|\([^\)]*\)|'s|standard dialogue|dialogue|dialog| - |_|\d+|\.|,", RegexOptions.IgnoreCase)]
     private static partial Regex UnnecessaryDocumentNameParts { get; }
@@ -305,6 +307,8 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
         for (var i = 0; i < dialogueSelections.Count; i++) {
             DialogueSelections[i] = dialogueSelections[i];
         }
+
+        RefreshPreview();
     }
 
     public void RefreshPreview(bool forward) {
