@@ -10,7 +10,7 @@ namespace DialogueImplementationTool.Dialogue.Processor;
 public sealed partial class KeywordLinker : IConversationProcessor {
     [StringSyntax("Regex")] private const string FillerRegexPart = @"[^\]]*";
     [StringSyntax("Regex")] private const string MergeRegexPart = "(?:merge|go|back) ";
-    [StringSyntax("Regex")] private const string OptionsAfterRegexPart = "(?:options after )";
+    [StringSyntax("Regex")] private const string OptionsAfterRegexPart = "(?:options (?:after|under) )";
 
     // [DONE], [HERE]
     [GeneratedRegex($"^{KeywordUtils.KeywordRegexPart}$")]
