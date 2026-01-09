@@ -19,7 +19,7 @@ public sealed class NoticeCorpseProcessor : DialogueTypeProcessor {
                 yield return new HasKeywordConditionData {
                     RunOnType = Condition.RunOnType.Target,
                     Keyword = { Link = { FormKey = Skyrim.Keyword.ActorTypeNPC.FormKey } }
-                }.ToConditionFloat(comparisonValue: 0);
+                }.ToConditionFloat();
                 yield return new GetInFactionConditionData {
                     RunOnType = Condition.RunOnType.Target,
                     Faction = { Link = { FormKey = Skyrim.Faction.BanditFaction.FormKey } }
@@ -53,7 +53,7 @@ public sealed class NoticeCorpseProcessor : DialogueTypeProcessor {
                 yield return new HasKeywordConditionData {
                     RunOnType = Condition.RunOnType.Target,
                     Keyword = { Link = { FormKey = Skyrim.Keyword.ActorTypeNPC.FormKey } }
-                }.ToConditionFloat(comparisonValue: 0);
+                }.ToConditionFloat();
                 yield return new GetInFactionConditionData {
                     RunOnType = Condition.RunOnType.Target,
                     Faction = { Link = { FormKey = Skyrim.Faction.BanditFaction.FormKey } }
