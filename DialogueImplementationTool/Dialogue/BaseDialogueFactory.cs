@@ -77,6 +77,14 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
             // Empty line shared info
             if (topicInfo.SharedInfo.ResponseDataTopicInfo.Responses is [] or [{ Text: "" }]) {
                 var emptyLine = Context.SelectRecord<DialogResponses, IDialogResponsesGetter>("Empty Line Shared Info");
+
+                // Set to single space to make it consistent with empty line shared infos which should also have a single space
+                if (topicInfo.SharedInfo.ResponseDataTopicInfo.Responses.Count == 0) {
+                    topicInfo.SharedInfo.ResponseDataTopicInfo.Responses.Add(new DialogueResponse { Text = " " });
+                } else {
+                    topicInfo.SharedInfo.ResponseDataTopicInfo.Responses[0].Text = " ";
+                }
+
                 return new DialogResponses(Context.GetNextFormKey(), Context.Release) {
                     ResponseData = new FormLinkNullable<IDialogResponsesGetter>(emptyLine.FormKey),
                     Conditions = GetConditions(topicInfo),
