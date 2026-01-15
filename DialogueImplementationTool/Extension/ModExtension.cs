@@ -23,8 +23,7 @@ public static class ModExtension {
                 Update.ModKey,
                 Dawnguard.ModKey,
                 HearthFires.ModKey,
-                Dragonborn.ModKey,
-                ModKey.FromFileName("BSAssets.esm"))
+                Dragonborn.ModKey)
             .Write();
     }
 }
