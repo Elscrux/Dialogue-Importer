@@ -65,7 +65,7 @@ public sealed class DocumentVM : ViewModel {
         if (HasCachedSelections == false) return;
 
         ImplementDialogue(true);
-        Context.Mod.Save(_outputPathProvider.OutputPath, Context.Environment.LoadOrder);
+        Context.Mod.Save(_outputPathProvider.OutputPath, Context.Environment);
     }
 
     private void ImplementDialogue(bool autoApply) {
@@ -133,7 +133,7 @@ public sealed class DocumentVM : ViewModel {
 
         ImplementDialogue(false);
 
-        Context.Mod.Save(_outputPathProvider.OutputPath, Context.Environment.LoadOrder);
+        Context.Mod.Save(_outputPathProvider.OutputPath, Context.Environment);
     }
 
     public void DeleteDocument() => _deleteDocument(this);

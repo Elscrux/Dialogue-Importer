@@ -58,7 +58,7 @@ public sealed class MainWindowVM : ViewModel, IDocumentImplementedListener {
             questDialogueVM.AutoParseAll();
         }
 
-        EnvironmentContext.Mod.Save(OutputPathProvider.OutputPath, EnvironmentContext.Environment.LoadOrder);
+        EnvironmentContext.Mod.Save(OutputPathProvider.OutputPath, EnvironmentContext.Environment);
     }
 
     public void AddQuest(FormKey questFormKey) {
