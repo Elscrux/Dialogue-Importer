@@ -162,9 +162,8 @@ public sealed class FormKeyJsonConverter : JsonConverter {
 
 sealed record AliasSelectionDto(FormKey FormKey, string? EditorID);
 
-public sealed partial class UISpeakerSelection(
+public sealed partial class SpeakerSelectionRepository(
     ILinkCache linkCache,
-    AutomaticSpeakerSelection automaticSpeakerSelection,
     ISpeakerFavoritesSelection speakerFavoritesSelection,
     IDocumentProvider documentProvider)
     : ISpeakerSelection {
@@ -184,38 +183,7 @@ public sealed partial class UISpeakerSelection(
                 .ToList();
         }
 
-        // In case all speakers can be matched exactly, apply them directly
-        var automaticSpeakersExactMatch = automaticSpeakerSelection.GetSpeakers<T>(speakerNames);
-        if (automaticSpeakersExactMatch.Count == speakerNames.Count) {
-            SaveSpeakers(automaticSpeakersExactMatch);
-            return automaticSpeakersExactMatch;
-        }
-
-        // Otherwise, try at least setting recognized speakers automatically
-        var automaticSpeakerSuggestions = automaticSpeakerSelection.GetSpeakers<T>(speakerNames, false);
-        foreach (var automaticSpeaker in automaticSpeakerSuggestions) {
-            var speaker = speakerSelections.FirstOrDefault(s =>
-                s.Name == automaticSpeaker.NameNoSpaces || s.Name == automaticSpeaker.Name);
-            if (speaker is null) continue;
-
-            speaker.FormKey = automaticSpeaker.FormLink.FormKey;
-            speaker.EditorID = automaticSpeaker.EditorID;
-        }
-
-        new SceneSpeakerWindow(linkCache, speakerFavoritesSelection, speakerSelections).ShowDialog();
-
-        while (speakerSelections.Any(s => s.FormLink.IsNull)) {
-            MessageBox.Show("You must assign every speaker of the scene to an npc");
-            new SceneSpeakerWindow(linkCache, speakerFavoritesSelection, speakerSelections).ShowDialog();
-        }
-
-        var speakers = speakerSelections
-            .Select(x => ISpeakerSelection.CreateSpeaker<T>(linkCache, x.FormLink, x.Name, editorId: x.EditorID))
-            .ToList();
-
-        SaveSpeakers(speakers);
-
-        return speakers;
+        return [];
 
         bool LoadSpeakers() {
             _savedSceneSelections ??= LoadFromFile();
@@ -260,34 +228,6 @@ public sealed partial class UISpeakerSelection(
                 }
 
                 return null;
-            }
-        }
-
-        void SaveSpeakers(IReadOnlyList<ISpeaker> aliasSpeakers) {
-            var selections = new Dictionary<string, AliasSelectionDto>();
-            foreach (var speaker in aliasSpeakers) {
-                selections[speaker.Name] = new AliasSelectionDto(speaker.FormLink.FormKey, speaker.EditorID);
-                speakerFavoritesSelection.AddSpeaker(speaker);
-            }
-
-            _savedSceneSelections ??= LoadFromFile();
-            _savedSceneSelections ??= new Dictionary<string, Dictionary<string, AliasSelectionDto>>();
-
-            var key = string.Join('|', speakerNames);
-            _savedSceneSelections[key] = selections;
-
-            try {
-                var text = JsonConvert.SerializeObject(_savedSceneSelections, _serializerSettings);
-                var directoryName = Path.GetDirectoryName(SelectionsPath);
-                if (directoryName is null) return;
-
-                if (!Directory.Exists(directoryName)) {
-                    Directory.CreateDirectory(directoryName);
-                }
-
-                File.WriteAllText(SelectionsPath, text);
-            } catch (Exception ex) {
-                Debug.WriteLine($"ERROR saving file: {ex.Message}");
             }
         }
     }

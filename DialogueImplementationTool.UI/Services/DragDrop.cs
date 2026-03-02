@@ -1,46 +1,9 @@
-﻿using System.Collections.ObjectModel;
-using System.Windows;
+﻿using System.Windows;
 using DialogueImplementationTool.Dialogue.Speaker;
-using DialogueImplementationTool.Services;
-using DialogueImplementationTool.UI.Models;
 using GongSolutions.Wpf.DragDrop;
 using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Cache;
-using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.WPF.Plugins;
-using Noggog;
-namespace DialogueImplementationTool.UI.Views;
-
-public partial class SceneSpeakerWindow {
-    public SceneSpeakerWindow(
-        ILinkCache linkCache,
-        ISpeakerFavoritesSelection speakerFavoritesSelection,
-        ObservableCollection<AliasSpeakerSelection> speakers) {
-        InitializeComponent();
-
-        LinkCache = linkCache;
-        SpeakerFavoritesSelection = speakerFavoritesSelection;
-        ScopedTypes = typeof(INpcGetter).AsEnumerable();
-        SceneSpeakers = speakers;
-
-        // Assign the closest existing favorites
-        foreach (var speaker in SceneSpeakers) {
-            var matchingSpeaker = SpeakerFavoritesSelection.GetClosestSpeakers(speaker.Name).FirstOrDefault();
-            if (matchingSpeaker is not null) speaker.FormKey = matchingSpeaker.FormLink.FormKey;
-        }
-
-        DataContext = this;
-    }
-
-    public ObservableCollection<AliasSpeakerSelection> SceneSpeakers { get; }
-    public ILinkCache LinkCache { get; }
-    public ISpeakerFavoritesSelection SpeakerFavoritesSelection { get; }
-    public IEnumerable<Type> ScopedTypes { get; set; }
-
-    private void Save_OnClick(object sender, RoutedEventArgs e) {
-        Close();
-    }
-}
+namespace DialogueImplementationTool.UI.Services;
 
 public sealed class FormKeyWrapper {
     public FormKey FormKey { get; set; }
