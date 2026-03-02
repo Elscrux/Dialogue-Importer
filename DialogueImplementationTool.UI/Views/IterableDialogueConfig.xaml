@@ -1,4 +1,4 @@
-﻿<Window x:Class="DialogueImplementationTool.UI.Views.ProcessDialogue"
+<Window x:Class="DialogueImplementationTool.UI.Views.ProcessDialogue"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -7,11 +7,213 @@
         xmlns:viewModels="clr-namespace:DialogueImplementationTool.UI.ViewModels"
         xmlns:dialogue="clr-namespace:DialogueImplementationTool.Dialogue;assembly=DialogueImplementationTool"
         xmlns:converters="clr-namespace:DialogueImplementationTool.UI.Converters"
+        xmlns:dd="urn:gong-wpf-dragdrop"
+        xmlns:views="clr-namespace:DialogueImplementationTool.UI.Views"
         mc:Ignorable="d"
         x:Name="DialogueWindow"
         Title="{Binding Title, StringFormat='Dialogue Implementation Tool - {0}'}"
-        Height="720" Width="1280"
-        MinHeight="360" MinWidth="640" d:DataContext="{d:DesignInstance viewModels:IterableDialogueConfigVM}">
+        Height="820" Width="1440"
+        MinHeight="600" MinWidth="1000" 
+        d:DataContext="{d:DesignInstance viewModels:IterableDialogueConfigVM}">
+
+    <Window.Resources>
+        <converters:IntPlusOneConverter x:Key="IntPlusOneConverter"/>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter"/>
+
+        <!-- Skyrim Dark Color Palette -->
+        <SolidColorBrush x:Key="SkyrimDeepBlack" Color="#0D0D0F"/>
+        <SolidColorBrush x:Key="SkyrimDarkGray" Color="#1A1D23"/>
+        <SolidColorBrush x:Key="SkyrimMediumGray" Color="#252830"/>
+        <SolidColorBrush x:Key="SkyrimSlateGray" Color="#2F3541"/>
+        <SolidColorBrush x:Key="SkyrimCoolGray" Color="#3D4452"/>
+        <SolidColorBrush x:Key="SkyrimLightGray" Color="#5A6071"/>
+        <SolidColorBrush x:Key="SkyrimSilver" Color="#8A909F"/>
+        <SolidColorBrush x:Key="SkyrimPaleBlue" Color="#9EACC4"/>
+        <SolidColorBrush x:Key="SkyrimIceBlue" Color="#B8C5D6"/>
+        <SolidColorBrush x:Key="SkyrimAccentBlue" Color="#6B8CAE"/>
+        <SolidColorBrush x:Key="SkyrimDarkAccent" Color="#4A5F7A"/>
+
+        <!-- Dark Background Gradient -->
+        <LinearGradientBrush x:Key="DarkBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#0D0D0F" Offset="0"/>
+            <GradientStop Color="#1A1D23" Offset="0.5"/>
+            <GradientStop Color="#0D0D0F" Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- Subtle Text Style -->
+        <Style x:Key="SkyrimText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource SkyrimIceBlue}"/>
+            <Setter Property="FontFamily" Value="Segoe UI, Arial"/>
+            <Setter Property="TextOptions.TextFormattingMode" Value="Ideal"/>
+        </Style>
+
+        <!-- Sleek Card Style -->
+        <Style x:Key="CardGroupBox" TargetType="GroupBox">
+            <Setter Property="Foreground" Value="{StaticResource SkyrimIceBlue}"/>
+            <Setter Property="Margin" Value="8"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GroupBox">
+                        <Border Background="{StaticResource SkyrimDarkGray}" 
+                                BorderBrush="{StaticResource SkyrimSlateGray}" 
+                                BorderThickness="1" 
+                                CornerRadius="2"
+                                Padding="12">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Header with subtle underline -->
+                                <Border Grid.Row="0" 
+                                        BorderBrush="{StaticResource SkyrimCoolGray}" 
+                                        BorderThickness="0,0,0,1" 
+                                        Padding="0,0,0,10" 
+                                        Margin="0,0,0,12">
+                                    <ContentPresenter ContentSource="Header" 
+                                                      TextBlock.FontWeight="SemiBold"
+                                                      TextBlock.FontSize="13"
+                                                      TextBlock.Foreground="{StaticResource SkyrimPaleBlue}"/>
+                                </Border>
+
+                                <!-- Content -->
+                                <ContentPresenter Grid.Row="1"/>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Flat Toggle Button Style -->
+        <Style x:Key="DialogueTypeButton" TargetType="ToggleButton">
+            <Setter Property="Background" Value="{StaticResource SkyrimMediumGray}"/>
+            <Setter Property="Foreground" Value="{StaticResource SkyrimSilver}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource SkyrimSlateGray}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="Border" 
+                                Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="2"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource SkyrimCoolGray}"/>
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource SkyrimLightGray}"/>
+                                <Setter Property="Foreground" Value="{StaticResource SkyrimPaleBlue}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource SkyrimDarkAccent}"/>
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource SkyrimAccentBlue}"/>
+                                <Setter Property="Foreground" Value="{StaticResource SkyrimIceBlue}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.35"/>
+                                <Setter Property="Cursor" Value="No"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Minimal Navigation Button Style -->
+        <Style x:Key="NavButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource SkyrimMediumGray}"/>
+            <Setter Property="Foreground" Value="{StaticResource SkyrimSilver}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource SkyrimSlateGray}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border" 
+                                Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="2"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource SkyrimCoolGray}"/>
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource SkyrimLightGray}"/>
+                                <Setter Property="Foreground" Value="{StaticResource SkyrimPaleBlue}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource SkyrimSlateGray}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.3"/>
+                                <Setter Property="Cursor" Value="No"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Subtle Action Button Style -->
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource SkyrimSlateGray}"/>
+            <Setter Property="Foreground" Value="{StaticResource SkyrimIceBlue}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource SkyrimCoolGray}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="Margin" Value="4,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border" 
+                                Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="2"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource SkyrimCoolGray}"/>
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource SkyrimLightGray}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource SkyrimDarkGray}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Window.Background>
+        <StaticResource ResourceKey="DarkBackgroundBrush"/>
+    </Window.Background>
+
     <Window.InputBindings>
         <KeyBinding Key="D1" Command="{Binding SelectIndex}" CommandParameter="1"/>
         <KeyBinding Key="NumPad1" Command="{Binding SelectIndex}" CommandParameter="1"/>
@@ -25,177 +227,386 @@
         <KeyBinding Key="NumPad5" Command="{Binding SelectIndex}" CommandParameter="5"/>
         <KeyBinding Key="D6" Command="{Binding SelectIndex}" CommandParameter="6"/>
         <KeyBinding Key="NumPad6" Command="{Binding SelectIndex}" CommandParameter="6"/>
-
         <KeyBinding Key="Left" Command="{Binding BacktrackMany}"/>
         <KeyBinding Key="Right" Command="{Binding SkipMany}"/>
     </Window.InputBindings>
 
-    <DockPanel>
-        <Menu DockPanel.Dock="Top">
-            <MenuItem Header="Save and Close"
-                      Click="Save_OnClick"
-                      Margin="10,10,0,0"
-                      HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            <MenuItem Header="Open Document"
-                      Margin="10,10,0,0"
-                      Command="{Binding OpenDocument}"
-                      HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            <MenuItem Header="Apply type to all"
-                      Margin="10,10,0,0"
-                      HorizontalAlignment="Left" VerticalAlignment="Top">
-                <MenuItem Header="Greeting"
-                          IsEnabled="{Binding ValidSpeaker}"
-                          Command="{Binding ApplyAll}"
-                          CommandParameter="{x:Static dialogue:DialogueType.Greeting}"/>
-                <MenuItem Header="Farewell"
-                          IsEnabled="{Binding ValidSpeaker}"
-                          Command="{Binding ApplyAll}"
-                          CommandParameter="{x:Static dialogue:DialogueType.Farewell}"/>
-                <MenuItem Header="Idle"
-                          IsEnabled="{Binding ValidSpeaker}"
-                          Command="{Binding ApplyAll}"
-                          CommandParameter="{x:Static dialogue:DialogueType.Idle}"/>
-                <MenuItem Header="Branching Dialogue"
-                          IsEnabled="{Binding ValidSpeaker}"
-                          Command="{Binding ApplyAll}"
-                          CommandParameter="{x:Static dialogue:DialogueType.Dialogue}"/>
-                <MenuItem Header="Generic Scene"
-                          Command="{Binding ApplyAll}"
-                          CommandParameter="{x:Static dialogue:DialogueType.GenericScene}"/>
-                <MenuItem Header="Quest Scene"
-                          Command="{Binding ApplyAll}"
-                          CommandParameter="{x:Static dialogue:DialogueType.QuestScene}"/>
-            </MenuItem>
-        </Menu>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-        <GroupBox DockPanel.Dock="Bottom"
-                  Header="2) Dialogue Type">
-            <UniformGrid>
-                <ToggleButton Margin="5"
-                              IsChecked="{Binding GreetingSelected}"
-                              IsEnabled="{Binding ValidSpeaker}"
-                              Content="Greeting" FontSize="36"/>
-                <ToggleButton Margin="5"
-                              IsChecked="{Binding FarewellSelected}"
-                              IsEnabled="{Binding ValidSpeaker}"
-                              Content="Farewell" FontSize="36"/>
-                <ToggleButton Margin="5"
-                              IsChecked="{Binding IdleSelected}"
-                              IsEnabled="{Binding ValidSpeaker}"
-                              Content="Idle" FontSize="36"/>
-                <ToggleButton Margin="5"
-                              IsChecked="{Binding DialogueSelected}"
-                              IsEnabled="{Binding ValidSpeaker}"
-                              Content="Branching Dialogue" FontSize="36"/>
-                <ToggleButton Margin="5"
-                              IsChecked="{Binding GenericSceneSelected}"
-                              Content="Generic Scene" FontSize="36"/>
-                <ToggleButton Margin="5"
-                              IsChecked="{Binding QuestSceneSelected}"
-                              Content="Quest Scene" FontSize="36"/>
-            </UniformGrid>
-        </GroupBox>
-
-        <GroupBox Header="1) Speaker" Width="300">
-            <StackPanel>
-                <plugins:FormKeyPicker MinHeight="200"
-                                       FormKey="{Binding SpeakerFormKey}"
-                                       LinkCache="{Binding LinkCache, Mode=OneWay}"
-                                       ScopedTypes="{Binding SpeakerTypes, Mode=OneWay}"/>
-
-                <GroupBox Header="Favorites" MinHeight="100">
-                    <ScrollViewer>
-                        <ListBox ItemsSource="{Binding SpeakerFavoritesSelection.Speakers}">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <Button Content="{Binding EditorID}"
-                                            Command="{Binding ElementName=DialogueWindow, Path=DataContext.SetSpeaker}"
-                                            CommandParameter="{Binding}"/>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </ScrollViewer>
-                </GroupBox>
-
-                <CheckBox Content="Use GetIsAliasRef"
-                          IsEnabled="{Binding HasNpcSelected}"
-                          IsChecked="{Binding UseGetIsAliasRef}"/>
-            </StackPanel>
-        </GroupBox>
-
-        <GroupBox Header="Dialogue">
+        <!-- Header Bar -->
+        <Border Grid.Row="0" 
+                Background="{StaticResource SkyrimDarkGray}" 
+                BorderBrush="{StaticResource SkyrimSlateGray}" 
+                BorderThickness="0,0,0,1" 
+                Padding="12,8">
             <Grid>
-                <TextBlock Text="{Binding PreviewText}"
-                           FontSize="36"
-                           TextWrapping="WrapWithOverflow" TextAlignment="Center"
-                           VerticalAlignment="Center"/>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-                <Grid Height="70" Width="275"
-                      HorizontalAlignment="Left" VerticalAlignment="Top">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                <!-- Left side buttons -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="💾 Save and Close" 
+                            Click="Save_OnClick" 
+                            Style="{StaticResource ActionButton}"/>
 
-                    <Grid.Resources>
-                        <converters:IntPlusOneConverter x:Key="IntPlusOneConverter"/>
-                    </Grid.Resources>
+                    <Button Content="📜 Open Document" 
+                            Command="{Binding OpenDocument}" 
+                            Style="{StaticResource ActionButton}"/>
 
-                    <TextBlock Grid.Column="0"
-                               Foreground="Black"
-                               Text="{Binding Index, Converter={StaticResource IntPlusOneConverter}}"
-                               FontSize="36"/>
+                    <Menu Background="Transparent" 
+                          Foreground="{StaticResource SkyrimIceBlue}" 
+                          VerticalAlignment="Center"
+                          FontWeight="Normal">
+                        <MenuItem Header="⚡ Apply Type to All" 
+                                  FontSize="13" 
+                                  Padding="14,8" 
+                                  Margin="4,0"
+                                  Background="{StaticResource SkyrimSlateGray}"
+                                  BorderBrush="{StaticResource SkyrimCoolGray}"
+                                  BorderThickness="1">
+                            <MenuItem Header="Greeting" 
+                                      IsEnabled="{Binding ValidSpeaker}" 
+                                      Command="{Binding ApplyAll}" 
+                                      CommandParameter="{x:Static dialogue:DialogueType.Greeting}"/>
+                            <MenuItem Header="Farewell" 
+                                      IsEnabled="{Binding ValidSpeaker}" 
+                                      Command="{Binding ApplyAll}" 
+                                      CommandParameter="{x:Static dialogue:DialogueType.Farewell}"/>
+                            <MenuItem Header="Idle" 
+                                      IsEnabled="{Binding ValidSpeaker}" 
+                                      Command="{Binding ApplyAll}" 
+                                      CommandParameter="{x:Static dialogue:DialogueType.Idle}"/>
+                            <MenuItem Header="Branching Dialogue" 
+                                      IsEnabled="{Binding ValidSpeaker}" 
+                                      Command="{Binding ApplyAll}" 
+                                      CommandParameter="{x:Static dialogue:DialogueType.Dialogue}"/>
+                            <MenuItem Header="Generic Scene" 
+                                      Command="{Binding ApplyAll}" 
+                                      CommandParameter="{x:Static dialogue:DialogueType.GenericScene}"/>
+                            <MenuItem Header="Quest Scene" 
+                                      Command="{Binding ApplyAll}" 
+                                      CommandParameter="{x:Static dialogue:DialogueType.QuestScene}"/>
+                        </MenuItem>
+                    </Menu>
+                </StackPanel>
 
-                    <TextBlock Grid.Column="1"
-                               Foreground="Black"
-                               Text="/"
-                               FontSize="36"/>
-
-                    <TextBlock Grid.Column="2"
-                               Foreground="Black"
-                               Text="{Binding LastIndex, Converter={StaticResource IntPlusOneConverter}}"
-                               FontSize="36"/>
-                </Grid>
-
-                <Grid Height="70" Width="275"
-                      HorizontalAlignment="Right" VerticalAlignment="Top">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-
-                    <Button Grid.Column="0"
-                            Content="⏪"
-                            IsEnabled="{Binding IsNotFirstIndex}"
-                            Command="{Binding BacktrackMany}"
-                            FontSize="36"
-                            Margin="10"/>
-
-                    <Button Grid.Column="1"
-                            Content="◀"
-                            IsEnabled="{Binding IsNotFirstIndex}"
-                            Command="{Binding Previous}"
-                            FontSize="36"
-                            Margin="10"/>
-
-                    <Button Grid.Column="2"
-                            Content="▶"
-                            IsEnabled="{Binding IsNotLastIndex}"
-                            Command="{Binding Next}"
-                            FontSize="36"
-                            Margin="10"/>
-
-                    <Button Grid.Column="3"
-                            Content="⏩"
-                            IsEnabled="{Binding IsNotLastIndex}"
-                            Command="{Binding SkipMany}"
-                            FontSize="36"
-                            Margin="10"/>
-                </Grid>
+                <!-- Right side - Beyond Skyrim logo -->
+                <Image Grid.Column="1" 
+                       Source="/Assets/bs_logo.png" 
+                       Height="50" 
+                       Width="50"
+                       Stretch="Uniform"
+                       VerticalAlignment="Center"
+                       Margin="15,0,0,0"/>
             </Grid>
-        </GroupBox>
-    </DockPanel>
+        </Border>
+
+        <!-- Main Content -->
+        <Border Grid.Row="1" 
+                BorderBrush="{StaticResource SkyrimSlateGray}" 
+                BorderThickness="0"
+                Margin="0">
+            <Grid Margin="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="380"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left Panel: Speaker & Configuration -->
+                <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <!-- Speaker Selection Card -->
+                        <GroupBox Style="{StaticResource CardGroupBox}"
+                                  Visibility="{Binding IsSceneSelected, Converter={StaticResource InvertedBooleanToVisibilityConverter}}">
+                            <GroupBox.Header>
+                                <TextBlock Text="STEP 1: SELECT SPEAKER" 
+                                           FontWeight="SemiBold" 
+                                           FontSize="13"/>
+                            </GroupBox.Header>
+                            <StackPanel>
+                                <plugins:FormKeyPicker MinHeight="220" 
+                                                       Margin="0,8,0,12"
+                                                       FormKey="{Binding SpeakerFormKey}"
+                                                       LinkCache="{Binding LinkCache, Mode=OneWay}"
+                                                       ScopedTypes="{Binding SpeakerTypes, Mode=OneWay}"/>
+
+                                <TextBlock Text="FAVORITES" 
+                                           FontSize="11" 
+                                           FontWeight="SemiBold" 
+                                           Foreground="{StaticResource SkyrimPaleBlue}" 
+                                           Margin="0,4,0,4"/>
+                                <Border Background="{StaticResource SkyrimDeepBlack}" 
+                                        BorderBrush="{StaticResource SkyrimSlateGray}" 
+                                        BorderThickness="1" 
+                                        MaxHeight="120"
+                                        Padding="4">
+                                    <ScrollViewer>
+                                        <ListBox ItemsSource="{Binding SpeakerFavoritesSelection.Speakers}" 
+                                                 Background="Transparent" 
+                                                 BorderThickness="0"
+                                                 dd:DragDrop.IsDragSource="True"
+                                                 dd:DragDrop.DragHandler="{StaticResource SpeakerFavouriteFormKeyDragSource}">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Button Content="{Binding EditorID}" 
+                                                            Padding="8,5" 
+                                                            Margin="2"
+                                                            Command="{Binding ElementName=DialogueWindow, Path=DataContext.SetSpeaker}"
+                                                            CommandParameter="{Binding}"
+                                                            Background="{StaticResource SkyrimMediumGray}" 
+                                                            Foreground="{StaticResource SkyrimSilver}" 
+                                                            BorderBrush="{StaticResource SkyrimSlateGray}"
+                                                            BorderThickness="1"
+                                                            Cursor="Hand">
+                                                        <Button.Style>
+                                                            <Style TargetType="Button">
+                                                                <Setter Property="Template">
+                                                                    <Setter.Value>
+                                                                        <ControlTemplate TargetType="Button">
+                                                                            <Border Background="{TemplateBinding Background}" 
+                                                                                    BorderBrush="{TemplateBinding BorderBrush}" 
+                                                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                                                    CornerRadius="2"
+                                                                                    Padding="{TemplateBinding Padding}">
+                                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                            </Border>
+                                                                            <ControlTemplate.Triggers>
+                                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                                    <Setter Property="Background" Value="{StaticResource SkyrimCoolGray}"/>
+                                                                                    <Setter Property="BorderBrush" Value="{StaticResource SkyrimLightGray}"/>
+                                                                                </Trigger>
+                                                                            </ControlTemplate.Triggers>
+                                                                        </ControlTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </Style>
+                                                        </Button.Style>
+                                                    </Button>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </ScrollViewer>
+                                </Border>
+
+                                <CheckBox Content="Use GetIsAliasRef" 
+                                          Margin="0,12,0,0"
+                                          IsEnabled="{Binding HasNpcSelected}"
+                                          IsChecked="{Binding UseGetIsAliasRef}"
+                                          Foreground="{StaticResource SkyrimIceBlue}" 
+                                          FontSize="12"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- Dialogue Type Selection Card -->
+                        <GroupBox Style="{StaticResource CardGroupBox}">
+                            <GroupBox.Header>
+                                <TextBlock FontWeight="SemiBold" FontSize="13">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource SkyrimText}">
+                                            <Setter Property="Text" Value="STEP 2: SELECT DIALOGUE TYPE"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsSceneSelected}" Value="True">
+                                                    <Setter Property="Text" Value="STEP 1: SELECT DIALOGUE TYPE"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </GroupBox.Header>
+                            <UniformGrid Columns="2">
+                                <ToggleButton IsChecked="{Binding GreetingSelected}" 
+                                              IsEnabled="{Binding ValidSpeaker}"
+                                              Content="Greeting" 
+                                              Style="{StaticResource DialogueTypeButton}"/>
+                                <ToggleButton IsChecked="{Binding FarewellSelected}" 
+                                              IsEnabled="{Binding ValidSpeaker}"
+                                              Content="Farewell" 
+                                              Style="{StaticResource DialogueTypeButton}"/>
+                                <ToggleButton IsChecked="{Binding IdleSelected}" 
+                                              IsEnabled="{Binding ValidSpeaker}"
+                                              Content="Idle" 
+                                              Style="{StaticResource DialogueTypeButton}"/>
+                                <ToggleButton IsChecked="{Binding DialogueSelected}" 
+                                              IsEnabled="{Binding ValidSpeaker}"
+                                              Content="Dialogue" 
+                                              Style="{StaticResource DialogueTypeButton}"/>
+                                <ToggleButton IsChecked="{Binding GenericSceneSelected}"
+                                              Content="Generic Scene" 
+                                              Style="{StaticResource DialogueTypeButton}"/>
+                                <ToggleButton IsChecked="{Binding QuestSceneSelected}"
+                                              Content="Quest Scene" 
+                                              Style="{StaticResource DialogueTypeButton}"/>
+                            </UniformGrid>
+                        </GroupBox>
+
+                        <!-- Scene Actors Card -->
+                        <GroupBox Style="{StaticResource CardGroupBox}"
+                                  Visibility="{Binding IsSceneSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <GroupBox.Header>
+                                <TextBlock Text="STEP 2: ASSIGN SCENE ACTORS" 
+                                           FontWeight="SemiBold" 
+                                           FontSize="13"/>
+                            </GroupBox.Header>
+                            <StackPanel>
+                                <TextBlock Margin="0,0,0,8" 
+                                           FontSize="11" 
+                                           Foreground="{StaticResource SkyrimLightGray}" 
+                                           TextWrapping="Wrap">
+                                    <Run Text="Detected"/>
+                                    <Run Text="{Binding CurrentSceneSpeakers.Count, Mode=OneWay}" 
+                                         FontWeight="SemiBold" 
+                                         Foreground="{StaticResource SkyrimPaleBlue}"/>
+                                    <Run Text="speaker(s). Drag from favorites or use the picker below."/>
+                                </TextBlock>
+
+                                <ItemsControl ItemsSource="{Binding CurrentSceneSpeakers}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{StaticResource SkyrimDeepBlack}" 
+                                                    BorderBrush="{StaticResource SkyrimSlateGray}" 
+                                                    BorderThickness="1" 
+                                                    Padding="8" 
+                                                    Margin="0,0,0,6">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Name}" 
+                                                               FontWeight="SemiBold" 
+                                                               FontSize="12"
+                                                               Foreground="{StaticResource SkyrimPaleBlue}" 
+                                                               Margin="0,0,0,6"/>
+                                                    <plugins:FormKeyPicker
+                                                        dd:DragDrop.IsDropTarget="True"
+                                                        dd:DragDrop.DropHandler="{StaticResource FormKeyPickerDropTarget}"
+                                                        MinHeight="30"
+                                                        FormKey="{Binding FormKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                        EditorID="{Binding EditorID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                        LinkCache="{Binding ElementName=DialogueWindow, Path=DataContext.LinkCache}"
+                                                        ScopedTypes="{Binding ElementName=DialogueWindow, Path=DataContext.SpeakerTypes}"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Right Panel: Dialogue Preview & Navigation -->
+                <GroupBox Grid.Column="1" 
+                          Header="DIALOGUE PREVIEW" 
+                          Style="{StaticResource CardGroupBox}" 
+                          Margin="8,0,0,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Progress Indicator -->
+                        <Border Grid.Row="0" 
+                                Background="{StaticResource SkyrimDeepBlack}" 
+                                BorderBrush="{StaticResource SkyrimSlateGray}" 
+                                BorderThickness="1" 
+                                Padding="15,10" 
+                                Margin="0,0,0,12">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" 
+                                            Orientation="Horizontal" 
+                                            VerticalAlignment="Center">
+                                    <TextBlock Text="Progress:" 
+                                               FontSize="13" 
+                                               Foreground="{StaticResource SkyrimLightGray}" 
+                                               Margin="0,0,12,0"
+                                               FontWeight="Normal"/>
+                                    <TextBlock FontSize="24" 
+                                               FontWeight="SemiBold" 
+                                               Foreground="{StaticResource SkyrimPaleBlue}">
+                                        <Run Text="{Binding Index, Converter={StaticResource IntPlusOneConverter}, Mode=OneWay}"/>
+                                        <Run Text="/" Foreground="{StaticResource SkyrimLightGray}"/>
+                                        <Run Text="{Binding LastIndex, Converter={StaticResource IntPlusOneConverter}, Mode=OneWay}"/>
+                                    </TextBlock>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <TextBlock Text="Shortcuts: " 
+                                               FontSize="11" 
+                                               Foreground="{StaticResource SkyrimLightGray}" 
+                                               VerticalAlignment="Center" 
+                                               Margin="0,0,4,0"/>
+                                    <TextBlock Text="← / →" 
+                                               FontSize="11" 
+                                               FontWeight="SemiBold" 
+                                               Foreground="{StaticResource SkyrimSilver}" 
+                                               VerticalAlignment="Center" 
+                                               Margin="0,0,8,0"/>
+                                    <TextBlock Text="1-6" 
+                                               FontSize="11" 
+                                               FontWeight="SemiBold" 
+                                               Foreground="{StaticResource SkyrimSilver}" 
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Dialogue Text Display -->
+                        <Border Grid.Row="1" 
+                                Background="{StaticResource SkyrimMediumGray}" 
+                                BorderBrush="{StaticResource SkyrimSlateGray}" 
+                                BorderThickness="1" 
+                                Padding="30">
+                            <Viewbox Stretch="Uniform" MaxHeight="400">
+                                <TextBlock Text="{Binding PreviewText}" 
+                                           TextWrapping="Wrap" 
+                                           TextAlignment="Center"
+                                           Foreground="{StaticResource SkyrimIceBlue}" 
+                                           FontSize="28" 
+                                           FontWeight="Normal"
+                                           FontFamily="Segoe UI, Georgia, Cambria"
+                                           MaxWidth="800"/>
+                            </Viewbox>
+                        </Border>
+
+                        <!-- Navigation Controls -->
+                        <Border Grid.Row="2" 
+                                Background="{StaticResource SkyrimDarkGray}" 
+                                BorderBrush="{StaticResource SkyrimSlateGray}" 
+                                BorderThickness="1" 
+                                Padding="10" 
+                                Margin="0,12,0,0">
+                            <UniformGrid Rows="1" Columns="4">
+                                <Button Content="⏪ Skip Back" 
+                                        Command="{Binding BacktrackMany}"
+                                        IsEnabled="{Binding IsNotFirstIndex}" 
+                                        Style="{StaticResource NavButton}"/>
+                                <Button Content="◀ Previous" 
+                                        Command="{Binding Previous}"
+                                        IsEnabled="{Binding IsNotFirstIndex}" 
+                                        Style="{StaticResource NavButton}"/>
+                                <Button Content="Next ▶" 
+                                        Command="{Binding Next}"
+                                        IsEnabled="{Binding IsNotLastIndex}" 
+                                        Style="{StaticResource NavButton}"/>
+                                <Button Content="Skip Forward ⏩" 
+                                        Command="{Binding SkipMany}"
+                                        IsEnabled="{Binding IsNotLastIndex}" 
+                                        Style="{StaticResource NavButton}"/>
+                            </UniformGrid>
+                        </Border>
+                    </Grid>
+                </GroupBox>
+            </Grid>
+        </Border>
+    </Grid>
 </Window>

@@ -1,24 +1,35 @@
-﻿using System.Diagnostics;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq.Expressions;
 using System.Reactive.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
 using DialogueImplementationTool.Dialogue;
+using DialogueImplementationTool.Dialogue.Model;
+using DialogueImplementationTool.Dialogue.Processor;
 using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Parser;
 using DialogueImplementationTool.Services;
+using DialogueImplementationTool.UI.Models;
+using DialogueImplementationTool.UI.Services;
+using Mutagen.Bethesda.Json;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Skyrim;
+using Newtonsoft.Json;
 using Noggog;
 using Noggog.WPF;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace DialogueImplementationTool.UI.ViewModels;
 
+using Conversation = List<GeneratedDialogue>;
+using FormKeyJsonConverter = Mutagen.Bethesda.Json.FormKeyJsonConverter;
+
 public sealed partial class IterableDialogueConfigVM : ViewModel {
     private readonly IDocumentIterator _documentParser;
+    private readonly IEnvironmentContext _environmentContext;
 
     public ISpeakerFavoritesSelection SpeakerFavoritesSelection { get; }
 
@@ -60,6 +71,15 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
     [Reactive] public IFormLinkGetter SpeakerLink { get; set; } = new FormLinkInformation(FormKey.Null, typeof(INpcGetter));
     [Reactive] public bool ValidSpeaker { get; set; }
 
+    /*====================================================
+        Scene Actors
+    ====================================================*/
+    [Reactive] public bool IsSceneSelected { get; set; }
+    [Reactive] public ObservableCollection<AliasSpeakerSelection> CurrentSceneSpeakers { get; set; } = [];
+
+    // Store scene speakers for each dialogue index
+    private readonly Dictionary<int, List<AliasSpeakerSelection>> _sceneSpeakersPerIndex = new();
+
     public ICommand SetSpeaker { get; }
     public ICommand SelectIndex { get; }
     public ICommand OpenDocument { get; }
@@ -73,16 +93,27 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
     [Reactive] public bool UseGetIsAliasRef { get; set; }
     [Reactive] public bool HasNpcSelected { get; set; }
 
+    // Shared JSON serializer settings to ensure consistency
+    private readonly JsonSerializerSettings _serializerSettings = new() {
+        Formatting = Formatting.Indented,
+        TypeNameHandling = TypeNameHandling.None,
+        Converters = {
+            new FormKeyJsonConverter(),
+            JsonConvertersMixIn.ModKey,
+        },
+    };
+
     public IterableDialogueConfigVM(
         IEnvironmentContext context,
         IDocumentIterator documentParser,
         AutomaticSpeakerSelection automaticSpeakerSelection,
         ISpeakerFavoritesSelection speakerFavoritesSelection) {
+        _environmentContext = context;
         SpeakerFavoritesSelection = speakerFavoritesSelection;
         _documentParser = documentParser;
         Index = _documentParser.Index;
         LinkCache = context.LinkCache;
-        Title = Path.GetFileName(documentParser.FilePath);
+        Title = Path.GetFileNameWithoutExtension(documentParser.FilePath);
 
         // Set buttons to unchecked
         GreetingSelected = FarewellSelected =
@@ -171,24 +202,28 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
         });
 
         BacktrackMany = ReactiveCommand.Create(() => {
+            SaveCurrentSceneSpeakers();
             _documentParser.BacktrackMany();
             Index = _documentParser.Index;
             RefreshPreview(false);
         });
 
         Previous = ReactiveCommand.Create(() => {
+            SaveCurrentSceneSpeakers();
             _documentParser.Previous();
             Index = _documentParser.Index;
             RefreshPreview(false);
         });
 
         Next = ReactiveCommand.Create(() => {
+            SaveCurrentSceneSpeakers();
             _documentParser.Next();
             Index = _documentParser.Index;
             RefreshPreview(true);
         });
 
         SkipMany = ReactiveCommand.Create(() => {
+            SaveCurrentSceneSpeakers();
             _documentParser.SkipMany();
             Index = _documentParser.Index;
             RefreshPreview(true);
@@ -229,6 +264,36 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
                 if (DialogueSelections.Count > Index) DialogueSelections[Index].UseGetIsAliasRef = x;
             });
 
+        // Watch for scene selection changes
+        this.WhenAnyValue(
+                x => x.GenericSceneSelected,
+                x => x.QuestSceneSelected,
+                (generic, quest) => generic || quest)
+            .Subscribe(isScene => {
+                IsSceneSelected = isScene;
+                if (isScene) {
+                    DetectAndLoadSceneSpeakers();
+                } else {
+                    SaveCurrentSceneSpeakers();
+                }
+            });
+
+        // Watch for changes to scene speaker FormKeys and save immediately
+        this.WhenAnyValue(x => x.CurrentSceneSpeakers)
+            .Subscribe(speakers => {
+                if (speakers == null) return;
+
+                // Subscribe to property changes on each speaker
+                foreach (var speaker in speakers) {
+                    speaker.WhenAnyValue(s => s.FormKey, s => s.EditorID)
+                        .Throttle(TimeSpan.FromMilliseconds(500))
+                        .Subscribe(_ => {
+                            Debug.WriteLine($"[IterableDialogueConfigVM] Speaker {speaker.Name} changed, auto-saving");
+                            SaveSceneSpeakersToFile();
+                        });
+                }
+            });
+
         SetupSelectionSubscription(vm => vm.GreetingSelected, DialogueType.Greeting);
         SetupSelectionSubscription(vm => vm.FarewellSelected, DialogueType.Farewell);
         SetupSelectionSubscription(vm => vm.IdleSelected, DialogueType.Idle);
@@ -249,6 +314,236 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
                 });
         }
     }
+
+    public void SaveCurrentSceneSpeakers() {
+        if (IsSceneSelected && CurrentSceneSpeakers.Count > 0) {
+
+            // Validate that all speakers are assigned
+            if (CurrentSceneSpeakers.Any(s => s.FormKey.IsNull)) {
+                Debug.WriteLine("[IterableDialogueConfigVM.SaveCurrentSceneSpeakers] WARNING: Some speakers are not assigned!");
+            }
+
+            _sceneSpeakersPerIndex[Index] = CurrentSceneSpeakers.ToList();
+
+            // Also save to the global scene selections file
+            SaveSceneSpeakersToFile();
+        }
+    }
+
+    // Update SaveAllSceneSpeakers method:
+    private void SaveSceneSpeakersToFile() {
+        try {
+            var speakerNames = CurrentSceneSpeakers.Select(s => s.Name).OrderBy(x => x).ToList();
+            var selectionsPath = GetSceneSelectionsPath();
+
+            Dictionary<string, Dictionary<string, AliasSelectionDto>> savedSelections;
+            if (File.Exists(selectionsPath)) {
+                var json = File.ReadAllText(selectionsPath);
+                savedSelections = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, AliasSelectionDto>>>(json, _serializerSettings)
+                                  ?? new Dictionary<string, Dictionary<string, AliasSelectionDto>>();
+            } else {
+                savedSelections = new Dictionary<string, Dictionary<string, AliasSelectionDto>>();
+            }
+
+            var key = string.Join('|', speakerNames);
+            var selections = new Dictionary<string, AliasSelectionDto>();
+            foreach (var speaker in CurrentSceneSpeakers) {
+                selections[speaker.Name] = new AliasSelectionDto(speaker.FormKey, speaker.EditorID);
+                SpeakerFavoritesSelection.AddSpeaker(new NpcSpeaker(LinkCache, speaker.FormLink));
+            }
+
+            savedSelections[key] = selections;
+
+            var directory = Path.GetDirectoryName(selectionsPath);
+            if (directory != null && !Directory.Exists(directory)) {
+                Directory.CreateDirectory(directory);
+            }
+
+            var outputJson = JsonConvert.SerializeObject(savedSelections, _serializerSettings);
+            File.WriteAllText(selectionsPath, outputJson);
+
+        } catch (Exception ex) {
+            Debug.WriteLine($"ERROR: {ex.Message}");
+            Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+        }
+    }
+
+    public void SaveAllSceneSpeakers() {
+        // Save the current one first
+        SaveCurrentSceneSpeakers();
+
+        // Now save all stored scene speakers to file
+        foreach (var (index, speakers) in _sceneSpeakersPerIndex) {
+            if (speakers.Count == 0) continue;
+
+            try {
+                var speakerNames = speakers.Select(s => s.Name).OrderBy(x => x).ToList();
+                var selectionsPath = GetSceneSelectionsPath();
+
+                Dictionary<string, Dictionary<string, AliasSelectionDto>> savedSelections;
+                if (File.Exists(selectionsPath)) {
+                    var json = File.ReadAllText(selectionsPath);
+                    savedSelections = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, AliasSelectionDto>>>(json, _serializerSettings)
+                                      ?? new Dictionary<string, Dictionary<string, AliasSelectionDto>>();
+                } else {
+                    savedSelections = new Dictionary<string, Dictionary<string, AliasSelectionDto>>();
+                }
+
+                var key = string.Join('|', speakerNames);
+                var selections = new Dictionary<string, AliasSelectionDto>();
+                foreach (var speaker in speakers) {
+                    selections[speaker.Name] = new AliasSelectionDto(speaker.FormKey, speaker.EditorID);
+                    SpeakerFavoritesSelection.AddSpeaker(new NpcSpeaker(LinkCache, speaker.FormLink));
+                }
+
+                savedSelections[key] = selections;
+
+                var directory = Path.GetDirectoryName(selectionsPath);
+                if (directory != null && !Directory.Exists(directory)) {
+                    Directory.CreateDirectory(directory);
+                }
+
+                var outputJson = JsonConvert.SerializeObject(savedSelections, _serializerSettings);
+                File.WriteAllText(selectionsPath, outputJson);
+
+            } catch (Exception ex) {
+                Debug.WriteLine($"ERROR saving speakers for index {index}: {ex.Message}");
+            }
+        }
+    }
+
+    private bool TryLoadSceneSpeakersFromFile(List<string> speakerNames) {
+        try {
+            var selectionsPath = GetSceneSelectionsPath();
+            if (!File.Exists(selectionsPath)) return false;
+
+            var json = File.ReadAllText(selectionsPath);
+            var savedSelections = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, AliasSelectionDto>>>(json, _serializerSettings);
+            if (savedSelections == null) return false;
+
+            var key = string.Join('|', speakerNames.OrderBy(x => x));
+            if (!savedSelections.TryGetValue(key, out var selections)) return false;
+
+            foreach (var speakerName in speakerNames) {
+                if (!selections.TryGetValue(speakerName, out var dto)) return false;
+
+                var aliasSpeaker = new AliasSpeakerSelection(LinkCache, SpeakerFavoritesSelection, speakerName) {
+                    FormKey = dto.FormKey,
+                    EditorID = dto.EditorID
+                };
+                CurrentSceneSpeakers.Add(aliasSpeaker);
+            }
+
+            return true;
+        } catch (Exception ex) {
+            Debug.WriteLine($"ERROR: {ex.Message}");
+            return false;
+        }
+    }
+
+    [GeneratedRegex("[\\/:*?\"<>|]")]
+    private static partial Regex IllegalFileNameRegex { get; }
+
+    private string GetSceneSelectionsPath() {
+        var fileName = IllegalFileNameRegex.Replace(_documentParser.FilePath + ".sceneselections", string.Empty);
+        return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Selections", fileName);
+    }
+
+    [GeneratedRegex(@"^([^:]+):\s*(.+)")]
+    private static partial Regex SceneLineRegex { get; }
+
+    private void DetectAndLoadSceneSpeakers() {
+        // First, check if we already have speakers saved for this index
+        if (_sceneSpeakersPerIndex.TryGetValue(Index, out var savedSpeakers)) {
+            CurrentSceneSpeakers.Clear();
+            foreach (var speaker in savedSpeakers) {
+                CurrentSceneSpeakers.Add(speaker);
+            }
+            return;
+        }
+
+        if (_documentParser is not ISceneParser sceneParser) {
+            return;
+        }
+
+        try {
+            var minimalProcessor = new MinimalSceneProcessor();
+            var topics = sceneParser.ParseScene(minimalProcessor, Index);
+
+            // Extract unique speaker names from the scene
+            var speakerNames = new HashSet<string>();
+            foreach (var topic in topics) {
+                foreach (var topicInfo in topic.TopicInfos) {
+                    foreach (var response in topicInfo.Responses) {
+                        // Check for SPEAKER= notes
+                        foreach (var note in response.StartNotes) {
+                            var speaker = SceneResponseProcessor.GetSpeaker(note);
+                            if (speaker is not null) {
+                                speakerNames.Add(ISpeaker.GetSpeakerName(speaker));
+                            }
+                        }
+
+                        // Also check for "Name: dialogue" format in response text
+                        var match = SceneLineRegex.Match(response.Response);
+                        if (match.Success) {
+                            var speakerName = ISpeaker.GetSpeakerName(match.Groups[1].Value);
+                            speakerNames.Add(speakerName);
+                        }
+                    }
+                }
+            }
+
+            CurrentSceneSpeakers.Clear();
+
+            // Try to load from saved file first
+            var loadedFromFile = TryLoadSceneSpeakersFromFile(speakerNames.ToList());
+
+            if (!loadedFromFile) {
+                // Create new speaker selections
+                foreach (var speakerName in speakerNames.OrderBy(x => x)) {
+                    var aliasSpeaker = new AliasSpeakerSelection(LinkCache, SpeakerFavoritesSelection, speakerName);
+
+                    // Try to auto-assign from favorites
+                    var matchingSpeaker = SpeakerFavoritesSelection.GetClosestSpeakers(speakerName).FirstOrDefault();
+                    if (matchingSpeaker is not null) {
+                        aliasSpeaker.FormKey = matchingSpeaker.FormLink.FormKey;
+                        aliasSpeaker.EditorID = matchingSpeaker.EditorID;
+                    }
+
+                    CurrentSceneSpeakers.Add(aliasSpeaker);
+                }
+            }
+
+        } catch (Exception ex) {
+            Debug.WriteLine($"ERROR: {ex.Message}");
+            Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+            CurrentSceneSpeakers.Clear();
+        }
+    }
+
+    // Minimal processor that only includes the SceneResponseProcessor
+    private sealed class MinimalSceneProcessor : IDialogueProcessor {
+        private readonly SceneResponseProcessor _sceneResponseProcessor = new();
+
+        public DialogueResponse BuildResponse(IList<FormattedText> textSnippets) {
+            var response = new DialogueResponse {
+                Response = string.Join(string.Empty, textSnippets.Select(x => x.Text)),
+            };
+            _sceneResponseProcessor.Process(response, textSnippets);
+            return response;
+        }
+
+        public void Process(DialogueResponse response, IList<FormattedText> textSnippets) {
+            _sceneResponseProcessor.Process(response, textSnippets);
+        }
+
+        public void Process(GenericDialogue genericDialogue, DialogueTopicInfo topicInfo) { }
+        public void Process(DialogueTopicInfo topicInfo) { }
+        public void Process(DialogueTopic topic) { }
+        public void Process(List<DialogueTopic> topics) { }
+        public void Process(Conversation conversation) { }
+    }
+
     private void RefreshPreview() {
         IsNotFirstIndex = Index > 0;
         IsNotLastIndex = Index < _documentParser.LastIndex;
@@ -270,6 +565,11 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
         DialogueSelected = DialogueSelections[Index].SelectedTypes.Contains(DialogueType.Dialogue);
         GenericSceneSelected = DialogueSelections[Index].SelectedTypes.Contains(DialogueType.GenericScene);
         QuestSceneSelected = DialogueSelections[Index].SelectedTypes.Contains(DialogueType.QuestScene);
+
+        // Refresh scene speakers if a scene type is selected
+        if (IsSceneSelected) {
+            DetectAndLoadSceneSpeakers();
+        }
     }
 
     [GeneratedRegex(@"\[[^\]]*\]|_s|'s|\([^\)]*\)|'s|standard dialogue|dialogue|dialog| - |_|\d+|\.|,", RegexOptions.IgnoreCase)]
@@ -331,3 +631,6 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
         }
     }
 }
+
+// DTO for saving/loading scene speaker selections
+internal sealed record AliasSelectionDto(FormKey FormKey, string? EditorID);
