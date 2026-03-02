@@ -7,14 +7,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Autofac" Version="8.4.0" />
+      <PackageReference Include="Autofac" Version="9.0.0" />
       <PackageReference Include="CsvHelper" Version="33.1.0" />
       <PackageReference Include="DocX" Version="5.0.0" />
-      <PackageReference Include="Mutagen.Bethesda.Autofac" Version="0.52.0-alpha.60" />
+      <PackageReference Include="Mutagen.Bethesda.Autofac" Version="0.54.0-alpha.19" />
       <PackageReference Include="Mutagen.Bethesda.FormKeys.SkyrimSE" Version="3.4.0" />
-      <PackageReference Include="Mutagen.Bethesda.Json" Version="0.52.0-alpha.60" />
-      <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.52.0-alpha.60" />
-      <PackageReference Include="Mutagen.Bethesda.WPF" Version="0.52.0-alpha.60" />
+      <PackageReference Include="Mutagen.Bethesda.Json" Version="0.54.0-alpha.19" />
+      <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.54.0-alpha.19" />
+      <PackageReference Include="Mutagen.Bethesda.WPF" Version="0.54.0-alpha.19" />
       <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
       <PackageReference Include="TransformersSharp" Version="1.0.0" />
     </ItemGroup>
