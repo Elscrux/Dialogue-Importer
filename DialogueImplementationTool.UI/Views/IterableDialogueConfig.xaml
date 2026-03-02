@@ -357,69 +357,10 @@
                                            FontSize="13"/>
                             </GroupBox.Header>
                             <StackPanel>
-                                <plugins:FormKeyPicker MinHeight="220" 
-                                                       Margin="0,8,0,12"
+                                <plugins:FormKeyPicker Margin="0,8,0,12"
                                                        FormKey="{Binding SpeakerFormKey}"
                                                        LinkCache="{Binding LinkCache, Mode=OneWay}"
                                                        ScopedTypes="{Binding SpeakerTypes, Mode=OneWay}"/>
-
-                                <TextBlock Text="FAVORITES" 
-                                           FontSize="11" 
-                                           FontWeight="SemiBold" 
-                                           Foreground="{StaticResource SkyrimPaleBlue}" 
-                                           Margin="0,4,0,4"/>
-                                <Border Background="{StaticResource SkyrimDeepBlack}" 
-                                        BorderBrush="{StaticResource SkyrimSlateGray}" 
-                                        BorderThickness="1" 
-                                        MaxHeight="120"
-                                        Padding="4">
-                                    <ScrollViewer>
-                                        <ListBox ItemsSource="{Binding SpeakerFavoritesSelection.Speakers}" 
-                                                 Background="Transparent" 
-                                                 BorderThickness="0"
-                                                 dd:DragDrop.IsDragSource="True"
-                                                 dd:DragDrop.DragHandler="{StaticResource SpeakerFavouriteFormKeyDragSource}">
-                                            <ListBox.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Button Content="{Binding EditorID}" 
-                                                            Padding="8,5" 
-                                                            Margin="2"
-                                                            Command="{Binding ElementName=DialogueWindow, Path=DataContext.SetSpeaker}"
-                                                            CommandParameter="{Binding}"
-                                                            Background="{StaticResource SkyrimMediumGray}" 
-                                                            Foreground="{StaticResource SkyrimSilver}" 
-                                                            BorderBrush="{StaticResource SkyrimSlateGray}"
-                                                            BorderThickness="1"
-                                                            Cursor="Hand">
-                                                        <Button.Style>
-                                                            <Style TargetType="Button">
-                                                                <Setter Property="Template">
-                                                                    <Setter.Value>
-                                                                        <ControlTemplate TargetType="Button">
-                                                                            <Border Background="{TemplateBinding Background}" 
-                                                                                    BorderBrush="{TemplateBinding BorderBrush}" 
-                                                                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                                                                    CornerRadius="2"
-                                                                                    Padding="{TemplateBinding Padding}">
-                                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                                            </Border>
-                                                                            <ControlTemplate.Triggers>
-                                                                                <Trigger Property="IsMouseOver" Value="True">
-                                                                                    <Setter Property="Background" Value="{StaticResource SkyrimCoolGray}"/>
-                                                                                    <Setter Property="BorderBrush" Value="{StaticResource SkyrimLightGray}"/>
-                                                                                </Trigger>
-                                                                            </ControlTemplate.Triggers>
-                                                                        </ControlTemplate>
-                                                                    </Setter.Value>
-                                                                </Setter>
-                                                            </Style>
-                                                        </Button.Style>
-                                                    </Button>
-                                                </DataTemplate>
-                                            </ListBox.ItemTemplate>
-                                        </ListBox>
-                                    </ScrollViewer>
-                                </Border>
 
                                 <CheckBox Content="Use GetIsAliasRef" 
                                           Margin="0,12,0,0"
@@ -478,6 +419,73 @@
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </StackPanel>
+                        </GroupBox>
+
+                        <!-- Speaker Favorites -->
+                        <GroupBox Style="{StaticResource CardGroupBox}">
+                            <GroupBox.Header>
+                                <TextBlock Text="FAVORITES" 
+                                           FontWeight="SemiBold" 
+                                           FontSize="13"/>
+                            </GroupBox.Header>
+
+                            <Border Background="{StaticResource SkyrimDeepBlack}"
+                                    BorderBrush="{StaticResource SkyrimSlateGray}"
+                                    BorderThickness="1"
+                                    Padding="4">
+                                <ScrollViewer>
+                                    <ListBox ItemsSource="{Binding SpeakerFavoritesSelection.Speakers}"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             dd:DragDrop.IsDragSource="True"
+                                             dd:DragDrop.DragHandler="{StaticResource SpeakerFavouriteFormKeyDragSource}">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Content="{Binding EditorID}"
+                                                        Padding="8,5"
+                                                        Margin="2"
+                                                        Command="{Binding ElementName=DialogueWindow, Path=DataContext.SetSpeaker}"
+                                                        CommandParameter="{Binding}"
+                                                        Background="{StaticResource SkyrimMediumGray}"
+                                                        Foreground="{StaticResource SkyrimSilver}"
+                                                        BorderBrush="{StaticResource SkyrimSlateGray}"
+                                                        BorderThickness="1"
+                                                        Cursor="Hand">
+                                                    <Button.Style>
+                                                        <Style TargetType="Button">
+                                                            <Setter Property="Template">
+                                                                <Setter.Value>
+                                                                    <ControlTemplate TargetType="Button">
+                                                                        <Border
+                                                                            Background="{TemplateBinding Background}"
+                                                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                                                            CornerRadius="2"
+                                                                            Padding="{TemplateBinding Padding}">
+                                                                            <ContentPresenter
+                                                                                HorizontalAlignment="Center"
+                                                                                VerticalAlignment="Center"/>
+                                                                        </Border>
+                                                                        <ControlTemplate.Triggers>
+                                                                            <Trigger Property="IsMouseOver"
+                                                                                    Value="True">
+                                                                                <Setter Property="Background"
+                                                                                    Value="{StaticResource SkyrimCoolGray}"/>
+                                                                                <Setter Property="BorderBrush"
+                                                                                    Value="{StaticResource SkyrimLightGray}"/>
+                                                                            </Trigger>
+                                                                        </ControlTemplate.Triggers>
+                                                                    </ControlTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </Style>
+                                                    </Button.Style>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </ScrollViewer>
+                            </Border>
                         </GroupBox>
                     </StackPanel>
                 </ScrollViewer>
