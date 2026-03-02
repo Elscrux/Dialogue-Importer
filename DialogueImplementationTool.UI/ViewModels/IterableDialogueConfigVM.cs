@@ -136,16 +136,16 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
         SelectIndex = ReactiveCommand.Create<string>(indexStr => {
             switch (int.Parse(indexStr)) {
                 case 1:
-                    if (ValidSpeaker) GreetingSelected = !GreetingSelected;
+                    GreetingSelected = !GreetingSelected;
                     break;
                 case 2:
-                    if (ValidSpeaker) FarewellSelected = !FarewellSelected;
+                    FarewellSelected = !FarewellSelected;
                     break;
                 case 3:
-                    if (ValidSpeaker) IdleSelected = !IdleSelected;
+                    IdleSelected = !IdleSelected;
                     break;
                 case 4:
-                    if (ValidSpeaker) DialogueSelected = !DialogueSelected;
+                    DialogueSelected = !DialogueSelected;
                     break;
                 case 5:
                     GenericSceneSelected = !GenericSceneSelected;
@@ -234,8 +234,6 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
 
         this.WhenAnyValue(v => v.SpeakerFormKey)
             .Subscribe(speaker => {
-                ValidSpeaker = SpeakerFormKey.IsNull is false;
-
                 if (speaker.IsNull) {
                     SpeakerLink = new FormLinkInformation(FormKey.Null, typeof(INpcGetter));
                     HasNpcSelected = false;

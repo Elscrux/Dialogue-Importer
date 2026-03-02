@@ -271,19 +271,15 @@
                                   BorderBrush="{StaticResource SkyrimCoolGray}"
                                   BorderThickness="1">
                             <MenuItem Header="Greeting" 
-                                      IsEnabled="{Binding ValidSpeaker}" 
                                       Command="{Binding ApplyAll}" 
                                       CommandParameter="{x:Static dialogue:DialogueType.Greeting}"/>
                             <MenuItem Header="Farewell" 
-                                      IsEnabled="{Binding ValidSpeaker}" 
                                       Command="{Binding ApplyAll}" 
                                       CommandParameter="{x:Static dialogue:DialogueType.Farewell}"/>
                             <MenuItem Header="Idle" 
-                                      IsEnabled="{Binding ValidSpeaker}" 
                                       Command="{Binding ApplyAll}" 
                                       CommandParameter="{x:Static dialogue:DialogueType.Idle}"/>
                             <MenuItem Header="Branching Dialogue" 
-                                      IsEnabled="{Binding ValidSpeaker}" 
                                       Command="{Binding ApplyAll}" 
                                       CommandParameter="{x:Static dialogue:DialogueType.Dialogue}"/>
                             <MenuItem Header="Generic Scene" 
@@ -321,11 +317,42 @@
                 <!-- Left Panel: Speaker & Configuration -->
                 <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
+
+                        <!-- Dialogue Type Selection Card -->
+                        <GroupBox Style="{StaticResource CardGroupBox}">
+                            <GroupBox.Header>
+                                <TextBlock FontWeight="SemiBold"
+                                           FontSize="13"
+                                           Text="STEP 1: SELECT DIALOGUE TYPE"
+                                           Style="{StaticResource SkyrimText}"/>
+                            </GroupBox.Header>
+                            <UniformGrid Columns="2">
+                                <ToggleButton IsChecked="{Binding GreetingSelected}" 
+                                              Content="Greeting" 
+                                              Style="{StaticResource DialogueTypeButton}"/>
+                                <ToggleButton IsChecked="{Binding FarewellSelected}" 
+                                              Content="Farewell" 
+                                              Style="{StaticResource DialogueTypeButton}"/>
+                                <ToggleButton IsChecked="{Binding IdleSelected}" 
+                                              Content="Idle" 
+                                              Style="{StaticResource DialogueTypeButton}"/>
+                                <ToggleButton IsChecked="{Binding DialogueSelected}" 
+                                              Content="Dialogue" 
+                                              Style="{StaticResource DialogueTypeButton}"/>
+                                <ToggleButton IsChecked="{Binding GenericSceneSelected}"
+                                              Content="Generic Scene" 
+                                              Style="{StaticResource DialogueTypeButton}"/>
+                                <ToggleButton IsChecked="{Binding QuestSceneSelected}"
+                                              Content="Quest Scene" 
+                                              Style="{StaticResource DialogueTypeButton}"/>
+                            </UniformGrid>
+                        </GroupBox>
+
                         <!-- Speaker Selection Card -->
                         <GroupBox Style="{StaticResource CardGroupBox}"
                                   Visibility="{Binding IsSceneSelected, Converter={StaticResource InvertedBooleanToVisibilityConverter}}">
                             <GroupBox.Header>
-                                <TextBlock Text="STEP 1: SELECT SPEAKER" 
+                                <TextBlock Text="STEP 2: SELECT SPEAKER" 
                                            FontWeight="SemiBold" 
                                            FontSize="13"/>
                             </GroupBox.Header>
@@ -401,48 +428,6 @@
                                           Foreground="{StaticResource SkyrimIceBlue}" 
                                           FontSize="12"/>
                             </StackPanel>
-                        </GroupBox>
-
-                        <!-- Dialogue Type Selection Card -->
-                        <GroupBox Style="{StaticResource CardGroupBox}">
-                            <GroupBox.Header>
-                                <TextBlock FontWeight="SemiBold" FontSize="13">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock" BasedOn="{StaticResource SkyrimText}">
-                                            <Setter Property="Text" Value="STEP 2: SELECT DIALOGUE TYPE"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsSceneSelected}" Value="True">
-                                                    <Setter Property="Text" Value="STEP 1: SELECT DIALOGUE TYPE"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </GroupBox.Header>
-                            <UniformGrid Columns="2">
-                                <ToggleButton IsChecked="{Binding GreetingSelected}" 
-                                              IsEnabled="{Binding ValidSpeaker}"
-                                              Content="Greeting" 
-                                              Style="{StaticResource DialogueTypeButton}"/>
-                                <ToggleButton IsChecked="{Binding FarewellSelected}" 
-                                              IsEnabled="{Binding ValidSpeaker}"
-                                              Content="Farewell" 
-                                              Style="{StaticResource DialogueTypeButton}"/>
-                                <ToggleButton IsChecked="{Binding IdleSelected}" 
-                                              IsEnabled="{Binding ValidSpeaker}"
-                                              Content="Idle" 
-                                              Style="{StaticResource DialogueTypeButton}"/>
-                                <ToggleButton IsChecked="{Binding DialogueSelected}" 
-                                              IsEnabled="{Binding ValidSpeaker}"
-                                              Content="Dialogue" 
-                                              Style="{StaticResource DialogueTypeButton}"/>
-                                <ToggleButton IsChecked="{Binding GenericSceneSelected}"
-                                              Content="Generic Scene" 
-                                              Style="{StaticResource DialogueTypeButton}"/>
-                                <ToggleButton IsChecked="{Binding QuestSceneSelected}"
-                                              Content="Quest Scene" 
-                                              Style="{StaticResource DialogueTypeButton}"/>
-                            </UniformGrid>
                         </GroupBox>
 
                         <!-- Scene Actors Card -->
