@@ -12,7 +12,6 @@ using DialogueImplementationTool.Dialogue.Speaker;
 using DialogueImplementationTool.Parser;
 using DialogueImplementationTool.Services;
 using DialogueImplementationTool.UI.Models;
-using DialogueImplementationTool.UI.Services;
 using Mutagen.Bethesda.Json;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
@@ -24,12 +23,11 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace DialogueImplementationTool.UI.ViewModels;
 
+using SceneSelections = Dictionary<string, Dictionary<string, AliasSelectionDto>>;
 using Conversation = List<GeneratedDialogue>;
-using FormKeyJsonConverter = Mutagen.Bethesda.Json.FormKeyJsonConverter;
 
 public sealed partial class IterableDialogueConfigVM : ViewModel {
     private readonly IDocumentIterator _documentParser;
-    private readonly IEnvironmentContext _environmentContext;
 
     public ISpeakerFavoritesSelection SpeakerFavoritesSelection { get; }
 
@@ -75,7 +73,7 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
         Scene Actors
     ====================================================*/
     [Reactive] public bool IsSceneSelected { get; set; }
-    [Reactive] public ObservableCollection<AliasSpeakerSelection> CurrentSceneSpeakers { get; set; } = [];
+    public ObservableCollection<AliasSpeakerSelection> CurrentSceneSpeakers { get; } = [];
 
     // Store scene speakers for each dialogue index
     private readonly Dictionary<int, List<AliasSpeakerSelection>> _sceneSpeakersPerIndex = new();
@@ -108,7 +106,6 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
         IDocumentIterator documentParser,
         AutomaticSpeakerSelection automaticSpeakerSelection,
         ISpeakerFavoritesSelection speakerFavoritesSelection) {
-        _environmentContext = context;
         SpeakerFavoritesSelection = speakerFavoritesSelection;
         _documentParser = documentParser;
         Index = _documentParser.Index;
@@ -315,7 +312,6 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
 
     public void SaveCurrentSceneSpeakers() {
         if (IsSceneSelected && CurrentSceneSpeakers.Count > 0) {
-
             // Validate that all speakers are assigned
             if (CurrentSceneSpeakers.Any(s => s.FormKey.IsNull)) {
                 Debug.WriteLine("[IterableDialogueConfigVM.SaveCurrentSceneSpeakers] WARNING: Some speakers are not assigned!");
@@ -334,13 +330,13 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
             var speakerNames = CurrentSceneSpeakers.Select(s => s.Name).OrderBy(x => x).ToList();
             var selectionsPath = GetSceneSelectionsPath();
 
-            Dictionary<string, Dictionary<string, AliasSelectionDto>> savedSelections;
+            SceneSelections savedSelections;
             if (File.Exists(selectionsPath)) {
                 var json = File.ReadAllText(selectionsPath);
-                savedSelections = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, AliasSelectionDto>>>(json, _serializerSettings)
-                                  ?? new Dictionary<string, Dictionary<string, AliasSelectionDto>>();
+                savedSelections = JsonConvert.DeserializeObject<SceneSelections>(json, _serializerSettings)
+                 ?? new SceneSelections();
             } else {
-                savedSelections = new Dictionary<string, Dictionary<string, AliasSelectionDto>>();
+                savedSelections = new SceneSelections();
             }
 
             var key = string.Join('|', speakerNames);
@@ -378,13 +374,13 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
                 var speakerNames = speakers.Select(s => s.Name).OrderBy(x => x).ToList();
                 var selectionsPath = GetSceneSelectionsPath();
 
-                Dictionary<string, Dictionary<string, AliasSelectionDto>> savedSelections;
+                SceneSelections savedSelections;
                 if (File.Exists(selectionsPath)) {
                     var json = File.ReadAllText(selectionsPath);
-                    savedSelections = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, AliasSelectionDto>>>(json, _serializerSettings)
-                                      ?? new Dictionary<string, Dictionary<string, AliasSelectionDto>>();
+                    savedSelections = JsonConvert.DeserializeObject<SceneSelections>(json, _serializerSettings)
+                                      ?? new SceneSelections();
                 } else {
-                    savedSelections = new Dictionary<string, Dictionary<string, AliasSelectionDto>>();
+                    savedSelections = new SceneSelections();
                 }
 
                 var key = string.Join('|', speakerNames);
@@ -416,7 +412,7 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
             if (!File.Exists(selectionsPath)) return false;
 
             var json = File.ReadAllText(selectionsPath);
-            var savedSelections = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, AliasSelectionDto>>>(json, _serializerSettings);
+            var savedSelections = JsonConvert.DeserializeObject<SceneSelections>(json, _serializerSettings);
             if (savedSelections == null) return false;
 
             var key = string.Join('|', speakerNames.OrderBy(x => x));
