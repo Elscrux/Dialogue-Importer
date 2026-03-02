@@ -227,8 +227,8 @@
         <KeyBinding Key="NumPad5" Command="{Binding SelectIndex}" CommandParameter="5"/>
         <KeyBinding Key="D6" Command="{Binding SelectIndex}" CommandParameter="6"/>
         <KeyBinding Key="NumPad6" Command="{Binding SelectIndex}" CommandParameter="6"/>
-        <KeyBinding Key="Left" Command="{Binding BacktrackMany}"/>
-        <KeyBinding Key="Right" Command="{Binding SkipMany}"/>
+        <KeyBinding Key="Left" Command="{Binding ToStart}"/>
+        <KeyBinding Key="Right" Command="{Binding ToEnd}"/>
     </Window.InputBindings>
 
     <Grid>
@@ -579,8 +579,8 @@
                                 Padding="10" 
                                 Margin="0,12,0,0">
                             <UniformGrid Rows="1" Columns="4">
-                                <Button Content="⏪ Skip Back" 
-                                        Command="{Binding BacktrackMany}"
+                                <Button Content="⏪ Start" 
+                                        Command="{Binding ToStart}"
                                         IsEnabled="{Binding IsNotFirstIndex}" 
                                         Style="{StaticResource NavButton}"/>
                                 <Button Content="◀ Previous" 
@@ -591,8 +591,8 @@
                                         Command="{Binding Next}"
                                         IsEnabled="{Binding IsNotLastIndex}" 
                                         Style="{StaticResource NavButton}"/>
-                                <Button Content="Skip Forward ⏩" 
-                                        Command="{Binding SkipMany}"
+                                <Button Content="End ⏩" 
+                                        Command="{Binding ToEnd}"
                                         IsEnabled="{Binding IsNotLastIndex}" 
                                         Style="{StaticResource NavButton}"/>
                             </UniformGrid>

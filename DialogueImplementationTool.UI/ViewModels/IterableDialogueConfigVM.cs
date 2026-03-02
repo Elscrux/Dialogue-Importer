@@ -83,10 +83,10 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
     public ICommand OpenDocument { get; }
     public ICommand ApplyAll { get; }
 
-    public ICommand BacktrackMany { get; }
+    public ICommand ToStart { get; }
     public ICommand Previous { get; }
     public ICommand Next { get; }
-    public ICommand SkipMany { get; }
+    public ICommand ToEnd { get; }
     public string Title { get; }
     [Reactive] public bool UseGetIsAliasRef { get; set; }
     [Reactive] public bool HasNpcSelected { get; set; }
@@ -198,9 +198,11 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
             }
         });
 
-        BacktrackMany = ReactiveCommand.Create(() => {
+        ToStart = ReactiveCommand.Create(() => {
             SaveCurrentSceneSpeakers();
-            _documentParser.BacktrackMany();
+            while (_documentParser.Index > 0) {
+                _documentParser.Previous();
+            }
             Index = _documentParser.Index;
             RefreshPreview(false);
         });
@@ -219,9 +221,11 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
             RefreshPreview(true);
         });
 
-        SkipMany = ReactiveCommand.Create(() => {
+        ToEnd = ReactiveCommand.Create(() => {
             SaveCurrentSceneSpeakers();
-            _documentParser.SkipMany();
+            while (_documentParser.Index < _documentParser.LastIndex) {
+                _documentParser.Next();
+            }
             Index = _documentParser.Index;
             RefreshPreview(true);
         });

@@ -20,9 +20,6 @@ public interface IDocumentIterator : IDocumentParser {
         if (Index < LastIndex) Index++;
     }
 
-    void SkipMany();
-    void BacktrackMany();
-
     string PreviewCurrent() {
         return Preview(Index);
     }
