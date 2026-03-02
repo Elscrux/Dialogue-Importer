@@ -61,7 +61,7 @@ public sealed class TestGenericSceneFactory {
 
         // Check
         _testConstants.Mod.Scenes.Should().HaveCount(2);
-        _testConstants.Mod.DialogTopics.Should().HaveCount(13); // 6 + 6 + 1 (shared dialogue)
+        _testConstants.Mod.DialogTopics.Should().HaveCount(15); // 7 + 7 + 1 (shared dialogue)
     }
 
     [Fact]
@@ -92,7 +92,7 @@ public sealed class TestGenericSceneFactory {
         genericSceneFactory.PreProcess(scene2.Topics);
 
         // Check - shared line link should be flattened, + 1 topic
-        scene1.Topics.Should().HaveCount(6);
-        scene2.Topics.Should().HaveCount(6);
+        scene1.Topics.Should().HaveCount(7);
+        scene2.Topics.Should().HaveCount(7);
     }
 }

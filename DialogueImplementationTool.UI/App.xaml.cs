@@ -74,7 +74,7 @@ public partial class App {
         builder.RegisterType<AutomaticSpeakerSelection>()
             .AsSelf();
 
-        builder.RegisterType<UISpeakerSelection>()
+        builder.RegisterType<SpeakerSelectionRepository>()
             .AsSelf()
             .As<ISpeakerSelection>();
 

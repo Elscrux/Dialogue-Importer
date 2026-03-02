@@ -54,14 +54,6 @@ public sealed class DocXDocumentParser
     [Reactive] public int Index { get; set; }
     public int LastIndex { get; }
 
-    public void BacktrackMany() {
-        (this as IDocumentIterator).Previous();
-    }
-
-    public void SkipMany() {
-        (this as IDocumentIterator).Next();
-    }
-
     public string Preview(int index) {
         return index < 0 || index >= _doc.Lists.Count
             ? string.Empty

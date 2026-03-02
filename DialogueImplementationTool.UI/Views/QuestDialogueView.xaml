@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="DialogueImplementationTool.UI.Views.QuestDialogueView"
+<UserControl x:Class="DialogueImplementationTool.UI.Views.QuestDialogueView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -10,51 +10,154 @@
              d:DataContext="{d:DesignInstance viewModels:QuestDialogueVM}"
              x:Name="Window"
              d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <!-- Skyrim Dark Color Palette -->
+        <SolidColorBrush x:Key="SkyrimDeepBlack" Color="#0D0D0F"/>
+        <SolidColorBrush x:Key="SkyrimDarkGray" Color="#1A1D23"/>
+        <SolidColorBrush x:Key="SkyrimMediumGray" Color="#252830"/>
+        <SolidColorBrush x:Key="SkyrimSlateGray" Color="#2F3541"/>
+        <SolidColorBrush x:Key="SkyrimCoolGray" Color="#3D4452"/>
+        <SolidColorBrush x:Key="SkyrimLightGray" Color="#5A6071"/>
+        <SolidColorBrush x:Key="SkyrimSilver" Color="#8A909F"/>
+        <SolidColorBrush x:Key="SkyrimPaleBlue" Color="#9EACC4"/>
+        <SolidColorBrush x:Key="SkyrimIceBlue" Color="#B8C5D6"/>
+        <SolidColorBrush x:Key="SkyrimAccentBlue" Color="#6B8CAE"/>
+        <SolidColorBrush x:Key="SkyrimDarkAccent" Color="#4A5F7A"/>
+
+        <!-- Action Button Style -->
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource SkyrimDarkAccent}"/>
+            <Setter Property="Foreground" Value="{StaticResource SkyrimIceBlue}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource SkyrimAccentBlue}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border" 
+                                Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="2"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource SkyrimCoolGray}"/>
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource SkyrimLightGray}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource SkyrimDarkGray}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Expander Style -->
+        <Style x:Key="SkyrimExpander" TargetType="Expander">
+            <Setter Property="Background" Value="{StaticResource SkyrimDarkGray}"/>
+            <Setter Property="Foreground" Value="{StaticResource SkyrimPaleBlue}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource SkyrimSlateGray}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontFamily" Value="Segoe UI, Arial"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="0,4"/>
+        </Style>
+
+        <!-- ListView Style -->
+        <Style x:Key="SkyrimListView" TargetType="ListView">
+            <Setter Property="Background" Value="{StaticResource SkyrimMediumGray}"/>
+            <Setter Property="Foreground" Value="{StaticResource SkyrimIceBlue}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource SkyrimSlateGray}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontFamily" Value="Segoe UI, Arial"/>
+            <Setter Property="Padding" Value="6"/>
+        </Style>
+    </UserControl.Resources>
+
     <Expander DockPanel.Dock="Top"
               IsExpanded="True"
-              Header="{Binding}">
+              Header="{Binding}"
+              Style="{StaticResource SkyrimExpander}">
         <Expander.HeaderTemplate>
             <DataTemplate>
                 <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
                     <TextBlock
                         Grid.Column="0"
-                        Text="{Binding Quest.EditorID}"/>
-                    
-                    <Button Click="Delete"
-                            Margin="5,0"
-                            HorizontalAlignment="Right">
+                        Text="{Binding Quest.EditorID}"
+                        Foreground="{StaticResource SkyrimIceBlue}"
+                        FontFamily="Segoe UI, Arial"
+                        FontSize="13"
+                        FontWeight="SemiBold"
+                        VerticalAlignment="Center"
+                        TextTrimming="CharacterEllipsis"
+                        Margin="0,0,8,0"/>
+
+                    <Button Grid.Column="1"
+                            Click="Delete"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            Padding="4"
+                            VerticalAlignment="Center"
+                            ToolTip="Delete quest">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Border" 
+                                        Background="{TemplateBinding Background}"
+                                        Padding="{TemplateBinding Padding}"
+                                        CornerRadius="2">
+                                    <ContentPresenter/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Border" Property="Background" Value="{StaticResource SkyrimMediumGray}"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
                         <iconPacks:PackIconBoxIcons
                             Kind="RegularTrash"
-                            Foreground="Red"
+                            Foreground="#E55"
+                            Width="16"
+                            Height="16"
                             VerticalAlignment="Center"/>
                     </Button>
                 </Grid>
             </DataTemplate>
         </Expander.HeaderTemplate>
 
-        <StackPanel>
-            <StackPanel Orientation="Horizontal">
+        <StackPanel Margin="8">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                 <Button
                     Content="+ File"
-                    FontSize="12"
-                    Margin="2,0"
-                    Padding="10, 5"
-                    Background="#574eb9"
+                    Style="{StaticResource ActionButton}"
                     Click="SelectFile_OnClick"/>
 
                 <Button
                     Content="+ Folder"
-                    FontSize="12"
-                    Margin="2,0"
-                    Padding="10, 5"
-                    Background="#574eb9"
-                    HorizontalAlignment="Left"
+                    Style="{StaticResource ActionButton}"
                     Click="SelectFolder_OnClick"/>
             </StackPanel>
 
             <ListView DockPanel.Dock="Top"
                       x:Name="DocumentListView"
-                      ItemsSource="{Binding Documents}">
+                      ItemsSource="{Binding Documents}"
+                      Style="{StaticResource SkyrimListView}">
                 <ListView.InputBindings>
                     <KeyBinding
                         Key="Delete"
