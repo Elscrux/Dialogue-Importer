@@ -330,22 +330,22 @@
                             </GroupBox.Header>
                             <UniformGrid Columns="2">
                                 <ToggleButton IsChecked="{Binding GreetingSelected}" 
-                                              Content="Greeting" 
+                                              Content="1. Greeting" 
                                               Style="{StaticResource DialogueTypeButton}"/>
                                 <ToggleButton IsChecked="{Binding FarewellSelected}" 
-                                              Content="Farewell" 
+                                              Content="2. Farewell" 
                                               Style="{StaticResource DialogueTypeButton}"/>
                                 <ToggleButton IsChecked="{Binding IdleSelected}" 
-                                              Content="Idle" 
+                                              Content="3. Idle" 
                                               Style="{StaticResource DialogueTypeButton}"/>
                                 <ToggleButton IsChecked="{Binding DialogueSelected}" 
-                                              Content="Dialogue" 
+                                              Content="4. Dialogue" 
                                               Style="{StaticResource DialogueTypeButton}"/>
                                 <ToggleButton IsChecked="{Binding GenericSceneSelected}"
-                                              Content="Generic Scene" 
+                                              Content="5. Generic Scene" 
                                               Style="{StaticResource DialogueTypeButton}"/>
                                 <ToggleButton IsChecked="{Binding QuestSceneSelected}"
-                                              Content="Quest Scene" 
+                                              Content="6. Quest Scene" 
                                               Style="{StaticResource DialogueTypeButton}"/>
                             </UniformGrid>
                         </GroupBox>
