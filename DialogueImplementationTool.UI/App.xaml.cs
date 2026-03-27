@@ -120,5 +120,10 @@ public partial class App {
 
         using var log = new StreamWriter(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "CrashLog.txt"), false);
         log.WriteLine(exception);
+
+        Console.WriteLine("The program crashed with the following exception:");
+        Console.WriteLine(exception);
+        Console.ReadLine();
+        Console.WriteLine("Press enter to exit.");
     }
 }
