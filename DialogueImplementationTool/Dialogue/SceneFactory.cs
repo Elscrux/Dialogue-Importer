@@ -165,6 +165,7 @@ public abstract class SceneFactory(IDialogueContext context) : BaseDialogueFacto
         var speakerNames = topics
             .SelectMany(topic => topic.TopicInfos)
             .Select(topicInfo => topicInfo.Prompt.FullText)
+            .Select(ISpeaker.GetSpeakerName)
             .Distinct()
             .ToList();
 
