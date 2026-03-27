@@ -227,8 +227,10 @@
         <KeyBinding Key="NumPad5" Command="{Binding SelectIndex}" CommandParameter="5"/>
         <KeyBinding Key="D6" Command="{Binding SelectIndex}" CommandParameter="6"/>
         <KeyBinding Key="NumPad6" Command="{Binding SelectIndex}" CommandParameter="6"/>
-        <KeyBinding Key="Left" Command="{Binding ToStart}"/>
-        <KeyBinding Key="Right" Command="{Binding ToEnd}"/>
+        <KeyBinding Key="Left" Command="{Binding Previous}"/>
+        <KeyBinding Key="Right" Command="{Binding Next}"/>
+        <KeyBinding Key="PageUp" Command="{Binding ToStart}"/>
+        <KeyBinding Key="PageDown" Command="{Binding ToEnd}"/>
     </Window.InputBindings>
 
     <Grid>
