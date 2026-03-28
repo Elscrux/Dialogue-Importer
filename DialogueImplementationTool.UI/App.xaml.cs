@@ -76,6 +76,7 @@ public partial class App {
 
         builder.RegisterType<SpeakerSelectionRepository>()
             .AsSelf()
+            .As<ISpeakerSelectionRepository>()
             .As<ISpeakerSelection>();
 
         builder.RegisterType<InjectedPrefixProvider>()
