@@ -8,7 +8,6 @@
         xmlns:dialogue="clr-namespace:DialogueImplementationTool.Dialogue;assembly=DialogueImplementationTool"
         xmlns:converters="clr-namespace:DialogueImplementationTool.UI.Converters"
         xmlns:dd="urn:gong-wpf-dragdrop"
-        xmlns:views="clr-namespace:DialogueImplementationTool.UI.Views"
         mc:Ignorable="d"
         x:Name="DialogueWindow"
         Title="{Binding Title, StringFormat='Dialogue Implementation Tool - {0}'}"

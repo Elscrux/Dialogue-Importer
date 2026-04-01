@@ -15,7 +15,6 @@ namespace DialogueImplementationTool.UI.ViewModels;
 public sealed class QuestDialogueVM : ViewModel {
     private readonly ILifetimeScope _lifetimeScope;
     private readonly Dictionary<string, Func<string, IDocumentParser>> _documentParsers;
-    private readonly Func<IDocumentParser, IDialogueContext, Action<DocumentVM>, DocumentVM> _documentVMFactory;
 
     public IQuest Quest { get; }
     public List<string> Extensions { get; }
@@ -30,13 +29,11 @@ public sealed class QuestDialogueVM : ViewModel {
         IQuest quest,
         ILifetimeScope lifetimeScope,
         IEnvironmentContext environmentContext,
-        Func<IDocumentParser, IDialogueContext, Action<DocumentVM>, DocumentVM> documentVMFactory,
         Func<string, DocXDocumentParser> docXIteratorFactory,
         Func<string, IDialogueContext, CsvDocumentParser> csvIteratorFactory) {
         _lifetimeScope = lifetimeScope;
         Quest = quest;
         EnvironmentContext = environmentContext;
-        _documentVMFactory = documentVMFactory;
         _documentParsers = new Dictionary<string, Func<string, IDocumentParser>> {
             { ".docx", docXIteratorFactory },
             { ".csv", path => csvIteratorFactory(path, GetContext(path)) },
@@ -86,9 +83,15 @@ public sealed class QuestDialogueVM : ViewModel {
     }
 
     public void AddDocument(string documentFilePath) {
-        var documentVM = _documentVMFactory(
+        var nestedScope = GetContainer(documentFilePath);
+
+        var context = nestedScope.Resolve<SkyrimDialogueContext>();
+
+        var documentVMFactory = nestedScope.Resolve<Func<IDocumentParser, IDialogueContext, Action<DocumentVM>, DocumentVM>>();
+
+        var documentVM = documentVMFactory(
             GetDocumentParser(documentFilePath),
-            GetContext(documentFilePath),
+            context,
             doc => Documents.Remove(doc));
 
         Documents.Add(documentVM);
