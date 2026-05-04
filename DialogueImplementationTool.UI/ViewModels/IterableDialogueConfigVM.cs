@@ -404,24 +404,27 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
     // Minimal processor that only includes the SceneResponseProcessor
     private sealed class MinimalSceneProcessor : IDialogueProcessor {
         private readonly SceneResponseProcessor _sceneResponseProcessor = new();
+        private readonly ResponseNoteExtractor _responseNoteExtractor = new();
 
         public DialogueResponse BuildResponse(IList<FormattedText> textSnippets) {
             var response = new DialogueResponse {
                 Response = string.Join(string.Empty, textSnippets.Select(x => x.Text)),
             };
             _sceneResponseProcessor.Process(response, textSnippets);
+            _responseNoteExtractor.Process(response, textSnippets);
             return response;
         }
 
         public void Process(DialogueResponse response, IList<FormattedText> textSnippets) {
             _sceneResponseProcessor.Process(response, textSnippets);
+            _responseNoteExtractor.Process(response, textSnippets);
         }
 
-        public void Process(GenericDialogue genericDialogue, DialogueTopicInfo topicInfo) { }
-        public void Process(DialogueTopicInfo topicInfo) { }
-        public void Process(DialogueTopic topic) { }
-        public void Process(List<DialogueTopic> topics) { }
-        public void Process(Conversation conversation) { }
+        public void Process(GenericDialogue genericDialogue, DialogueTopicInfo topicInfo) {}
+        public void Process(DialogueTopicInfo topicInfo) {}
+        public void Process(DialogueTopic topic) {}
+        public void Process(List<DialogueTopic> topics) {}
+        public void Process(Conversation conversation) {}
     }
 
     private void RefreshPreview() {
@@ -452,7 +455,8 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
         }
     }
 
-    [GeneratedRegex(@"\[[^\]]*\]|_s|'s|\([^\)]*\)|'s|standard dialogue|dialogue|dialog| - |_|\d+|\.|,", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"\[[^\]]*\]|_s|'s|\([^\)]*\)|'s|standard dialogue|dialogue|dialog| - |_|\d+|\.|,",
+        RegexOptions.IgnoreCase)]
     private static partial Regex UnnecessaryDocumentNameParts { get; }
 
     private void TrySetSpeaker(AutomaticSpeakerSelection automaticSpeakerSelection) {
