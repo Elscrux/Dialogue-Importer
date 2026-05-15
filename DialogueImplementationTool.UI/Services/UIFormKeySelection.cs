@@ -16,25 +16,47 @@ public sealed class UIFormKeySelection(
     private readonly Lock _lock = new();
     private readonly HashSet<string> _openedIdentifiers = [];
 
-    public FormKey GetFormKey<TMajor>(string title, string identifier, FormKey defaultFormKey)
+    public FormKey GetFormKey<TMajor>(string title, string identifier, FormKey defaultFormKey, bool canBeNull = false)
         where TMajor : IMajorRecordQueryableGetter {
         // Only show one form key selection window at a time
         lock (_lock) {
-            var formKey = GetFormKeyImpl<TMajor>(title, identifier, defaultFormKey);
+            var formKey = GetFormKeyImpl(title, identifier, defaultFormKey, canBeNull, typeof(TMajor));
             formKeyCache.Set<TMajor>(identifier, formKey);
             return formKey;
         }
     }
 
-    private FormKey GetFormKeyImpl<TMajor>(string title, string identifier, FormKey defaultFormKey)
-        where TMajor : IMajorRecordQueryableGetter {
-        if (formKeyCache.TryGetFormKey<TMajor>(identifier, out var formKey)) {
+    public FormKey GetFormKey(
+        string title,
+        string identifier,
+        FormKey defaultFormKey,
+        bool canBeNull = false,
+        params IReadOnlyList<Type> recordTypes) {
+        lock (_lock) {
+            var formKey = GetFormKeyImpl(title, identifier, defaultFormKey, canBeNull, recordTypes);
+            foreach (var recordType in recordTypes) {
+                if (environmentContext.LinkCache.TryResolve(formKey, recordType, out _)) {
+                    formKeyCache.Set(identifier, formKey, recordType);
+                    break;
+                }
+            }
+            return formKey;
+        }
+    }
+
+    private FormKey GetFormKeyImpl(
+        string title,
+        string identifier,
+        FormKey defaultFormKey,
+        bool canBeNone,
+        params IReadOnlyList<Type> recordTypes) {
+        if (formKeyCache.TryGetFormKey(identifier, out var formKey, recordTypes)) {
             if (CanSkipPrompt()) return formKey;
 
             defaultFormKey = formKey;
         }
 
-        if (typeof(INpcGetter).IsAssignableFrom(typeof(TMajor))) {
+        if (recordTypes.Any(recordType => typeof(INpcGetter).IsAssignableFrom(recordType))) {
             var closestSpeakers = automaticSpeakerSelection
                 .GetSpeakers<NpcSpeaker>([identifier], false)
                 .ToArray();
@@ -55,6 +77,8 @@ public sealed class UIFormKeySelection(
             _openedIdentifiers.Add(identifier);
 
             while (formKeySelection.FormKey == FormKey.Null) {
+                if (canBeNone) return FormKey.Null;
+
                 MessageBox.Show("You must select a form key");
                 formKeySelection = GetSelection();
                 formKeySelection.ShowDialog();
@@ -62,7 +86,7 @@ public sealed class UIFormKeySelection(
 
             return formKeySelection.FormKey;
 
-            FormKeySelectionWindow GetSelection() => new(title, environmentContext.LinkCache, [typeof(TMajor)], defaultFormKey);
+            FormKeySelectionWindow GetSelection() => new(title, environmentContext.LinkCache, recordTypes, defaultFormKey);
         });
 
         return formKey;

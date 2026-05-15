@@ -78,9 +78,32 @@ public partial class FormKeyCache {
         return false;
     }
 
+    public bool TryGetFormKey(string identifier, out FormKey formKey, params IReadOnlyList<Type> recordTypes) {
+        foreach (var recordType in recordTypes) {
+            var fullName = recordType.FullName;
+            if (fullName != null
+             && _cache.TryGetValue(fullName, out var dict)
+             && dict.TryGetValue(identifier, out formKey)) {
+                return true;
+            }
+        }
+
+        formKey = FormKey.Null;
+        return false;
+    }
+
     public void Set<TMajor>(string title, FormKey formKey)
         where TMajor : IMajorRecordQueryableGetter {
         var fullName = typeof(TMajor).FullName;
+        if (fullName is null) throw new InvalidOperationException("Type.FullName is null");
+
+        var dict = _cache.GetOrAdd(fullName);
+        dict[title] = formKey;
+        SaveSelection();
+    }
+
+    public void Set(string title, FormKey formKey, Type recordType) {
+        var fullName = recordType.FullName;
         if (fullName is null) throw new InvalidOperationException("Type.FullName is null");
 
         var dict = _cache.GetOrAdd(fullName);

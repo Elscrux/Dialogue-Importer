@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 namespace DialogueImplementationTool.Services;
@@ -11,6 +12,9 @@ public sealed class InjectedFormKeySelection : IFormKeySelection {
         _injectedEntries = injectedEntries;
     }
 
-    public FormKey GetFormKey<TMajor>(string title, string identifier, FormKey defaultFormKey) 
+    public FormKey GetFormKey<TMajor>(string title, string identifier, FormKey defaultFormKey, bool canBeNull = false) 
         where TMajor : IMajorRecordQueryableGetter => _injectedEntries.GetValueOrDefault(identifier, defaultFormKey);
+    public FormKey GetFormKey(string title, string identifier, FormKey defaultFormKey, bool canBeNull = false, params IReadOnlyList<Type> recordTypes) {
+        return _injectedEntries.GetValueOrDefault(identifier, defaultFormKey);
+    }
 }

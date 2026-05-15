@@ -230,6 +230,49 @@ public sealed class SkyrimDialogueContext(
         return context.GetOrAddAsOverride(environmentContext.Mod);
     }
 
+    public IMajorRecord? SelectRecordCanBeNull(string prompt, params IReadOnlyList<Type> recordTypes) {
+        var formKey = formKeySelection.GetFormKey($"Select: {prompt}", prompt, FormKey.Null, true, recordTypes);
+        if (formKey.IsNull) return null;
+
+        foreach (var recordType in recordTypes) {
+            if (!environmentContext.LinkCache.TryResolve(formKey, recordType, out _)) continue;
+            if (!environmentContext.LinkCache.TryResolveContext(formKey, recordType, out var context)) continue;
+
+            return context.GetOrAddAsOverride(environmentContext.Mod);
+        }
+
+        throw new InvalidOperationException($"Couldn't resolve selected form key {formKey} to any of the provided record types {string.Join(", ", recordTypes.Select(t => t.Name))}");
+    }
+
+    public TMajor? SelectRecordCanBeNull<TMajor, TMajorGetter>(string prompt)
+        where TMajor : class, TMajorGetter, IMajorRecordQueryable
+        where TMajorGetter : class, IMajorRecordQueryableGetter {
+        return SelectRecordCanBeNull<TMajor, TMajorGetter>(prompt, FormKey.Null);
+    }
+
+    public TMajor? SelectRecordCanBeNull<TMajor, TMajorGetter>(string prompt, FormKey defaultFormKey)
+        where TMajor : class, TMajorGetter, IMajorRecordQueryable
+        where TMajorGetter : class, IMajorRecordQueryableGetter {
+        var formKey = formKeySelection.GetFormKey<TMajorGetter>($"Select: {prompt}", prompt, defaultFormKey, true);
+        if (formKey.IsNull) return null;
+
+        var context = environmentContext.LinkCache.ResolveContext<TMajor, TMajorGetter>(formKey);
+        return context.GetOrAddAsOverride(environmentContext.Mod);
+    }
+
+    public IMajorRecord SelectRecord(string prompt, params IReadOnlyList<Type> recordTypes) {
+        var formKey = formKeySelection.GetFormKey($"Select: {prompt}", prompt, FormKey.Null, false, recordTypes);
+
+        foreach (var recordType in recordTypes) {
+            if (!environmentContext.LinkCache.TryResolve(formKey, recordType, out _)) continue;
+            if (!environmentContext.LinkCache.TryResolveContext(formKey, recordType, out var context)) continue;
+
+            return context.GetOrAddAsOverride(environmentContext.Mod);
+        }
+
+        throw new InvalidOperationException($"Couldn't resolve selected form key {formKey} to any of the provided record types {string.Join(", ", recordTypes.Select(t => t.Name))}");
+    }
+
     public TMajor SelectRecord<TMajor, TMajorGetter>(string prompt)
         where TMajor : class, TMajorGetter, IMajorRecordQueryable
         where TMajorGetter : class, IMajorRecordQueryableGetter {

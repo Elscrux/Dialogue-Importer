@@ -32,6 +32,14 @@ public interface IDialogueContext {
     IFormLink<IQuestGetter> GetFavorDialogueQuest();
     DialogBranch? GetServiceBranch(ServiceType serviceType, FormKey defaultBranchFormKey);
     public Condition? GetSpeakerCondition(ISpeaker speaker);
+    IMajorRecord? SelectRecordCanBeNull(string prompt, params IReadOnlyList<Type> recordTypes);
+    TMajor? SelectRecordCanBeNull<TMajor, TMajorGetter>(string prompt)
+        where TMajor : class, TMajorGetter, IMajorRecordQueryable
+        where TMajorGetter : class, IMajorRecordQueryableGetter;
+    TMajor? SelectRecordCanBeNull<TMajor, TMajorGetter>(string prompt, FormKey defaultFormKey)
+        where TMajor : class, TMajorGetter, IMajorRecordQueryable
+        where TMajorGetter : class, IMajorRecordQueryableGetter;
+    IMajorRecord SelectRecord(string prompt, params IReadOnlyList<Type> recordTypes);
     TMajor SelectRecord<TMajor, TMajorGetter>(string prompt)
         where TMajor : class, TMajorGetter, IMajorRecordQueryable
         where TMajorGetter : class, IMajorRecordQueryableGetter;
