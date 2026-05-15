@@ -95,6 +95,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new BleedOutChecker(),
             new FightingChecker(_context),
             new QuestStageChecker(_context),
+            new LocationChecker(_context),
         ];
 
         TopicProcessors = [
