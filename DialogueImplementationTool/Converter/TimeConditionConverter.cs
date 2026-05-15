@@ -8,7 +8,7 @@ public static partial class TimeConditionConverter {
     [StringSyntax(StringSyntaxAttribute.Regex)]
     private const string HourPattern = @"\b(\d{1,2})(?::(\d{2}))?\b";
 
-    [GeneratedRegex(@$"{HourPattern}[^\d]*{HourPattern}")]
+    [GeneratedRegex(@$"{HourPattern}[^\d]*{HourPattern}$")]
     private static partial Regex TimeRegex { get; }
 
     public static IEnumerable<Condition> Convert(string time) {
