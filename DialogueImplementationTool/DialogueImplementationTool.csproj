@@ -452,6 +452,9 @@
       <Compile Update="Services\CachedEmotionClassifier.cs">
         <DependentUpon>IEmotionClassifier.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\Processor\FightingChecker.cs">
+        <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
+      </Compile>
       <Compile Update="Dialogue\Processor\BleedOutChecker.cs">
         <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>

@@ -93,6 +93,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new AutoPassChecker(new SkillCheckUtils(_context)),
             new AutoFailChecker(),
             new BleedOutChecker(),
+            new FightingChecker(_context),
         ];
 
         TopicProcessors = [
