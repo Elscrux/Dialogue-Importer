@@ -15,7 +15,9 @@ public sealed partial class TalkedToChecker(IDialogueContext context) : IDialogu
                 var match = TalkedToRegex.Match(note.Text);
                 if (!match.Success) continue;
 
-                var npc = context.SelectRecord<Npc, INpcGetter>(match.Groups[1].Value);
+                var npc = context.SelectRecordCanBeNull<Npc, INpcGetter>(match.Groups[1].Value);
+                if (npc is null) continue;
+
                 var placedNpc = context.LinkCache.PriorityOrder.WinningOverrides<IPlacedNpcGetter>()
                     .FirstOrDefault(placedNpc => placedNpc.Base.FormKey == npc.FormKey);
                 if (placedNpc == null) continue;
