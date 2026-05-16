@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using DialogueImplementationTool.Dialogue.Model;
+using DialogueImplementationTool.Extension;
 using Mutagen.Bethesda.FormKeys.SkyrimSE;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueImplementationTool.Dialogue.Processor;
@@ -15,7 +16,7 @@ public sealed partial class DispositionChecker : IDialogueTopicInfoProcessor {
         bool CheckNote(Note note) {
             var match = DispositionRegex.Match(note.Text);
             if (match.Success) {
-                var compareOperator = CompareOperatorUtils.GetCompareOperator(match.Groups[1].Value);
+                var compareOperator = CompareOperatorExtension.GetCompareOperator(match.Groups[1].Value);
                 var value = int.Parse(match.Groups[2].Value);
                 topicInfo.ExtraConditions.Add(new ConditionFloat {
                     Data = new GetRelationshipRankConditionData {
@@ -65,7 +66,7 @@ public sealed partial class DispositionChecker : IDialogueTopicInfoProcessor {
         }
     }
 
-    [GeneratedRegex($"disposition {CompareOperatorUtils.CompareOperatorRegex} (\\d+)", RegexOptions.IgnoreCase)]
+    [GeneratedRegex($"disposition {CompareOperatorExtension.CompareOperatorRegex} (\\d+)", RegexOptions.IgnoreCase)]
     private static partial Regex DispositionRegex { get; }
 
     [GeneratedRegex("disposition positive|positive disposition", RegexOptions.IgnoreCase)]
