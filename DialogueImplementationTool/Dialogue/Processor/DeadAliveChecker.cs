@@ -82,32 +82,11 @@ public sealed partial class DeadAliveChecker(IDialogueContext context) : IDialog
 
             if (conditionsPerResponse.All(r => r.conditions.Count == 0)) continue;
 
-            var currentTopicGroup = 0;
-            var currentTopicInfoGroup = 0;
-            var lastAliveState = conditionsPerResponse[0].isAlive;
-            List<DialogueTopicInfo.GroupAssignment> groupAssignments =
-                [new(currentTopicGroup, currentTopicInfoGroup, conditionsPerResponse[0].conditions, [])];
-            for (var i = 1; i < conditionsPerResponse.Length; i++) {
-                var (currentAliveState, conditions) = conditionsPerResponse[i];
-
-                if (lastAliveState.HasValue != currentAliveState.HasValue) {
-                    // Nullability of last and current are different - must be new topic group
-                    currentTopicGroup++;
-                    currentTopicInfoGroup = 0;
-                } else if (currentAliveState != lastAliveState) {
-                    // Last and current are both not null and different - must be alternate topic infos in the same topic
-                    currentTopicInfoGroup++;
-
-                    // Don't use conditions - this will just be the fallback of the first so no conditions needed
-                    conditions = [];
-                }
-
-                groupAssignments.Add(
-                    new DialogueTopicInfo.GroupAssignment(currentTopicGroup, currentTopicInfoGroup, conditions, []));
-
-                lastAliveState = currentAliveState;
-            }
-
+            var groupAssignments = DialogueTopicInfo.Build(
+                conditionsPerResponse,
+                response => response.isAlive,
+                response => response.conditions,
+                _ => []);
             topicInfo.SplitOffDialogueGroups(groupAssignments, topic);
         }
 

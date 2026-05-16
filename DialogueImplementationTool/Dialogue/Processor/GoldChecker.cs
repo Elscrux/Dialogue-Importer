@@ -143,40 +143,11 @@ public sealed partial class GoldChecker : IDialogueTopicProcessor {
                 continue;
             }
 
-            var currentTopicGroup = 0;
-            var currentTopicInfoGroup = 0;
-            var lastSuccessState = conditionsPerResponse[0].isSuccess;
-            List<DialogueTopicInfo.GroupAssignment> groupAssignments = [
-                new(currentTopicGroup,
-                    currentTopicInfoGroup,
-                    conditionsPerResponse[0].conditions,
-                    conditionsPerResponse[0].scripts)
-            ];
-            for (var i = 1; i < conditionsPerResponse.Length; i++) {
-                var (currentSuccessState, conditions, scripts) = conditionsPerResponse[i];
-                var uniqueConditions = new List<Condition>();
-                foreach (var condition in conditions.Where(c => !uniqueConditions.Any(uc => AreConditionsEquivalent(uc, c)))) {
-                    uniqueConditions.Add(condition);
-                }
-
-                if (lastSuccessState.HasValue != currentSuccessState.HasValue) {
-                    // Nullability of last and current are different - must be new topic group
-                    currentTopicGroup++;
-                    currentTopicInfoGroup = 0;
-                } else if (currentSuccessState != lastSuccessState) {
-                    // Last and current are both not null and different - must be alternate topic infos in the same topic
-                    currentTopicInfoGroup++;
-
-                    // Don't use conditions - this will just be the fallback of the first so no conditions needed
-                    uniqueConditions = [];
-                }
-
-                groupAssignments.Add(
-                    new DialogueTopicInfo.GroupAssignment(currentTopicGroup, currentTopicInfoGroup, uniqueConditions, scripts));
-
-                lastSuccessState = currentSuccessState;
-            }
-
+            var groupAssignments = DialogueTopicInfo.Build(
+                conditionsPerResponse,
+                response => response.isSuccess,
+                response => GetUniqueConditions(response.conditions),
+                response => response.scripts);
             topicInfo.SplitOffDialogueGroups(groupAssignments, topic);
         }
 
@@ -188,6 +159,17 @@ public sealed partial class GoldChecker : IDialogueTopicProcessor {
                 CompareOperator = CompareOperatorExtension.GetCompareOperator(match.Groups["compare"].Value),
                 ComparisonValue = int.Parse(match.Groups["amount"].Value, CultureInfo.InvariantCulture),
             };
+        }
+
+        List<Condition> GetUniqueConditions(IEnumerable<Condition> conditions) {
+            var uniqueConditions = new List<Condition>();
+            foreach (var condition in conditions) {
+                if (uniqueConditions.Any(uc => AreConditionsEquivalent(uc, condition))) continue;
+
+                uniqueConditions.Add(condition);
+            }
+
+            return uniqueConditions;
         }
 
         bool AreConditionsEquivalent(Condition a, Condition b) {

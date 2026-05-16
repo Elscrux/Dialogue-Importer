@@ -236,6 +236,51 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
         IReadOnlyList<Condition> ExtraConditions,
         IReadOnlyList<DialogueScript> Scripts);
 
+    public static List<GroupAssignment> Build<T>(
+        IReadOnlyList<T> responseData,
+        Func<T, bool?> stateSelector,
+        Func<T, IReadOnlyList<Condition>> conditionsSelector,
+        Func<T, IReadOnlyList<DialogueScript>> scriptsSelector) {
+        var groupAssignments = new List<GroupAssignment>();
+        if (responseData.Count == 0) return groupAssignments;
+
+        // Start with first response data
+        var currentTopicGroup = 0;
+        var currentTopicInfoGroup = 0;
+        var lastState = stateSelector(responseData[0]);
+        groupAssignments.Add(new GroupAssignment(
+            currentTopicGroup,
+            currentTopicInfoGroup,
+            conditionsSelector(responseData[0]),
+            scriptsSelector(responseData[0])));
+
+        // Integrate further response data into the groups
+        for (var i = 1; i < responseData.Count; i++) {
+            var currentState = stateSelector(responseData[i]);
+            var conditions = conditionsSelector(responseData[i]);
+            var scripts = scriptsSelector(responseData[i]);
+
+            if (lastState.HasValue != currentState.HasValue) {
+                currentTopicGroup++;
+                currentTopicInfoGroup = 0;
+            } else if (currentState != lastState) {
+                currentTopicInfoGroup++;
+                conditions = [];
+                scripts = [];
+            }
+
+            groupAssignments.Add(new GroupAssignment(
+                currentTopicGroup,
+                currentTopicInfoGroup,
+                conditions,
+                scripts));
+
+            lastState = currentState;
+        }
+
+        return groupAssignments;
+    }
+
     /// <summary>
     /// Splits off dialogue in a topic info based on group assignments.
     /// - A [TopicGroup: 0, TopicInfoGroup: 0]
