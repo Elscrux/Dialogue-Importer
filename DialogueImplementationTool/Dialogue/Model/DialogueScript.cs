@@ -8,7 +8,7 @@ namespace DialogueImplementationTool.Dialogue.Model;
 public sealed record ScriptPropertyName(ScriptProperty ScriptProperty, string ScriptName);
 
 public sealed class DialogueScript : IEquatable<DialogueScript> {
-    public DialogueScript() { }
+    public DialogueScript() {}
 
     public DialogueScript(DialogueScript otherScript) {
         StartScriptLines = otherScript.StartScriptLines.ToList();
@@ -26,7 +26,21 @@ public sealed class DialogueScript : IEquatable<DialogueScript> {
 
     public void AddEndScriptLines(DialogueScript otherScript) {
         EndScriptLines.AddRange(otherScript.EndScriptLines);
-        Properties.AddRange(otherScript.Properties.Where(p => otherScript.EndScriptLines.Any(l => l.Contains(p.ScriptProperty.Name))));
+        Properties.AddRange(otherScript.Properties
+            .Where(p => otherScript.EndScriptLines.Any(l => l.Contains(p.ScriptProperty.Name)))
+            .Where(p => Properties.All(existing => existing.ScriptProperty.Name != p.ScriptProperty.Name)));
+    }
+
+    public void SetTo(IReadOnlyList<DialogueScript> scripts) {
+        if (scripts.Count == 0) return;
+
+        Properties.SetTo(scripts[0].Properties);
+        StartScriptLines.SetTo(scripts[0].StartScriptLines);
+        EndScriptLines.SetTo(scripts[0].EndScriptLines);
+
+        for (var i = 1; i < scripts.Count; i++) {
+            AddEndScriptLines(scripts[i]);
+        }
     }
 
     public void ClearUnusedProperties() {

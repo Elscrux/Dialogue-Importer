@@ -86,7 +86,7 @@ public sealed partial class DeadAliveChecker(IDialogueContext context) : IDialog
             var currentTopicInfoGroup = 0;
             var lastAliveState = conditionsPerResponse[0].isAlive;
             List<DialogueTopicInfo.GroupAssignment> groupAssignments =
-                [new(currentTopicGroup, currentTopicInfoGroup, conditionsPerResponse[0].conditions)];
+                [new(currentTopicGroup, currentTopicInfoGroup, conditionsPerResponse[0].conditions, [])];
             for (var i = 1; i < conditionsPerResponse.Length; i++) {
                 var (currentAliveState, conditions) = conditionsPerResponse[i];
 
@@ -103,7 +103,7 @@ public sealed partial class DeadAliveChecker(IDialogueContext context) : IDialog
                 }
 
                 groupAssignments.Add(
-                    new DialogueTopicInfo.GroupAssignment(currentTopicGroup, currentTopicInfoGroup, conditions));
+                    new DialogueTopicInfo.GroupAssignment(currentTopicGroup, currentTopicInfoGroup, conditions, []));
 
                 lastAliveState = currentAliveState;
             }

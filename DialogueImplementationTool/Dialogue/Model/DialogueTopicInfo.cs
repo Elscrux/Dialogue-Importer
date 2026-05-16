@@ -230,7 +230,11 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
         }
     }
 
-    public record GroupAssignment(int TopicGroup, int TopicInfoGroup, IReadOnlyList<Condition> ExtraConditions);
+    public record GroupAssignment(
+        int TopicGroup,
+        int TopicInfoGroup,
+        IReadOnlyList<Condition> ExtraConditions,
+        IReadOnlyList<DialogueScript> Scripts);
 
     /// <summary>
     /// Splits off dialogue in a topic info based on group assignments.
@@ -250,7 +254,10 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
         if (groupAssignments.Count != _responses.Count)
             throw new ArgumentException("Group assignments must match the number of responses");
 
-        var topics = new List<List<(List<DialogueResponse> Responses, HashSet<Condition> ExtraConditions)>>();
+        var topics =
+            new List<List<(List<DialogueResponse> Responses,
+                HashSet<Condition> ExtraConditions,
+                List<DialogueScript> Scripts)>>();
         for (var i = 0; i < groupAssignments.Count; i++) {
             var groupAssignment = groupAssignments[i];
             var response = _responses[i];
@@ -260,12 +267,13 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
             var topicInfoGroup = topics[groupAssignment.TopicGroup];
 
             // Get response group
-            if (topicInfoGroup.Count <= groupAssignment.TopicInfoGroup) topicInfoGroup.Add(([], []));
+            if (topicInfoGroup.Count <= groupAssignment.TopicInfoGroup) topicInfoGroup.Add(([], [], []));
             var responseGroup = topicInfoGroup[groupAssignment.TopicInfoGroup];
 
             // Add response and extra conditions
             responseGroup.Responses.Add(response);
             responseGroup.ExtraConditions.Add(groupAssignment.ExtraConditions);
+            responseGroup.Scripts.Add(groupAssignment.Scripts);
         }
 
         var currentLinks = Links.ToList();
@@ -284,11 +292,12 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
 
             // Add topic infos to topic
             for (var j = 0; j < topicInfos.Count; j++) {
-                var (responses, extraConditions) = topicInfos[j];
+                var (responses, extraConditions, scripts) = topicInfos[j];
                 DialogueTopicInfo topicInfo;
                 if (i == 0) {
                     topicInfo = CopyWith(responses);
                     topicInfo.ExtraConditions.Add(extraConditions);
+                    topicInfo.Script.SetTo(scripts);
                     topicInfo.Links.SetTo(currentLinks);
 
                     // Insert to make sure it stays in the same order the owning topic had before
@@ -301,6 +310,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
                         Links = currentLinks.ToList(),
                     };
 
+                    topicInfo.Script.SetTo(scripts);
                     topic.TopicInfos.Add(topicInfo);
                 }
 
