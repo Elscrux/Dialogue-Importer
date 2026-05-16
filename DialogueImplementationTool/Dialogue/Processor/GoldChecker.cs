@@ -143,7 +143,7 @@ public sealed partial class GoldChecker : IDialogueTopicProcessor {
                 continue;
             }
 
-            var groupAssignments = DialogueTopicInfo.Build(
+            var groupAssignments = DialogueTopicInfo.BuildGroupAssignments(
                 conditionsPerResponse,
                 response => response.isSuccess,
                 response => GetUniqueConditions(response.conditions),

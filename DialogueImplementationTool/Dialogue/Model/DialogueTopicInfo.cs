@@ -236,7 +236,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
         IReadOnlyList<Condition> ExtraConditions,
         IReadOnlyList<DialogueScript> Scripts);
 
-    public static List<GroupAssignment> Build<T>(
+    public static List<GroupAssignment> BuildGroupAssignments<T>(
         IReadOnlyList<T> responseData,
         Func<T, bool?> stateSelector,
         Func<T, IReadOnlyList<Condition>> conditionsSelector,

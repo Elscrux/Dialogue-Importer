@@ -82,7 +82,7 @@ public sealed partial class DeadAliveChecker(IDialogueContext context) : IDialog
 
             if (conditionsPerResponse.All(r => r.conditions.Count == 0)) continue;
 
-            var groupAssignments = DialogueTopicInfo.Build(
+            var groupAssignments = DialogueTopicInfo.BuildGroupAssignments(
                 conditionsPerResponse,
                 response => response.isAlive,
                 response => response.conditions,
