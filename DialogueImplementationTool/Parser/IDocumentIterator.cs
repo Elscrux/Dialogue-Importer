@@ -43,7 +43,7 @@ public interface IDocumentIterator : IDocumentParser {
                 DialogueType.Dialogue
                     when this is IBranchingDialogueParser branchingDialogueParser =>
                     branchingDialogueParser.ParseBranchingDialogue(factorySpecificProcessor, index),
-                DialogueType.Greeting or DialogueType.Farewell or DialogueType.Idle
+                DialogueType.Greeting or DialogueType.Farewell or DialogueType.Idle or DialogueType.CommentScene
                     when this is IOneLinerParser oneLinerParser => oneLinerParser.ParseOneLiner(factorySpecificProcessor, index),
                 DialogueType.GenericScene or DialogueType.QuestScene
                     when this is ISceneParser sceneParser => sceneParser.ParseScene(factorySpecificProcessor, index),

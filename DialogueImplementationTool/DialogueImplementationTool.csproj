@@ -461,6 +461,9 @@
       <Compile Update="Dialogue\Processor\BleedOutChecker.cs">
         <DependentUpon>IDialogueTopicInfoProcessor.cs</DependentUpon>
       </Compile>
+      <Compile Update="Dialogue\CommentSceneFactory.cs">
+        <DependentUpon>OneLinerFactory.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

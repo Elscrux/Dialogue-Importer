@@ -289,6 +289,9 @@
                             <MenuItem Header="Quest Scene" 
                                       Command="{Binding ApplyAll}" 
                                       CommandParameter="{x:Static dialogue:DialogueType.QuestScene}"/>
+                            <MenuItem Header="Quest Scene" 
+                                      Command="{Binding ApplyAll}" 
+                                      CommandParameter="{x:Static dialogue:DialogueType.CommentScene}"/>
                         </MenuItem>
                     </Menu>
                 </StackPanel>
@@ -330,21 +333,31 @@
                             <UniformGrid Columns="2">
                                 <ToggleButton IsChecked="{Binding GreetingSelected}" 
                                               Content="1. Greeting" 
+                                              ToolTip="One liner to greet the player"
                                               Style="{StaticResource DialogueTypeButton}"/>
                                 <ToggleButton IsChecked="{Binding FarewellSelected}" 
                                               Content="2. Farewell" 
+                                                ToolTip="One liner to say goodbye to the player"
                                               Style="{StaticResource DialogueTypeButton}"/>
                                 <ToggleButton IsChecked="{Binding IdleSelected}" 
                                               Content="3. Idle" 
+                                              ToolTip="One liner that can play randomly outside of dialogue"
                                               Style="{StaticResource DialogueTypeButton}"/>
                                 <ToggleButton IsChecked="{Binding DialogueSelected}" 
-                                              Content="4. Dialogue" 
+                                              Content="4. Dialogue"
+                                              ToolTip="Branching dialogue in a conversation of npc and player" 
                                               Style="{StaticResource DialogueTypeButton}"/>
                                 <ToggleButton IsChecked="{Binding GenericSceneSelected}"
                                               Content="5. Generic Scene" 
+                                              ToolTip="Generic ambient scene setup, default setup of the scene in a story manager quest, can be formatted as default scene or 3x3 style scene" 
                                               Style="{StaticResource DialogueTypeButton}"/>
                                 <ToggleButton IsChecked="{Binding QuestSceneSelected}"
                                               Content="6. Quest Scene" 
+                                              ToolTip="Scene that is created in the selected quest, uses default scene format"
+                                              Style="{StaticResource DialogueTypeButton}"/>
+                                <ToggleButton IsChecked="{Binding CommentSceneSelected}"
+                                              Content="7. Comment Scene"
+                                              ToolTip="One liner that is set up in a story manager quest with a scene with one dialog phase, used for comments from npcs on something based on a trigger"
                                               Style="{StaticResource DialogueTypeButton}"/>
                             </UniformGrid>
                         </GroupBox>

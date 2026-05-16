@@ -12,6 +12,9 @@ namespace DialogueImplementationTool.Tests;
 public sealed class TestConstants {
     private const SkyrimRelease Release = SkyrimRelease.SkyrimSE;
 
+    public static readonly FormKey FormList1FormKey = FormKey.Factory("AAAAAA:TestMod.esp");
+    public static readonly FormKey FormList2FormKey = FormKey.Factory("BBBBBB:TestMod.esp");
+
     public static readonly FormKey Speaker1FormKey = FormKey.Factory("111111:TestMod.esp");
 
     public TestConstants() {
@@ -19,6 +22,9 @@ public sealed class TestConstants {
             .Builder<ISkyrimMod, ISkyrimModGetter>(GameRelease.SkyrimSE)
             .WithOutputMod(Mod)
             .Build();
+
+        FormList1 = new FormList(FormList1FormKey, Release) { EditorID = "TestFormList1" };
+        FormList2 = new FormList(FormList2FormKey, Release) { EditorID = "TestFormList2" };
 
         Speaker1 = new NpcSpeaker(LinkCache,
             new FormLinkInformation(Speaker1FormKey, typeof(INpcGetter)));
@@ -30,6 +36,8 @@ public sealed class TestConstants {
         Quest = new Quest(FormKey.Factory("999999:TestMod.esp"), Release) { EditorID = "TestQuest" };
 
         Mod.Quests.Add(Quest);
+        Mod.FormLists.Add(FormList1);
+        Mod.FormLists.Add(FormList2);
         Mod.Npcs.AddNew(Speaker1.FormLink.FormKey);
         Mod.Npcs.AddNew(Speaker2.FormLink.FormKey);
         Mod.Npcs.AddNew(Speaker3.FormLink.FormKey);
@@ -56,6 +64,8 @@ public sealed class TestConstants {
         FormKeySelection);
 
     public Quest Quest { get; }
+    public FormList  FormList1 { get; }
+    public FormList FormList2 { get; }
     public NpcSpeaker Speaker1 { get; }
     public NpcSpeaker Speaker2 { get; }
     public NpcSpeaker Speaker3 { get; }

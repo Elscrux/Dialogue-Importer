@@ -7,4 +7,5 @@ public enum DialogueType {
     Idle,
     GenericScene,
     QuestScene,
+    CommentScene,
 }

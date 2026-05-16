@@ -17,7 +17,7 @@ public sealed class SceneWithOneDialogTopicFactory(IDialogueContext context, uin
                 context.AddRecord(topic);
                 return new Scene(context.GetNextFormKey(), context.Release) {
                     EditorID = quest.EditorID + "Scene",
-                    Flags = Scene.Flag.BeginOnQuestStart | Scene.Flag.StopQuestOnEnd,
+                    Flags = Scene.Flag.BeginOnQuestStart | Scene.Flag.StopQuestOnEnd | (Scene.Flag) 4,
                     Phases = [
                         new ScenePhase {
                             // EditorWidth = 400,

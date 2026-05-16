@@ -51,6 +51,7 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
     [Reactive] public bool DialogueSelected { get; set; }
     [Reactive] public bool GenericSceneSelected { get; set; }
     [Reactive] public bool QuestSceneSelected { get; set; }
+    [Reactive] public bool CommentSceneSelected { get; set; }
 
 
     /*====================================================
@@ -104,8 +105,8 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
         Title = Path.GetFileNameWithoutExtension(documentParser.FilePath);
 
         // Set buttons to unchecked
-        GreetingSelected = FarewellSelected =
-            IdleSelected = DialogueSelected = GenericSceneSelected = QuestSceneSelected = false;
+        GreetingSelected = FarewellSelected = IdleSelected =
+            DialogueSelected = GenericSceneSelected = QuestSceneSelected = CommentSceneSelected = false;
 
         // Set up selections
         DialogueSelections.Clear();
@@ -141,6 +142,9 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
                 case 6:
                     QuestSceneSelected = !QuestSceneSelected;
                     break;
+                case 7:
+                    CommentSceneSelected = !CommentSceneSelected;
+                    break;
             }
         });
 
@@ -166,6 +170,7 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
             DialogueSelected = false;
             GenericSceneSelected = false;
             QuestSceneSelected = false;
+            CommentSceneSelected = false;
 
             switch (type) {
                 case DialogueType.Greeting:
@@ -185,6 +190,9 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
                     break;
                 case DialogueType.QuestScene:
                     QuestSceneSelected = true;
+                    break;
+                case DialogueType.CommentScene:
+                    CommentSceneSelected = true;
                     break;
             }
         });
@@ -288,6 +296,7 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
         SetupSelectionSubscription(vm => vm.DialogueSelected, DialogueType.Dialogue);
         SetupSelectionSubscription(vm => vm.GenericSceneSelected, DialogueType.GenericScene);
         SetupSelectionSubscription(vm => vm.QuestSceneSelected, DialogueType.QuestScene);
+        SetupSelectionSubscription(vm => vm.CommentSceneSelected, DialogueType.CommentScene);
 
         void SetupSelectionSubscription(Expression<Func<IterableDialogueConfigVM, bool>> property, DialogueType type) {
             this.WhenAnyValue(property)
@@ -448,6 +457,7 @@ public sealed partial class IterableDialogueConfigVM : ViewModel {
         DialogueSelected = DialogueSelections[Index].SelectedTypes.Contains(DialogueType.Dialogue);
         GenericSceneSelected = DialogueSelections[Index].SelectedTypes.Contains(DialogueType.GenericScene);
         QuestSceneSelected = DialogueSelections[Index].SelectedTypes.Contains(DialogueType.QuestScene);
+        CommentSceneSelected = DialogueSelections[Index].SelectedTypes.Contains(DialogueType.CommentScene);
 
         // Refresh scene speakers if a scene type is selected
         if (IsSceneSelected) {

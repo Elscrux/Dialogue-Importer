@@ -23,6 +23,7 @@ public abstract class BaseDialogueFactory(IDialogueContext context) {
             DialogueType.Idle => new IdleFactory(context),
             DialogueType.GenericScene => new GenericSceneFactory(context),
             DialogueType.QuestScene => new QuestSceneFactory(context),
+            DialogueType.CommentScene => new CommentSceneFactory(context),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
         };
     }
