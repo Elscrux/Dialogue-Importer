@@ -86,7 +86,6 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new TimeChecker(),
             new SayOnceChecker(),
             new DispositionChecker(),
-            new GoldChecker(),
             new GoodbyeChecker(),
             new TopicInfoTrimmer(),
             new TopicInfoInvalidStringFixer(),
@@ -107,6 +106,7 @@ public sealed class DialogueProcessor : IDialogueProcessor {
             new SuccessFailureSeparator(new SkillCheckUtils(_context)),
             new DeadAliveChecker(_context),
             new BelongsToPreviousChecker(),
+            new GoldChecker(),
             new RemoveEmptyTopicInfos(),
         ];
 
