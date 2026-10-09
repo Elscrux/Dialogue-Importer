@@ -422,22 +422,43 @@ public sealed class TestBranchingDialogueFactory {
 
         // Check
         conversation[0].Topics.Should().HaveCount(3);
+
+        // The Khajiit / not Khajiit responses are split off into a separate topic,
+        // linked from the first topic info via invisible continue
         conversation[0].Topics[0].TopicInfos.Should().ContainSingle();
         var firstTopicInfo = conversation[0].Topics[0].TopicInfos[0];
-        firstTopicInfo.Responses.Should().HaveCount(5);
+        firstTopicInfo.Responses.Should().HaveCount(3);
         firstTopicInfo.Responses[1].HasNote(x => x == "unlock BUREAU").Should().BeFalse();
+        firstTopicInfo.ExtraConditions.Should().BeEmpty();
+        firstTopicInfo.InvisibleContinue.Should().BeTrue();
+        firstTopicInfo.Links.Should().ContainSingle();
 
-        var secondTopicInfo = conversation[0].Topics[1];
-        secondTopicInfo.TopicInfos.Should().ContainSingle();
-        secondTopicInfo.TopicInfos[0].Prompt.Notes().Should().BeEmpty();
-        secondTopicInfo.TopicInfos[0].Responses.Should().HaveCount(4);
-        secondTopicInfo.TopicInfos[0].Responses[^1].HasNote("back to root").Should().BeFalse();
+        var raceTopic = firstTopicInfo.Links[0];
+        raceTopic.TopicInfos.Should().HaveCount(2);
 
-        var thirdTopicInfo = conversation[0].Topics[2];
-        thirdTopicInfo.TopicInfos.Should().ContainSingle();
-        thirdTopicInfo.TopicInfos[0].Prompt.Notes().Should().BeEmpty();
-        thirdTopicInfo.TopicInfos[0].Responses.Should().HaveCount(6);
-        thirdTopicInfo.TopicInfos[0].Responses[^1].HasNote("back to root").Should().BeFalse();
+        var khajiitTopicInfo = raceTopic.TopicInfos[0];
+        khajiitTopicInfo.Responses.Should().ContainSingle();
+        khajiitTopicInfo.Responses[0].Response.Should().Be("Your people are the worst. No offense.");
+        khajiitTopicInfo.ExtraConditions.Should().HaveCount(2);
+        khajiitTopicInfo.ExtraConditions[0].Data.Should().BeAssignableTo<IGetPCIsRaceConditionDataGetter>();
+        var conditionFloat = khajiitTopicInfo.ExtraConditions[0].Should().BeAssignableTo<IConditionFloatGetter>().Subject;
+        conditionFloat.ComparisonValue.Should().Be(1.0f);
+        khajiitTopicInfo.ExtraConditions[1].Data.Should().BeAssignableTo<IGetPCIsRaceConditionDataGetter>();
+        conditionFloat = khajiitTopicInfo.ExtraConditions[1].Should().BeAssignableTo<IConditionFloatGetter>().Subject;
+        conditionFloat.ComparisonValue.Should().Be(1.0f);
+
+        var notKhajiitTopicInfo = raceTopic.TopicInfos[1];
+        notKhajiitTopicInfo.Responses.Should().ContainSingle();
+        notKhajiitTopicInfo.Responses[0].Response.Should().Be("The cats are the worst.");
+        notKhajiitTopicInfo.ExtraConditions.Should().HaveCount(2);
+        notKhajiitTopicInfo.ExtraConditions[0].Data.Should().BeAssignableTo<IGetPCIsRaceConditionDataGetter>();
+        notKhajiitTopicInfo.ExtraConditions[1].Data.Should().BeAssignableTo<IGetPCIsRaceConditionDataGetter>();
+
+        // Both race topic infos link to the same next topics (the original links of the topic info)
+        khajiitTopicInfo.Links.Should().HaveCount(2);
+        notKhajiitTopicInfo.Links.Should().HaveCount(2);
+        khajiitTopicInfo.Links[0].Should().BeSameAs(notKhajiitTopicInfo.Links[0]);
+        khajiitTopicInfo.Links[1].Should().BeSameAs(notKhajiitTopicInfo.Links[1]);
     }
 
     [Fact]

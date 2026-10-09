@@ -168,7 +168,8 @@ public sealed class TestDeadAliveChecker {
         CheckDeadAliveTopicInfo(links[0], "B", "C");
         links[0].ExtraConditions[0].CompareOperator.Should().Be(CompareOperator.EqualTo);
 
-        CheckOtherTopicInfo(links[1], "D");
+        CheckDeadAliveTopicInfo(links[1], "D");
+        links[1].ExtraConditions[0].CompareOperator.Should().Be(CompareOperator.GreaterThanOrEqualTo);
 
         links[0].Links.Should().ContainSingle();
         links[0].InvisibleContinue.Should().BeTrue();

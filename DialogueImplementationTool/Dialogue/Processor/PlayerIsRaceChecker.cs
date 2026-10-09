@@ -45,30 +45,56 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicProcessor {
     };
 
     public void Process(DialogueTopic topic) {
-        foreach (var topicInfo in topic.TopicInfos) {
+        for (var topicInfoIndex = 0; topicInfoIndex < topic.TopicInfos.Count; topicInfoIndex++) {
+            var topicInfo = topic.TopicInfos[topicInfoIndex];
+
+            // Handle prompt notes - conditions apply to the whole topic info
             foreach (var note in topicInfo.Prompt.Notes()) {
-                if (CheckNote(note, topicInfo)) {
-                    topicInfo.Prompt.RemoveNote(note);
-                }
+                var (_, conditions) = GetConditions(note);
+                if (conditions.Count == 0) continue;
+
+                topicInfo.ExtraConditions.AddRange(conditions);
+                topicInfo.Prompt.RemoveNote(note);
             }
 
-            foreach (var note in topicInfo.AllNotes()) {
-                if (CheckNote(note, topicInfo)) {
-                    foreach (var response in topicInfo.Responses) {
+            // Handle response notes - conditions apply per response,
+            // so responses with different race conditions need to be split into separate topic infos
+            var conditionsPerResponse = topicInfo.Responses
+                .Select(response => {
+                    var conditions = new List<Condition>();
+                    var states = new List<string>();
+                    foreach (var note in response.Notes()) {
+                        var (state, noteConditions) = GetConditions(note);
+                        if (noteConditions.Count == 0) continue;
+
+                        conditions.AddRange(noteConditions);
+                        states.Add(state);
                         response.RemoveNote(note);
                     }
-                }
-            }
+
+                    return (State: states.Count == 0 ? null : string.Join("|", states), Conditions: conditions);
+                })
+                .ToArray();
+
+            if (conditionsPerResponse.All(r => r.Conditions.Count == 0)) continue;
+
+            var groupAssignments = DialogueTopicInfo.BuildGroupAssignments(
+                conditionsPerResponse,
+                response => response.State,
+                response => response.Conditions,
+                _ => []);
+            topicInfo.SplitOffDialogueGroups(groupAssignments, topic);
         }
     }
 
-    private static bool CheckNote(Note note, DialogueTopicInfo topicInfo) {
+    private static (string State, List<Condition> Conditions) GetConditions(Note note) {
         var match = IsRaceRegex.Match(note.Text);
-        if (!match.Success) return false;
+        if (!match.Success) return (string.Empty, []);
 
         var text = note.Text;
         var negated = NegatedRegex.IsMatch(text);
         var conditions = new List<Condition>();
+        var raceNames = new List<string>();
         while (match.Success) {
             var matchingRace = match.Groups.Values.Skip(1).FirstOrDefault(x => x.Success);
             if (matchingRace is null) break;
@@ -81,6 +107,7 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicProcessor {
                 AddConditions(regular, vampire);
             }
 
+            raceNames.Add(matchingRace.Value);
             text = text.Replace(matchingRace.Value, string.Empty);
             match = IsRaceRegex.Match(text);
         }
@@ -92,9 +119,10 @@ public sealed partial class PlayerIsRaceChecker : IDialogueTopicProcessor {
             }
         }
 
-        topicInfo.ExtraConditions.AddRange(conditions);
-
-        return true;
+        var state = negated
+            ? $"NOT {string.Join(",", raceNames)}"
+            : string.Join(",", raceNames);
+        return (state, conditions);
 
         void AddConditions(FormKey regular, FormKey vampire) {
             conditions.Add(new ConditionFloat {

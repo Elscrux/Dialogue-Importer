@@ -230,7 +230,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
         }
     }
 
-    public record GroupAssignment(
+    public sealed record GroupAssignment(
         int TopicGroup,
         int TopicInfoGroup,
         IReadOnlyList<Condition> ExtraConditions,
@@ -238,7 +238,7 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
 
     public static List<GroupAssignment> BuildGroupAssignments<T>(
         IReadOnlyList<T> responseData,
-        Func<T, bool?> stateSelector,
+        Func<T, object?> stateSelector,
         Func<T, IReadOnlyList<Condition>> conditionsSelector,
         Func<T, IReadOnlyList<DialogueScript>> scriptsSelector) {
         var groupAssignments = new List<GroupAssignment>();
@@ -254,19 +254,26 @@ public sealed class DialogueTopicInfo : IEquatable<DialogueTopicInfo> {
             conditionsSelector(responseData[0]),
             scriptsSelector(responseData[0])));
 
+        var allStates = responseData.Select(stateSelector).ToHashSet();
+
         // Integrate further response data into the groups
         for (var i = 1; i < responseData.Count; i++) {
             var currentState = stateSelector(responseData[i]);
             var conditions = conditionsSelector(responseData[i]);
             var scripts = scriptsSelector(responseData[i]);
 
-            if (lastState.HasValue != currentState.HasValue) {
+            if ((lastState is null) != (currentState is null)) {
                 currentTopicGroup++;
                 currentTopicInfoGroup = 0;
-            } else if (currentState != lastState) {
+            } else if (!Equals(currentState, lastState)) {
                 currentTopicInfoGroup++;
-                conditions = [];
-                scripts = [];
+
+                // If there are only two states, we can assume that the first state is mutually exclusive with the second state.
+                // That means we can omit the conditions for the second state so it just acts as fallback for the first state.
+                // This is useful to avoid duplicate conditions which need to be updated as well if the first state changes. 
+                if (allStates.Count == 2) {
+                    conditions = [];
+                }
             }
 
             groupAssignments.Add(new GroupAssignment(
